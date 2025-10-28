@@ -28,13 +28,25 @@ O projeto é estruturado da seguinte forma:
 ```
 premiora-landing/
 ├── src/
+│   ├── components/      # Componentes reutilizáveis
+│   │   ├── Navbar.tsx
+│   │   ├── Hero.tsx
+│   │   ├── Features.tsx
+│   │   ├── Benefits.tsx
+│   │   ├── CTA.tsx
+│   │   ├── Footer.tsx
+│   │   └── LandingPage.tsx
+│   ├── contexts/        # Contextos React
+│   │   └── AuthContext.tsx
+│   ├── utils/           # Utilitários e configurações
+│   │   └── supabaseClient.ts
+│   ├── styles/          # Arquivos de estilo
+│   │   └── index.css
+│   ├── assets/          # Assets estáticos (imagens, ícones)
 │   ├── App.tsx          # Componente principal com roteamento
-│   ├── AuthContext.tsx  # Contexto de autenticação
 │   ├── Login.tsx        # Página de login/registro
-│   ├── supabaseClient.ts # Configuração do cliente Supabase
-│   ├── main.ts          # Ponto de entrada da aplicação
-│   └── App.css          # Estilos principais
-├── public/              # Assets estáticos
+│   └── main.ts          # Ponto de entrada da aplicação
+├── public/              # Assets públicos
 ├── package.json         # Dependências e scripts
 └── tsconfig.json        # Configuração TypeScript
 ```
