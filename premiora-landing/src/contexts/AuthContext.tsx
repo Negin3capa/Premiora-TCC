@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
-import { supabase } from './supabaseClient';
+import { supabase } from '../utils/supabaseClient';
 
 // Interface para o contexto de autenticação
 interface AuthContextType {
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (_event: string, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
