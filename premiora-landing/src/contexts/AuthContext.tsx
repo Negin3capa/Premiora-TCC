@@ -33,46 +33,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Função para login com Google
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    });
-    if (error) {
-      console.error('Erro ao fazer login com Google:', error.message);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) {
+        console.error('Erro ao fazer login com Google:', error.message);
+        throw error;
+      }
+    } catch (err) {
+      setLoading(false);
+      throw err;
     }
   };
 
   // Função para login com email e senha
   const signInWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      console.error('Erro ao fazer login com email:', error.message);
-      throw error;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) {
+        console.error('Erro ao fazer login com email:', error.message);
+        throw error;
+      }
+    } catch (err) {
+      setLoading(false);
+      throw err;
     }
   };
 
   // Função para registro com email e senha
   const signUpWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) {
-      console.error('Erro ao registrar com email:', error.message);
-      throw error;
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) {
+        console.error('Erro ao registrar com email:', error.message);
+        throw error;
+      }
+      // Após registro bem-sucedido, setar loading false, pois não loga automaticamente
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      throw err;
     }
   };
 
   // Função para logout
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Erro ao fazer logout:', error.message);
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Erro ao fazer logout:', error.message);
+        throw error;
+      }
+      // Após logout, loading será setado false pelo onAuthStateChange
+    } catch (err) {
+      setLoading(false);
+      throw err;
     }
   };
 
