@@ -11,17 +11,20 @@ O Premiora é uma plataforma revolucionária que combina o melhor de múltiplas 
 O projeto é estruturado da seguinte forma:
 
 ### Frontend
+
 - **Framework**: React 19 com TypeScript
 - **Build Tool**: Vite
 - **Roteamento**: React Router DOM
 - **Estilização**: CSS personalizado (App.css, style.css)
 
 ### Autenticação
+
 - **Provedor**: Supabase
 - **Métodos**: Login com Google OAuth e email/senha
 - **Contexto**: AuthContext para gerenciamento de estado de autenticação
 
 ### Estrutura de Arquivos
+
 ```
 premiora-landing/
 ├── src/
@@ -37,6 +40,7 @@ premiora-landing/
 ```
 
 ### Fluxo de Autenticação
+
 1. O usuário acessa a landing page ou página de login
 2. O AuthProvider gerencia o estado de autenticação
 3. Login via Google OAuth ou email/senha
@@ -44,6 +48,7 @@ premiora-landing/
 5. Sessão é mantida e atualizada automaticamente
 
 ### CI/CD
+
 - **Plataforma**: GitHub Actions
 - **Workflow**: Build automatizado em pushes e pull requests para a branch main
 - **Ambiente**: Ubuntu com Node.js 18
@@ -51,6 +56,7 @@ premiora-landing/
 ## Setup
 
 ### Pré-requisitos
+
 - Node.js 18 ou superior
 - npm ou yarn
 - Conta no Supabase (para configuração da autenticação)
@@ -58,32 +64,37 @@ premiora-landing/
 ### Instalação
 
 1. Clone o repositório:
+
 ```bash
 git clone <url-do-repositorio>
 cd premiora-tcc
 ```
 
-2. Instale as dependências:
+1. Instale as dependências:
+
 ```bash
 cd premiora-landing
 npm install
 ```
 
-3. Configure as variáveis de ambiente (se necessário):
+1. Configure as variáveis de ambiente (se necessário):
    - O cliente Supabase já está configurado em `src/supabaseClient.ts`
    - Para produção, configure as chaves do Supabase adequadamente
 
-4. Execute o projeto em modo desenvolvimento:
+2. Execute o projeto em modo desenvolvimento:
+
 ```bash
 npm run dev
 ```
 
-5. Para build de produção:
+1. Para build de produção:
+
 ```bash
 npm run build
 ```
 
-6. Para preview do build:
+1. Para preview do build:
+
 ```bash
 npm run preview
 ```
@@ -91,20 +102,24 @@ npm run preview
 ## Uso
 
 ### Navegação
+
 - **Página Inicial (/)**: Landing page com informações sobre a plataforma
 - **Login (/login)**: Página de autenticação com opções de login via Google ou email/senha
 
 ### Funcionalidades
+
 - **Registro**: Crie uma conta usando email/senha ou Google OAuth
 - **Login**: Acesse sua conta existente
 - **Logout**: Desconecte-se da plataforma
 
 ### Desenvolvimento
+
 - Execute `npm run dev` para iniciar o servidor de desenvolvimento
 - A aplicação estará disponível em `http://localhost:5173` (porta padrão do Vite)
 - Modificações no código são recarregadas automaticamente
 
 ### Deploy
+
 O projeto inclui configuração de CI/CD via GitHub Actions. Todo push para a branch main dispara um build automatizado que verifica a sintaxe e compila o projeto.
 
 ## Tecnologias Utilizadas
