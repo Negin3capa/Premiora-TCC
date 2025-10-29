@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/home`,
         },
       });
       if (error) {
@@ -63,6 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Erro ao fazer login com email:', error.message);
         throw error;
       }
+      // Após login bem-sucedido, setar loading false
+      setLoading(false);
     } catch (err) {
       setLoading(false);
       throw err;

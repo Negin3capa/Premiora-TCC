@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 
 // Componente de Login
 const Login: React.FC = () => {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading } = useAuth();
+  const navigate = useNavigate();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading, user } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+
+  // Redirecionar para HomePage quando usuário está autenticado
+  useEffect(() => {
+    if (user && !loading) {
+      navigate('/home');
+    }
+  }, [user, loading, navigate]);
 
   // Função para lidar com o clique no botão de login Google
   const handleGoogleLogin = async () => {
