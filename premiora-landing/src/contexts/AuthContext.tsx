@@ -108,30 +108,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Função para upsert do perfil do usuário na tabela 'users'
+  // Esta função roda em background e não bloqueia o fluxo de autenticação
   const upsertUserProfile = async (user: User) => {
-    const { error } = await supabase
-      .from('users')
-      .upsert({
-        id: user.id,
-        email: user.email,
-        name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-        avatar_url: user.user_metadata?.avatar_url || null,
-      });
-    if (error) {
-      console.error('Erro ao upsertar perfil do usuário:', error.message);
+    try {
+      const { error } = await supabase
+        .from('users')
+        .upsert({
+          id: user.id,
+          email: user.email,
+          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          avatar_url: user.user_metadata?.avatar_url || null,
+        });
+      if (error) {
+        console.error('Erro ao upsertar perfil do usuário:', error.message);
+      }
+    } catch (err) {
+      console.error('Erro ao upsertar perfil do usuário:', err);
     }
   };
 
   // Escutar mudanças na sessão
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await upsertUserProfile(session.user);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Executa upsert em background sem bloquear
+        if (session?.user) {
+          upsertUserProfile(session.user).catch(err => 
+            console.error('Background upsert failed:', err)
+          );
+        }
+      } catch (error) {
+        console.error('Erro ao obter sessão:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getSession();
@@ -140,9 +154,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (_event: string, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Executa upsert em background sem bloquear
         if (session?.user) {
-          await upsertUserProfile(session.user);
+          upsertUserProfile(session.user).catch(err => 
+            console.error('Background upsert failed:', err)
+          );
         }
+        
         setLoading(false);
       }
     );
