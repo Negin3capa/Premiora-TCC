@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -51,6 +52,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Realiza login com Facebook usando OAuth do Supabase
+   * Requer configuração prévia do aplicativo Facebook no Supabase
+   */
+  const signInWithFacebook = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/home`,
+        },
+      });
+      if (error) {
+        console.error('Erro ao fazer login com Facebook:', error.message);
+        throw error;
+      }
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+
   // Função para login com email e senha
   const signInWithEmail = async (email: string, password: string) => {
     setLoading(true);
@@ -75,14 +99,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpWithEmail = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
-        password,
+        password
       });
       if (error) {
         console.error('Erro ao registrar com email:', error.message);
         throw error;
       }
+
+      console.log('Signup realizado com sucesso:', data);
+
+      // Para registro de email/senha, tentar criar perfil diretamente após signup
+      if (data.user) {
+        console.log('Tentando criar perfil para usuário:', data.user);
+        try {
+          await upsertUserProfile(data.user);
+          console.log('Perfil criado/verificado após signup');
+        } catch (profileError) {
+          console.error('Erro ao criar perfil após cadastro:', profileError);
+          // Não falha o signup por causa do perfil, apenas registra o erro
+        }
+      }
+
       // Após registro bem-sucedido, setar loading false, pois não loga automaticamente
       setLoading(false);
     } catch (err) {
@@ -111,19 +150,79 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Esta função roda em background e não bloqueia o fluxo de autenticação
   const upsertUserProfile = async (user: User) => {
     try {
-      const { error } = await supabase
+      console.log('🔄 Criando/atualizando perfil do usuário:', {
+        id: user.id,
+        email: user.email,
+        user_metadata: user.user_metadata,
+        session: !!supabase.auth.getUser()
+      });
+
+      // Para usuários de email/senha, podemos tentar extrair nome do email ou deixar nulo
+      const displayName = user.user_metadata?.full_name ||
+                         user.user_metadata?.name ||
+                         (user.email ? user.email.split('@')[0] : null);
+
+      console.log('📝 Dados para inserir:', {
+        id: user.id,
+        email: user.email,
+        name: displayName,
+        avatar_url: user.user_metadata?.avatar_url || null
+      });
+
+      // Primeiro, tentar inserir (funciona melhor com RLS)
+      const { data: insertData, error: insertError } = await supabase
         .from('users')
-        .upsert({
+        .insert({
           id: user.id,
           email: user.email,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+          name: displayName,
           avatar_url: user.user_metadata?.avatar_url || null,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('❌ Erro na inserção do perfil:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
         });
-      if (error) {
-        console.error('Erro ao upsertar perfil do usuário:', error.message);
+
+        // Se falhar por chave duplicada, tentar atualizar
+        if (insertError.message?.includes('duplicate key') || insertError.code === '23505') {
+          console.log('🔄 Chave duplicada, tentando atualizar...');
+          const { data: updateData, error: updateError } = await supabase
+            .from('users')
+            .update({
+              name: displayName,
+              avatar_url: user.user_metadata?.avatar_url || null,
+            })
+            .eq('id', user.id)
+            .select()
+            .single();
+
+          if (updateError) {
+            console.error('❌ Erro na atualização do perfil:', updateError);
+          } else {
+            console.log('✅ Perfil atualizado com sucesso:', updateData);
+          }
+        } else {
+          // Log completamente o erro para debug
+          console.error('🔍 Detalhes do erro de permissão:', {
+            error: insertError,
+            userId: user.id,
+            email: user.email,
+            authUser: await supabase.auth.getUser()
+          });
+          throw insertError;
+        }
+      } else {
+        console.log('✅ Perfil criado com sucesso via insert:', insertData);
       }
     } catch (err) {
-      console.error('Erro ao upsertar perfil do usuário:', err);
+      console.error('💥 Erro geral ao upsertar perfil do usuário:', err);
+      // Não lançamos erro para não quebrar o fluxo de autenticação
     }
   };
 
@@ -173,6 +272,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     session,
     signInWithGoogle,
+    signInWithFacebook,
     signInWithEmail,
     signUpWithEmail,
     signOut,

@@ -5,7 +5,7 @@ import { useAuth } from './contexts/AuthContext';
 // Componente de Login
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail, loading, user } = useAuth();
+  const { signInWithGoogle, signInWithFacebook, signInWithEmail, signUpWithEmail, loading, user } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +25,16 @@ const Login: React.FC = () => {
       await signInWithGoogle();
     } catch (err) {
       setError('Erro ao fazer login com Google');
+    }
+  };
+
+  // Função para lidar com o clique no botão de login Facebook
+  const handleFacebookLogin = async () => {
+    try {
+      setError('');
+      await signInWithFacebook();
+    } catch (err) {
+      setError('Erro ao fazer login com Facebook');
     }
   };
 
@@ -125,6 +135,20 @@ const Login: React.FC = () => {
           >
             <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="google-icon" />
             {loading ? 'Carregando...' : `Entrar com Google`}
+          </button>
+
+          {/* Botão Facebook */}
+          <button
+            onClick={handleFacebookLogin}
+            disabled={loading}
+            className="facebook-login-button"
+          >
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
+              alt="Facebook"
+              className="facebook-icon"
+            />
+            {loading ? 'Carregando...' : `Entrar com Facebook`}
           </button>
 
           {/* Toggle entre login e registro */}
