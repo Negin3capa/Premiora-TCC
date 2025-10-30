@@ -14,6 +14,15 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Verify project directory
+      run: |
+        echo "Listing repo root:" 
+        ls -la
+        if [ ! -d "premiora-web" ]; then
+          echo "ERROR: expected folder 'premiora-web' not found" >&2
+          exit 1
+        fi
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
