@@ -8,20 +8,23 @@ Este documento descreve as melhorias visuais e funcionais implementadas na HomeP
 
 ### 1. Novos Arquivos
 
-#### `premiora-landing/src/components/ProtectedRoute.tsx`
+
+#### `premiora-web/src/components/ProtectedRoute.tsx`
 - **Componente de proteção de rotas** para páginas autenticadas
 - Redireciona usuários não autenticados para /login
 - Exibe tela de loading durante verificação de autenticação
 - Documentação JSDoc completa
 
-#### `premiora-landing/src/components/PublicRoute.tsx`
+
+#### `premiora-web/src/components/PublicRoute.tsx`
 - **Componente de proteção de rotas públicas**
 - Redireciona usuários autenticados para /home automaticamente
 - Previne acesso à landing page e login por usuários logados
 - Exibe tela de loading durante verificação de autenticação
 - Documentação JSDoc completa
 
-#### `premiora-landing/src/styles/globals.css`
+
+#### `premiora-web/src/styles/globals.css`
 - **Design System completo** com variáveis CSS para cores, espaçamentos, tipografia e transições
 - **Sistema de cores** moderno com paleta principal (#FF424D), cores de fundo e estado
 - **Estilos de reset** e base para consistência entre navegadores
@@ -33,11 +36,13 @@ Este documento descreve as melhorias visuais e funcionais implementadas na HomeP
 
 ### 2. Arquivos Modificados
 
-#### `premiora-landing/src/main.ts`
+
+#### `premiora-web/src/main.ts`
 - Importação do arquivo `globals.css` antes dos outros estilos
 - Garante que as variáveis CSS estejam disponíveis globalmente
 
-#### `premiora-landing/src/styles/HomePage.css`
+
+#### `premiora-web/src/styles/HomePage.css`
 Redesign completo inspirado em Patreon e Reddit:
 
 **Sidebar:**
