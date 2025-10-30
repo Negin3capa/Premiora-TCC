@@ -26,7 +26,7 @@ O projeto é estruturado da seguinte forma:
 ### Estrutura de Arquivos
 
 ```
-premiora-landing/
+premiora-web/
 ├── src/
 │   ├── components/      # Componentes reutilizáveis
 │   │   ├── Navbar.tsx
@@ -35,20 +35,31 @@ premiora-landing/
 │   │   ├── Benefits.tsx
 │   │   ├── CTA.tsx
 │   │   ├── Footer.tsx
-│   │   └── LandingPage.tsx
+│   │   ├── LandingPage.tsx
+│   │   ├── HomePage.tsx
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── Feed.tsx
+│   │   ├── ContentCard.tsx
+│   │   ├── ProtectedRoute.tsx
+│   │   ├── PublicRoute.tsx
+│   │   └── Login.tsx
 │   ├── contexts/        # Contextos React
 │   │   └── AuthContext.tsx
 │   ├── utils/           # Utilitários e configurações
 │   │   └── supabaseClient.ts
 │   ├── styles/          # Arquivos de estilo
+│   │   ├── globals.css
+│   │   ├── HomePage.css
 │   │   └── index.css
-│   ├── assets/          # Assets estáticos (imagens, ícones)
 │   ├── App.tsx          # Componente principal com roteamento
-│   ├── Login.tsx        # Página de login/registro
 │   └── main.ts          # Ponto de entrada da aplicação
 ├── public/              # Assets públicos
+│   └── vite.svg
+├── dist/                # Build de produção (gerado automaticamente)
 ├── package.json         # Dependências e scripts
-└── tsconfig.json        # Configuração TypeScript
+├── tsconfig.json        # Configuração TypeScript
+└── index.html           # Template HTML
 ```
 
 ### Fluxo de Autenticação
@@ -85,7 +96,7 @@ cd premiora-tcc
 1. Instale as dependências:
 
 ```bash
-cd premiora-landing
+cd premiora-web
 npm install
 ```
 
