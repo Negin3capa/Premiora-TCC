@@ -2,15 +2,26 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 
+// Interface para o perfil do usuário
+interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string;
+  avatar_url: string | null;
+}
+
 // Interface para o contexto de autenticação
 interface AuthContextType {
   user: User | null;
+  userProfile: UserProfile | null;
   session: Session | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithFacebook: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
+  refreshUserProfile: () => Promise<void>;
 }
 
 // Criar contexto
@@ -28,6 +39,7 @@ export const useAuth = () => {
 // Provedor do contexto
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +51,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/home`,
+          scopes: 'openid email profile',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
       if (error) {
         console.error('Erro ao fazer login com Google:', error.message);
+        throw error;
+      }
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
+  };
+
+  /**
+   * Realiza login com Facebook usando OAuth do Supabase
+   * Requer configuração prévia do aplicativo Facebook no Supabase
+   */
+  const signInWithFacebook = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: {
+          redirectTo: `${window.location.origin}/home`,
+        },
+      });
+      if (error) {
+        console.error('Erro ao fazer login com Facebook:', error.message);
         throw error;
       }
     } catch (err) {
@@ -75,14 +115,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpWithEmail = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
-        password,
+        password
       });
       if (error) {
         console.error('Erro ao registrar com email:', error.message);
         throw error;
       }
+
+      console.log('Signup realizado com sucesso:', data);
+
+      // Para registro de email/senha, tentar criar perfil diretamente após signup
+      if (data.user) {
+        console.log('Tentando criar perfil para usuário:', data.user);
+        try {
+          await upsertUserProfile(data.user);
+          console.log('Perfil criado/verificado após signup');
+        } catch (profileError) {
+          console.error('Erro ao criar perfil após cadastro:', profileError);
+          // Não falha o signup por causa do perfil, apenas registra o erro
+        }
+      }
+
       // Após registro bem-sucedido, setar loading false, pois não loga automaticamente
       setLoading(false);
     } catch (err) {
@@ -111,19 +166,112 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Esta função roda em background e não bloqueia o fluxo de autenticação
   const upsertUserProfile = async (user: User) => {
     try {
-      const { error } = await supabase
+      console.log('🔄 Criando/atualizando perfil do usuário:', {
+        id: user.id,
+        email: user.email,
+        user_metadata: user.user_metadata,
+        session: !!supabase.auth.getUser()
+      });
+
+      // Para usuários de email/senha, podemos tentar extrair nome do email ou deixar nulo
+      const displayName = user.user_metadata?.full_name ||
+                         user.user_metadata?.name ||
+                         (user.email ? user.email.split('@')[0] : null);
+
+      // Obtém a URL do avatar (Google OAuth usa 'picture', outros podem usar 'avatar_url')
+      const avatarUrl = user.user_metadata?.avatar_url ||
+                       user.user_metadata?.picture || null;
+
+
+
+      console.log('📝 Dados para inserir:', {
+        id: user.id,
+        email: user.email,
+        name: displayName,
+        avatar_url: avatarUrl
+      });
+
+      // Primeiro, tentar inserir (funciona melhor com RLS)
+      const { data: insertData, error: insertError } = await supabase
         .from('users')
-        .upsert({
+        .insert({
           id: user.id,
           email: user.email,
-          name: user.user_metadata?.full_name || user.user_metadata?.name || null,
-          avatar_url: user.user_metadata?.avatar_url || null,
+          name: displayName,
+          avatar_url: avatarUrl,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('❌ Erro na inserção do perfil:', {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
         });
-      if (error) {
-        console.error('Erro ao upsertar perfil do usuário:', error.message);
+
+        // Se falhar por chave duplicada, tentar atualizar
+        if (insertError.message?.includes('duplicate key') || insertError.code === '23505') {
+          console.log('🔄 Chave duplicada, tentando atualizar...');
+          const { data: updateData, error: updateError } = await supabase
+            .from('users')
+            .update({
+              name: displayName,
+              avatar_url: avatarUrl,
+            })
+            .eq('id', user.id)
+            .select()
+            .single();
+
+          if (updateError) {
+            console.error('❌ Erro na atualização do perfil:', updateError);
+          } else {
+            console.log('✅ Perfil atualizado com sucesso:', updateData);
+          }
+        } else {
+          // Log completamente o erro para debug
+          console.error('🔍 Detalhes do erro de permissão:', {
+            error: insertError,
+            userId: user.id,
+            email: user.email,
+            authUser: await supabase.auth.getUser()
+          });
+          throw insertError;
+        }
+      } else {
+        console.log('✅ Perfil criado com sucesso via insert:', insertData);
       }
     } catch (err) {
-      console.error('Erro ao upsertar perfil do usuário:', err);
+      console.error('💥 Erro geral ao upsertar perfil do usuário:', err);
+      // Não lançamos erro para não quebrar o fluxo de autenticação
+    }
+  };
+
+  // Função para buscar o perfil do usuário do banco de dados
+  const refreshUserProfile = async () => {
+    if (!user) {
+      setUserProfile(null);
+      return;
+    }
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('id, name, email, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Erro ao buscar perfil do usuário:', error);
+        setUserProfile(null);
+        return;
+      }
+
+      setUserProfile(profile);
+    } catch (err) {
+      console.error('Erro geral ao buscar perfil:', err);
+      setUserProfile(null);
     }
   };
 
@@ -134,12 +282,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Executa upsert em background sem bloquear
         if (session?.user) {
-          upsertUserProfile(session.user).catch(err => 
+          upsertUserProfile(session.user).catch(err =>
             console.error('Background upsert failed:', err)
           );
+
+          // Após upsert, tenta buscar o perfil atualizado
+          setTimeout(() => {
+            refreshUserProfile();
+          }, 100);
         }
       } catch (error) {
         console.error('Erro ao obter sessão:', error);
@@ -154,14 +307,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (_event: string, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Executa upsert em background sem bloquear
         if (session?.user) {
-          upsertUserProfile(session.user).catch(err => 
+          upsertUserProfile(session.user).catch(err =>
             console.error('Background upsert failed:', err)
           );
+
+          // Após upsert, tenta buscar o perfil atualizado
+          setTimeout(() => {
+            refreshUserProfile();
+          }, 100);
+        } else {
+          setUserProfile(null);
         }
-        
+
         setLoading(false);
       }
     );
@@ -171,12 +331,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: AuthContextType = {
     user,
+    userProfile,
     session,
     signInWithGoogle,
+    signInWithFacebook,
     signInWithEmail,
     signUpWithEmail,
     signOut,
     loading,
+    refreshUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
