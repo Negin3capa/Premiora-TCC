@@ -19,18 +19,56 @@ interface HeaderProps {
  * @param user - Objeto do usuário autenticado do Supabase
  */
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) => {
-  const { signOut } = useAuth();
+  const { signOut, userProfile } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   
   // Extrai informações do perfil do usuário
-  const userName = user?.user_metadata?.full_name || 
-                   user?.user_metadata?.name || 
-                   user?.email?.split('@')[0] || 
+  const userName = user?.user_metadata?.full_name ||
+                   user?.user_metadata?.name ||
+                   userProfile?.name ||
+                   user?.email?.split('@')[0] ||
                    'Usuário';
-  
-  const userAvatar = user?.user_metadata?.avatar_url || 
-                     user?.user_metadata?.picture || 
-                     `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
+
+  /**
+   * Helper function to extract avatar URL from user metadata
+   * Handles different OAuth provider structures (Google, Facebook, etc.)
+   */
+  const getAvatarUrl = () => {
+    const metadata = user?.user_metadata;
+
+    // Try different possible avatar field names from OAuth providers
+    const possibleFields = ['avatar_url', 'picture', 'photo', 'profile_picture', 'image'];
+
+    // Check direct metadata fields first (Facebook typically stores here)
+    for (const field of possibleFields) {
+      if (metadata?.[field]) {
+        return metadata[field];
+      }
+    }
+
+    // Check nested identities data (common for Google OAuth)
+    if (metadata?.identities && Array.isArray(metadata.identities)) {
+      for (const identity of metadata.identities) {
+        if (identity?.identity_data) {
+          for (const field of possibleFields) {
+            if (identity.identity_data[field]) {
+              return identity.identity_data[field];
+            }
+          }
+        }
+      }
+    }
+
+    // Fallback to database profile (stored user profile)
+    if (userProfile?.avatar_url) {
+      return userProfile.avatar_url;
+    }
+
+    // Final fallback to generated avatar with user initials
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
+  };
+
+  const userAvatar = getAvatarUrl();
 
   /**
    * Handler para realizar logout
