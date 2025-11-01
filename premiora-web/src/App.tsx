@@ -9,7 +9,6 @@ import Login from './Login';
 import HomePage from './components/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-import './styles/index.css';
 
 /**
  * Componente principal da aplicação com roteamento protegido
