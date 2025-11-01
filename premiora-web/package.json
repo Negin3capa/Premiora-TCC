@@ -13,6 +13,7 @@
     "vite": "^7.1.7"
   },
   "dependencies": {
+    "@hcaptcha/react-hcaptcha": "^1.14.0",
     "@supabase/supabase-js": "^2.76.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

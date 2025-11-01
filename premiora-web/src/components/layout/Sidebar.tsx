@@ -76,12 +76,10 @@ const Sidebar: React.FC = () => {
   const navigationItems = [
     { icon: '🏠', label: 'Home', active: true },
     { icon: '🔥', label: 'Trending', active: false },
-    { icon: '📺', label: 'Videos', active: false },
-    { icon: '📱', label: 'Live', active: false },
+    { icon: '🔔', label: 'Notifications', active: false },
+    { icon: '💬', label: 'Messages', active: false },
     { icon: '👥', label: 'Following', active: false },
-    { icon: '❤️', label: 'Liked', active: false },
-    { icon: '📚', label: 'Library', active: false },
-    { icon: '⚙️', label: 'Settings', active: false },
+    { icon: '🏘️', label: 'Communities', active: false },
   ];
 
   return (

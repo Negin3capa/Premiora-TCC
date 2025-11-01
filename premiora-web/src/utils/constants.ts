@@ -44,3 +44,10 @@ export const FORM_LIMITS = {
   DESCRIPTION: 2000,
   POST_CONTENT: 5000
 } as const;
+
+/**
+ * Configurações do hCaptcha
+ */
+export const HCAPTCHA_CONFIG = {
+  SITE_KEY: 'c710ceee-90f2-479e-a504-6d0874c62c58'
+} as const;
