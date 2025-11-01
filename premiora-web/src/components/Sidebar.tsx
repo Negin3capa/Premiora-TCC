@@ -4,6 +4,10 @@
  */
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import CreateContentModal, { type ContentType } from './CreateContentModal';
+import CreatePostModal from './CreatePostModal';
+import CreateVideoModal from './CreateVideoModal';
+import CreateCommunityModal from './CreateCommunityModal';
 
 /**
  * Sidebar de navegação principal da aplicação
@@ -21,6 +25,55 @@ const Sidebar: React.FC = () => {
   const userAvatar = user?.user_metadata?.avatar_url || 
                      user?.user_metadata?.picture || 
                      `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
+
+  // Estados para controlar modais
+  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = React.useState(false);
+  const [isCreateVideoModalOpen, setIsCreateVideoModalOpen] = React.useState(false);
+  const [isCreateCommunityModalOpen, setIsCreateCommunityModalOpen] = React.useState(false);
+
+  /**
+   * Handler para seleção de tipo de conteúdo no modal principal
+   */
+  const handleContentTypeSelect = (type: ContentType) => {
+    switch (type) {
+      case 'post':
+        setIsCreatePostModalOpen(true);
+        break;
+      case 'video':
+        setIsCreateVideoModalOpen(true);
+        break;
+      case 'community':
+        setIsCreateCommunityModalOpen(true);
+        break;
+      default:
+        console.warn(`Tipo de conteúdo não suportado: ${type}`);
+    }
+  };
+
+  /**
+   * Handler para publicação de post (callback do CreatePostModal)
+   */
+  const handlePostPublish = (postData: any) => {
+    console.log('Post publicado:', postData);
+    // TODO: Integrar com API quando implementado
+  };
+
+  /**
+   * Handler para publicação de vídeo (callback do CreateVideoModal)
+   */
+  const handleVideoPublish = (videoData: any) => {
+    console.log('Vídeo publicado:', videoData);
+    // TODO: Integrar com API quando implementado
+  };
+
+  /**
+   * Handler para criação de comunidade (callback do CreateCommunityModal)
+   */
+  const handleCommunityCreate = (communityData: any) => {
+    console.log('Comunidade criada:', communityData);
+    // TODO: Integrar com API quando implementado
+  };
 
   const navigationItems = [
     { icon: '🏠', label: 'Home', active: true },
@@ -55,6 +108,53 @@ const Sidebar: React.FC = () => {
           ))}
         </ul>
       </nav>
+
+      {/* Botão Criar */}
+      <div className="create-section" style={{
+        padding: '0 var(--space-4)',
+        marginBottom: 'var(--space-4)'
+      }}>
+        <button
+          className="create-button"
+          onClick={() => setIsCreateModalOpen(true)}
+          aria-label="Criar novo conteúdo"
+          title="Criar novo conteúdo"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-3)',
+            padding: 'var(--space-4)',
+            borderRadius: 'var(--radius-lg)',
+            border: 'none',
+            background: 'linear-gradient(135deg, var(--color-primary) 0%, #FF6B75 100%)',
+            color: 'var(--color-text-white)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: 'var(--font-weight-semibold)',
+            cursor: 'pointer',
+            transition: 'all var(--transition-fast)',
+            boxShadow: '0 4px 12px rgba(255, 66, 77, 0.3)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 66, 77, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 66, 77, 0.3)';
+          }}
+        >
+          <span className="create-icon" style={{
+            fontSize: 'var(--font-size-xl)',
+            width: '24px',
+            textAlign: 'center',
+            flexShrink: 0
+          }}>
+            ✏️
+          </span>
+          <span className="create-label">Criar</span>
+        </button>
+      </div>
 
       <div className="sidebar-footer">
         {user && (
@@ -128,6 +228,34 @@ const Sidebar: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de criação de conteúdo */}
+      <CreateContentModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSelectContentType={handleContentTypeSelect}
+      />
+
+      {/* Modal de criação de post */}
+      <CreatePostModal
+        isOpen={isCreatePostModalOpen}
+        onClose={() => setIsCreatePostModalOpen(false)}
+        onPublish={handlePostPublish}
+      />
+
+      {/* Modal de criação de vídeo */}
+      <CreateVideoModal
+        isOpen={isCreateVideoModalOpen}
+        onClose={() => setIsCreateVideoModalOpen(false)}
+        onPublish={handleVideoPublish}
+      />
+
+      {/* Modal de criação de comunidade */}
+      <CreateCommunityModal
+        isOpen={isCreateCommunityModalOpen}
+        onClose={() => setIsCreateCommunityModalOpen(false)}
+        onCreate={handleCommunityCreate}
+      />
     </aside>
   );
 };

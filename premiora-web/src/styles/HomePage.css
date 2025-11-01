@@ -186,8 +186,8 @@
 /* ==================== Header ==================== */
 
 .header {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-dark);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   padding: var(--space-4) var(--space-6);
   position: sticky;
   top: 0;
@@ -204,9 +204,21 @@
   gap: var(--space-6);
 }
 
-.search-section {
+.header-spacer {
   flex: 1;
+  max-width: 280px; /* Same width as sidebar to balance */
+}
+
+.search-section {
+  flex: 0 0 500px;
   max-width: 500px;
+}
+
+.header-right {
+  flex: 1;
+  max-width: 280px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .search-container {
@@ -835,8 +847,20 @@
     gap: var(--space-3);
   }
 
+  .header-spacer {
+    display: none;
+  }
+
+  .header-right {
+    display: none;
+  }
+
   .search-section {
     flex: 1;
+  }
+
+  .header-actions {
+    display: flex;
   }
 
   .feed {
