@@ -2,9 +2,18 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 
+// Interface para o perfil do usuário
+interface UserProfile {
+  id: string;
+  name: string | null;
+  email: string;
+  avatar_url: string | null;
+}
+
 // Interface para o contexto de autenticação
 interface AuthContextType {
   user: User | null;
+  userProfile: UserProfile | null;
   session: Session | null;
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
@@ -12,6 +21,7 @@ interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
+  refreshUserProfile: () => Promise<void>;
 }
 
 // Criar contexto
@@ -29,6 +39,7 @@ export const useAuth = () => {
 // Provedor do contexto
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,6 +51,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/home`,
+          scopes: 'openid email profile',
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
         },
       });
       if (error) {
@@ -162,11 +178,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                          user.user_metadata?.name ||
                          (user.email ? user.email.split('@')[0] : null);
 
+      // Obtém a URL do avatar (Google OAuth usa 'picture', outros podem usar 'avatar_url')
+      const avatarUrl = user.user_metadata?.avatar_url ||
+                       user.user_metadata?.picture || null;
+
+
+
       console.log('📝 Dados para inserir:', {
         id: user.id,
         email: user.email,
         name: displayName,
-        avatar_url: user.user_metadata?.avatar_url || null
+        avatar_url: avatarUrl
       });
 
       // Primeiro, tentar inserir (funciona melhor com RLS)
@@ -176,7 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           id: user.id,
           email: user.email,
           name: displayName,
-          avatar_url: user.user_metadata?.avatar_url || null,
+          avatar_url: avatarUrl,
         })
         .select()
         .single();
@@ -196,7 +218,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .from('users')
             .update({
               name: displayName,
-              avatar_url: user.user_metadata?.avatar_url || null,
+              avatar_url: avatarUrl,
             })
             .eq('id', user.id)
             .select()
@@ -226,6 +248,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Função para buscar o perfil do usuário do banco de dados
+  const refreshUserProfile = async () => {
+    if (!user) {
+      setUserProfile(null);
+      return;
+    }
+
+    try {
+      const { data: profile, error } = await supabase
+        .from('users')
+        .select('id, name, email, avatar_url')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Erro ao buscar perfil do usuário:', error);
+        setUserProfile(null);
+        return;
+      }
+
+      setUserProfile(profile);
+    } catch (err) {
+      console.error('Erro geral ao buscar perfil:', err);
+      setUserProfile(null);
+    }
+  };
+
   // Escutar mudanças na sessão
   useEffect(() => {
     const getSession = async () => {
@@ -233,12 +282,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const { data: { session } } = await supabase.auth.getSession();
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Executa upsert em background sem bloquear
         if (session?.user) {
-          upsertUserProfile(session.user).catch(err => 
+          upsertUserProfile(session.user).catch(err =>
             console.error('Background upsert failed:', err)
           );
+
+          // Após upsert, tenta buscar o perfil atualizado
+          setTimeout(() => {
+            refreshUserProfile();
+          }, 100);
         }
       } catch (error) {
         console.error('Erro ao obter sessão:', error);
@@ -253,14 +307,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (_event: string, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Executa upsert em background sem bloquear
         if (session?.user) {
-          upsertUserProfile(session.user).catch(err => 
+          upsertUserProfile(session.user).catch(err =>
             console.error('Background upsert failed:', err)
           );
+
+          // Após upsert, tenta buscar o perfil atualizado
+          setTimeout(() => {
+            refreshUserProfile();
+          }, 100);
+        } else {
+          setUserProfile(null);
         }
-        
+
         setLoading(false);
       }
     );
@@ -270,6 +331,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: AuthContextType = {
     user,
+    userProfile,
     session,
     signInWithGoogle,
     signInWithFacebook,
@@ -277,6 +339,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUpWithEmail,
     signOut,
     loading,
+    refreshUserProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

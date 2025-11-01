@@ -15,9 +15,9 @@
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(47, 47, 49, 0.95);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: var(--z-sticky);
   transition: all var(--transition-base);
 }
@@ -41,12 +41,8 @@
   gap: var(--space-3);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
-  color: #000000;
+  color: var(--color-text-white);
   text-decoration: none;
-}
-
-.logo span {
-  color: #000000;
 }
 
 .logo svg {
@@ -62,7 +58,7 @@
 }
 
 .nav-links a {
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
   transition: color var(--transition-base);
@@ -71,7 +67,7 @@
 
 .nav-links a:hover,
 .nav-links a:focus {
-  color: var(--color-text-primary);
+  color: var(--color-text-white);
 }
 
 .nav-links a::after {
@@ -97,7 +93,7 @@
 }
 
 .login-btn {
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
   padding: var(--space-2) var(--space-4);
@@ -106,8 +102,8 @@
 }
 
 .login-btn:hover {
-  color: var(--color-text-primary);
-  background: var(--color-bg-hover);
+  color: var(--color-text-white);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .cta-button-small {
