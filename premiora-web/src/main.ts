@@ -4,7 +4,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import App from './App.tsx';
 import './styles/globals.css';
-import './styles/index.css';
 
 // Renderiza o componente React App no elemento com id 'app' com roteamento e provedor de autenticação
 ReactDOM.createRoot(document.getElementById('app')!).render(

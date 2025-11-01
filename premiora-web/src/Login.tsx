@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
+import './styles/login.css';
 
 // Componente de Login
 const Login: React.FC = () => {
@@ -82,10 +83,21 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
+      {/* Premium Branding Header */}
+      <div className="login-brand">
+        <div className="brand-logo">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+          <span>Premiora</span>
+        </div>
+        <p className="brand-tagline">A plataforma brasileira para monetização de conteúdo criativo</p>
+      </div>
+
       <div className="login-container">
         <div className="login-header">
-          <h1>{isSignUp ? 'Criar Conta' : 'Entrar no Premiora'}</h1>
-          <p>{isSignUp ? 'Crie sua conta para começar a monetizar seu conteúdo.' : 'Entre com sua conta para continuar criando e monetizando seu conteúdo.'}</p>
+          <h1>{isSignUp ? 'Criar sua conta' : 'Bem-vindo de volta'}</h1>
+          <p>{isSignUp ? 'Junte-se a milhares de criadores que monetizam seu talento.' : 'Continue criando e crescendo com sua comunidade.'}</p>
         </div>
 
         <div className="login-content">
