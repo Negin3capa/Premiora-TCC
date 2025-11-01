@@ -1,23 +1,23 @@
 /**
- * Componente ProtectedRoute
- * Protege rotas que requerem autenticação, redirecionando usuários não autenticados para login
+ * Componente PublicRoute
+ * Protege rotas públicas (landing, login) de usuários já autenticados, redirecionando para /home
  */
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
-interface ProtectedRouteProps {
+interface PublicRouteProps {
   children: React.ReactNode;
 }
 
 /**
- * Wrapper para rotas protegidas que requerem autenticação
- * Redireciona para /login se o usuário não estiver autenticado
+ * Wrapper para rotas públicas que não devem ser acessadas por usuários autenticados
+ * Redireciona para /home se o usuário estiver autenticado
  * 
- * @param children - Componentes filhos a serem renderizados se autenticado
- * @returns Componente filho ou redirecionamento para login
+ * @param children - Componentes filhos a serem renderizados se não autenticado
+ * @returns Componente filho ou redirecionamento para home
  */
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
 
   // Mostra loading enquanto verifica autenticação
@@ -50,13 +50,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  // Redireciona para login se não estiver autenticado
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  // Redireciona para home se estiver autenticado
+  if (user) {
+    return <Navigate to="/home" replace />;
   }
 
-  // Renderiza o componente protegido
+  // Renderiza a página pública
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

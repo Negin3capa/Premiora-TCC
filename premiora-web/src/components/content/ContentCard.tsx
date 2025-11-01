@@ -3,7 +3,7 @@
  * Card de conteúdo que exibe posts, vídeos, lives e perfis
  */
 import React from 'react';
-import type { ContentItem } from './HomePage';
+import type { ContentItem } from '../../types/content';
 
 interface ContentCardProps {
   item: ContentItem;

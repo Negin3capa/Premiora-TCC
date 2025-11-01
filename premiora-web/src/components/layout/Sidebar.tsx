@@ -3,11 +3,9 @@
  * Barra lateral com navegação e perfil do usuário
  */
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import CreateContentModal, { type ContentType } from './CreateContentModal';
-import CreatePostModal from './CreatePostModal';
-import CreateVideoModal from './CreateVideoModal';
-import CreateCommunityModal from './CreateCommunityModal';
+import { useAuth } from '../../hooks/useAuth';
+import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
+import type { ContentType } from '../modals/CreateContentModal';
 
 /**
  * Sidebar de navegação principal da aplicação

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import ContentCard from './ContentCard';
-import type { ContentItem } from './HomePage';
+import type { ContentItem } from '../../types/content';
 
 interface FeedProps {
   items: ContentItem[];

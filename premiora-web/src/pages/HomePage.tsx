@@ -1,23 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import Sidebar from './Sidebar';
-import Header from './Header';
-import Feed from './Feed';
+import { useAuth } from '../hooks/useAuth';
+import type { ContentItem } from '../types/content';
+import { Sidebar, Header } from '../components/layout';
+import Feed from '../components/content/Feed';
 import '../styles/HomePage.css';
-
-export interface ContentItem {
-  id: string;
-  type: 'profile' | 'video' | 'post' | 'live';
-  title: string;
-  author: string;
-  authorAvatar: string;
-  thumbnail?: string;
-  content?: string;
-  views?: number;
-  likes?: number;
-  timestamp: string;
-  isLive?: boolean;
-}
 
 const HomePage: React.FC = () => {
   const { user } = useAuth();

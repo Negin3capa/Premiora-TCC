@@ -4,11 +4,10 @@
  */
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './components/LandingPage';
-import Login from './Login';
-import HomePage from './components/HomePage';
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
+import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import HomePage from './pages/HomePage';
+import { ProtectedRoute, PublicRoute } from './components/auth';
 
 /**
  * Componente principal da aplicação com roteamento protegido

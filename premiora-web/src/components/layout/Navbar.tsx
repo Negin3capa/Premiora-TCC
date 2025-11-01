@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 // Componente Navbar: Navegação fixa no topo
 const Navbar: React.FC = () => {

@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 interface HeaderProps {
   searchQuery: string;

@@ -6,15 +6,17 @@ Projeto SaaS, buscando unir as qualidades do Patreon/Discord/Reddit/Youtube em u
 
 O Premiora é uma plataforma revolucionária que combina o melhor de múltiplas redes sociais e plataformas de monetização em um único ecossistema. Criadores de conteúdo podem construir comunidades engajadas, compartilhar conteúdo diversificado e monetizar suas criações de forma inteligente, tudo em um só lugar.
 
+Para informações detalhadas sobre a arquitetura técnica, padrões de design e decisões técnicas, consulte o arquivo [ARCHITECTURE.md](./ARCHITECTURE.md).
+
 ## Arquitetura
 
 O projeto é estruturado da seguinte forma:
 
 ### Frontend
 
-- **Framework**: React 19 com TypeScript
-- **Build Tool**: Vite
-- **Roteamento**: React Router DOM
+- **Framework**: React 19.2.0 com TypeScript ~5.9.3
+- **Build Tool**: Vite ^7.1.7
+- **Roteamento**: React Router DOM ^7.9.4
 - **Estilização**: CSS personalizado (App.css, style.css)
 
 ### Autenticação
@@ -28,30 +30,62 @@ O projeto é estruturado da seguinte forma:
 ```
 premiora-web/
 ├── src/
-│   ├── components/      # Componentes reutilizáveis
-│   │   ├── Navbar.tsx
-│   │   ├── Hero.tsx
-│   │   ├── Features.tsx
-│   │   ├── Benefits.tsx
-│   │   ├── CTA.tsx
-│   │   ├── Footer.tsx
+│   ├── pages/           # Componentes de página
 │   │   ├── LandingPage.tsx
 │   │   ├── HomePage.tsx
-│   │   ├── Header.tsx
-│   │   ├── Sidebar.tsx
-│   │   ├── Feed.tsx
-│   │   ├── ContentCard.tsx
-│   │   ├── ProtectedRoute.tsx
-│   │   ├── PublicRoute.tsx
 │   │   └── Login.tsx
+│   ├── components/      # Componentes reutilizáveis
+│   │   ├── auth/        # Componentes de autenticação
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── PublicRoute.tsx
+│   │   ├── common/      # Componentes comuns
+│   │   │   ├── CommunityDropdown.tsx
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   └── FileUpload.tsx
+│   │   ├── content/     # Componentes de conteúdo
+│   │   │   ├── ContentCard.tsx
+│   │   │   ├── Feed.tsx
+│   │   │   └── HomePage.tsx (removido - movido para pages/)
+│   │   ├── forms/       # Componentes de formulários
+│   │   │   └── Benefits.tsx
+│   │   ├── landing/     # Componentes da landing page
+│   │   │   ├── Header.tsx
+│   │   │   ├── Hero.tsx
+│   │   │   ├── Features.tsx
+│   │   │   ├── Testimonials.tsx
+│   │   │   ├── Pricing.tsx
+│   │   │   ├── FAQ.tsx
+│   │   │   ├── CTA.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── HowItWorks.tsx
+│   │   │   ├── SocialProof.tsx
+│   │   │   └── index.ts
+│   │   ├── layout/      # Componentes de layout
+│   │   │   ├── Header.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   └── index.ts
+│   │   └── modals/      # Componentes de modal
+│   │       ├── CreateCommunityModal.tsx
+│   │       ├── CreateContentModal.tsx
+│   │       ├── CreatePostModal.tsx
+│   │       ├── CreateVideoModal.tsx
+│   │       └── index.ts
+│   ├── hooks/           # Hooks customizados
+│   │   └── useAuth.ts
 │   ├── contexts/        # Contextos React
 │   │   └── AuthContext.tsx
+│   ├── types/           # Definições de tipos TypeScript
+│   │   └── content.ts
 │   ├── utils/           # Utilitários e configurações
+│   │   ├── constants.ts
 │   │   └── supabaseClient.ts
 │   ├── styles/          # Arquivos de estilo
 │   │   ├── globals.css
 │   │   ├── HomePage.css
-│   │   └── index.css
+│   │   ├── landing-page.css
+│   │   ├── login.css
+│   │   └── modals.css
 │   ├── App.tsx          # Componente principal com roteamento
 │   └── main.ts          # Ponto de entrada da aplicação
 ├── public/              # Assets públicos
@@ -92,13 +126,13 @@ const signInWithFacebook = async () => {
   setLoading(true);
   try {
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
+      provider: "facebook",
       options: {
         redirectTo: `${window.location.origin}/home`,
       },
     });
     if (error) {
-      console.error('Erro ao fazer login com Facebook:', error.message);
+      console.error("Erro ao fazer login com Facebook:", error.message);
       throw error;
     }
   } catch (err) {
@@ -135,6 +169,12 @@ Para ativar o login com Facebook, é necessário:
 - **Workflow**: Build automatizado em pushes e pull requests para a branch main
 - **Ambiente**: Ubuntu com Node.js 18
 
+### Desenvolvimento
+
+- **Linting**: Markdownlint para documentação
+- **Formatação**: Prettier para padronização de código
+- **TypeScript**: Configuração strict com checagem rigorosa de tipos
+
 ## Setup
 
 ### Pré-requisitos
@@ -152,10 +192,14 @@ git clone <url-do-repositorio>
 cd premiora-tcc
 ```
 
-1. Instale as dependências:
+1. Instale as dependências do projeto e ferramentas de desenvolvimento:
 
 ```bash
 cd premiora-web
+npm install
+
+# Ferramentas de desenvolvimento (no diretório raiz)
+cd ..
 npm install
 ```
 
@@ -169,7 +213,7 @@ npm install
 npm run dev
 ```
 
-1. Para build de produção:
+1. Para build de produção (compila TypeScript e gera bundle otimizado):
 
 ```bash
 npm run build
@@ -194,7 +238,7 @@ npm run preview
 - **Login**: Acesse sua conta existente
 - **Logout**: Desconecte-se da plataforma
 
-### Desenvolvimento
+### Servidor de Desenvolvimento
 
 - Execute `npm run dev` para iniciar o servidor de desenvolvimento
 - A aplicação estará disponível em `http://localhost:5173` (porta padrão do Vite)

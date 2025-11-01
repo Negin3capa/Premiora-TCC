@@ -3,7 +3,7 @@
  * Permite ao usuário criar uma nova comunidade na plataforma
  */
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 /**
  * Props do componente CreateCommunityModal

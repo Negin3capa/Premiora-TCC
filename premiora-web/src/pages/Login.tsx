@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
-import './styles/login.css';
+import { useAuth } from '../hooks/useAuth';
+import '../styles/login.css';
 
 // Componente de Login
 const Login: React.FC = () => {
