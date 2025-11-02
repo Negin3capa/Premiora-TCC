@@ -7,6 +7,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Enable auto-merge for this workflow
+permissions:
+  contents: write
+  pull-requests: write
+  statuses: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
