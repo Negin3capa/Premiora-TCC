@@ -3,6 +3,7 @@
  * Barra lateral com navegação e perfil do usuário
  */
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
 import type { ContentType } from '../modals/CreateContentModal';
@@ -13,6 +14,8 @@ import type { ContentType } from '../modals/CreateContentModal';
  */
 const Sidebar: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Extrai informações do perfil do usuário
   const userName = user?.user_metadata?.full_name || 
@@ -74,13 +77,20 @@ const Sidebar: React.FC = () => {
   };
 
   const navigationItems = [
-    { icon: '🏠', label: 'Home', active: true },
-    { icon: '🔥', label: 'Trending', active: false },
-    { icon: '🔔', label: 'Notifications', active: false },
-    { icon: '💬', label: 'Messages', active: false },
-    { icon: '👥', label: 'Following', active: false },
-    { icon: '🏘️', label: 'Communities', active: false },
+    { icon: '🏠', label: 'Home', route: '/home', active: true },
+    { icon: '🔥', label: 'Trending', route: '/trending', active: false },
+    { icon: '🔔', label: 'Notifications', route: '/notifications', active: false },
+    { icon: '💬', label: 'Messages', route: '/messages', active: false },
+    { icon: '👥', label: 'Following', route: '/following', active: false },
+    { icon: '🏘️', label: 'Communities', route: '/communities', active: false },
   ];
+
+  /**
+   * Handler para navegação entre páginas
+   */
+  const handleNavigation = (route: string) => {
+    navigate(route);
+  };
 
   return (
     <aside className="sidebar">
@@ -90,18 +100,22 @@ const Sidebar: React.FC = () => {
       
       <nav className="sidebar-nav">
         <ul className="nav-list">
-          {navigationItems.map((item, index) => (
-            <li key={index} className={`nav-item ${item.active ? 'active' : ''}`}>
-              <button 
-                className="nav-button"
-                aria-label={item.label}
-                aria-current={item.active ? 'page' : undefined}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                <span className="nav-label">{item.label}</span>
-              </button>
-            </li>
-          ))}
+          {navigationItems.map((item, index) => {
+            const isActive = location.pathname === item.route;
+            return (
+              <li key={index} className={`nav-item ${isActive ? 'active' : ''}`}>
+                <button
+                  className="nav-button"
+                  aria-label={item.label}
+                  aria-current={isActive ? 'page' : undefined}
+                  onClick={() => handleNavigation(item.route)}
+                >
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </nav>
 

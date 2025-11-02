@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import CommunityPage from './pages/CommunityPage';
+import CommunitiesPage from './pages/CommunitiesPage';
 import { ProtectedRoute, PublicRoute } from './components/auth';
 
 /**
@@ -50,6 +51,16 @@ const App: React.FC = () => {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Rota Lista de Comunidades (apenas para autenticados) */}
+      <Route
+        path="/communities"
+        element={
+          <ProtectedRoute>
+            <CommunitiesPage />
           </ProtectedRoute>
         }
       />
