@@ -55,15 +55,64 @@ export const useCommunityForm = () => {
    * Atualiza campo do formulário
    */
   const updateField = useCallback((field: keyof CommunityFormData, value: string | boolean | File | null) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
 
-    // Verificar disponibilidade do nome quando for alterado
-    if (field === 'name' && typeof value === 'string') {
-      checkNameAvailability(value);
-    }
+      // Verificar disponibilidade do nome quando for alterado
+      if (field === 'name' && typeof value === 'string') {
+        if (value.length < 3) {
+          setValidation(v => ({ ...v, nameAvailable: null, checkingName: false }));
+        } else {
+          setValidation(v => ({ ...v, checkingName: true }));
+          // Verificar disponibilidade de forma assíncrona
+          getCommunityByName(value).then(existing => {
+            setValidation(v => ({
+              ...v,
+              nameAvailable: !existing,
+              checkingName: false
+            }));
+          }).catch(() => {
+            setValidation(v => ({
+              ...v,
+              nameAvailable: false,
+              checkingName: false
+            }));
+          });
+        }
+      }
 
-    // Revalidar formulário após mudança
-    setTimeout(validateForm, 0);
+      // Revalidar formulário após mudança
+      setTimeout(() => {
+        // Validação inline simplificada
+        const errors: Record<string, string> = {};
+
+        if (!newData.name.trim()) {
+          errors.name = 'Nome da comunidade é obrigatório';
+        } else if (newData.name.length < 3) {
+          errors.name = 'Nome deve ter pelo menos 3 caracteres';
+        }
+
+        if (!newData.displayName.trim()) {
+          errors.displayName = 'Nome de exibição é obrigatório';
+        } else if (newData.displayName.length < 3) {
+          errors.displayName = 'Nome de exibição deve ter pelo menos 3 caracteres';
+        }
+
+        if (!newData.description.trim()) {
+          errors.description = 'Descrição é obrigatória';
+        } else if (newData.description.length < 10) {
+          errors.description = 'Descrição deve ter pelo menos 10 caracteres';
+        }
+
+        setValidation(v => ({
+          ...v,
+          isValid: Object.keys(errors).length === 0,
+          errors
+        }));
+      }, 0);
+
+      return newData;
+    });
   }, []);
 
   /**
