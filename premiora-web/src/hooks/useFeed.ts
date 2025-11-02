@@ -54,7 +54,8 @@ export const useFeed = () => {
     for (let i = 0; i < count; i++) {
       const index = startIndex + i;
       const type = types[Math.floor(Math.random() * types.length)];
-      const accessLevel = type === 'post' ? accessLevels[Math.floor(Math.random() * accessLevels.length)] : undefined;
+      // Videos default to public, posts can be any access level
+      const accessLevel = type === 'video' ? 'public' : accessLevels[Math.floor(Math.random() * accessLevels.length)];
 
       const baseContent = type === 'post'
         ? `Este é um conteúdo de exemplo ${index}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`

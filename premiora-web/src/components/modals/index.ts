@@ -7,3 +7,4 @@ export { default as CreatePostModal } from './CreatePostModal';
 export { default as CreateCommunityModal } from './CreateCommunityModal';
 export { default as CreateContentModal } from './CreateContentModal';
 export { default as PostViewModal } from './PostViewModal';
+export { default as VideoViewModal } from './VideoViewModal';

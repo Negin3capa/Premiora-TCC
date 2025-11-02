@@ -187,8 +187,8 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
         name: formData.name,
         displayName: formData.displayName,
         description: formData.description,
-        bannerUrl: formData.banner ? URL.createObjectURL(formData.banner) : undefined,
-        avatarUrl: formData.avatar ? URL.createObjectURL(formData.avatar) : undefined,
+        bannerFile: formData.banner,
+        avatarFile: formData.avatar,
         isPrivate: formData.isPrivate
       });
 

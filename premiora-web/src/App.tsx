@@ -1,15 +1,35 @@
 /**
  * Componente principal App
- * Gerencia roteamento da aplicação com proteção de rotas
+ * Gerencia roteamento da aplicação com proteção de rotas e code splitting
  */
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import Login from './pages/Login';
-import HomePage from './pages/HomePage';
-import CommunityPage from './pages/CommunityPage';
-import CommunitiesPage from './pages/CommunitiesPage';
 import { ProtectedRoute, PublicRoute } from './components/auth';
+
+// Lazy loading dos componentes de página para otimização de bundle
+const LandingPage = React.lazy(() => import('./pages/LandingPage'));
+const Login = React.lazy(() => import('./pages/Login'));
+const HomePage = React.lazy(() => import('./pages/HomePage'));
+const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
+const CommunitiesPage = React.lazy(() => import('./pages/CommunitiesPage'));
+const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
+
+/**
+ * Componente de loading para páginas em lazy loading
+ * Exibe um indicador visual durante o carregamento das páginas
+ */
+const PageLoader: React.FC = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    fontSize: '18px',
+    color: '#666'
+  }}>
+    Carregando...
+  </div>
+);
 
 /**
  * Componente principal da aplicação com roteamento protegido
@@ -24,60 +44,72 @@ import { ProtectedRoute, PublicRoute } from './components/auth';
  */
 const App: React.FC = () => {
   return (
-    <Routes>
-      {/* Rota raiz - Landing Page (apenas para não autenticados) */}
-      <Route 
-        path="/" 
-        element={
-          <PublicRoute>
-            <LandingPage />
-          </PublicRoute>
-        } 
-      />
-      
-      {/* Rota de Login (apenas para não autenticados) */}
-      <Route 
-        path="/login" 
-        element={
-          <PublicRoute>
-            <Login />
-          </PublicRoute>
-        } 
-      />
-      
-      {/* Rota Home (apenas para autenticados) */}
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-        }
-      />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Rota raiz - Landing Page (apenas para não autenticados) */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <LandingPage />
+            </PublicRoute>
+          }
+        />
 
-      {/* Rota Lista de Comunidades (apenas para autenticados) */}
-      <Route
-        path="/communities"
-        element={
-          <ProtectedRoute>
-            <CommunitiesPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Rota de Login (apenas para não autenticados) */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
 
-      {/* Rota Comunidades (apenas para autenticados) */}
-      <Route
-        path="/r/:communityName"
-        element={
-          <ProtectedRoute>
-            <CommunityPage />
-          </ProtectedRoute>
-        }
-      />
+        {/* Rota Home (apenas para autenticados) */}
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Rota catch-all - redireciona para landing page */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Rota Lista de Comunidades (apenas para autenticados) */}
+        <Route
+          path="/communities"
+          element={
+            <ProtectedRoute>
+              <CommunitiesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Comunidades (apenas para autenticados) */}
+        <Route
+          path="/r/:communityName"
+          element={
+            <ProtectedRoute>
+              <CommunityPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Configurações (apenas para autenticados) */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota catch-all - redireciona para landing page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 

@@ -9,6 +9,7 @@ import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
 import { Sidebar, Header } from '../components/layout';
 import Feed from '../components/content/Feed';
+import { getCommunityByName, isCommunityMember } from '../utils/communityUtils';
 import '../styles/CommunityPage.css';
 
 /**
@@ -55,12 +56,16 @@ const CommunityPage: React.FC = () => {
       'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&h=200&fit=crop&auto=format'
     ];
 
+    // Array de timestamps estáveis
+    const timestamps = ['2h atrás', '5h atrás', '8h atrás', '12h atrás', '1d atrás', '2d atrás', '3d atrás'];
+
     const mockItems: ContentItem[] = [];
 
     for (let i = 0; i < count; i++) {
       const index = startIndex + i;
-      const type = types[Math.floor(Math.random() * types.length)];
-      const accessLevel = type === 'post' ? accessLevels[Math.floor(Math.random() * accessLevels.length)] : undefined;
+      // Use index-based selection for stable values instead of random
+      const type = types[index % types.length];
+      const accessLevel = type === 'post' ? accessLevels[index % accessLevels.length] : undefined;
 
       const baseContent = type === 'post'
         ? `Este é um conteúdo da comunidade ${communityName}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`
@@ -71,19 +76,20 @@ const CommunityPage: React.FC = () => {
         type,
         title: type === 'video' ? `Vídeo ${index} da comunidade` : `Post ${index} da comunidade`,
         author: `Usuário ${index}`,
-        authorAvatar: postAvatars[Math.floor(Math.random() * postAvatars.length)],
-        thumbnail: type === 'video' ? videoThumbnails[Math.floor(Math.random() * videoThumbnails.length)] : undefined,
+        authorAvatar: postAvatars[index % postAvatars.length],
+        thumbnail: type === 'video' ? videoThumbnails[index % videoThumbnails.length] : undefined,
         content: baseContent,
-        views: Math.floor(Math.random() * 5000),
-        likes: Math.floor(Math.random() * 500),
-        timestamp: `${Math.floor(Math.random() * 24)}h atrás`,
+        // Use stable values based on index instead of random
+        views: (index + 1) * 127, // 127, 254, 381, etc.
+        likes: (index + 1) * 23,  // 23, 46, 69, etc.
+        timestamp: timestamps[index % timestamps.length],
         // Community-specific properties
         communityId: community?.id || 'mock-community-id',
         communityName: communityName || 'comunidade-teste',
         communityAvatar: community?.avatarUrl || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=40&h=40&fit=crop&crop=center&auto=format',
         // Propriedades de acesso para posts
         accessLevel,
-        isLocked: accessLevel !== 'public' && Math.random() > 0.5,
+        isLocked: accessLevel !== 'public' && (index % 3 === 0), // Every 3rd item is locked
         previewContent: accessLevel !== 'public'
           ? `Este é um preview do conteúdo exclusivo ${index}. Veja apenas uma parte...`
           : undefined,
@@ -99,55 +105,73 @@ const CommunityPage: React.FC = () => {
 
   // Load community data
   useEffect(() => {
-    if (!communityName) return;
+    const loadCommunityData = async () => {
+      if (!communityName) return;
 
-    // Array de banners dinâmicos baseados no nome da comunidade
-    const getCommunityBanner = (name: string) => {
-      const bannerMap: Record<string, string> = {
-        tecnologia: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=200&fit=crop&auto=format',
-        'arte-digital': 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=200&fit=crop&auto=format',
-        gaming: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=200&fit=crop&auto=format',
-        musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=200&fit=crop&auto=format',
-        fitness: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=200&fit=crop&auto=format',
-        fotografia: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=200&fit=crop&auto=format',
-        culinaria: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=200&fit=crop&auto=format',
-        design: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=200&fit=crop&auto=format'
+      try {
+        // Try to fetch real community data first
+        const realCommunity = await getCommunityByName(communityName);
+
+        if (realCommunity) {
+          setCommunity(realCommunity);
+          // Check if user is a member
+          const isMember = await isCommunityMember(realCommunity.id);
+          setIsJoined(isMember);
+          return;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar comunidade real:', error);
+      }
+
+      // Fallback to mock data if real community doesn't exist
+      const getCommunityBanner = (name: string) => {
+        const bannerMap: Record<string, string> = {
+          tecnologia: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=200&fit=crop&auto=format',
+          'arte-digital': 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=200&fit=crop&auto=format',
+          gaming: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=200&fit=crop&auto=format',
+          musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=200&fit=crop&auto=format',
+          fitness: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=200&fit=crop&auto=format',
+          fotografia: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=200&fit=crop&auto=format',
+          culinaria: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=200&fit=crop&auto=format',
+          design: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=200&fit=crop&auto=format'
+        };
+        return bannerMap[name] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=200&fit=crop&auto=format';
       };
-      return bannerMap[name] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=200&fit=crop&auto=format';
-    };
 
-    // Array de avatares dinâmicos baseados no nome da comunidade
-    const getCommunityAvatar = (name: string) => {
-      const avatarMap: Record<string, string> = {
-        tecnologia: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=80&h=80&fit=crop&crop=center&auto=format',
-        'arte-digital': 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=80&h=80&fit=crop&crop=center&auto=format',
-        gaming: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=80&h=80&fit=crop&crop=center&auto=format',
-        musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=80&h=80&fit=crop&crop=center&auto=format',
-        fitness: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=80&h=80&fit=crop&crop=center&auto=format',
-        fotografia: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=80&h=80&fit=crop&crop=center&auto=format',
-        culinaria: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&h=80&fit=crop&crop=center&auto=format',
-        design: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=80&h=80&fit=crop&crop=center&auto=format'
+      const getCommunityAvatar = (name: string) => {
+        const avatarMap: Record<string, string> = {
+          tecnologia: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=80&h=80&fit=crop&crop=center&auto=format',
+          'arte-digital': 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=80&h=80&fit=crop&crop=center&auto=format',
+          gaming: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=80&h=80&fit=crop&crop=center&auto=format',
+          musica: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=80&h=80&fit=crop&crop=center&auto=format',
+          fitness: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=80&h=80&fit=crop&crop=center&auto=format',
+          fotografia: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=80&h=80&fit=crop&crop=center&auto=format',
+          culinaria: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&h=80&fit=crop&crop=center&auto=format',
+          design: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=80&h=80&fit=crop&crop=center&auto=format'
+        };
+        return avatarMap[name] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop&crop=center&auto=format';
       };
-      return avatarMap[name] || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=80&h=80&fit=crop&crop=center&auto=format';
+
+      // Mock community data for non-existent communities
+      const mockCommunity: Community = {
+        id: `community-${communityName}`,
+        name: communityName,
+        displayName: `Comunidade ${communityName.charAt(0).toUpperCase() + communityName.slice(1)}`,
+        description: `Bem-vindo à comunidade ${communityName}! Esta é uma comunidade dedicada a discussões e compartilhamento de conteúdo relacionado a ${communityName}.`,
+        bannerUrl: getCommunityBanner(communityName),
+        avatarUrl: getCommunityAvatar(communityName),
+        creatorId: 'creator-123',
+        isPrivate: false,
+        memberCount: Math.floor(Math.random() * 10000) + 1000,
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z'
+      };
+
+      setCommunity(mockCommunity);
+      setIsJoined(Math.random() > 0.5); // Mock join status for mock communities
     };
 
-    // Mock community data - in real app, this would come from API
-    const mockCommunity: Community = {
-      id: `community-${communityName}`,
-      name: communityName,
-      displayName: `Comunidade ${communityName.charAt(0).toUpperCase() + communityName.slice(1)}`,
-      description: `Bem-vindo à comunidade ${communityName}! Esta é uma comunidade dedicada a discussões e compartilhamento de conteúdo relacionado a ${communityName}.`,
-      bannerUrl: getCommunityBanner(communityName),
-      avatarUrl: getCommunityAvatar(communityName),
-      creatorId: 'creator-123',
-      isPrivate: false,
-      memberCount: Math.floor(Math.random() * 10000) + 1000,
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z'
-    };
-
-    setCommunity(mockCommunity);
-    setIsJoined(Math.random() > 0.5); // Mock join status
+    loadCommunityData();
   }, [communityName]);
 
   // Load initial content
@@ -214,7 +238,15 @@ const CommunityPage: React.FC = () => {
         />
 
         {/* Community Header Banner */}
-        <div className="community-header-banner">
+        <div
+          className="community-header-banner"
+          style={{
+            backgroundImage: community.bannerUrl ? `url(${community.bannerUrl})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
           <div className="community-header-content">
             <div className="community-info-section">
               <img
@@ -307,7 +339,7 @@ const CommunityPage: React.FC = () => {
 
               <div className="community-metrics">
                 <div className="metric">
-                  <span className="metric-number">{Math.floor(Math.random() * 100)}</span>
+                  <span className="metric-number">{Math.floor(community.memberCount * 0.05)}</span>
                   <span className="metric-label">Online</span>
                 </div>
                 <div className="metric">

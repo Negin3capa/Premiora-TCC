@@ -102,14 +102,29 @@ export async function getCommunityByName(name: string): Promise<Community | null
 }
 
 /**
+ * Faz upload de uma imagem para o Supabase Storage
+ */
+async function uploadCommunityImage(file: File, type: 'banner' | 'avatar', _communityName: string): Promise<string | null> {
+  try {
+    // For now, return a blob URL as fallback since storage bucket may not exist
+    // In production, this should upload to Supabase Storage
+    console.warn(`Storage upload not implemented yet. Using blob URL for ${type}.`);
+    return URL.createObjectURL(file);
+  } catch (error) {
+    console.error(`Erro ao processar ${type}:`, error);
+    return null;
+  }
+}
+
+/**
  * Cria uma nova comunidade
  */
 export async function createCommunity(communityData: {
   name: string;
   displayName: string;
   description?: string;
-  bannerUrl?: string;
-  avatarUrl?: string;
+  bannerFile?: File | null;
+  avatarFile?: File | null;
   isPrivate: boolean;
 }): Promise<Community | null> {
   const { data: { user } } = await supabase.auth.getUser();
@@ -119,14 +134,32 @@ export async function createCommunity(communityData: {
     return null;
   }
 
+  // Fazer upload das imagens se fornecidas
+  let bannerUrl: string | undefined;
+  let avatarUrl: string | undefined;
+
+  if (communityData.bannerFile) {
+    const uploadedBannerUrl = await uploadCommunityImage(communityData.bannerFile, 'banner', communityData.name);
+    if (uploadedBannerUrl) {
+      bannerUrl = uploadedBannerUrl;
+    }
+  }
+
+  if (communityData.avatarFile) {
+    const uploadedAvatarUrl = await uploadCommunityImage(communityData.avatarFile, 'avatar', communityData.name);
+    if (uploadedAvatarUrl) {
+      avatarUrl = uploadedAvatarUrl;
+    }
+  }
+
   const { data, error } = await supabase
     .from('communities')
     .insert({
       name: communityData.name,
       display_name: communityData.displayName,
       description: communityData.description,
-      banner_url: communityData.bannerUrl,
-      avatar_url: communityData.avatarUrl,
+      banner_url: bannerUrl,
+      avatar_url: avatarUrl,
       creator_id: user.id,
       is_private: communityData.isPrivate
     })

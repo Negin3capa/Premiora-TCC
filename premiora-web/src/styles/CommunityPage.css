@@ -53,6 +53,18 @@
   background: linear-gradient(135deg, var(--color-primary) 0%, #FF6B75 100%);
   padding: var(--space-6) var(--space-6) var(--space-4);
   color: var(--color-text-white);
+  position: relative;
+}
+
+.community-header-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
 .community-header-content {
@@ -62,6 +74,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
+  position: relative;
+  z-index: 2;
 }
 
 .community-info-section {
@@ -328,7 +342,7 @@
 }
 
 .reddit-post:hover {
-  border-color: var--color-border-medium);
+  border-color: var(--color-border-medium);
   box-shadow: var(--shadow-sm);
 }
 
