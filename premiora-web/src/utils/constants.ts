@@ -87,7 +87,8 @@ export const FORM_LIMITS = {
 
 /**
  * Configurações do hCaptcha
+ * A chave do site é obtida da variável de ambiente VITE_HCAPTCHA_SITE_KEY
  */
 export const HCAPTCHA_CONFIG = {
-  SITE_KEY: 'c710ceee-90f2-479e-a504-6d0874c62c58'
+  SITE_KEY: import.meta.env.VITE_HCAPTCHA_SITE_KEY || ''
 } as const;

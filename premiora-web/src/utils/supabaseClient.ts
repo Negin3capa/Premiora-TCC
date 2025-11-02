@@ -1,7 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Configuração do cliente Supabase
-const supabaseUrl = 'https://mibwqfvuilpwpuenobru.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pYndxZnZ1aWxwd3B1ZW5vYnJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE2NDMyNzEsImV4cCI6MjA3NzIxOTI3MX0.EeTOOnS0ADJA4eILS_0NP2JkHgBOr-ny2esBSs-4o9s';
+/**
+ * Cliente Supabase configurado com variáveis de ambiente
+ * As credenciais são obtidas das variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY
+ */
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Variáveis de ambiente do Supabase não encontradas. ' +
+    'Verifique se VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY estão definidas no arquivo .env'
+  );
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
