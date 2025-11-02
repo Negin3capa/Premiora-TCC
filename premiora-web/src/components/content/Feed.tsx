@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import ContentCard from './ContentCard';
+import UserSuggestions from './UserSuggestions';
 import type { ContentItem } from '../../types/content';
 
 interface FeedProps {
@@ -45,9 +46,18 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, onLoadMore }) => {
           </div>
         ) : (
           <div className="content-grid">
-            {items.map((item) => (
-              <ContentCard key={item.id} item={item} />
-            ))}
+            {items.map((item) => {
+              // Render UserSuggestions for profile type items
+              if (item.type === 'profile') {
+                return (
+                  <div key={item.id} className="user-suggestions-wrapper">
+                    <UserSuggestions suggestions={[]} />
+                  </div>
+                );
+              }
+              // Render ContentCard for other types
+              return <ContentCard key={item.id} item={item} />;
+            })}
           </div>
         )}
 

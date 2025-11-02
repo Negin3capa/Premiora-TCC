@@ -493,6 +493,11 @@
   margin-bottom: var(--space-6);
 }
 
+.user-suggestions-wrapper {
+  width: 100%;
+  animation: slideInUp var(--transition-base);
+}
+
 .empty-state {
   text-align: center;
   padding: var(--space-12) var(--space-6);
