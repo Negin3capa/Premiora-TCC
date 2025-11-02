@@ -7,7 +7,8 @@ import type { User } from '@supabase/supabase-js';
 import { useAuth } from '../../hooks/useAuth';
 import { searchCommunities } from '../../utils/communityUtils';
 import SearchResults from '../common/SearchResults';
-import type { Community, ContentItem } from '../../types/content';
+import type { Community } from '../../types/community';
+import type { ContentItem } from '../../types/content';
 
 interface HeaderProps {
   searchQuery: string;

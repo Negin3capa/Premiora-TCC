@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { getUserCommunities } from '../../utils/communityUtils';
-import type { Community } from '../../types/content';
+import type { Community } from '../../types/community';
 
 /**
  * Props do componente CommunityDropdown

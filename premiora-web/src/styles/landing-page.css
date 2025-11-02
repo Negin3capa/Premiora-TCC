@@ -195,7 +195,20 @@
   font-size: 2rem;
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  display: block;
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
+.stat .currency {
+  font-size: 1.5rem;
+  margin-right: 0.25rem;
+  color: var(--color-text-primary);
+}
+
+.stat .amount {
+  font-size: 2rem;
+  color: var(--color-text-primary);
 }
 
 .stat span {

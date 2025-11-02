@@ -83,6 +83,7 @@ const Sidebar: React.FC = () => {
     { icon: '💬', label: 'Messages', route: '/messages', active: false },
     { icon: '👥', label: 'Following', route: '/following', active: false },
     { icon: '🏘️', label: 'Communities', route: '/communities', active: false },
+    { icon: '⚙️', label: 'Settings', route: '/settings', active: false },
   ];
 
   /**

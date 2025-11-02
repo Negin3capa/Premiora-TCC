@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import type { ContentItem } from '../../types/content';
-import { PostViewModal } from '../modals';
+import { PostViewModal, VideoViewModal } from '../modals';
 
 interface ContentCardProps {
   item: ContentItem;
@@ -18,6 +18,7 @@ interface ContentCardProps {
 const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   const { userProfile } = useAuth();
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   /**
    * Handler para visualizar post detalhado
@@ -39,8 +40,16 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Handler para reproduzir vídeo
    */
   const handlePlay = () => {
-    console.log(`Playing ${item.type}: ${item.title}`);
-    // TODO: Implementar lógica de reprodução
+    if (item.type === 'video') {
+      setIsVideoModalOpen(true);
+    }
+  };
+
+  /**
+   * Handler para fechar modal do vídeo
+   */
+  const handleCloseVideoModal = () => {
+    setIsVideoModalOpen(false);
   };
 
   /**
@@ -104,7 +113,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
                 <span className="play-icon">▶️</span>
               </div>
               <div className="video-duration">
-                {Math.floor(Math.random() * 20) + 1}:{(Math.floor(Math.random() * 60)).toString().padStart(2, '0')}
+                {((item.views || 0) % 20) + 1}:{((item.views || 0) % 60).toString().padStart(2, '0')}
               </div>
             </div>
             <div className="video-info">
@@ -265,7 +274,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
             title="Comentar"
           >
             <span className="action-icon">💬</span>
-            <span className="action-count">{Math.floor(Math.random() * 50)}</span>
+            <span className="action-count">{Math.floor((item.likes || 0) / 5)}</span>
           </button>
           <button
             className="action-btn share-btn"
@@ -282,6 +291,13 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         item={isPostModalOpen ? item : null}
         isOpen={isPostModalOpen}
         onClose={handleClosePostModal}
+        userTier={userProfile?.tier}
+      />
+
+      <VideoViewModal
+        item={isVideoModalOpen ? item : null}
+        isOpen={isVideoModalOpen}
+        onClose={handleCloseVideoModal}
         userTier={userProfile?.tier}
       />
     </>

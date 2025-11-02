@@ -4,7 +4,8 @@
  */
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Community, ContentItem } from '../../types/content';
+import type { Community } from '../../types/community';
+import type { ContentItem } from '../../types/content';
 
 interface SearchResultsProps {
   query: string;

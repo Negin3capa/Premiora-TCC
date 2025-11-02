@@ -10,84 +10,102 @@ Para informações detalhadas sobre a arquitetura técnica, padrões de design e
 
 ## Arquitetura
 
-O projeto é estruturado da seguinte forma:
+O projeto segue uma arquitetura **Component-Based Architecture** com princípios de **Separação de Responsabilidades** e **Reutilização de Código**. A estrutura foi recentemente refatorada para melhorar a manutenibilidade e escalabilidade.
 
-### Frontend
+Para informações detalhadas sobre a arquitetura técnica, padrões de design e decisões técnicas, consulte o arquivo [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+### Tecnologias Principais
 
 - **Framework**: React 19.2.0 com TypeScript ~5.9.3
 - **Build Tool**: Vite ^7.1.7
 - **Roteamento**: React Router DOM ^7.9.4
-- **Estilização**: CSS personalizado (App.css, style.css)
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
+- **Estilização**: CSS personalizado com variáveis CSS
 
 ### Autenticação
 
-- **Provedor**: Supabase
+- **Provedor**: Supabase Auth
 - **Métodos**: Login com Google OAuth, Facebook OAuth e email/senha
-- **Contexto**: AuthContext para gerenciamento de estado de autenticação
+- **Gerenciamento**: AuthService + AuthContext para estado global
+- **Proteção**: ProtectedRoute e PublicRoute para controle de acesso
 
 ### Estrutura de Arquivos
 
 ```
 premiora-web/
 ├── src/
-│   ├── pages/           # Componentes de página
-│   │   ├── LandingPage.tsx
-│   │   ├── HomePage.tsx
-│   │   └── Login.tsx
-│   ├── components/      # Componentes reutilizáveis
+│   ├── components/      # Componentes React organizados por domínio
 │   │   ├── auth/        # Componentes de autenticação
 │   │   │   ├── ProtectedRoute.tsx
 │   │   │   └── PublicRoute.tsx
-│   │   ├── common/      # Componentes comuns
+│   │   ├── common/      # Componentes reutilizáveis
 │   │   │   ├── CommunityDropdown.tsx
 │   │   │   ├── ErrorBoundary.tsx
-│   │   │   └── FileUpload.tsx
-│   │   ├── content/     # Componentes de conteúdo
+│   │   │   ├── FileUpload.tsx
+│   │   │   └── SearchResults.tsx
+│   │   ├── content/     # Componentes de conteúdo e feed
 │   │   │   ├── ContentCard.tsx
 │   │   │   ├── Feed.tsx
-│   │   │   └── HomePage.tsx (removido - movido para pages/)
+│   │   │   ├── UserSuggestions.tsx
+│   │   │   └── index.ts
 │   │   ├── forms/       # Componentes de formulários
 │   │   │   └── Benefits.tsx
 │   │   ├── landing/     # Componentes da landing page
 │   │   │   ├── Header.tsx
-│   │   │   ├── Hero.tsx
-│   │   │   ├── Features.tsx
-│   │   │   ├── Testimonials.tsx
-│   │   │   ├── Pricing.tsx
-│   │   │   ├── FAQ.tsx
-│   │   │   ├── CTA.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   ├── HowItWorks.tsx
-│   │   │   ├── SocialProof.tsx
-│   │   │   └── index.ts
-│   │   ├── layout/      # Componentes de layout
+│   │   ├── Hero.tsx
+│   │   ├── Features.tsx
+│   │   ├── Testimonials.tsx
+│   │   ├── Pricing.tsx
+│   │   ├── FAQ.tsx
+│   │   ├── CTA.tsx
+│   │   ├── Footer.tsx
+│   │   ├── HowItWorks.tsx
+│   │   ├── SocialProof.tsx
+│   │   └── index.ts
+│   │   ├── layout/      # Componentes de layout estrutural
 │   │   │   ├── Header.tsx
 │   │   │   ├── Sidebar.tsx
-│   │   │   ├── Navbar.tsx
 │   │   │   └── index.ts
-│   │   └── modals/      # Componentes de modal
+│   │   └── modals/      # Componentes modais
 │   │       ├── CreateCommunityModal.tsx
 │   │       ├── CreateContentModal.tsx
 │   │       ├── CreatePostModal.tsx
 │   │       ├── CreateVideoModal.tsx
 │   │       └── index.ts
-│   ├── hooks/           # Hooks customizados
-│   │   └── useAuth.ts
-│   ├── contexts/        # Contextos React
+│   ├── contexts/        # Contextos React para estado global
 │   │   └── AuthContext.tsx
-│   ├── types/           # Definições de tipos TypeScript
-│   │   └── content.ts
-│   ├── utils/           # Utilitários e configurações
-│   │   ├── constants.ts
-│   │   └── supabaseClient.ts
-│   ├── styles/          # Arquivos de estilo
+│   ├── hooks/           # Hooks customizados para lógica reutilizável
+│   │   ├── useAuth.ts
+│   │   ├── useFeed.ts
+│   │   ├── useSearch.ts
+│   │   └── useInfiniteScroll.ts
+│   ├── pages/           # Componentes de página (rotas)
+│   │   ├── CommunitiesPage.tsx
+│   │   ├── CommunityPage.tsx
+│   │   ├── HomePage.tsx
+│   │   ├── LandingPage.tsx
+│   │   └── Login.tsx
+│   ├── services/        # Serviços para lógica de negócio e API
+│   │   └── authService.ts
+│   ├── styles/          # Arquivos de estilo organizados
 │   │   ├── globals.css
 │   │   ├── HomePage.css
 │   │   ├── landing-page.css
 │   │   ├── login.css
-│   │   └── modals.css
-│   ├── App.tsx          # Componente principal com roteamento
-│   └── main.ts          # Ponto de entrada da aplicação
+│   │   ├── modals.css
+│   │   ├── CommunitiesPage.css
+│   │   ├── CommunityPage.css
+│   │   └── UserSuggestions.css
+│   ├── types/           # Definições TypeScript organizadas por domínio
+│   │   ├── auth.ts      # Tipos de autenticação
+│   │   ├── community.ts # Tipos de comunidades
+│   │   └── content.ts   # Tipos de conteúdo
+│   ├── utils/           # Utilitários e configurações
+│   │   ├── communityUtils.ts
+│   │   ├── constants.ts
+│   │   └── supabaseClient.ts
+│   ├── App.tsx          # Componente raiz com roteamento
+│   └── main.tsx         # Ponto de entrada da aplicação
 ├── public/              # Assets públicos
 │   └── vite.svg
 ├── dist/                # Build de produção (gerado automaticamente)
