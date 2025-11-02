@@ -69,8 +69,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUpWithEmail = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      await AuthService.signUpWithEmail(email, password);
+      const result = await AuthService.signUpWithEmail(email, password);
       setLoading(false);
+      return result;
     } catch (err) {
       setLoading(false);
       throw err;

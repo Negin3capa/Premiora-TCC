@@ -119,6 +119,7 @@
 
 .cta-button-small:hover {
   background: var(--color-primary-hover);
+  color: var(--color-text-white);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -237,6 +238,7 @@
 
 .hero-cta-primary:hover {
   background: var(--color-primary-hover);
+  color: var(--color-text-white);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }

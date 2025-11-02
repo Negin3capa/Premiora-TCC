@@ -9,6 +9,8 @@ import { ProtectedRoute, PublicRoute } from './components/auth';
 // Lazy loading dos componentes de página para otimização de bundle
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Login = React.lazy(() => import('./pages/Login'));
+const EmailConfirmation = React.lazy(() => import('./pages/EmailConfirmation'));
+const EmailConfirmationSuccess = React.lazy(() => import('./pages/EmailConfirmationSuccess'));
 const HomePage = React.lazy(() => import('./pages/HomePage'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
 const CommunitiesPage = React.lazy(() => import('./pages/CommunitiesPage'));
@@ -64,6 +66,18 @@ const App: React.FC = () => {
               <Login />
             </PublicRoute>
           }
+        />
+
+        {/* Rota de Confirmação de Email (acessível para todos os estados de autenticação) */}
+        <Route
+          path="/email-confirmation"
+          element={<EmailConfirmation />}
+        />
+
+        {/* Rota de Sucesso da Confirmação de Email (acessível para todos os estados de autenticação) */}
+        <Route
+          path="/email-confirmation-success"
+          element={<EmailConfirmationSuccess />}
         />
 
         {/* Rota Home (apenas para autenticados) */}

@@ -11,13 +11,15 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showSignupSuggestion, setShowSignupSuggestion] = useState(false);
 
   // Redirecionar para HomePage quando usuário está autenticado
+  // Mas não redirecionar imediatamente após signup - aguardar confirmação de email
   useEffect(() => {
-    if (user && !loading) {
+    if (user && !loading && !isSignUp) {
       navigate('/home');
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, isSignUp]);
 
   // Função para lidar com o clique no botão de login Google
   const handleGoogleLogin = async () => {
@@ -62,8 +64,13 @@ const Login: React.FC = () => {
 
     try {
       setError('');
+      setShowSignupSuggestion(false);
       if (isSignUp) {
         await signUpWithEmail(email, password);
+        // Após cadastro bem-sucedido, redirecionar para confirmação de email
+        // O Supabase envia email de confirmação automaticamente
+        navigate('/email-confirmation');
+        return;
       } else {
         await signInWithEmail(email, password);
       }
@@ -71,12 +78,16 @@ const Login: React.FC = () => {
       // Tratamento específico de erros do Supabase
       if (err.message?.includes('Email address') && err.message?.includes('is invalid')) {
         setError('Este email não é permitido. Use um email real válido.');
+        setShowSignupSuggestion(false);
       } else if (err.message?.includes('User already registered')) {
         setError('Este email já está cadastrado. Tente fazer login.');
+        setShowSignupSuggestion(false);
       } else if (err.message?.includes('Invalid login credentials')) {
         setError('Email ou senha incorretos.');
+        setShowSignupSuggestion(true);
       } else {
         setError(err.message || 'Erro na autenticação');
+        setShowSignupSuggestion(false);
       }
     }
   };
@@ -125,6 +136,25 @@ const Login: React.FC = () => {
               />
             </div>
             {error && <p className="error-message">{error}</p>}
+
+            {/* Sugestão de cadastro quando login falha */}
+            {showSignupSuggestion && !isSignUp && (
+              <div className="signup-suggestion">
+                <p>Não tem uma conta ainda?</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSignUp(true);
+                    setShowSignupSuggestion(false);
+                    setError('');
+                  }}
+                  className="signup-suggestion-button"
+                >
+                  Criar conta com este email
+                </button>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
