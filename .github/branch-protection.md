@@ -18,11 +18,10 @@ To enable auto-merge, configure the following branch protection rules in GitHub:
   - [x] Require review from Code Owners (if applicable)
   - [x] Restrict who can dismiss pull request reviews
 
-- [x] **Require status checks to pass before merging**
-  - [x] Require branches to be up to date before merging
-  - [x] Status checks found in the last week for this repository:
-    - `build` (from CI Build workflow)
-    - `copilot-review` (from Copilot PR Review workflow)
+  - [x] **Require status checks to pass before merging**
+    - [x] Require branches to be up to date before merging
+    - [x] Status checks found in the last week for this repository:
+      - `build` (from CI Build workflow)
 
 - [x] **Require branches to be up to date before merging**
 
