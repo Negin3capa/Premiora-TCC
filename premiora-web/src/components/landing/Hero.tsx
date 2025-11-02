@@ -23,7 +23,7 @@ const Hero: React.FC = () => {
               <span>Criadores</span>
             </div>
             <div className="stat">
-              <strong>R$ 50M+</strong>
+              <strong><span className="currency">R$</span><span className="amount">50M+</span></strong>
               <span>Pago mensalmente</span>
             </div>
             <div className="stat">

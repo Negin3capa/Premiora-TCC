@@ -12,22 +12,26 @@ A aplicação segue uma arquitetura **Component-Based Architecture** com os segu
 
 - **Separação de Responsabilidades**: Cada componente tem uma responsabilidade única e bem definida
 - **Composição sobre Herança**: Utiliza composição de componentes para reutilização
-- **Estado Centralizado**: Gerenciamento de estado global através de Context API
+- **Estado Centralizado**: Gerenciamento de estado global através de Context API + Services
 - **Roteamento Declarativo**: Navegação baseada em rotas com proteção automática
+- **Custom Hooks**: Lógica reutilizável extraída para hooks customizados
+- **Service Layer**: Camada de serviços para lógica de negócio e comunicação com APIs
 
-### Fluxo de Dados
+### Fluxo de Dados (Pós-Refatoração)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User Interface │───▶│  Event Handlers │───▶│  State Updates  │
-│   (Components)   │    │   (Hooks)       │    │   (Context)     │
+│   User Interface │───▶│  Custom Hooks   │───▶│  State Updates  │
+│   (Components)   │    │   (useFeed,     │    │   (Context)     │
+│                  │    │    useSearch)   │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Data Fetching │◀───│   API Calls     │◀───│   Supabase       │
-│   (Services)    │    │   (Utils)       │    │   (Backend)      │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+│   Business      │◀───│   API Services  │◀───│   Supabase       │
+│   Logic         │    │   (AuthService) │    │   (Backend)      │
+│   (Services)    │    └─────────────────┘    └─────────────────┘
+└─────────────────┘
 ```
 
 ## Arquitetura de Componentes
@@ -559,6 +563,159 @@ test('login form submits correctly', async () => {
 - **Performance Degradation**: Alertas de performance
 - **Security Issues**: Monitoramento de segurança
 
+## Melhorias de Refatoração
+
+### Refatoração Estrutural Completa
+
+Recentemente, a arquitetura foi submetida a uma refatoração abrangente seguindo as melhores práticas de desenvolvimento React/TypeScript. As principais melhorias incluem:
+
+#### 1. **Separação de Responsabilidades Aprimorada**
+
+**Antes**: Componentes monolíticos com múltiplas responsabilidades
+
+```typescript
+// HomePage.tsx (150+ linhas) - ANTES
+const HomePage: React.FC = () => {
+  // Estado do feed, busca, scroll infinito
+  // Geração de dados mock
+  // Lógica de filtros
+  // Renderização UI
+  // Tudo em um componente gigante
+};
+```
+
+**Depois**: Componentes focados com hooks customizados
+
+```typescript
+// HomePage.tsx (25 linhas) - DEPOIS
+const HomePage: React.FC = () => {
+  const { feedItems, loading, hasMore, loadMoreContent } = useFeed();
+  const { searchQuery, setSearchQuery, filteredItems } = useSearch(feedItems);
+
+  return (
+    <div className="homepage">
+      <Sidebar />
+      <div className="main-content">
+        <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} user={user} />
+        <Feed items={filteredItems} loading={loading} hasMore={hasMore} onLoadMore={loadMoreContent} />
+      </div>
+    </div>
+  );
+};
+```
+
+#### 2. **Camada de Serviços Introduzida**
+
+**AuthService**: Centraliza toda lógica de autenticação
+
+```typescript
+export class AuthService {
+  static async signInWithGoogle(): Promise<void> {
+    // Lógica OAuth Google
+  }
+
+  static async signInWithFacebook(): Promise<void> {
+    // Lógica OAuth Facebook
+  }
+
+  static async upsertUserProfile(user: User): Promise<void> {
+    // Lógica de perfil de usuário
+  }
+}
+```
+
+#### 3. **Hooks Customizados para Lógica Reutilizável**
+
+- **useFeed**: Gerenciamento completo do estado do feed
+- **useSearch**: Funcionalidade de busca e filtragem
+- **useInfiniteScroll**: Scroll infinito com Intersection Observer
+- **useAuth**: Hook simplificado para contexto de autenticação
+
+#### 4. **Organização de Tipos por Domínio**
+
+```
+src/types/
+├── auth.ts      # Tipos de autenticação e perfis
+├── community.ts # Tipos de comunidades e funcionalidades sociais
+└── content.ts   # Tipos de conteúdo e feed
+```
+
+#### 5. **Context API Otimizado**
+
+**AuthContext** agora delega lógica para AuthService:
+
+```typescript
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  // Estado focado no gerenciamento de estado
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  // Handlers delegam para AuthService
+  const signInWithGoogle = useCallback(async () => {
+    await AuthService.signInWithGoogle();
+  }, []);
+};
+```
+
+### Benefícios da Refatoração
+
+#### **Manutenibilidade**
+
+- ✅ Componentes menores e mais fáceis de entender
+- ✅ Lógica de negócio separada da UI
+- ✅ Tipos organizados por domínio
+- ✅ Documentação JSDoc abrangente
+
+#### **Reutilização**
+
+- ✅ Hooks customizados reutilizáveis
+- ✅ Serviços independentes de componentes
+- ✅ Componentes modulares e compostos
+
+#### **Testabilidade**
+
+- ✅ Lógica isolada em hooks e serviços
+- ✅ Componentes focados em renderização
+- ✅ Fácil mocking de dependências
+
+#### **Performance**
+
+- ✅ Menor re-renderização de componentes
+- ✅ Lazy loading de hooks
+- ✅ Otimização de estado local
+
+#### **Desenvolvimento**
+
+- ✅ Code splitting mais eficiente
+- ✅ Debugging mais fácil
+- ✅ Onboarding mais rápido para novos devs
+
+### Padrões de Código Implementados
+
+#### **Princípios SOLID**
+
+- ✅ **Single Responsibility**: Cada módulo tem uma responsabilidade clara
+- ✅ **Open/Closed**: Código extensível sem modificar existente
+- ✅ **Liskov Substitution**: Interfaces consistentes
+- ✅ **Interface Segregation**: Interfaces específicas por domínio
+- ✅ **Dependency Inversion**: Dependências injetadas via serviços
+
+#### **Convenções de Nomeação**
+
+- ✅ Hooks: `use*` (useFeed, useSearch, useAuth)
+- ✅ Serviços: `*Service` (AuthService)
+- ✅ Tipos: PascalCase com sufixos descritivos
+- ✅ Arquivos: kebab-case para componentes, camelCase para hooks
+
+#### **Documentação**
+
+- ✅ JSDoc em todas as funções públicas
+- ✅ Comentários em português para o time brasileiro
+- ✅ Exemplos de uso em comentários
+- ✅ Descrições de parâmetros e retornos
+
 ## Conclusão
 
 A arquitetura da Premiora foi projetada com foco em:
@@ -569,4 +726,4 @@ A arquitetura da Premiora foi projetada com foco em:
 - **Segurança**: Autenticação robusta e proteção de dados
 - **Experiência do Usuário**: Interface responsiva e intuitiva
 
-Esta arquitetura suporta o crescimento da plataforma de um MVP para uma solução enterprise, mantendo a agilidade necessária para iteração rápida baseada em feedback dos usuários.
+Esta arquitetura suporta o crescimento da Premiora de um MVP para uma solução enterprise, mantendo a agilidade necessária para iteração rápida baseada em feedback dos usuários.

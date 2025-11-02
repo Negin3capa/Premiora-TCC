@@ -2,7 +2,7 @@
  * Constantes da aplicação Premiora
  */
 
-import type { Community } from '../types/content';
+import type { Community } from '../types/community';
 
 /**
  * Comunidades disponíveis na plataforma (dados mockados)

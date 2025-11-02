@@ -10,7 +10,7 @@ import type {
   CommunityContent,
   PostFlair,
   CommunityTag
-} from '../types/content';
+} from '../types/community';
 
 /**
  * Busca todas as comunidades disponíveis

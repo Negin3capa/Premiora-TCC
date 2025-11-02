@@ -5,7 +5,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import type { Community, ContentItem } from '../types/content';
+import type { Community } from '../types/community';
+import type { ContentItem } from '../types/content';
 import { Sidebar, Header } from '../components/layout';
 import '../styles/CommunitiesPage.css';
 
@@ -25,14 +26,38 @@ const CommunitiesPage: React.FC = () => {
 
   // Mock data generator for communities
   const generateMockCommunities = (): Community[] => {
+    // Array de banners reais para comunidades (imagens de paisagem/tecnologia)
+    const bannerUrls = [
+      'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=200&fit=crop&auto=format', // Tech/coding
+      'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=200&fit=crop&auto=format', // Digital art
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=200&fit=crop&auto=format', // Gaming
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=200&fit=crop&auto=format', // Music
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=200&fit=crop&auto=format', // Fitness
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=200&fit=crop&auto=format', // Photography
+      'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=200&fit=crop&auto=format', // Cooking
+      'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&h=200&fit=crop&auto=format'  // Design
+    ];
+
+    // Array de avatares para comunidades (ícones/tech relacionados)
+    const avatarUrls = [
+      'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=80&h=80&fit=crop&crop=center&auto=format', // Tech
+      'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=80&h=80&fit=crop&crop=center&auto=format', // Art
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=80&h=80&fit=crop&crop=center&auto=format', // Gaming
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=80&h=80&fit=crop&crop=center&auto=format', // Music
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=80&h=80&fit=crop&crop=center&auto=format', // Fitness
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=80&h=80&fit=crop&crop=center&auto=format', // Photography
+      'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=80&h=80&fit=crop&crop=center&auto=format', // Cooking
+      'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=80&h=80&fit=crop&crop=center&auto=format'  // Design
+    ];
+
     const mockCommunities: Community[] = [
       {
         id: 'tech-community',
         name: 'tecnologia',
         displayName: 'Tecnologia & Inovação',
         description: 'Discussões sobre as últimas tendências em tecnologia, programação, IA e inovação digital.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[0],
+        avatarUrl: avatarUrls[0],
         creatorId: 'creator-1',
         isPrivate: false,
         memberCount: 15420,
@@ -44,8 +69,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'arte-digital',
         displayName: 'Arte Digital',
         description: 'Comunidade para artistas digitais compartilharem seus trabalhos, técnicas e inspirações.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[1],
+        avatarUrl: avatarUrls[1],
         creatorId: 'creator-2',
         isPrivate: false,
         memberCount: 8750,
@@ -57,8 +82,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'gaming',
         displayName: 'Gaming & eSports',
         description: 'Tudo sobre jogos, eSports, reviews e discussões sobre a indústria dos games.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[2],
+        avatarUrl: avatarUrls[2],
         creatorId: 'creator-3',
         isPrivate: false,
         memberCount: 25680,
@@ -70,8 +95,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'musica',
         displayName: 'Música & Produção',
         description: 'Produtores musicais, DJs e amantes da música compartilham tracks, dicas e colaborações.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[3],
+        avatarUrl: avatarUrls[3],
         creatorId: 'creator-4',
         isPrivate: false,
         memberCount: 12340,
@@ -83,8 +108,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'fitness',
         displayName: 'Fitness & Saúde',
         description: 'Dicas de treino, nutrição, motivação e tudo relacionado a uma vida saudável.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[4],
+        avatarUrl: avatarUrls[4],
         creatorId: 'creator-5',
         isPrivate: false,
         memberCount: 18950,
@@ -96,8 +121,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'fotografia',
         displayName: 'Fotografia Profissional',
         description: 'Fotógrafos profissionais e amadores compartilham técnicas, equipamentos e portfólios.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[5],
+        avatarUrl: avatarUrls[5],
         creatorId: 'creator-6',
         isPrivate: false,
         memberCount: 6780,
@@ -109,8 +134,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'culinaria',
         displayName: 'Culinária Criativa',
         description: 'Receitas inovadoras, técnicas culinárias e dicas para chefs caseiros e profissionais.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[6],
+        avatarUrl: avatarUrls[6],
         creatorId: 'creator-7',
         isPrivate: false,
         memberCount: 9450,
@@ -122,8 +147,8 @@ const CommunitiesPage: React.FC = () => {
         name: 'design',
         displayName: 'Design & UI/UX',
         description: 'Designers gráficos, UX/UI e criativos compartilham projetos, tutoriais e inspiração.',
-        bannerUrl: '/placeholder.svg?height=200&width=800',
-        avatarUrl: '/placeholder.svg?height=80&width=80',
+        bannerUrl: bannerUrls[7],
+        avatarUrl: avatarUrls[7],
         creatorId: 'creator-8',
         isPrivate: false,
         memberCount: 11200,
@@ -137,6 +162,26 @@ const CommunitiesPage: React.FC = () => {
 
   // Mock data generator for community showcase content
   const generateCommunityShowcaseContent = (community: Community): ContentItem[] => {
+    // Array de avatares para membros da comunidade
+    const memberAvatars = [
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format',
+      'https://images.unsplash.com/photo-1494790108755-2616b60d0de9?w=40&h=40&fit=crop&crop=face&auto=format',
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face&auto=format',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face&auto=format',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop&crop=face&auto=format'
+    ];
+
+    // Array de thumbnails para vídeos da comunidade
+    const videoThumbnails = [
+      'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=200&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=200&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop&auto=format',
+      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=300&h=200&fit=crop&auto=format'
+    ];
+
     const showcaseItems: ContentItem[] = [];
     const contentCount = Math.floor(Math.random() * 3) + 2; // 2-4 items per community
 
@@ -149,8 +194,8 @@ const CommunitiesPage: React.FC = () => {
           ? `Vídeo incrível da comunidade ${community.displayName}`
           : `Post interessante sobre ${community.displayName}`,
         author: `Membro ${i + 1}`,
-        authorAvatar: `https://ui-avatars.com/api/?name=Membro${i + 1}&background=random&color=fff`,
-        thumbnail: isVideo ? `/placeholder.svg?height=200&width=300` : undefined,
+        authorAvatar: memberAvatars[Math.floor(Math.random() * memberAvatars.length)],
+        thumbnail: isVideo ? videoThumbnails[Math.floor(Math.random() * videoThumbnails.length)] : undefined,
         content: isVideo ? undefined : `Conteúdo de exemplo da comunidade ${community.displayName}. Este é um preview do que você pode encontrar nesta comunidade incrível!`,
         views: Math.floor(Math.random() * 5000) + 100,
         likes: Math.floor(Math.random() * 500) + 10,

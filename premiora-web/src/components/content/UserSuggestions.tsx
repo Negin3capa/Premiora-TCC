@@ -42,7 +42,7 @@ const UserSuggestions: React.FC<UserSuggestionsProps> = ({ suggestions }) => {
       id: '1',
       username: 'promo out of con...',
       handle: '@ofcpro...',
-      avatar: 'https://placehold.co/40x40?text=P',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format',
       latestPost: 'MOLETOM POR MENOS DE 50 CONTO',
       description: 'Moletom Liso Algodão Unissex...',
       isVerified: true
@@ -51,7 +51,7 @@ const UserSuggestions: React.FC<UserSuggestionsProps> = ({ suggestions }) => {
       id: '2',
       username: 'lobão das prom...',
       handle: '@lobao...',
-      avatar: 'https://placehold.co/40x40?text=L',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format',
       latestPost: 'É galera... NOVEMBRO CHEGOU!',
       description: 'E sabe o que isso significa? CHEIRINHO...',
       isVerified: true
@@ -60,7 +60,7 @@ const UserSuggestions: React.FC<UserSuggestionsProps> = ({ suggestions }) => {
       id: '3',
       username: 'tech creator',
       handle: '@techcreator',
-      avatar: 'https://placehold.co/40x40?text=T',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b60d0de9?w=40&h=40&fit=crop&crop=face&auto=format',
       latestPost: 'New coding tutorial is live!',
       description: 'Learn React hooks in 10 minutes...',
       isVerified: false
@@ -69,7 +69,7 @@ const UserSuggestions: React.FC<UserSuggestionsProps> = ({ suggestions }) => {
       id: '4',
       username: 'design guru',
       handle: '@designguru',
-      avatar: 'https://placehold.co/40x40?text=D',
+      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face&auto=format',
       latestPost: 'UI/UX trends for 2024',
       description: 'Minimalism is making a comeback...',
       isVerified: true

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import ContentCard from './ContentCard';
 import UserSuggestions from './UserSuggestions';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import type { ContentItem } from '../../types/content';
 
 interface FeedProps {
@@ -10,32 +11,14 @@ interface FeedProps {
   onLoadMore: () => void;
 }
 
+/**
+ * Componente Feed que exibe lista de conteúdo com scroll infinito
+ * Gerencia renderização de diferentes tipos de conteúdo e carregamento lazy
+ *
+ * @component
+ */
 const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, onLoadMore }) => {
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading) {
-          onLoadMore();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [hasMore, loading, onLoadMore]);
+  const loadMoreRef = useInfiniteScroll(hasMore, loading, onLoadMore);
 
   return (
     <main className="feed">
@@ -47,7 +30,7 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, onLoadMore }) => {
         ) : (
           <div className="content-grid">
             {items.map((item) => {
-              // Render UserSuggestions for profile type items
+              // Renderizar sugestões de usuário para itens do tipo profile
               if (item.type === 'profile') {
                 return (
                   <div key={item.id} className="user-suggestions-wrapper">
@@ -55,7 +38,7 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, onLoadMore }) => {
                   </div>
                 );
               }
-              // Render ContentCard for other types
+              // Renderizar ContentCard para outros tipos
               return <ContentCard key={item.id} item={item} />;
             })}
           </div>
