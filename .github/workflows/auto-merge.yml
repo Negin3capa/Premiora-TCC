@@ -34,30 +34,43 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check CI status
-        id: ci-status
+      - name: Check all required status checks
+        id: status-check
         run: |
-          # Wait for CI to complete and check status
-          echo "Checking CI status for PR #${{ github.event.pull_request.number }}"
+          # Wait for all status checks to complete
+          echo "Checking status checks for PR #${{ github.event.pull_request.number }}"
 
           # Get the latest commit SHA
           COMMIT_SHA=$(gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits[-1].oid')
           echo "Latest commit: $COMMIT_SHA"
 
-          # Check if CI workflow is successful
-          CI_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/status --jq '.state')
-          echo "CI status: $CI_SUCCESS"
+          # Check overall combined status
+          COMBINED_STATUS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/status --jq '.state')
+          echo "Combined status: $COMBINED_STATUS"
 
-          if [ "$CI_SUCCESS" = "success" ]; then
-            echo "ci_passed=true" >> $GITHUB_OUTPUT
+          # Also check individual check runs for more detailed info
+          CHECK_RUNS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '.check_runs[] | select(.status == "completed") | .conclusion')
+          echo "Check runs: $CHECK_RUNS"
+
+          # Check if both required checks are present and successful
+          BUILD_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '[.check_runs[] | select(.name == "build" and .status == "completed" and .conclusion == "success")] | length > 0')
+          COPILOT_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '[.check_runs[] | select(.name == "copilot-review" and .status == "completed" and .conclusion == "success")] | length > 0')
+
+          echo "Build check success: $BUILD_SUCCESS"
+          echo "Copilot check success: $COPILOT_SUCCESS"
+
+          if [ "$BUILD_SUCCESS" = "true" ] && [ "$COPILOT_SUCCESS" = "true" ]; then
+            echo "all_checks_passed=true" >> $GITHUB_OUTPUT
+            echo "✅ All required checks passed!"
           else
-            echo "ci_passed=false" >> $GITHUB_OUTPUT
+            echo "all_checks_passed=false" >> $GITHUB_OUTPUT
+            echo "❌ Some required checks failed or are still running"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto-merge PR
-        if: steps.ci-status.outputs.ci_passed == 'true'
+        if: steps.status-check.outputs.all_checks_passed == 'true'
         run: |
           echo "Enabling auto-merge for PR #${{ github.event.pull_request.number }}"
 
@@ -67,7 +80,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on PR
-        if: steps.ci-status.outputs.ci_passed == 'true'
+        if: steps.status-check.outputs.all_checks_passed == 'true'
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body "✅ All checks passed! This PR will be automatically merged once branch protection rules are satisfied."
         env:
