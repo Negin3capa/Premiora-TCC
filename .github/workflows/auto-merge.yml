@@ -1,0 +1,75 @@
+name: Auto Merge
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+  status: {}
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.base.ref == 'main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable auto-merge for Dependabot PRs
+        if: github.actor == 'dependabot[bot]'
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for Renovate PRs
+        if: github.actor == 'renovate[bot]'
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check CI status
+        id: ci-status
+        run: |
+          # Wait for CI to complete and check status
+          echo "Checking CI status for PR #${{ github.event.pull_request.number }}"
+
+          # Get the latest commit SHA
+          COMMIT_SHA=$(gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits[-1].oid')
+          echo "Latest commit: $COMMIT_SHA"
+
+          # Check if CI workflow is successful
+          CI_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/status --jq '.state')
+          echo "CI status: $CI_SUCCESS"
+
+          if [ "$CI_SUCCESS" = "success" ]; then
+            echo "ci_passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "ci_passed=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge PR
+        if: steps.ci-status.outputs.ci_passed == 'true'
+        run: |
+          echo "Enabling auto-merge for PR #${{ github.event.pull_request.number }}"
+
+          # Enable auto-merge with merge commit
+          gh pr merge ${{ github.event.pull_request.number }} --auto --merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on PR
+        if: steps.ci-status.outputs.ci_passed == 'true'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "✅ All checks passed! This PR will be automatically merged once branch protection rules are satisfied."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
