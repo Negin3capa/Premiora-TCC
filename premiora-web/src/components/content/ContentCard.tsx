@@ -170,6 +170,25 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
               <span className="content-type">{item.type}</span>
             </div>
           </div>
+
+          {/* Flair do post */}
+          {item.postFlair && (
+            <div
+              className="post-flair"
+              style={{
+                backgroundColor: item.postFlair.backgroundColor,
+                color: item.postFlair.color,
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '500',
+                marginRight: '8px'
+              }}
+            >
+              {item.postFlair.text}
+            </div>
+          )}
+
           <button
             className="card-menu"
             aria-label="Mais opções"
@@ -178,6 +197,52 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
             ⋯
           </button>
         </div>
+
+        {/* Informações da comunidade */}
+        {item.communityId && (
+          <div className="community-info" style={{
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--color-border-light)',
+            backgroundColor: 'var(--color-bg-secondary)',
+            fontSize: '14px',
+            color: 'var(--color-text-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            {item.communityAvatar && (
+              <img
+                src={item.communityAvatar}
+                alt={item.communityName}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%'
+                }}
+              />
+            )}
+            <span>r/{item.communityName}</span>
+            {item.userFlairs && item.userFlairs.length > 0 && (
+              <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
+                {item.userFlairs.map((userFlair, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      backgroundColor: userFlair.flair?.backgroundColor || '#e5e7eb',
+                      color: userFlair.flair?.color || '#374151',
+                      padding: '2px 6px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {userFlair.flair?.text}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="card-content">
           {renderContentSpecific()}
