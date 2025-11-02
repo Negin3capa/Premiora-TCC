@@ -2,7 +2,7 @@ name: Copilot PR Review
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'refactor/**' ]  # Allow testing on refactor branches
   pull_request_target:
     types:
       - opened
