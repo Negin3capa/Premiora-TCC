@@ -124,21 +124,3 @@ jobs:
               repo: context.repo.repo,
               body: reviewContent
             });
-
-      - name: Summary Comment
-        if: github.event_name == 'pull_request_target' && always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cat << EOF | gh pr comment ${{ github.event.pull_request.number }} --body-file -
-          ## 🤖 Copilot Review Summary
-
-          ✅ **Review completed**
-
-          **Status:** Automated code review finished
-          **Files Analyzed:** ${{ github.event.pull_request.changed_files }}
-          **PR:** #${{ github.event.pull_request.number }}
-
-          ***
-          *Automated review by GitHub Copilot for Pull Requests*
-          EOF
