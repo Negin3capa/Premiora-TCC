@@ -2,9 +2,12 @@
  * Componente Header
  * Barra superior com busca, notificações, perfil do usuário e logout
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { useAuth } from '../../hooks/useAuth';
+import { searchCommunities } from '../../utils/communityUtils';
+import SearchResults from '../common/SearchResults';
+import type { Community, ContentItem } from '../../types/content';
 
 interface HeaderProps {
   searchQuery: string;
@@ -21,6 +24,14 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) => {
   const { signOut, userProfile } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [searchResults, setSearchResults] = useState<{
+    communities: Community[];
+    content: ContentItem[];
+  }>({ communities: [], content: [] });
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchTimeoutRef = useRef<number | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   
   // Extrai informações do perfil do usuário
   const userName = user?.user_metadata?.full_name ||
@@ -71,6 +82,69 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) =>
   const userAvatar = getAvatarUrl();
 
   /**
+   * Effect para buscar resultados quando a query muda
+   */
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchQuery.trim().length >= 2) {
+      setSearchLoading(true);
+      setShowSearchResults(true);
+
+      searchTimeoutRef.current = window.setTimeout(async () => {
+        try {
+          const communities = await searchCommunities(searchQuery);
+          // TODO: Implementar busca de conteúdo quando disponível
+          setSearchResults({
+            communities,
+            content: [] // Por enquanto, apenas comunidades
+          });
+        } catch (error) {
+          console.error('Erro na busca:', error);
+          setSearchResults({ communities: [], content: [] });
+        } finally {
+          setSearchLoading(false);
+        }
+      }, 300); // Debounce de 300ms
+    } else {
+      setShowSearchResults(false);
+      setSearchResults({ communities: [], content: [] });
+      setSearchLoading(false);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  /**
+   * Effect para fechar resultados ao clicar fora
+   */
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  /**
+   * Handler para fechar resultados de busca
+   */
+  const handleCloseSearchResults = () => {
+    setShowSearchResults(false);
+  };
+
+  /**
    * Handler para realizar logout
    */
   const handleLogout = async () => {
@@ -86,27 +160,42 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) =>
     <header className="header">
       <div className="header-content">
         <div className="header-spacer"></div>
-        <div className="search-section">
+        <div className="search-section" ref={searchContainerRef}>
           <div className="search-container">
             <input
               type="text"
-              placeholder="Buscar criadores, vídeos, posts..."
+              placeholder="Buscar comunidades, criadores, vídeos..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
+              onFocus={() => {
+                if (searchQuery.trim().length >= 2 && (searchResults.communities.length > 0 || searchResults.content.length > 0)) {
+                  setShowSearchResults(true);
+                }
+              }}
               className="search-input"
               aria-label="Buscar conteúdo"
             />
-            <button 
-              className="search-button" 
+            <button
+              className="search-button"
               aria-label="Realizar busca"
               onClick={() => {
-                // TODO: Implementar lógica de busca
+                // TODO: Implementar busca avançada
                 console.log('Buscando:', searchQuery);
               }}
             >
               <span className="search-icon">🔍</span>
             </button>
           </div>
+
+          {showSearchResults && (
+            <SearchResults
+              query={searchQuery}
+              communities={searchResults.communities}
+              content={searchResults.content}
+              loading={searchLoading}
+              onClose={handleCloseSearchResults}
+            />
+          )}
         </div>
 
         <div className="header-right">

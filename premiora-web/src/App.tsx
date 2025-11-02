@@ -7,6 +7,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
+import CommunityPage from './pages/CommunityPage';
 import { ProtectedRoute, PublicRoute } from './components/auth';
 
 /**
@@ -44,13 +45,23 @@ const App: React.FC = () => {
       />
       
       {/* Rota Home (apenas para autenticados) */}
-      <Route 
-        path="/home" 
+      <Route
+        path="/home"
         element={
           <ProtectedRoute>
             <HomePage />
           </ProtectedRoute>
-        } 
+        }
+      />
+
+      {/* Rota Comunidades (apenas para autenticados) */}
+      <Route
+        path="/r/:communityName"
+        element={
+          <ProtectedRoute>
+            <CommunityPage />
+          </ProtectedRoute>
+        }
       />
 
       {/* Rota catch-all - redireciona para landing page */}

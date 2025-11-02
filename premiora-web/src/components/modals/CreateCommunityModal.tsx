@@ -3,7 +3,8 @@
  * Permite ao usuário criar uma nova comunidade na plataforma
  */
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { createCommunity, getCommunityByName } from '../../utils/communityUtils';
 
 /**
  * Props do componente CreateCommunityModal
@@ -48,7 +49,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
   onClose,
   onCreate
 }) => {
-  const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Estado do formulário
   const [formData, setFormData] = useState<CommunityFormData>({
@@ -135,10 +136,16 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
     }
 
     setCheckingName(true);
-    // Simulação de verificação
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setNameAvailable(!['teste', 'admin', 'support', 'mod'].includes(name.toLowerCase()));
-    setCheckingName(false);
+    try {
+      // Verificar se comunidade já existe
+      const existingCommunity = await getCommunityByName(name);
+      setNameAvailable(!existingCommunity);
+    } catch (error) {
+      console.error('Erro ao verificar disponibilidade do nome:', error);
+      setNameAvailable(false); // Em caso de erro, assumir indisponível
+    } finally {
+      setCheckingName(false);
+    }
   };
 
   /**
@@ -175,23 +182,30 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Simulação de criação
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      if (onCreate) {
-        onCreate(formData);
-      }
-
-      console.log('Comunidade criada:', {
-        ...formData,
-        creatorId: user?.id,
-        createdAt: new Date()
+      // Criar comunidade usando a API real
+      const community = await createCommunity({
+        name: formData.name,
+        displayName: formData.displayName,
+        description: formData.description,
+        bannerUrl: formData.banner ? URL.createObjectURL(formData.banner) : undefined,
+        avatarUrl: formData.avatar ? URL.createObjectURL(formData.avatar) : undefined,
+        isPrivate: formData.isPrivate
       });
 
-      // Limpar formulário e fechar modal
-      handleCancel();
+      if (community) {
+        // Chamar callback se fornecido
+        if (onCreate) {
+          onCreate(formData);
+        }
 
-      alert('Comunidade criada com sucesso!');
+        // Limpar formulário e fechar modal
+        handleCancel();
+
+        // Redirecionar para a página da comunidade recém-criada
+        navigate(`/r/${community.name}`);
+      } else {
+        throw new Error('Falha ao criar comunidade');
+      }
 
     } catch (error) {
       console.error('Erro ao criar comunidade:', error);

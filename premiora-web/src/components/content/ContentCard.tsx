@@ -1,9 +1,11 @@
 /**
  * Componente ContentCard
- * Card de conteúdo que exibe posts, vídeos, lives e perfis
+ * Card de conteúdo que exibe posts, vídeos e perfis
  */
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import type { ContentItem } from '../../types/content';
+import { PostViewModal } from '../modals';
 
 interface ContentCardProps {
   item: ContentItem;
@@ -11,11 +13,30 @@ interface ContentCardProps {
 
 /**
  * Card de conteúdo reutilizável para diferentes tipos de mídia
- * Suporta: posts, vídeos, transmissões ao vivo e perfis de criadores
+ * Suporta: posts, vídeos e perfis de criadores
  */
 const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
+  const { userProfile } = useAuth();
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
   /**
-   * Handler para reproduzir vídeo ou live
+   * Handler para visualizar post detalhado
+   */
+  const handleViewPost = () => {
+    if (item.type === 'post') {
+      setIsPostModalOpen(true);
+    }
+  };
+
+  /**
+   * Handler para fechar modal do post
+   */
+  const handleClosePostModal = () => {
+    setIsPostModalOpen(false);
+  };
+
+  /**
+   * Handler para reproduzir vídeo
    */
   const handlePlay = () => {
     console.log(`Playing ${item.type}: ${item.title}`);
@@ -95,45 +116,32 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
           </div>
         );
 
-      case 'live':
-        return (
-          <div className="live-content">
-            <div className="live-thumbnail" onClick={handlePlay}>
-              <img 
-                src={item.thumbnail} 
-                alt={item.title}
-                loading="lazy"
-              />
-              {item.isLive && (
-                <div className="live-badge">
-                  🔴 AO VIVO
-                </div>
-              )}
-              <div className="play-overlay">
-                <span className="play-icon">▶️</span>
-              </div>
-            </div>
-            <div className="live-info">
-              <h3 className="content-title">{item.title}</h3>
-              <p className="content-stats">
-                {item.views?.toLocaleString('pt-BR')} assistindo agora
-              </p>
-            </div>
-          </div>
-        );
+
 
       case 'post':
         return (
-          <div className="post-content">
+          <div className="post-content" onClick={handleViewPost} style={{ cursor: 'pointer' }}>
             <h3 className="content-title">{item.title}</h3>
-            <p className="post-body">{item.content}</p>
+            <p className="post-body">
+              {item.isLocked && item.previewContent
+                ? item.previewContent
+                : item.content?.substring(0, 150) + (item.content && item.content.length > 150 ? '...' : '')}
+            </p>
             {item.thumbnail && (
-              <img 
-                src={item.thumbnail} 
-                alt={item.title} 
+              <img
+                src={item.thumbnail}
+                alt={item.title}
                 className="post-image"
                 loading="lazy"
               />
+            )}
+            {item.isLocked && (
+              <div className="locked-indicator">
+                <span className="lock-icon">🔒</span>
+                <span className="lock-text">
+                  {item.requiredTier ? `${item.requiredTier}` : 'Exclusivo'}
+                </span>
+              </div>
             )}
             <p className="content-stats">
               {item.timestamp}
@@ -147,62 +155,136 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   };
 
   return (
-    <article className={`content-card ${item.type}-card`}>
-      <div className="card-header">
-        <div className="author-info">
-          <img 
-            src={item.authorAvatar}
-            alt={item.author}
-            className="author-avatar"
-            loading="lazy"
-          />
-          <div className="author-details">
-            <span className="author-name">{item.author}</span>
-            <span className="content-type">{item.type}</span>
+    <>
+      <article className={`content-card ${item.type}-card`}>
+        <div className="card-header">
+          <div className="author-info">
+            <img
+              src={item.authorAvatar}
+              alt={item.author}
+              className="author-avatar"
+              loading="lazy"
+            />
+            <div className="author-details">
+              <span className="author-name">{item.author}</span>
+              <span className="content-type">{item.type}</span>
+            </div>
           </div>
+
+          {/* Flair do post */}
+          {item.postFlair && (
+            <div
+              className="post-flair"
+              style={{
+                backgroundColor: item.postFlair.backgroundColor,
+                color: item.postFlair.color,
+                padding: '2px 8px',
+                borderRadius: '12px',
+                fontSize: '12px',
+                fontWeight: '500',
+                marginRight: '8px'
+              }}
+            >
+              {item.postFlair.text}
+            </div>
+          )}
+
+          <button
+            className="card-menu"
+            aria-label="Mais opções"
+            title="Mais opções"
+          >
+            ⋯
+          </button>
         </div>
-        <button 
-          className="card-menu" 
-          aria-label="Mais opções"
-          title="Mais opções"
-        >
-          ⋯
-        </button>
-      </div>
 
-      <div className="card-content">
-        {renderContentSpecific()}
-      </div>
+        {/* Informações da comunidade */}
+        {item.communityId && (
+          <div className="community-info" style={{
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--color-border-light)',
+            backgroundColor: 'var(--color-bg-secondary)',
+            fontSize: '14px',
+            color: 'var(--color-text-secondary)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            {item.communityAvatar && (
+              <img
+                src={item.communityAvatar}
+                alt={item.communityName}
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%'
+                }}
+              />
+            )}
+            <span>r/{item.communityName}</span>
+            {item.userFlairs && item.userFlairs.length > 0 && (
+              <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
+                {item.userFlairs.map((userFlair, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      backgroundColor: userFlair.flair?.backgroundColor || '#e5e7eb',
+                      color: userFlair.flair?.color || '#374151',
+                      padding: '2px 6px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    {userFlair.flair?.text}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-      <div className="card-actions">
-        <button 
-          className="action-btn like-btn" 
-          onClick={handleLike}
-          aria-label="Curtir"
-          title="Curtir"
-        >
-          <span className="action-icon">❤️</span>
-          <span className="action-count">{item.likes?.toLocaleString('pt-BR')}</span>
-        </button>
-        <button 
-          className="action-btn comment-btn"
-          onClick={handleComment}
-          aria-label="Comentar"
-          title="Comentar"
-        >
-          <span className="action-icon">💬</span>
-          <span className="action-count">{Math.floor(Math.random() * 50)}</span>
-        </button>
-        <button 
-          className="action-btn share-btn" 
-          onClick={handleShare}
-          aria-label="Compartilhar"
-          title="Compartilhar"
-        >
-          <span className="action-icon">📤</span>
-        </button>
-      </div>
-    </article>
+        <div className="card-content">
+          {renderContentSpecific()}
+        </div>
+
+        <div className="card-actions">
+          <button
+            className="action-btn like-btn"
+            onClick={handleLike}
+            aria-label="Curtir"
+            title="Curtir"
+          >
+            <span className="action-icon">❤️</span>
+            <span className="action-count">{item.likes?.toLocaleString('pt-BR')}</span>
+          </button>
+          <button
+            className="action-btn comment-btn"
+            onClick={handleComment}
+            aria-label="Comentar"
+            title="Comentar"
+          >
+            <span className="action-icon">💬</span>
+            <span className="action-count">{Math.floor(Math.random() * 50)}</span>
+          </button>
+          <button
+            className="action-btn share-btn"
+            onClick={handleShare}
+            aria-label="Compartilhar"
+            title="Compartilhar"
+          >
+            <span className="action-icon">📤</span>
+          </button>
+        </div>
+      </article>
+
+      <PostViewModal
+        item={isPostModalOpen ? item : null}
+        isOpen={isPostModalOpen}
+        onClose={handleClosePostModal}
+        userTier={userProfile?.tier}
+      />
+    </>
   );
 };
 

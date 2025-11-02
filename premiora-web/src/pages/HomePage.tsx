@@ -15,25 +15,40 @@ const HomePage: React.FC = () => {
 
   // Mock data generator
   const generateMockContent = useCallback((startIndex: number, count: number): ContentItem[] => {
-    const types: ContentItem['type'][] = ['profile', 'video', 'post', 'live'];
+    const types: ContentItem['type'][] = ['profile', 'video', 'post'];
+    const accessLevels: ContentItem['accessLevel'][] = ['public', 'supporters', 'premium'];
     const mockItems: ContentItem[] = [];
 
     for (let i = 0; i < count; i++) {
       const index = startIndex + i;
       const type = types[Math.floor(Math.random() * types.length)];
-      
+      const accessLevel = type === 'post' ? accessLevels[Math.floor(Math.random() * accessLevels.length)] : undefined;
+
+      const baseContent = type === 'post'
+        ? `Este é um conteúdo de exemplo ${index}. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`
+        : undefined;
+
       mockItems.push({
         id: `item-${index}`,
         type,
-        title: type === 'profile' ? `Creator ${index}` : `${type.charAt(0).toUpperCase() + type.slice(1)} Content ${index}`,
-        author: `User ${index}`,
+        title: type === 'profile' ? `Criador ${index}` : `${type.charAt(0).toUpperCase() + type.slice(1)} ${index}`,
+        author: `Usuário ${index}`,
         authorAvatar: `/placeholder.svg?height=40&width=40`,
         thumbnail: type !== 'profile' ? `/placeholder.svg?height=200&width=300` : undefined,
-        content: type === 'post' ? `This is a sample post content ${index}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.` : undefined,
+        content: baseContent,
         views: Math.floor(Math.random() * 10000),
         likes: Math.floor(Math.random() * 1000),
-        timestamp: `${Math.floor(Math.random() * 24)}h ago`,
-        isLive: type === 'live' ? Math.random() > 0.5 : false
+        timestamp: `${Math.floor(Math.random() * 24)}h atrás`,
+        // Propriedades de acesso para posts
+        accessLevel,
+        isLocked: accessLevel !== 'public' && Math.random() > 0.5,
+        previewContent: accessLevel !== 'public'
+          ? `Este é um preview do conteúdo exclusivo ${index}. Veja apenas uma parte...`
+          : undefined,
+        requiredTier: accessLevel === 'supporters' ? 'Apoiadores' : accessLevel === 'premium' ? 'Premium' : undefined,
+        fullContent: accessLevel !== 'public'
+          ? `${baseContent}\n\nConteúdo completo exclusivo para ${accessLevel === 'supporters' ? 'apoiadores' : 'assinantes premium'}! Este é o conteúdo adicional que só membros podem ver. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.`
+          : undefined
       });
     }
 

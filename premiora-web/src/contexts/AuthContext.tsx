@@ -8,6 +8,7 @@ interface UserProfile {
   name: string | null;
   email: string;
   avatar_url: string | null;
+  tier?: string; // Tier de assinatura (supporters, premium, etc.)
 }
 
 // Interface para o contexto de autenticação
@@ -247,7 +248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data: profile, error } = await supabase
         .from('users')
-        .select('id, name, email, avatar_url')
+        .select('id, name, email, avatar_url, tier')
         .eq('id', user.id)
         .single();
 

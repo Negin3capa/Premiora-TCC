@@ -9,10 +9,50 @@ import type { Community } from '../types/content';
  * TODO: Buscar comunidades do usuário da API
  */
 export const MOCK_COMMUNITIES: Community[] = [
-  { id: 'general', name: 'Geral', description: 'Discussões gerais' },
-  { id: 'tech', name: 'Tecnologia', description: 'Tecnologia e inovação' },
-  { id: 'art', name: 'Arte', description: 'Arte e criatividade' },
-  { id: 'gaming', name: 'Gaming', description: 'Jogos e entretenimento' }
+  {
+    id: 'general',
+    name: 'geral',
+    displayName: 'Geral',
+    description: 'Discussões gerais',
+    creatorId: 'mock-creator',
+    isPrivate: false,
+    memberCount: 1000,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: 'tech',
+    name: 'tecnologia',
+    displayName: 'Tecnologia',
+    description: 'Tecnologia e inovação',
+    creatorId: 'mock-creator',
+    isPrivate: false,
+    memberCount: 500,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: 'art',
+    name: 'arte',
+    displayName: 'Arte',
+    description: 'Arte e criatividade',
+    creatorId: 'mock-creator',
+    isPrivate: false,
+    memberCount: 300,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
+  },
+  {
+    id: 'gaming',
+    name: 'gaming',
+    displayName: 'Gaming',
+    description: 'Jogos e entretenimento',
+    creatorId: 'mock-creator',
+    isPrivate: false,
+    memberCount: 800,
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z'
+  }
 ];
 
 /**
@@ -43,4 +83,11 @@ export const FORM_LIMITS = {
   TITLE: 200,
   DESCRIPTION: 2000,
   POST_CONTENT: 5000
+} as const;
+
+/**
+ * Configurações do hCaptcha
+ */
+export const HCAPTCHA_CONFIG = {
+  SITE_KEY: 'c710ceee-90f2-479e-a504-6d0874c62c58'
 } as const;
