@@ -40,6 +40,8 @@ jobs:
 
       - name: Copilot Code Review
         id: copilot-review
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "🤖 Starting Copilot Code Review..."
 
@@ -125,6 +127,8 @@ jobs:
 
       - name: Summary Comment
         if: github.event_name == 'pull_request_target' && always()
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           cat << EOF | gh pr comment ${{ github.event.pull_request.number }} --body-file -
           ## 🤖 Copilot Review Summary
