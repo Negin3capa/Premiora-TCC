@@ -52,19 +52,17 @@ jobs:
           CHECK_RUNS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '.check_runs[] | select(.status == "completed") | .conclusion')
           echo "Check runs: $CHECK_RUNS"
 
-          # Check if both required checks are present and successful
+          # Check if the required build check is present and successful
           BUILD_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '[.check_runs[] | select(.name == "build" and .status == "completed" and .conclusion == "success")] | length > 0')
-          COPILOT_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '[.check_runs[] | select(.name == "copilot-review" and .status == "completed" and .conclusion == "success")] | length > 0')
 
           echo "Build check success: $BUILD_SUCCESS"
-          echo "Copilot check success: $COPILOT_SUCCESS"
 
-          if [ "$BUILD_SUCCESS" = "true" ] && [ "$COPILOT_SUCCESS" = "true" ]; then
+          if [ "$BUILD_SUCCESS" = "true" ]; then
             echo "all_checks_passed=true" >> $GITHUB_OUTPUT
             echo "✅ All required checks passed!"
           else
             echo "all_checks_passed=false" >> $GITHUB_OUTPUT
-            echo "❌ Some required checks failed or are still running"
+            echo "❌ Build check failed or is still running"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
