@@ -71,9 +71,10 @@ export class AuthService {
    * Realiza registro com email e senha
    * @param email - Email do usuário
    * @param password - Senha do usuário
+   * @returns Dados do signup incluindo informações sobre confirmação de email
    * @throws Error se o registro falhar
    */
-  static async signUpWithEmail(email: string, password: string): Promise<void> {
+  static async signUpWithEmail(email: string, password: string): Promise<any> {
     const { data, error } = await supabase.auth.signUp({
       email,
       password
@@ -85,6 +86,7 @@ export class AuthService {
     }
 
     console.log('Signup realizado com sucesso:', data);
+    return data;
   }
 
   /**

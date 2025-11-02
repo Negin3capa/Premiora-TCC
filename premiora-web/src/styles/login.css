@@ -58,9 +58,9 @@
 }
 
 .google-login-button {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  border: 2px solid var(--color-border-dark);
+  background: white;
+  color: black;
+  border: 2px solid #dadce0;
   padding: var(--space-4) var(--space-8);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -76,8 +76,8 @@
 }
 
 .google-login-button:hover:not(:disabled) {
-  background: var(--color-bg-dark);
-  color: var(--color-text-white);
+  background: #f8f9fa;
+  border-color: #c4c7c5;
   transform: translateY(-2px);
   box-shadow: var(--shadow-xl);
 }
@@ -127,7 +127,6 @@
 .facebook-icon {
   width: 24px;
   height: 24px;
-  filter: brightness(0) invert(1);
 }
 
 .login-footer {
@@ -186,9 +185,9 @@
 
 .email-login-button {
   width: 100%;
-  background: var(--color-bg-dark);
+  background: var(--color-error);
   color: var(--color-text-white);
-  border: 2px solid var(--color-bg-dark);
+  border: 2px solid var(--color-error);
   padding: var(--space-4);
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -199,8 +198,10 @@
 }
 
 .email-login-button:hover:not(:disabled) {
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background: var(--color-error);
+  color: var(--color-text-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-xl);
 }
 
 .email-login-button:disabled {
@@ -266,4 +267,215 @@
   margin: var(--space-2) 0;
   text-align: center;
   font-weight: var(--font-weight-medium);
+}
+
+/* Estilos da página de confirmação de email */
+.confirmation-status {
+  margin: var(--space-6) 0;
+}
+
+.status-pending,
+.status-success,
+.status-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+}
+
+.status-pending {
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border-light);
+}
+
+.status-success {
+  background: var(--color-success-light);
+  border: 2px solid var(--color-success);
+}
+
+.status-error {
+  background: var(--color-error-light);
+  border: 2px solid var(--color-error);
+}
+
+.email-icon,
+.success-icon,
+.error-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.status-success .success-icon {
+  color: var(--color-success);
+}
+
+.status-error .error-icon {
+  color: var(--color-error);
+}
+
+.confirmation-status h3 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.confirmation-status p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+.message-box {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+  text-align: center;
+}
+
+.message-box p {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.resend-button {
+  background: var(--color-bg-dark);
+  color: var(--color-text-white);
+  border: 2px solid var(--color-bg-dark);
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-top: var(--space-4);
+}
+
+.resend-button:hover:not(:disabled) {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+.resend-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Estilos da página de sucesso da confirmação de email */
+.success-info {
+  margin: var(--space-8) 0;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-4);
+  border: 1px solid var(--color-border-light);
+}
+
+.info-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.info-content h4 {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.info-content p {
+  font-size: var(--font-size-base);
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.redirect-notice {
+  text-align: center;
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+}
+
+.redirect-notice p {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.countdown {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.skip-button {
+  background: var(--color-bg-dark);
+  color: var(--color-text-white);
+  border: 2px solid var(--color-bg-dark);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.skip-button:hover:not(:disabled) {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+}
+
+/* Estilos da sugestão de cadastro */
+.signup-suggestion {
+  background: var(--color-info-light);
+  border: 1px solid var(--color-info);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  margin: var(--space-4) 0;
+  text-align: center;
+}
+
+.signup-suggestion p {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.signup-suggestion-button {
+  background: var(--color-info);
+  color: var(--color-text-white);
+  border: 2px solid var(--color-info);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  width: 100%;
+}
+
+.signup-suggestion-button:hover:not(:disabled) {
+  background: var(--color-info);
+  border-color: var(--color-info);
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
