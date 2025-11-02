@@ -11,6 +11,7 @@ To enable auto-merge, configure the following branch protection rules in GitHub:
 **Branch name pattern:** `main`
 
 ### Protection Rules
+
 - [x] **Require a pull request before merging**
   - [x] Require approvals: **1** (minimum)
   - [x] Dismiss stale pull request approvals when new commits are pushed
@@ -21,6 +22,7 @@ To enable auto-merge, configure the following branch protection rules in GitHub:
   - [x] Require branches to be up to date before merging
   - [x] Status checks found in the last week for this repository:
     - `build` (from CI Build workflow)
+    - `copilot-review` (from Copilot PR Review workflow)
 
 - [x] **Require branches to be up to date before merging**
 
@@ -30,6 +32,7 @@ To enable auto-merge, configure the following branch protection rules in GitHub:
 ### Auto-Merge Settings
 
 In the repository settings:
+
 1. Go to **Settings** → **General**
 2. Scroll to **Pull Requests**
 3. Check **Allow auto-merge**
@@ -38,6 +41,7 @@ In the repository settings:
 ## Auto-Merge Behavior
 
 The auto-merge workflow will:
+
 1. Monitor pull requests targeting the `main` branch
 2. Skip draft pull requests
 3. Automatically enable auto-merge for:
