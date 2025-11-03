@@ -1,0 +1,56 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "installCommand": "npm ci",
+  "framework": "vite",
+  "regions": ["gru1"],
+  "functions": {
+    "src/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "VITE_SUPABASE_URL": "@vite_supabase_url",
+    "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
+    "VITE_HCAPTCHA_SITE_KEY": "@vite_hcaptcha_site_key"
+  }
+}
