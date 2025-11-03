@@ -14,6 +14,7 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   user: User | null;
+  onToggleSidebar?: () => void;
 }
 
 /**
@@ -22,7 +23,7 @@ interface HeaderProps {
  * @param onSearchChange - Callback para atualizar a query de busca
  * @param user - Objeto do usuário autenticado do Supabase
  */
-const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) => {
+const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onToggleSidebar }) => {
   const { signOut, userProfile } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -31,8 +32,11 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) =>
     content: ContentItem[];
   }>({ communities: [], content: [] });
   const [searchLoading, setSearchLoading] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const searchTimeoutRef = useRef<number | null>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+  const scrollTimeoutRef = useRef<number | null>(null);
   
   // Extrai informações do perfil do usuário
   const userName = user?.user_metadata?.full_name ||
@@ -139,6 +143,55 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) =>
   }, []);
 
   /**
+   * Effect para detectar scroll e mostrar/ocultar header no mobile
+   */
+  useEffect(() => {
+    const handleScroll = () => {
+      // Only apply on mobile devices (screens <= 768px)
+      if (window.innerWidth > 768) return;
+
+      const currentScrollY = window.scrollY;
+      const previousScrollY = lastScrollY.current;
+
+      // Clear existing timeout
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Determine scroll direction with minimum threshold to avoid jitter
+      const scrollDifference = Math.abs(currentScrollY - previousScrollY);
+
+      if (scrollDifference > 5) { // Minimum scroll difference to avoid jitter
+        if (currentScrollY > previousScrollY && currentScrollY > 30) {
+          // Scrolling down and past threshold - hide header
+          setIsHeaderVisible(false);
+        } else if (currentScrollY < previousScrollY) {
+          // Scrolling up - show header immediately
+          setIsHeaderVisible(true);
+        }
+      }
+
+      // Update last scroll position
+      lastScrollY.current = currentScrollY;
+
+      // Auto-show header after 2 seconds of no scrolling
+      scrollTimeoutRef.current = window.setTimeout(() => {
+        setIsHeaderVisible(true);
+      }, 2000);
+    };
+
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  /**
    * Handler para fechar resultados de busca
    */
   const handleCloseSearchResults = () => {
@@ -158,8 +211,27 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user }) =>
   };
 
   return (
-    <header className="header">
+    <header className={`header ${!isHeaderVisible ? 'header-hidden' : ''}`}>
       <div className="header-content">
+        {/* Mobile user avatar menu */}
+        {onToggleSidebar && (
+          <button
+            className="mobile-menu-button"
+            onClick={onToggleSidebar}
+            aria-label="Abrir menu lateral"
+            title="Menu"
+          >
+            <img
+              src={userAvatar}
+              alt={userName}
+              className="mobile-avatar"
+              onError={(e) => {
+                // Fallback caso a imagem falhe ao carregar
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
+              }}
+            />
+          </button>
+        )}
         <div className="header-spacer"></div>
         <div className="search-section" ref={searchContainerRef}>
           <div className="search-container">
