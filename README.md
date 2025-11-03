@@ -269,10 +269,24 @@ npm run preview
 - Execute `npm run dev` para iniciar o servidor de desenvolvimento
 - A aplicação estará disponível em `http://localhost:5173` (porta padrão do Vite)
 - Modificações no código são recarregadas automaticamente
+- OAuth redirects funcionam automaticamente com qualquer porta Vite
 
 ### Deploy
 
-O projeto inclui configuração de CI/CD via GitHub Actions. Todo push para a branch main dispara um build automatizado que verifica a sintaxe e compila o projeto.
+#### Status Atual: Vercel Temporariamente Desabilitado
+
+O deploy no Vercel está temporariamente desabilitado para desenvolvimento local. Para reativar:
+
+1. **Renomeie** `premiora-web/vercel.json.disabled` → `premiora-web/vercel.json`
+2. **Descomente** o job `deploy-preview` no arquivo `.github/workflows/ci.yml`
+3. **Configure Supabase** com URLs do Vercel em vez de localhost
+4. **Remova** a nota de status em `DEPLOYMENT.md`
+
+#### CI/CD Automatizado
+
+- **GitHub Actions**: Build automatizado em pushes e pull requests
+- **Ambiente**: Ubuntu com Node.js 20
+- **Deploy**: Desabilitado até reativação do Vercel
 
 ## Tecnologias Utilizadas
 
