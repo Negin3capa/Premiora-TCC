@@ -36,3 +36,4 @@ database/*.sql
 *.njsproj
 *.sln
 *.sw?
+.vercel
