@@ -7,15 +7,33 @@ import type { User } from '@supabase/supabase-js';
  */
 export class AuthService {
   /**
+   * Determina a URL de redirecionamento apropriada baseada no ambiente
+   * @param path - Caminho relativo para redirecionamento
+   * @returns URL completa de redirecionamento
+   */
+  static getRedirectUrl(path: string): string {
+    const origin = window.location.origin;
+
+    // Para ambientes de preview do Vercel, garantir que usamos HTTPS
+    if (origin.includes('vercel-preview') || origin.includes('vercel.app')) {
+      return `https://${window.location.host}${path}`;
+    }
+
+    return `${origin}${path}`;
+  }
+  /**
    * Realiza login com Google OAuth
    * @returns Promise que resolve quando o login é iniciado
    * @throws Error se houver falha na configuração do OAuth
    */
   static async signInWithGoogle(): Promise<void> {
+    // Determinar URL de redirecionamento baseada no ambiente
+    const redirectTo = AuthService.getRedirectUrl('/home');
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/home`,
+        redirectTo,
         scopes: 'openid email profile',
         queryParams: {
           access_type: 'offline',
@@ -36,10 +54,13 @@ export class AuthService {
    * @throws Error se houver falha na configuração do OAuth
    */
   static async signInWithFacebook(): Promise<void> {
+    // Determinar URL de redirecionamento baseada no ambiente
+    const redirectTo = AuthService.getRedirectUrl('/home');
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${window.location.origin}/home`,
+        redirectTo,
       },
     });
 
