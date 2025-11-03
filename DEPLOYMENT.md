@@ -2,6 +2,14 @@
 
 Este documento descreve como configurar e gerenciar os ambientes de deploy da aplicação Premiora Web.
 
+## ⚠️ Status do Deploy
+
+**Vercel deployment temporariamente desabilitado** - O projeto não está pronto para deploy ainda. Para reativar:
+
+1. Renomeie `premiora-web/vercel.json.disabled` para `premiora-web/vercel.json`
+2. Descomente o job `deploy-preview` no arquivo `.github/workflows/ci.yml`
+3. Remova esta nota de status
+
 ## 📋 Visão Geral
 
 A aplicação utiliza uma pipeline de CI/CD completa com:
@@ -82,7 +90,7 @@ your_supabase_anon_key_here
 
 ### 3. Environment Variables no Vercel
 
-Configure as variáveis de ambiente no painel do Vercel:
+⚠️ **Importante**: As variáveis de ambiente NÃO devem ser hardcoded no `vercel.json`. Configure-as no painel do Vercel:
 
 ```bash
 # Para Production
@@ -95,6 +103,8 @@ vercel env add VITE_SUPABASE_URL preview
 vercel env add VITE_SUPABASE_ANON_KEY preview
 vercel env add VITE_HCAPTCHA_SITE_KEY preview
 ```
+
+**Por que não no vercel.json?** Por segurança - secrets nunca devem ser committed no repositório.
 
 ## 📦 Processo de Deploy
 
