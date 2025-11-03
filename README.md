@@ -6,8 +6,6 @@ Projeto SaaS, buscando unir as qualidades do Patreon/Discord/Reddit/Youtube em u
 
 O Premiora é uma plataforma revolucionária que combina o melhor de múltiplas redes sociais e plataformas de monetização em um único ecossistema. Criadores de conteúdo podem construir comunidades engajadas, compartilhar conteúdo diversificado e monetizar suas criações de forma inteligente, tudo em um só lugar.
 
-Para informações detalhadas sobre a arquitetura técnica, padrões de design e decisões técnicas, consulte o arquivo [ARCHITECTURE.md](./ARCHITECTURE.md).
-
 ## Arquitetura
 
 O projeto segue uma arquitetura **Component-Based Architecture** com princípios de **Separação de Responsabilidades** e **Reutilização de Código**. A estrutura foi recentemente refatorada para melhorar a manutenibilidade e escalabilidade.
@@ -51,19 +49,20 @@ premiora-web/
 │   │   ├── forms/       # Componentes de formulários
 │   │   │   └── Benefits.tsx
 │   │   ├── landing/     # Componentes da landing page
+│   │   │   ├── CTA.tsx
+│   │   │   ├── FAQ.tsx
+│   │   │   ├── Features.tsx
+│   │   │   ├── Footer.tsx
 │   │   │   ├── Header.tsx
-│   │   ├── Hero.tsx
-│   │   ├── Features.tsx
-│   │   ├── Testimonials.tsx
-│   │   ├── Pricing.tsx
-│   │   ├── FAQ.tsx
-│   │   ├── CTA.tsx
-│   │   ├── Footer.tsx
-│   │   ├── HowItWorks.tsx
-│   │   ├── SocialProof.tsx
-│   │   └── index.ts
+│   │   │   ├── Hero.tsx
+│   │   │   ├── HowItWorks.tsx
+│   │   │   ├── Pricing.tsx
+│   │   │   ├── SocialProof.tsx
+│   │   │   ├── Testimonials.tsx
+│   │   │   └── index.ts
 │   │   ├── layout/      # Componentes de layout estrutural
 │   │   │   ├── Header.tsx
+│   │   │   ├── Navbar.tsx
 │   │   │   ├── Sidebar.tsx
 │   │   │   └── index.ts
 │   │   └── modals/      # Componentes modais
@@ -71,30 +70,36 @@ premiora-web/
 │   │       ├── CreateContentModal.tsx
 │   │       ├── CreatePostModal.tsx
 │   │       ├── CreateVideoModal.tsx
+│   │       ├── PostViewModal.tsx
+│   │       ├── VideoViewModal.tsx
 │   │       └── index.ts
 │   ├── contexts/        # Contextos React para estado global
 │   │   └── AuthContext.tsx
 │   ├── hooks/           # Hooks customizados para lógica reutilizável
 │   │   ├── useAuth.ts
 │   │   ├── useFeed.ts
-│   │   ├── useSearch.ts
-│   │   └── useInfiniteScroll.ts
+│   │   ├── useInfiniteScroll.ts
+│   │   └── useSearch.ts
 │   ├── pages/           # Componentes de página (rotas)
 │   │   ├── CommunitiesPage.tsx
 │   │   ├── CommunityPage.tsx
+│   │   ├── EmailConfirmation.tsx
+│   │   ├── EmailConfirmationSuccess.tsx
 │   │   ├── HomePage.tsx
 │   │   ├── LandingPage.tsx
-│   │   └── Login.tsx
+│   │   ├── Login.tsx
+│   │   └── SettingsPage.tsx
 │   ├── services/        # Serviços para lógica de negócio e API
 │   │   └── authService.ts
 │   ├── styles/          # Arquivos de estilo organizados
+│   │   ├── CommunitiesPage.css
+│   │   ├── CommunityPage.css
 │   │   ├── globals.css
 │   │   ├── HomePage.css
 │   │   ├── landing-page.css
 │   │   ├── login.css
 │   │   ├── modals.css
-│   │   ├── CommunitiesPage.css
-│   │   ├── CommunityPage.css
+│   │   ├── SettingsPage.css
 │   │   └── UserSuggestions.css
 │   ├── types/           # Definições TypeScript organizadas por domínio
 │   │   ├── auth.ts      # Tipos de autenticação
@@ -108,10 +113,14 @@ premiora-web/
 │   └── main.tsx         # Ponto de entrada da aplicação
 ├── public/              # Assets públicos
 │   └── vite.svg
-├── dist/                # Build de produção (gerado automaticamente)
+├── .env.example         # Exemplo de variáveis de ambiente
+├── .gitignore           # Arquivos ignorados pelo Git
+├── index.html           # Template HTML
 ├── package.json         # Dependências e scripts
 ├── tsconfig.json        # Configuração TypeScript
-└── index.html           # Template HTML
+├── vercel.json          # Configuração de deploy Vercel
+├── vite.config.ts       # Configuração Vite
+└── dist/                # Build de produção (gerado automaticamente)
 ```
 
 ### Fluxo de Autenticação

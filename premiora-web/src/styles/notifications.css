@@ -1,0 +1,200 @@
+/**
+ * Estilos para o sistema de notificações/toasts
+ */
+
+/* Container principal das notificações */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 400px;
+  pointer-events: none;
+}
+
+/* Notificação individual */
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: auto;
+  animation: slideInRight 0.3s ease-out;
+  min-width: 300px;
+  max-width: 100%;
+}
+
+/* Animação de entrada */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Animação de saída */
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Estilos por tipo de notificação */
+.notification-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-left: 4px solid #10b981;
+}
+
+.notification-error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border-left: 4px solid #ef4444;
+}
+
+.notification-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border-left: 4px solid #f59e0b;
+}
+
+.notification-info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border-left: 4px solid #3b82f6;
+}
+
+/* Ícone da notificação */
+.notification-icon {
+  font-size: var(--font-size-xl);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Conteúdo da notificação */
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title {
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-1);
+  line-height: 1.4;
+}
+
+.notification-message {
+  font-size: var(--font-size-xs);
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+/* Ações da notificação */
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.notification-action-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.notification-action-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.notification-close-button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.notification-close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Barra de progresso */
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  animation: progressBar linear;
+}
+
+@keyframes progressBar {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 480px) {
+  .notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .notification {
+    min-width: auto;
+    max-width: none;
+  }
+}
+
+/* Tema escuro (se necessário) */
+@media (prefers-color-scheme: dark) {
+  .notification {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Animação de saída quando removida */
+.notification.removing {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
