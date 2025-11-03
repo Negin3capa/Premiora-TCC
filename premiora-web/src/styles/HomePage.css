@@ -1188,7 +1188,7 @@
 
 .messages-layout {
   display: flex;
-  height: calc(100vh - 80px); /* Account for header and bottom bar */
+  flex: 1; /* Fill the available height in main-content */
   background-color: var(--color-bg-secondary);
 }
 
@@ -1351,6 +1351,23 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.back-button {
+  background: none;
+  border: none;
+  padding: var(--space-2);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xl);
+  transition: all var(--transition-fast);
+  display: none; /* Hidden by default, shown on mobile */
+}
+
+.back-button:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
 }
 
 .chat-avatar {
@@ -1535,23 +1552,39 @@
 /* Mobile responsive adjustments for messages */
 @media (max-width: 768px) {
   .messages-layout {
-    height: calc(100vh - 140px); /* Account for header, bottom bar, and mobile adjustments */
+    height: calc(100vh - 140px); /* Account for header and bottom bar */
+    position: relative;
+    overflow: hidden; /* Prevent horizontal/vertical scrolling */
   }
 
   .conversations-sidebar {
     width: 100%;
     position: absolute;
-    left: -100%;
+    left: 0; /* Show by default on mobile */
     top: 0;
     z-index: 10;
     transition: left var(--transition-fast);
+    height: 100%; /* Fill the available height */
   }
 
-  .conversations-sidebar.open {
-    left: 0;
+  .conversations-sidebar.hidden {
+    left: -100%; /* Hide when viewing a chat */
   }
 
   .chat-area {
     width: 100%;
+    position: absolute;
+    left: 100%; /* Start off-screen */
+    top: 0;
+    transition: left var(--transition-fast);
+    height: 100%; /* Fill the available height */
+  }
+
+  .chat-area.visible {
+    left: 0; /* Show when a conversation is selected */
+  }
+
+  .back-button {
+    display: flex; /* Show back button on mobile */
   }
 }

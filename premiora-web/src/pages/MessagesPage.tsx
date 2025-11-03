@@ -16,6 +16,7 @@ const MessagesPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileChatView, setIsMobileChatView] = useState(false);
 
   /**
    * Handler para alternar visibilidade da sidebar em dispositivos móveis
@@ -104,7 +105,7 @@ const MessagesPage: React.FC = () => {
 
         <div className="messages-layout">
           {/* Conversations List */}
-          <div className="conversations-sidebar">
+          <div className={`conversations-sidebar ${isMobileChatView ? 'hidden' : ''}`}>
             <div className="conversations-header">
               <h2>Mensagens</h2>
               <button className="new-message-button" title="Nova mensagem">
@@ -124,7 +125,10 @@ const MessagesPage: React.FC = () => {
                   <div
                     key={conversation.id}
                     className={`conversation-item ${selectedConversation === conversation.id ? 'active' : ''} ${conversation.unread ? 'unread' : ''}`}
-                    onClick={() => setSelectedConversation(conversation.id)}
+                    onClick={() => {
+                      setSelectedConversation(conversation.id);
+                      setIsMobileChatView(true);
+                    }}
                   >
                     <div className="conversation-avatar">
                       <img
@@ -156,12 +160,19 @@ const MessagesPage: React.FC = () => {
           </div>
 
           {/* Chat Area */}
-          <div className="chat-area">
+          <div className={`chat-area ${isMobileChatView ? 'visible' : ''}`}>
             {selectedConversation ? (
               <>
                 {/* Chat Header */}
                 <div className="chat-header">
                   <div className="chat-user-info">
+                    <button
+                      className="back-button"
+                      onClick={() => setIsMobileChatView(false)}
+                      title="Voltar para conversas"
+                    >
+                      ←
+                    </button>
                     <img
                       src={selectedConversationData?.user.avatar}
                       alt={selectedConversationData?.user.name}

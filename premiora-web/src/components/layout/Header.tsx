@@ -55,14 +55,14 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
     // Try different possible avatar field names from OAuth providers
     const possibleFields = ['avatar_url', 'picture', 'photo', 'profile_picture', 'image'];
 
-    // Check direct metadata fields first (Facebook typically stores here)
+    // Check direct metadata fields first (Facebook typically stores here, Google also uses 'picture')
     for (const field of possibleFields) {
       if (metadata?.[field]) {
         return metadata[field];
       }
     }
 
-    // Check nested identities data (common for Google OAuth)
+    // Check nested identities data (common for some OAuth setups)
     if (metadata?.identities && Array.isArray(metadata.identities)) {
       for (const identity of metadata.identities) {
         if (identity?.identity_data) {
