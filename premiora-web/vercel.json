@@ -5,11 +5,6 @@
   "installCommand": "npm ci",
   "framework": "vite",
   "regions": ["gru1"],
-  "functions": {
-    "src/**/*.ts": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
