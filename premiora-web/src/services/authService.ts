@@ -25,10 +25,10 @@ export class AuthService {
       isLocalDevAlt
     });
 
-    // Em desenvolvimento local, sempre usar localhost
+    // Em desenvolvimento local, usar a origem atual (suporta portas dinâmicas do Vite)
     if (isLocalDev || isLocalDevAlt) {
-      console.log('✅ Ambiente de desenvolvimento local detectado, usando localhost');
-      return `http://localhost:5173${path}`;
+      console.log('✅ Ambiente de desenvolvimento local detectado, usando origem atual');
+      return `${window.location.origin}${path}`;
     }
 
     // Para produção/Vercel, usar VERCEL_URL se disponível

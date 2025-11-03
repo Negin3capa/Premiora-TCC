@@ -118,7 +118,6 @@ premiora-web/
 ├── index.html           # Template HTML
 ├── package.json         # Dependências e scripts
 ├── tsconfig.json        # Configuração TypeScript
-├── vercel.json          # Configuração de deploy Vercel
 ├── vite.config.ts       # Configuração Vite
 └── dist/                # Build de produção (gerado automaticamente)
 ```
