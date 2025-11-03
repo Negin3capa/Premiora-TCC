@@ -210,6 +210,7 @@ export class AuthService {
    * @returns Promise com dados do perfil ou null se não encontrado
    */
   static async fetchUserProfile(userId: string): Promise<any> {
+    console.log('🔍 Buscando perfil do usuário:', userId);
     try {
       const { data: profile, error } = await supabase
         .from('users')
@@ -218,13 +219,19 @@ export class AuthService {
         .single();
 
       if (error) {
-        console.error('Erro ao buscar perfil do usuário:', error);
+        console.error('❌ Erro ao buscar perfil do usuário:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return null;
       }
 
+      console.log('✅ Perfil encontrado:', profile);
       return profile;
     } catch (err) {
-      console.error('Erro geral ao buscar perfil:', err);
+      console.error('💥 Erro geral ao buscar perfil:', err);
       return null;
     }
   }
