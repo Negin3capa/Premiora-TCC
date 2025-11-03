@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
-import { Sidebar, Header } from '../components/layout';
+import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import '../styles/CommunitiesPage.css';
 
 /**
@@ -18,11 +18,19 @@ const CommunitiesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'relevance' | 'trending' | 'popular' | 'new' | 'alphabetical'>('popular');
+  const [sortBy, setSortBy] = useState<'relevance' | 'trending' | 'popular' | 'new'>('popular');
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [communityContent, setCommunityContent] = useState<ContentItem[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  /**
+   * Handler para alternar visibilidade da sidebar em dispositivos móveis
+   */
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   // Mock data generator for communities
   const generateMockCommunities = (): Community[] => {
@@ -257,8 +265,6 @@ const CommunitiesPage: React.FC = () => {
         return communitiesWithScores.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-      case 'alphabetical':
-        return communitiesWithScores.sort((a, b) => a.displayName.localeCompare(b.displayName));
       case 'relevance':
       default:
         return communitiesWithScores.sort((a, b) => b.relevanceScore - a.relevanceScore);
@@ -276,22 +282,24 @@ const CommunitiesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="communities-page">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         <div className="main-content">
           <div className="loading">Carregando comunidades...</div>
         </div>
+        <MobileBottomBar />
       </div>
     );
   }
 
   return (
     <div className="communities-page">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           user={user}
+          onToggleSidebar={toggleSidebar}
         />
 
         <div className="communities-container">
@@ -330,12 +338,6 @@ const CommunitiesPage: React.FC = () => {
                 onClick={() => setSortBy('new')}
               >
                 🆕 Novo
-              </button>
-              <button
-                className={`sort-button ${sortBy === 'alphabetical' ? 'active' : ''}`}
-                onClick={() => setSortBy('alphabetical')}
-              >
-                🔤 Alfabética
               </button>
             </div>
           </div>
@@ -443,6 +445,7 @@ const CommunitiesPage: React.FC = () => {
           )}
         </div>
       </div>
+      <MobileBottomBar />
     </div>
   );
 };

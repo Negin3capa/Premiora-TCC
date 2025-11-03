@@ -16,6 +16,8 @@ const HomePage = React.lazy(() => import('./pages/HomePage'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
 const CommunitiesPage = React.lazy(() => import('./pages/CommunitiesPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
+const NotificationsPage = React.lazy(() => import('./pages/NotificationsPage'));
+const MessagesPage = React.lazy(() => import('./pages/MessagesPage'));
 
 /**
  * Componente de loading para páginas em lazy loading
@@ -118,6 +120,26 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Notificações (apenas para autenticados) */}
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Mensagens (apenas para autenticados) */}
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <MessagesPage />
             </ProtectedRoute>
           }
         />

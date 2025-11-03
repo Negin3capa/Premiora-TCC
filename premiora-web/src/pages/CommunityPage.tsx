@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
-import { Sidebar, Header } from '../components/layout';
+import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import Feed from '../components/content/Feed';
 import { getCommunityByName, isCommunityMember } from '../utils/communityUtils';
 import '../styles/CommunityPage.css';
@@ -26,6 +26,14 @@ const CommunityPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [community, setCommunity] = useState<Community | null>(null);
   const [isJoined, setIsJoined] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  /**
+   * Handler para alternar visibilidade da sidebar em dispositivos móveis
+   */
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   // Mock data generator for community posts
   const generateMockCommunityContent = useCallback((startIndex: number, count: number): ContentItem[] => {
@@ -219,22 +227,24 @@ const CommunityPage: React.FC = () => {
   if (!community) {
     return (
       <div className="community-page">
-        <Sidebar />
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         <div className="main-content">
           <div className="loading">Carregando comunidade...</div>
         </div>
+        <MobileBottomBar />
       </div>
     );
   }
 
   return (
     <div className="community-page">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           user={user}
+          onToggleSidebar={toggleSidebar}
         />
 
         {/* Community Header Banner */}
@@ -400,6 +410,7 @@ const CommunityPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <MobileBottomBar />
     </div>
   );
 };
