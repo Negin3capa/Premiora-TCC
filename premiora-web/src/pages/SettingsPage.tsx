@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useUI } from '../hooks/useUI';
 import { Sidebar, Header } from '../components/layout';
@@ -27,8 +27,8 @@ const SettingsPage: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Estados para configurações
-  const [settings, setSettings] = useState({
+  // Estados para configurações com valores padrão
+  const defaultSettings = {
     // Conta
     emailNotifications: true,
     pushNotifications: false,
@@ -48,7 +48,31 @@ const SettingsPage: React.FC = () => {
     allowAds: true,
     creatorMode: false,
     premiumFeatures: false,
-  });
+  };
+
+  const [settings, setSettings] = useState(defaultSettings);
+
+  // Carregar configurações do localStorage na inicialização
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem('premiora-user-settings');
+      if (savedSettings) {
+        const parsedSettings = JSON.parse(savedSettings);
+        setSettings(prev => ({ ...prev, ...parsedSettings }));
+      }
+    } catch (error) {
+      console.error('Erro ao carregar configurações do usuário:', error);
+    }
+  }, []);
+
+  // Salvar configurações no localStorage quando mudam
+  useEffect(() => {
+    try {
+      localStorage.setItem('premiora-user-settings', JSON.stringify(settings));
+    } catch (error) {
+      console.error('Erro ao salvar configurações do usuário:', error);
+    }
+  }, [settings]);
 
   /**
    * Handler para atualização de configurações
