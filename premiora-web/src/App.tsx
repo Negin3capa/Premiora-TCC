@@ -5,6 +5,7 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute } from './components/auth';
+import NotificationContainer from './components/common/NotificationContainer';
 
 // Lazy loading dos componentes de página para otimização de bundle
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
@@ -47,6 +48,7 @@ const PageLoader: React.FC = () => (
 const App: React.FC = () => {
   return (
     <Suspense fallback={<PageLoader />}>
+      <NotificationContainer />
       <Routes>
         {/* Rota raiz - Landing Page (apenas para não autenticados) */}
         <Route

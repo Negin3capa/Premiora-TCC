@@ -12,6 +12,31 @@ export class AuthService {
    * @returns URL completa de redirecionamento
    */
   static getRedirectUrl(path: string): string {
+    // Priorizar VERCEL_URL (definido automaticamente pelo Vercel)
+    const vercelUrl = import.meta.env.VITE_VERCEL_URL || import.meta.env.VERCEL_URL;
+
+    if (vercelUrl) {
+      try {
+        const url = new URL(vercelUrl);
+        return `${url.origin}${path}`;
+      } catch (error) {
+        console.warn('VERCEL_URL inválida, usando fallback:', vercelUrl);
+      }
+    }
+
+    // Usar URL de redirecionamento configurada se disponível (VITE_REDIRECT_URL)
+    const configuredRedirectUrl = import.meta.env.VITE_REDIRECT_URL;
+
+    if (configuredRedirectUrl) {
+      try {
+        const url = new URL(configuredRedirectUrl);
+        return `${url.origin}${path}`;
+      } catch (error) {
+        console.warn('VITE_REDIRECT_URL inválida, usando fallback:', configuredRedirectUrl);
+      }
+    }
+
+    // Fallback: determinar dinamicamente baseada no ambiente atual
     const origin = window.location.origin;
 
     // Para ambientes de preview do Vercel, garantir que usamos HTTPS
@@ -210,6 +235,7 @@ export class AuthService {
    * @returns Promise com dados do perfil ou null se não encontrado
    */
   static async fetchUserProfile(userId: string): Promise<any> {
+    console.log('🔍 Buscando perfil do usuário:', userId);
     try {
       const { data: profile, error } = await supabase
         .from('users')
@@ -218,13 +244,19 @@ export class AuthService {
         .single();
 
       if (error) {
-        console.error('Erro ao buscar perfil do usuário:', error);
+        console.error('❌ Erro ao buscar perfil do usuário:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         return null;
       }
 
+      console.log('✅ Perfil encontrado:', profile);
       return profile;
     } catch (err) {
-      console.error('Erro geral ao buscar perfil:', err);
+      console.error('💥 Erro geral ao buscar perfil:', err);
       return null;
     }
   }

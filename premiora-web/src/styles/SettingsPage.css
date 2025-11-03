@@ -278,6 +278,52 @@
   font-weight: var(--font-weight-bold);
 }
 
+/* Tema toggle específico */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 2px solid transparent;
+}
+
+.theme-option:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.theme-option.active {
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+  border-color: var(--color-primary);
+}
+
+.theme-option input[type="radio"] {
+  display: none;
+}
+
+/* Melhorar aparência dos selects */
+.setting-label select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right var(--space-3) center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: var(--space-10);
+  appearance: none;
+}
+
 /* Responsividade */
 @media (max-width: 1024px) {
   .settings-container {
@@ -337,6 +383,16 @@
 
   .confirm-buttons button {
     width: 100%;
+  }
+
+  .theme-toggle {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .theme-option {
+    width: 100%;
+    justify-content: center;
   }
 }
 

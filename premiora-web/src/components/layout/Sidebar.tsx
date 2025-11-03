@@ -5,6 +5,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useModal } from '../../hooks/useModal';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
 import type { ContentType } from '../modals/CreateContentModal';
 
@@ -14,38 +15,34 @@ import type { ContentType } from '../modals/CreateContentModal';
  */
 const Sidebar: React.FC = () => {
   const { user } = useAuth();
+  const { openModal, closeModal, isModalOpen } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Extrai informações do perfil do usuário
-  const userName = user?.user_metadata?.full_name || 
-                   user?.user_metadata?.name || 
-                   user?.email?.split('@')[0] || 
+  const userName = user?.user_metadata?.full_name ||
+                   user?.user_metadata?.name ||
+                   user?.email?.split('@')[0] ||
                    'Usuário';
-  
-  const userAvatar = user?.user_metadata?.avatar_url || 
-                     user?.user_metadata?.picture || 
-                     `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
 
-  // Estados para controlar modais
-  const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
-  const [isCreatePostModalOpen, setIsCreatePostModalOpen] = React.useState(false);
-  const [isCreateVideoModalOpen, setIsCreateVideoModalOpen] = React.useState(false);
-  const [isCreateCommunityModalOpen, setIsCreateCommunityModalOpen] = React.useState(false);
+  const userAvatar = user?.user_metadata?.avatar_url ||
+                     user?.user_metadata?.picture ||
+                     `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
 
   /**
    * Handler para seleção de tipo de conteúdo no modal principal
    */
   const handleContentTypeSelect = (type: ContentType) => {
+    closeModal('createContent'); // Fecha o modal principal
     switch (type) {
       case 'post':
-        setIsCreatePostModalOpen(true);
+        openModal('createPost');
         break;
       case 'video':
-        setIsCreateVideoModalOpen(true);
+        openModal('createVideo');
         break;
       case 'community':
-        setIsCreateCommunityModalOpen(true);
+        openModal('createCommunity');
         break;
       default:
         console.warn(`Tipo de conteúdo não suportado: ${type}`);
@@ -127,7 +124,7 @@ const Sidebar: React.FC = () => {
       }}>
         <button
           className="create-button"
-          onClick={() => setIsCreateModalOpen(true)}
+          onClick={() => openModal('createContent')}
           aria-label="Criar novo conteúdo"
           title="Criar novo conteúdo"
           style={{
@@ -242,29 +239,29 @@ const Sidebar: React.FC = () => {
 
       {/* Modal de criação de conteúdo */}
       <CreateContentModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        isOpen={isModalOpen('createContent')}
+        onClose={() => closeModal('createContent')}
         onSelectContentType={handleContentTypeSelect}
       />
 
       {/* Modal de criação de post */}
       <CreatePostModal
-        isOpen={isCreatePostModalOpen}
-        onClose={() => setIsCreatePostModalOpen(false)}
+        isOpen={isModalOpen('createPost')}
+        onClose={() => closeModal('createPost')}
         onPublish={handlePostPublish}
       />
 
       {/* Modal de criação de vídeo */}
       <CreateVideoModal
-        isOpen={isCreateVideoModalOpen}
-        onClose={() => setIsCreateVideoModalOpen(false)}
+        isOpen={isModalOpen('createVideo')}
+        onClose={() => closeModal('createVideo')}
         onPublish={handleVideoPublish}
       />
 
       {/* Modal de criação de comunidade */}
       <CreateCommunityModal
-        isOpen={isCreateCommunityModalOpen}
-        onClose={() => setIsCreateCommunityModalOpen(false)}
+        isOpen={isModalOpen('createCommunity')}
+        onClose={() => closeModal('createCommunity')}
         onCreate={handleCommunityCreate}
       />
     </aside>

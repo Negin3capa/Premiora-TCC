@@ -90,56 +90,85 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Escutar mudanças na sessão e gerenciar estado
   useEffect(() => {
+    let isMounted = true;
+
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
+        console.log('🔄 Inicializando autenticação...');
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-        // Gerenciar perfil em background
+        if (error) {
+          console.error('❌ Erro ao obter sessão:', error);
+          if (isMounted) setLoading(false);
+          return;
+        }
+
+        console.log('✅ Sessão obtida:', { hasSession: !!session, userId: session?.user?.id });
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false); // Finalizar loading imediatamente após definir usuário
+        }
+
+        // Gerenciar perfil em background (não bloqueia a UI)
         if (session?.user) {
+          console.log('👤 Usuário autenticado, buscando perfil em background...');
           AuthService.upsertUserProfile(session.user).catch(err =>
             console.error('Background profile upsert failed:', err)
           );
 
-          // Buscar perfil após upsert
-          setTimeout(() => {
-            refreshUserProfile();
-          }, 100);
+          // Buscar perfil em background sem afetar loading state
+          refreshUserProfile().catch(err => {
+            console.error('Profile fetch failed:', err);
+          });
+        } else {
+          console.log('❌ Nenhum usuário autenticado');
+          if (isMounted) {
+            setUserProfile(null);
+          }
         }
       } catch (error) {
-        console.error('Erro ao inicializar autenticação:', error);
-      } finally {
-        setLoading(false);
+        console.error('💥 Erro geral ao inicializar autenticação:', error);
+        if (isMounted) setLoading(false);
       }
     };
 
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event: string, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      async (event: string, session) => {
+        console.log('🔄 Auth state change:', event, { hasSession: !!session, userId: session?.user?.id });
 
-        // Gerenciar perfil em background
+        if (isMounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false); // Finalizar loading imediatamente
+        }
+
+        // Gerenciar perfil em background (não bloqueia a UI)
         if (session?.user) {
+          console.log('👤 Auth state change - usuário autenticado, buscando perfil em background...');
           AuthService.upsertUserProfile(session.user).catch(err =>
             console.error('Background profile upsert failed:', err)
           );
 
-          // Buscar perfil após upsert
-          setTimeout(() => {
-            refreshUserProfile();
-          }, 100);
+          // Buscar perfil em background sem afetar loading state
+          refreshUserProfile().catch(err => {
+            console.error('Profile fetch failed:', err);
+          });
         } else {
-          setUserProfile(null);
+          console.log('❌ Auth state change - nenhum usuário autenticado');
+          if (isMounted) {
+            setUserProfile(null);
+          }
         }
-
-        setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [refreshUserProfile]);
 
   const value: AuthContextType = {

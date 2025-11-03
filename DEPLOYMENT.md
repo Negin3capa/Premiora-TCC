@@ -240,5 +240,5 @@ Para problemas de deploy:
 
 ---
 
-**Última atualização**: Novembro 2025
+**Última atualização**: 02 de Novembro de 2025
 **Versão**: 1.0.0
