@@ -94,18 +94,17 @@ const Login: React.FC = () => {
 
   return (
     <div className="login-page">
-      {/* Premium Branding Header */}
-      <div className="login-brand">
-        <div className="brand-logo">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-          <span>Premiora</span>
-        </div>
-        <p className="brand-tagline">A plataforma brasileira para monetização de conteúdo criativo</p>
-      </div>
-
       <div className="login-container">
+        {/* Premium Branding Header */}
+        <div className="login-brand">
+          <div className="brand-logo">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+            <span>Premiora</span>
+          </div>
+        </div>
+
         <div className="login-header">
           <h1>{isSignUp ? 'Criar sua conta' : 'Bem-vindo de volta'}</h1>
           <p>{isSignUp ? 'Junte-se a milhares de criadores que monetizam seu talento.' : 'Continue criando e crescendo com sua comunidade.'}</p>

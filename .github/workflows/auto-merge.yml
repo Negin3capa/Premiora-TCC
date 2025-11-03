@@ -53,7 +53,7 @@ jobs:
           echo "Check runs: $CHECK_RUNS"
 
           # Check if the required build check is present and successful
-          BUILD_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '[.check_runs[] | select(.name == "build" and .status == "completed" and .conclusion == "success")] | length > 0')
+          BUILD_SUCCESS=$(gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/check-runs --jq '[.check_runs[] | select(.name == "build-and-test" and .status == "completed" and .conclusion == "success")] | length > 0')
 
           echo "Build check success: $BUILD_SUCCESS"
 
