@@ -12,11 +12,31 @@ export class AuthService {
    * @returns URL completa de redirecionamento
    */
   static getRedirectUrl(path: string): string {
-    // Priorizar VERCEL_URL (definido automaticamente pelo Vercel)
+    // Verificar se estamos rodando localmente (não em Vercel)
+    const isLocalDev = !import.meta.env.VERCEL && window.location.hostname === 'localhost';
+    const isLocalDevAlt = import.meta.env.DEV && !import.meta.env.VERCEL_ENV;
+
+    console.log('🔍 Verificando ambiente:', {
+      DEV: import.meta.env.DEV,
+      VERCEL: import.meta.env.VERCEL,
+      VERCEL_ENV: import.meta.env.VERCEL_ENV,
+      hostname: window.location.hostname,
+      isLocalDev,
+      isLocalDevAlt
+    });
+
+    // Em desenvolvimento local, sempre usar localhost
+    if (isLocalDev || isLocalDevAlt) {
+      console.log('✅ Ambiente de desenvolvimento local detectado, usando localhost');
+      return `http://localhost:5173${path}`;
+    }
+
+    // Para produção/Vercel, usar VERCEL_URL se disponível
     const vercelUrl = import.meta.env.VITE_VERCEL_URL || import.meta.env.VERCEL_URL;
 
     if (vercelUrl) {
       try {
+        console.log('🔄 Usando VERCEL_URL:', vercelUrl);
         const url = new URL(vercelUrl);
         return `${url.origin}${path}`;
       } catch (error) {
@@ -24,20 +44,9 @@ export class AuthService {
       }
     }
 
-    // Usar URL de redirecionamento configurada se disponível (VITE_REDIRECT_URL)
-    const configuredRedirectUrl = import.meta.env.VITE_REDIRECT_URL;
-
-    if (configuredRedirectUrl) {
-      try {
-        const url = new URL(configuredRedirectUrl);
-        return `${url.origin}${path}`;
-      } catch (error) {
-        console.warn('VITE_REDIRECT_URL inválida, usando fallback:', configuredRedirectUrl);
-      }
-    }
-
     // Fallback: determinar dinamicamente baseada no ambiente atual
     const origin = window.location.origin;
+    console.log('🔄 Usando origin atual:', origin);
 
     // Para ambientes de preview do Vercel, garantir que usamos HTTPS
     if (origin.includes('vercel-preview') || origin.includes('vercel.app')) {
