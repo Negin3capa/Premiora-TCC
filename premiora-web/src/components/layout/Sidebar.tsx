@@ -9,11 +9,16 @@ import { useModal } from '../../hooks/useModal';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
 import type { ContentType } from '../modals/CreateContentModal';
 
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
 /**
  * Sidebar de navegação principal da aplicação
  * Exibe menu de navegação, criadores em alta e perfil do usuário
  */
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const { user } = useAuth();
   const { openModal, closeModal, isModalOpen } = useModal();
   const navigate = useNavigate();
@@ -88,10 +93,40 @@ const Sidebar: React.FC = () => {
    */
   const handleNavigation = (route: string) => {
     navigate(route);
+    // Fecha sidebar em dispositivos móveis após navegação
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  /**
+   * Handler para fechar sidebar ao clicar no overlay
+   */
+  const handleOverlayClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  /**
+   * Handler para prevenir fechamento ao clicar no conteúdo da sidebar
+   */
+  const handleSidebarContentClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   return (
-    <aside className="sidebar">
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={handleOverlayClick}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`} onClick={handleSidebarContentClick}>
       <div className="sidebar-header">
         <h2 className="sidebar-logo">Premiora</h2>
       </div>
@@ -265,6 +300,7 @@ const Sidebar: React.FC = () => {
         onCreate={handleCommunityCreate}
       />
     </aside>
+    </>
   );
 };
 

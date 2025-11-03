@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useUI } from '../hooks/useUI';
-import { Sidebar, Header } from '../components/layout';
+import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import '../styles/SettingsPage.css';
 
 /**
@@ -26,6 +26,14 @@ const SettingsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState('appearance');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  /**
+   * Handler para alternar visibilidade da sidebar em dispositivos móveis
+   */
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 
   // Estados para configurações com valores padrão
   const defaultSettings = {
@@ -116,12 +124,13 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div className="settings-page">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           user={user}
+          onToggleSidebar={toggleSidebar}
         />
 
         <div className="settings-container">
@@ -706,6 +715,7 @@ const SettingsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <MobileBottomBar />
     </div>
   );
 };
