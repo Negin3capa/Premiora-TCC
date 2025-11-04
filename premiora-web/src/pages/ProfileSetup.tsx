@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, AtSign, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { useProfileSetup } from '../hooks/useProfileSetup';
 import { useAuth } from '../hooks/useAuth';
+import { shouldForceProfileSetup, isProfileComplete as isProfileCompleteUtil } from '../utils/profileUtils';
 
 /**
  * Página de configuração inicial do perfil do usuário
@@ -10,7 +11,7 @@ import { useAuth } from '../hooks/useAuth';
  */
 const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, userProfile, loading: authLoading } = useAuth();
   const {
     name,
     setName,
@@ -21,8 +22,37 @@ const ProfileSetup: React.FC = () => {
     submitSuccess,
     usernameValidation,
     saveProfile,
-    isProfileComplete,
   } = useProfileSetup();
+
+  /**
+   * Handler para prevenir fechamento da aba/janela durante setup incompleto
+   */
+  const handleBeforeUnload = useCallback((e: BeforeUnloadEvent) => {
+    if (!user || !userProfile) return;
+
+    // Se deve forçar setup, prevenir fechamento
+    if (shouldForceProfileSetup(user, userProfile)) {
+      e.preventDefault();
+      e.returnValue = 'Você precisa completar seu perfil antes de sair. Tem certeza que deseja fechar?';
+      return e.returnValue;
+    }
+  }, [user, userProfile]);
+
+  // Adicionar listener para prevenir fechamento da aba
+  useEffect(() => {
+    if (!user || !userProfile) return;
+
+    // Adicionar listener apenas se deve forçar setup
+    if (shouldForceProfileSetup(user, userProfile)) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      console.log('🛡️ Proteção contra fechamento ativada na página de setup');
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        console.log('🛡️ Proteção contra fechamento desativada na página de setup');
+      };
+    }
+  }, [user, userProfile, handleBeforeUnload]);
 
   // Redirecionamentos baseados no estado de autenticação
   useEffect(() => {
@@ -36,11 +66,11 @@ const ProfileSetup: React.FC = () => {
     }
 
     // Se perfil já está completo, redirecionar para dashboard
-    if (isProfileComplete()) {
+    if (isProfileCompleteUtil(userProfile)) {
       navigate('/dashboard', { replace: true });
       return;
     }
-  }, [user, authLoading, isProfileComplete, navigate]);
+  }, [user, authLoading, userProfile, navigate]);
 
   // Preencher automaticamente dados do OAuth se disponível
   useEffect(() => {

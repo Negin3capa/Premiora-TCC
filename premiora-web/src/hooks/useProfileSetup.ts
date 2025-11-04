@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from './useAuth';
+import { clearSetupLock } from '../utils/profileUtils';
 
 /**
  * Estado de validação do username
@@ -158,6 +159,12 @@ export const useProfileSetup = () => {
       }
 
       console.log('✅ Perfil salvo com sucesso');
+
+      // Limpar bloqueio do setup
+      if (user) {
+        clearSetupLock(user.id);
+        console.log('🔓 Setup desbloqueado após conclusão bem-sucedida');
+      }
 
       // Atualizar perfil no contexto
       await refreshUserProfile();

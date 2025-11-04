@@ -1,8 +1,9 @@
-import React, { createContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AuthService } from '../services/authService';
 import { signOut } from '../lib/supabaseAuth';
+import { clearSetupLock, clearExpiredSetupLocks } from '../utils/profileUtils';
 import type { UserProfile, AuthContextType } from '../types/auth';
 
 // Criar contexto
@@ -19,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const currentUserIdRef = useRef<string | null>(null);
 
   /**
    * Busca e atualiza o perfil do usuário no estado local
@@ -82,6 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSignOut = useCallback(async () => {
     setLoading(true);
     try {
+      // Limpar bloqueio do setup antes do logout
+      if (user?.id) {
+        clearSetupLock(user.id);
+        console.log('🔓 Setup lock removido no logout para usuário:', user.id);
+      }
+
       const result = await signOut();
       if (result.error) {
         throw result.error;
@@ -95,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   // Escutar mudanças na sessão e gerenciar estado
   useEffect(() => {
@@ -103,6 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
+        // Limpar bloqueios expirados na inicialização
+        clearExpiredSetupLocks();
+
         console.log('🔄 Inicializando autenticação...');
         const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -149,9 +160,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event: string, session) => {
         console.log('🔄 Auth state change:', event, { hasSession: !!session, userId: session?.user?.id });
 
+        // Limpar bloqueios expirados periodicamente
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          clearExpiredSetupLocks();
+        }
+
+        // Se usuário fez logout, limpar setup locks usando o ref
+        if (event === 'SIGNED_OUT' && currentUserIdRef.current) {
+          clearSetupLock(currentUserIdRef.current);
+          console.log('🔓 Setup lock removido no sign out para usuário:', currentUserIdRef.current);
+          currentUserIdRef.current = null;
+        }
+
         if (isMounted) {
           setSession(session);
           setUser(session?.user ?? null);
+          // Atualizar ref com ID do usuário atual
+          currentUserIdRef.current = session?.user?.id ?? null;
           setLoading(false); // Finalizar loading imediatamente
         }
 

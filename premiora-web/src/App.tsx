@@ -4,7 +4,7 @@
  */
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ProtectedRoute, PublicRoute } from './components/auth';
+import { ProtectedRoute, PublicRoute, ProfileSetupGuard } from './components/auth';
 import NotificationContainer from './components/common/NotificationContainer';
 
 // Lazy loading dos componentes de página para otimização de bundle
@@ -113,12 +113,14 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Rota Dashboard (apenas para autenticados) */}
+        {/* Rota Dashboard (apenas para autenticados com perfil completo) */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <ProfileSetupGuard>
+                <Dashboard />
+              </ProfileSetupGuard>
             </ProtectedRoute>
           }
         />
