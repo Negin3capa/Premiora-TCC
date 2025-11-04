@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const profile = await AuthService.fetchUserProfile(user.id);
     setUserProfile(profile);
-  }, [user]);
+  }, []); // Removida dependência de user para evitar loop
 
   /**
    * Handlers de autenticação que delegam para o AuthService
@@ -119,12 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false); // Finalizar loading imediatamente após definir usuário
         }
 
-        // Gerenciar perfil em background (não bloqueia a UI)
+        // Buscar perfil em background (não bloqueia a UI)
         if (session?.user) {
           console.log('👤 Usuário autenticado, buscando perfil em background...');
-          AuthService.upsertUserProfile(session.user).catch(err =>
-            console.error('Background profile upsert failed:', err)
-          );
 
           // Buscar perfil em background sem afetar loading state
           refreshUserProfile().catch(err => {
@@ -154,12 +151,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false); // Finalizar loading imediatamente
         }
 
-        // Gerenciar perfil em background (não bloqueia a UI)
+        // Buscar perfil em background (não bloqueia a UI)
         if (session?.user) {
           console.log('👤 Auth state change - usuário autenticado, buscando perfil em background...');
-          AuthService.upsertUserProfile(session.user).catch(err =>
-            console.error('Background profile upsert failed:', err)
-          );
 
           // Buscar perfil em background sem afetar loading state
           refreshUserProfile().catch(err => {

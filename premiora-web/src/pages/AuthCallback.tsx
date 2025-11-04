@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { handleOAuthCallback } from '../lib/supabaseAuth';
 
 /**
  * Página de callback para processar autenticação OAuth
@@ -16,34 +17,68 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     let redirectTimer: number;
 
-    // Aguardar o AuthContext terminar de carregar
-    if (loading) {
-      console.log('⏳ Aguardando carregamento do contexto de autenticação...');
-      return;
-    }
+    const processCallback = async () => {
+      // Aguardar o AuthContext terminar de carregar
+      if (loading) {
+        console.log('⏳ Aguardando carregamento do contexto de autenticação...');
+        return;
+      }
 
-    // Se temos um usuário autenticado, o login foi bem-sucedido
-    if (user) {
-      console.log('✅ Usuário autenticado detectado no callback');
-      setStatus('success');
-      setMessage('Login realizado com sucesso! Redirecionando...');
+      // Se temos um usuário autenticado, processar callback OAuth
+      if (user) {
+        console.log('✅ Usuário autenticado detectado no callback');
 
-      // Redirecionar para dashboard após 2 segundos
+        try {
+          // Processar callback OAuth (apenas validação)
+          console.log('🔄 Processando callback OAuth...');
+          const result = await handleOAuthCallback();
+
+          if (result.error) {
+            console.error('❌ Erro no processamento OAuth:', result.error);
+            setStatus('error');
+            setMessage('Erro ao processar login OAuth. Tente novamente.');
+            redirectTimer = setTimeout(() => {
+              navigate('/login', { replace: true });
+            }, 3000);
+            return;
+          }
+
+          console.log('✅ Callback OAuth processado com sucesso');
+
+          // Para usuários OAuth, sempre redirecionar para setup
+          // Assumimos que são novos usuários que precisam configurar o perfil
+          console.log('🔄 Usuário OAuth detectado, redirecionando para setup');
+          setStatus('success');
+          setMessage('Login realizado com sucesso! Configurando perfil...');
+
+          // Redirecionar para setup após 2 segundos
+          redirectTimer = setTimeout(() => {
+            navigate('/setup', { replace: true });
+          }, 2000);
+
+        } catch (error) {
+          console.error('💥 Erro geral no processamento do callback:', error);
+          setStatus('error');
+          setMessage('Erro ao processar login. Tente novamente.');
+          redirectTimer = setTimeout(() => {
+            navigate('/login', { replace: true });
+          }, 3000);
+        }
+        return;
+      }
+
+      // Se não temos usuário e não estamos carregando, houve um erro
+      console.log('❌ Nenhum usuário autenticado encontrado no callback');
+      setStatus('error');
+      setMessage('Erro ao processar login. Redirecionando para login...');
+
+      // Redirecionar para login após 3 segundos
       redirectTimer = setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 2000);
-      return;
-    }
+        navigate('/login', { replace: true });
+      }, 3000);
+    };
 
-    // Se não temos usuário e não estamos carregando, houve um erro
-    console.log('❌ Nenhum usuário autenticado encontrado no callback');
-    setStatus('error');
-    setMessage('Erro ao processar login. Redirecionando para login...');
-
-    // Redirecionar para login após 3 segundos
-    redirectTimer = setTimeout(() => {
-      navigate('/login', { replace: true });
-    }, 3000);
+    processCallback();
 
     // Cleanup timer on unmount
     return () => {

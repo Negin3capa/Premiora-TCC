@@ -243,7 +243,8 @@ export async function getCurrentUser(): Promise<CurrentUserResult> {
 
 /**
  * Processa callback OAuth após login com provedor
- * Verifica se já existe conta com mesmo email+provedor e cria nova se necessário
+ * Valida apenas que a sessão OAuth foi estabelecida corretamente
+ * Não cria perfis automaticamente - deixa isso para o setup
  * @returns Promise com resultado do processamento
  */
 export async function handleOAuthCallback(): Promise<{ user: User | null; error: AuthError | null }> {
@@ -267,115 +268,14 @@ export async function handleOAuthCallback(): Promise<{ user: User | null; error:
     }
 
     const user = session.user;
-    console.log('✅ Sessão OAuth encontrada:', {
+    console.log('✅ Sessão OAuth validada:', {
       userId: user.id,
       email: user.email,
       provider: user.app_metadata?.provider
     });
 
-    // Extrair informações do provedor
-    const provider = user.app_metadata?.provider as OAuthProvider;
-    const providerId = user.identities?.[0]?.id;
-    const email = user.email;
-
-    if (!provider || !providerId || !email) {
-      console.error('❌ Informações do provedor incompletas');
-      return { user, error: null };
-    }
-
-    // Verificar se já existe entrada para este email+provedor
-    const { data: existingProvider } = await supabase
-      .from('auth_providers')
-      .select('id, user_id, username')
-      .eq('email', email)
-      .eq('provider_name', provider)
-      .single();
-
-    if (existingProvider) {
-      console.log('✅ Conta já existe para este provedor, fazendo login normal');
-      return { user, error: null };
-    }
-
-    // Verificar se já existe usuário com este email
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id, username')
-      .eq('email', email)
-      .single();
-
-    let targetUserId = user.id;
-    let username: string;
-
-    if (existingUser) {
-      // Já existe usuário com este email, criar nova entrada auth_providers
-      console.log('📝 Usuário existe, criando nova entrada auth_providers');
-      targetUserId = existingUser.id;
-
-      // Gerar username único baseado no existente
-      const baseUsername = existingUser.username || email.split('@')[0];
-      username = await generateUniqueUsername(baseUsername);
-    } else {
-      // Novo usuário, gerar username baseado no email
-      const baseUsername = email.split('@')[0];
-      username = await generateUniqueUsername(baseUsername);
-    }
-
-    // Criar entrada na tabela auth_providers
-    const { error: insertError } = await supabase
-      .from('auth_providers')
-      .insert({
-        user_id: targetUserId,
-        provider_name: provider,
-        provider_id: providerId,
-        email: email,
-        username: username,
-      });
-
-    if (insertError) {
-      console.error('❌ Erro ao criar entrada auth_providers:', insertError);
-      throw insertError;
-    }
-
-    // Se é um novo usuário, atualizar o perfil
-    if (!existingUser) {
-      const displayName = user.user_metadata?.full_name ||
-                         user.user_metadata?.name ||
-                         username;
-
-      const avatarUrl = user.user_metadata?.avatar_url ||
-                       user.user_metadata?.picture || null;
-
-      // Criar perfil do usuário
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: targetUserId,
-          email: email,
-          username: username,
-          name: displayName,
-          avatar_url: avatarUrl,
-        });
-
-      if (profileError) {
-        console.error('❌ Erro ao criar perfil do usuário:', profileError);
-        throw profileError;
-      }
-
-      console.log('✅ Novo usuário criado via OAuth:', {
-        userId: targetUserId,
-        username,
-        email,
-        provider
-      });
-    } else {
-      console.log('✅ Nova conta associada via OAuth:', {
-        userId: targetUserId,
-        username,
-        email,
-        provider
-      });
-    }
-
+    // Apenas validar que temos um usuário OAuth válido
+    // Não criar perfis automaticamente - o setup fará isso
     return { user, error: null };
   } catch (error) {
     console.error('💥 Erro geral no processamento OAuth:', error);

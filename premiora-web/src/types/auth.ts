@@ -8,6 +8,7 @@
 export interface UserProfile {
   id: string;
   name: string | null;
+  username: string | null;
   email: string;
   avatar_url: string | null;
   tier?: string; // Tier de assinatura (supporters, premium, etc.)

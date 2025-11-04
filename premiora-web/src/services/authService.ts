@@ -256,7 +256,7 @@ export class AuthService {
     try {
       const { data: profile, error } = await supabase
         .from('users')
-        .select('id, name, email, avatar_url, tier')
+        .select('id, name, username, email, avatar_url, tier')
         .eq('id', userId)
         .single();
 

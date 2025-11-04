@@ -14,6 +14,7 @@ const Signup = React.lazy(() => import('./pages/Signup'));
 const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
 const EmailConfirmation = React.lazy(() => import('./pages/EmailConfirmation'));
 const EmailConfirmationSuccess = React.lazy(() => import('./pages/EmailConfirmationSuccess'));
+const ProfileSetup = React.lazy(() => import('./pages/ProfileSetup'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
 const CommunitiesPage = React.lazy(() => import('./pages/CommunitiesPage'));
@@ -100,6 +101,16 @@ const App: React.FC = () => {
         <Route
           path="/email-confirmation-success"
           element={<EmailConfirmationSuccess />}
+        />
+
+        {/* Rota de Setup de Perfil (apenas para autenticados) */}
+        <Route
+          path="/setup"
+          element={
+            <ProtectedRoute>
+              <ProfileSetup />
+            </ProtectedRoute>
+          }
         />
 
         {/* Rota Dashboard (apenas para autenticados) */}
