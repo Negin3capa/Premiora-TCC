@@ -1,0 +1,434 @@
+/**
+ * Módulo central de autenticação Supabase
+ * Gerencia todas as operações de autenticação da aplicação Premiora
+ */
+import { supabase } from '../utils/supabaseClient';
+import { generateUniqueUsername } from '../utils/generateUniqueUsername';
+import type { User, AuthError } from '@supabase/supabase-js';
+
+/**
+ * Tipos para provedores OAuth suportados
+ */
+export type OAuthProvider = 'google' | 'facebook';
+
+/**
+ * Resultado do registro de usuário
+ */
+export interface SignUpResult {
+  user: User | null;
+  error: AuthError | null;
+  username?: string;
+}
+
+/**
+ * Resultado da busca de usuário atual
+ */
+export interface CurrentUserResult {
+  user: User | null;
+  profile: any | null;
+  error: AuthError | null;
+}
+
+/**
+ * Inicializa o cliente Supabase com as variáveis de ambiente
+ * @returns Cliente Supabase configurado
+ */
+export function initializeSupabaseAuth() {
+  return supabase;
+}
+
+/**
+ * Registra um novo usuário com email, senha e username
+ * @param email - Email do usuário
+ * @param password - Senha do usuário
+ * @param username - Username único (opcional, será gerado se não fornecido)
+ * @returns Promise com resultado do registro
+ */
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  username?: string
+): Promise<SignUpResult> {
+  try {
+    console.log('🔄 Iniciando registro de usuário:', { email, hasUsername: !!username });
+
+    // Se não foi fornecido username, gerar um único baseado no email
+    let finalUsername = username;
+    if (!finalUsername) {
+      const emailBase = email.split('@')[0];
+      finalUsername = await generateUniqueUsername(emailBase);
+      console.log('📝 Username gerado automaticamente:', finalUsername);
+    } else {
+      // Validar se o username fornecido é único
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', finalUsername)
+        .single();
+
+      if (existingUser) {
+        throw new Error('Este username já está em uso. Escolha outro.');
+      }
+    }
+
+    // Registrar usuário no Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: finalUsername,
+          email_confirm: true,
+        },
+      },
+    });
+
+    if (error) {
+      console.error('❌ Erro no registro Supabase:', error);
+      throw error;
+    }
+
+    console.log('✅ Registro realizado com sucesso:', {
+      userId: data.user?.id,
+      username: finalUsername,
+      email: data.user?.email
+    });
+
+    return {
+      user: data.user,
+      error: null,
+      username: finalUsername,
+    };
+  } catch (error) {
+    console.error('💥 Erro geral no registro:', error);
+    return {
+      user: null,
+      error: error as AuthError,
+    };
+  }
+}
+
+/**
+ * Faz login com email e senha
+ * @param email - Email do usuário
+ * @param password - Senha do usuário
+ * @returns Promise que resolve quando o login é realizado
+ */
+export async function signInWithEmail(email: string, password: string): Promise<{ error: AuthError | null }> {
+  try {
+    console.log('🔄 Iniciando login com email:', email);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      console.error('❌ Erro no login:', error);
+      throw error;
+    }
+
+    console.log('✅ Login realizado com sucesso');
+    return { error: null };
+  } catch (error) {
+    console.error('💥 Erro geral no login:', error);
+    return { error: error as AuthError };
+  }
+}
+
+/**
+ * Faz login com provedor OAuth (Google ou Facebook)
+ * @param provider - Provedor OAuth
+ * @returns Promise que resolve quando o login é iniciado
+ */
+export async function signInWithProvider(provider: OAuthProvider): Promise<{ error: AuthError | null }> {
+  try {
+    console.log('🔄 Iniciando login OAuth:', provider);
+
+    // Determinar URL de redirecionamento baseada no ambiente
+    const redirectTo = getRedirectUrl('/auth/callback');
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+        scopes: provider === 'google' ? 'openid email profile' : 'email',
+        queryParams: provider === 'google' ? {
+          access_type: 'offline',
+          prompt: 'consent',
+        } : undefined,
+      },
+    });
+
+    if (error) {
+      console.error('❌ Erro no login OAuth:', error);
+      throw error;
+    }
+
+    console.log('✅ Login OAuth iniciado com sucesso');
+    return { error: null };
+  } catch (error) {
+    console.error('💥 Erro geral no login OAuth:', error);
+    return { error: error as AuthError };
+  }
+}
+
+/**
+ * Faz logout do usuário atual
+ * @returns Promise que resolve quando o logout é realizado
+ */
+export async function signOut(): Promise<{ error: AuthError | null }> {
+  try {
+    console.log('🔄 Iniciando logout');
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('❌ Erro no logout:', error);
+      throw error;
+    }
+
+    console.log('✅ Logout realizado com sucesso');
+    return { error: null };
+  } catch (error) {
+    console.error('💥 Erro geral no logout:', error);
+    return { error: error as AuthError };
+  }
+}
+
+/**
+ * Busca o usuário atual e seu perfil
+ * @returns Promise com dados do usuário atual
+ */
+export async function getCurrentUser(): Promise<CurrentUserResult> {
+  try {
+    console.log('🔍 Buscando usuário atual');
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError) {
+      console.error('❌ Erro ao buscar usuário auth:', authError);
+      return { user: null, profile: null, error: authError };
+    }
+
+    if (!user) {
+      console.log('❌ Nenhum usuário autenticado');
+      return { user: null, profile: null, error: null };
+    }
+
+    // Buscar perfil do usuário
+    const { data: profile, error: profileError } = await supabase
+      .from('users')
+      .select('id, name, email, username, avatar_url, tier')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error('❌ Erro ao buscar perfil:', profileError);
+      return { user, profile: null, error: { message: profileError.message, name: 'ProfileError' } as AuthError };
+    }
+
+    console.log('✅ Usuário e perfil encontrados:', {
+      userId: user.id,
+      username: profile?.username,
+      email: user.email
+    });
+
+    return { user, profile, error: null };
+  } catch (error) {
+    console.error('💥 Erro geral ao buscar usuário atual:', error);
+    return { user: null, profile: null, error: error as AuthError };
+  }
+}
+
+/**
+ * Processa callback OAuth após login com provedor
+ * Verifica se já existe conta com mesmo email+provedor e cria nova se necessário
+ * @returns Promise com resultado do processamento
+ */
+export async function handleOAuthCallback(): Promise<{ user: User | null; error: AuthError | null }> {
+  try {
+    console.log('🔄 Processando callback OAuth');
+
+    // Aguardar um pouco para garantir que a sessão esteja estabelecida
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Obter sessão atual
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      console.error('❌ Erro ao obter sessão:', sessionError);
+      throw sessionError;
+    }
+
+    if (!session?.user) {
+      console.log('❌ Nenhuma sessão encontrada no callback');
+      return { user: null, error: null };
+    }
+
+    const user = session.user;
+    console.log('✅ Sessão OAuth encontrada:', {
+      userId: user.id,
+      email: user.email,
+      provider: user.app_metadata?.provider
+    });
+
+    // Extrair informações do provedor
+    const provider = user.app_metadata?.provider as OAuthProvider;
+    const providerId = user.identities?.[0]?.id;
+    const email = user.email;
+
+    if (!provider || !providerId || !email) {
+      console.error('❌ Informações do provedor incompletas');
+      return { user, error: null };
+    }
+
+    // Verificar se já existe entrada para este email+provedor
+    const { data: existingProvider } = await supabase
+      .from('auth_providers')
+      .select('id, user_id, username')
+      .eq('email', email)
+      .eq('provider_name', provider)
+      .single();
+
+    if (existingProvider) {
+      console.log('✅ Conta já existe para este provedor, fazendo login normal');
+      return { user, error: null };
+    }
+
+    // Verificar se já existe usuário com este email
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id, username')
+      .eq('email', email)
+      .single();
+
+    let targetUserId = user.id;
+    let username: string;
+
+    if (existingUser) {
+      // Já existe usuário com este email, criar nova entrada auth_providers
+      console.log('📝 Usuário existe, criando nova entrada auth_providers');
+      targetUserId = existingUser.id;
+
+      // Gerar username único baseado no existente
+      const baseUsername = existingUser.username || email.split('@')[0];
+      username = await generateUniqueUsername(baseUsername);
+    } else {
+      // Novo usuário, gerar username baseado no email
+      const baseUsername = email.split('@')[0];
+      username = await generateUniqueUsername(baseUsername);
+    }
+
+    // Criar entrada na tabela auth_providers
+    const { error: insertError } = await supabase
+      .from('auth_providers')
+      .insert({
+        user_id: targetUserId,
+        provider_name: provider,
+        provider_id: providerId,
+        email: email,
+        username: username,
+      });
+
+    if (insertError) {
+      console.error('❌ Erro ao criar entrada auth_providers:', insertError);
+      throw insertError;
+    }
+
+    // Se é um novo usuário, atualizar o perfil
+    if (!existingUser) {
+      const displayName = user.user_metadata?.full_name ||
+                         user.user_metadata?.name ||
+                         username;
+
+      const avatarUrl = user.user_metadata?.avatar_url ||
+                       user.user_metadata?.picture || null;
+
+      // Criar perfil do usuário
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: targetUserId,
+          email: email,
+          username: username,
+          name: displayName,
+          avatar_url: avatarUrl,
+        });
+
+      if (profileError) {
+        console.error('❌ Erro ao criar perfil do usuário:', profileError);
+        throw profileError;
+      }
+
+      console.log('✅ Novo usuário criado via OAuth:', {
+        userId: targetUserId,
+        username,
+        email,
+        provider
+      });
+    } else {
+      console.log('✅ Nova conta associada via OAuth:', {
+        userId: targetUserId,
+        username,
+        email,
+        provider
+      });
+    }
+
+    return { user, error: null };
+  } catch (error) {
+    console.error('💥 Erro geral no processamento OAuth:', error);
+    return { user: null, error: error as AuthError };
+  }
+}
+
+/**
+ * Determina a URL de redirecionamento apropriada baseada no ambiente
+ * @param path - Caminho relativo para redirecionamento
+ * @returns URL completa de redirecionamento
+ */
+function getRedirectUrl(path: string): string {
+  // Verificar se estamos rodando localmente
+  const isLocalDev = !import.meta.env.VERCEL && window.location.hostname === 'localhost';
+  const isLocalDevAlt = import.meta.env.DEV && !import.meta.env.VERCEL_ENV;
+
+  console.log('🔍 Verificando ambiente para redirect:', {
+    DEV: import.meta.env.DEV,
+    VERCEL: import.meta.env.VERCEL,
+    VERCEL_ENV: import.meta.env.VERCEL_ENV,
+    hostname: window.location.hostname,
+    isLocalDev,
+    isLocalDevAlt
+  });
+
+  // Em desenvolvimento local, usar a origem atual
+  if (isLocalDev || isLocalDevAlt) {
+    console.log('✅ Ambiente de desenvolvimento local detectado');
+    return `${window.location.origin}${path}`;
+  }
+
+  // Para produção/Vercel, usar VERCEL_URL se disponível
+  const vercelUrl = import.meta.env.VITE_VERCEL_URL || import.meta.env.VERCEL_URL;
+
+  if (vercelUrl) {
+    try {
+      console.log('🔄 Usando VERCEL_URL:', vercelUrl);
+      const url = new URL(vercelUrl);
+      return `${url.origin}${path}`;
+    } catch (error) {
+      console.warn('VERCEL_URL inválida, usando fallback:', vercelUrl);
+    }
+  }
+
+  // Fallback: determinar dinamicamente baseada no ambiente atual
+  const origin = window.location.origin;
+  console.log('🔄 Usando origin atual:', origin);
+
+  // Para ambientes de preview do Vercel, garantir que usamos HTTPS
+  if (origin.includes('vercel-preview') || origin.includes('vercel.app')) {
+    return `https://${window.location.host}${path}`;
+  }
+
+  return `${origin}${path}`;
+}

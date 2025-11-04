@@ -10,9 +10,11 @@ import NotificationContainer from './components/common/NotificationContainer';
 // Lazy loading dos componentes de página para otimização de bundle
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Login = React.lazy(() => import('./pages/Login'));
+const Signup = React.lazy(() => import('./pages/Signup'));
+const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
 const EmailConfirmation = React.lazy(() => import('./pages/EmailConfirmation'));
 const EmailConfirmationSuccess = React.lazy(() => import('./pages/EmailConfirmationSuccess'));
-const HomePage = React.lazy(() => import('./pages/HomePage'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
 const CommunitiesPage = React.lazy(() => import('./pages/CommunitiesPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
@@ -38,12 +40,12 @@ const PageLoader: React.FC = () => (
 
 /**
  * Componente principal da aplicação com roteamento protegido
- * 
- * Rotas públicas (/, /login):
+ *
+ * Rotas públicas (/, /login, /signup):
  * - Acessíveis apenas por usuários não autenticados
- * - Usuários autenticados são redirecionados para /home
- * 
- * Rotas protegidas (/home):
+ * - Usuários autenticados são redirecionados para /dashboard
+ *
+ * Rotas protegidas (/dashboard):
  * - Acessíveis apenas por usuários autenticados
  * - Usuários não autenticados são redirecionados para /login
  */
@@ -72,6 +74,22 @@ const App: React.FC = () => {
           }
         />
 
+        {/* Rota de Signup (apenas para não autenticados) */}
+        <Route
+          path="/signup"
+          element={
+            <PublicRoute>
+              <Signup />
+            </PublicRoute>
+          }
+        />
+
+        {/* Rota de Callback OAuth (acessível para todos) */}
+        <Route
+          path="/auth/callback"
+          element={<AuthCallback />}
+        />
+
         {/* Rota de Confirmação de Email (acessível para todos os estados de autenticação) */}
         <Route
           path="/email-confirmation"
@@ -84,14 +102,20 @@ const App: React.FC = () => {
           element={<EmailConfirmationSuccess />}
         />
 
-        {/* Rota Home (apenas para autenticados) */}
+        {/* Rota Dashboard (apenas para autenticados) */}
         <Route
-          path="/home"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <Dashboard />
             </ProtectedRoute>
           }
+        />
+
+        {/* Rota Home (redirect para dashboard) */}
+        <Route
+          path="/home"
+          element={<Navigate to="/dashboard" replace />}
         />
 
         {/* Rota Lista de Comunidades (apenas para autenticados) */}

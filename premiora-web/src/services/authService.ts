@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { generateUniqueUsername } from '../utils/generateUniqueUsername';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -180,9 +181,14 @@ export class AuthService {
       const avatarUrl = user.user_metadata?.avatar_url ||
                        user.user_metadata?.picture || null;
 
+      // Gerar username único baseado no email (obrigatório para a tabela users)
+      const baseUsername = user.email ? user.email.split('@')[0] : 'user';
+      const username = await generateUniqueUsername(baseUsername);
+
       console.log('📝 Dados para inserir:', {
         id: user.id,
         email: user.email,
+        username: username,
         name: displayName,
         avatar_url: avatarUrl
       });
@@ -193,6 +199,7 @@ export class AuthService {
         .insert({
           id: user.id,
           email: user.email,
+          username: username,
           name: displayName,
           avatar_url: avatarUrl,
         })
@@ -215,6 +222,7 @@ export class AuthService {
             .update({
               name: displayName,
               avatar_url: avatarUrl,
+              username: username, // Também atualizar username se necessário
             })
             .eq('id', user.id)
             .select()

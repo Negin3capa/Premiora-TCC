@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState, useCallback } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AuthService } from '../services/authService';
+import { signOut } from '../lib/supabaseAuth';
 import type { UserProfile, AuthContextType } from '../types/auth';
 
 // Criar contexto
@@ -78,13 +79,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const signOut = useCallback(async () => {
+  const handleSignOut = useCallback(async () => {
     setLoading(true);
     try {
-      await AuthService.signOut();
+      const result = await signOut();
+      if (result.error) {
+        throw result.error;
+      }
+      setUser(null);
+      setUserProfile(null);
+      setSession(null);
     } catch (err) {
       setLoading(false);
       throw err;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -179,7 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signInWithFacebook,
     signInWithEmail,
     signUpWithEmail,
-    signOut,
+    signOut: handleSignOut,
     loading,
     refreshUserProfile,
   };
