@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { generateUniqueUsername } from '../utils/generateUniqueUsername';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -159,6 +160,7 @@ export class AuthService {
 
   /**
    * Cria ou atualiza o perfil do usuário no banco de dados
+   * Preserva dados customizados do usuário (name, username) se já configurados
    * @param user - Objeto User do Supabase
    * @returns Promise que resolve quando o perfil é criado/atualizado
    */
@@ -171,66 +173,79 @@ export class AuthService {
         session: !!supabase.auth.getUser()
       });
 
-      // Extrair nome do usuário dos metadados
-      const displayName = user.user_metadata?.full_name ||
-                         user.user_metadata?.name ||
-                         (user.email ? user.email.split('@')[0] : null);
+      // Primeiro, verificar se o perfil já existe
+      const existingProfile = await AuthService.fetchUserProfile(user.id);
 
-      // Obter URL do avatar
-      const avatarUrl = user.user_metadata?.avatar_url ||
-                       user.user_metadata?.picture || null;
+      // Extrair dados OAuth
+      const oauthName = user.user_metadata?.full_name ||
+                       user.user_metadata?.name ||
+                       (user.email ? user.email.split('@')[0] : null);
 
-      console.log('📝 Dados para inserir:', {
-        id: user.id,
-        email: user.email,
-        name: displayName,
-        avatar_url: avatarUrl
-      });
+      const oauthAvatarUrl = user.user_metadata?.avatar_url ||
+                            user.user_metadata?.picture || null;
 
-      // Tentar inserir novo perfil
-      const { data: insertData, error: insertError } = await supabase
-        .from('users')
-        .insert({
-          id: user.id,
-          email: user.email,
-          name: displayName,
-          avatar_url: avatarUrl,
-        })
-        .select()
-        .single();
+      if (!existingProfile) {
+        // Perfil não existe - criar novo com dados OAuth
+        console.log('📝 Criando novo perfil com dados OAuth');
 
-      if (insertError) {
-        console.error('❌ Erro na inserção do perfil:', {
-          message: insertError.message,
-          details: insertError.details,
-          hint: insertError.hint,
-          code: insertError.code
-        });
+        const baseUsername = user.email ? user.email.split('@')[0] : 'user';
+        const username = await generateUniqueUsername(baseUsername);
 
-        // Se falhar por chave duplicada, tentar atualizar
-        if (insertError.message?.includes('duplicate key') || insertError.code === '23505') {
-          console.log('🔄 Chave duplicada, tentando atualizar...');
-          const { data: updateData, error: updateError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: user.id,
+            email: user.email,
+            username: username,
+            name: oauthName,
+            avatar_url: oauthAvatarUrl,
+          })
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error('❌ Erro ao criar perfil:', insertError);
+          throw insertError;
+        } else {
+          console.log('✅ Perfil criado com sucesso:', insertData);
+        }
+      } else {
+        // Perfil existe - atualizar apenas dados não customizados
+        console.log('🔄 Perfil existente encontrado, atualizando dados OAuth');
+
+        const updateData: any = {};
+
+        // Atualizar avatar se não foi customizado ou se é diferente
+        if (oauthAvatarUrl && (!existingProfile.avatar_url || existingProfile.avatar_url !== oauthAvatarUrl)) {
+          updateData.avatar_url = oauthAvatarUrl;
+        }
+
+        // Só atualizar name/username se o perfil ainda não foi configurado
+        if (!existingProfile.profile_setup_completed) {
+          if (oauthName && existingProfile.name !== oauthName) {
+            updateData.name = oauthName;
+          }
+          // Username geralmente não deve ser alterado se já existe
+        }
+
+        // Só fazer update se há dados para atualizar
+        if (Object.keys(updateData).length > 0) {
+          const { data: updateResult, error: updateError } = await supabase
             .from('users')
-            .update({
-              name: displayName,
-              avatar_url: avatarUrl,
-            })
+            .update(updateData)
             .eq('id', user.id)
             .select()
             .single();
 
           if (updateError) {
-            console.error('❌ Erro na atualização do perfil:', updateError);
+            console.error('❌ Erro ao atualizar perfil:', updateError);
             throw updateError;
           } else {
-            console.log('✅ Perfil atualizado com sucesso:', updateData);
+            console.log('✅ Perfil atualizado com sucesso:', updateResult);
           }
         } else {
-          throw insertError;
+          console.log('ℹ️ Nenhum dado OAuth para atualizar');
         }
-      } else {
-        console.log('✅ Perfil criado com sucesso via insert:', insertData);
       }
     } catch (err) {
       console.error('💥 Erro geral ao upsertar perfil do usuário:', err);
@@ -248,7 +263,7 @@ export class AuthService {
     try {
       const { data: profile, error } = await supabase
         .from('users')
-        .select('id, name, email, avatar_url, tier')
+        .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
         .eq('id', userId)
         .single();
 
