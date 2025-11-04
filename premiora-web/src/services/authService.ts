@@ -1,4 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
+import { supabaseAdmin } from '../utils/supabaseAdminClient';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -190,7 +191,7 @@ export class AuthService {
         // Criar username temporário único baseado no ID do usuário
         const tempUsername = `temp_${user.id.replace(/-/g, '').substring(0, 20)}`;
 
-        const { data: insertData, error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabaseAdmin
           .from('users')
           .insert({
             id: user.id,
@@ -235,7 +236,7 @@ export class AuthService {
 
         // Só fazer update se há dados para atualizar
         if (Object.keys(updateData).length > 0) {
-          const { data: updateResult, error: updateError } = await supabase
+          const { data: updateResult, error: updateError } = await supabaseAdmin
             .from('users')
             .update(updateData)
             .eq('id', user.id)
@@ -260,13 +261,14 @@ export class AuthService {
 
   /**
    * Busca o perfil do usuário do banco de dados
+   * Usa cliente admin para bypass de RLS policies durante OAuth
    * @param userId - ID do usuário
    * @returns Promise com dados do perfil ou null se não encontrado
    */
   static async fetchUserProfile(userId: string): Promise<any> {
     console.log('🔍 Buscando perfil do usuário:', userId);
     try {
-      const { data: profile, error } = await supabase
+      const { data: profile, error } = await supabaseAdmin
         .from('users')
         .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
         .eq('id', userId)
