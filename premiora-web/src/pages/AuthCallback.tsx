@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { handleOAuthCallback } from '../lib/supabaseAuth';
+import { AuthService } from '../services/authService';
 
 /**
  * Página de callback para processar autenticação OAuth
@@ -45,16 +46,38 @@ const AuthCallback: React.FC = () => {
 
           console.log('✅ Callback OAuth processado com sucesso');
 
-          // Para usuários OAuth, sempre redirecionar para setup
-          // Assumimos que são novos usuários que precisam configurar o perfil
-          console.log('🔄 Usuário OAuth detectado, redirecionando para setup');
-          setStatus('success');
-          setMessage('Login realizado com sucesso! Configurando perfil...');
+          // Criar/atualizar perfil do usuário no banco de dados
+          console.log('👤 Criando/atualizando perfil do usuário OAuth...');
+          await AuthService.upsertUserProfile(user);
 
-          // Redirecionar para setup após 2 segundos
-          redirectTimer = setTimeout(() => {
-            navigate('/setup', { replace: true });
-          }, 2000);
+          // Verificar se o perfil já está completo
+          console.log('🔍 Verificando se perfil está completo...');
+          const userProfile = await AuthService.fetchUserProfile(user.id);
+
+          const isProfileComplete = userProfile &&
+                                   userProfile.name &&
+                                   userProfile.username &&
+                                   userProfile.profile_setup_completed;
+
+          if (isProfileComplete) {
+            console.log('✅ Perfil já está completo, redirecionando para dashboard');
+            setStatus('success');
+            setMessage('Login realizado com sucesso! Bem-vindo de volta.');
+
+            // Redirecionar para dashboard após 2 segundos
+            redirectTimer = setTimeout(() => {
+              navigate('/dashboard', { replace: true });
+            }, 2000);
+          } else {
+            console.log('⚠️ Perfil incompleto, redirecionando para setup');
+            setStatus('success');
+            setMessage('Login realizado com sucesso! Configurando perfil...');
+
+            // Redirecionar para setup após 2 segundos
+            redirectTimer = setTimeout(() => {
+              navigate('/setup', { replace: true });
+            }, 2000);
+          }
 
         } catch (error) {
           console.error('💥 Erro geral no processamento do callback:', error);

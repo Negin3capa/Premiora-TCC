@@ -118,6 +118,7 @@ export const useProfileSetup = () => {
 
   /**
    * Salva o perfil do usuário no Supabase
+   * Para usuários OAuth, atualiza o registro existente
    * @returns Promise que resolve quando o perfil é salvo
    */
   const saveProfile = async (): Promise<void> => {
@@ -143,11 +144,14 @@ export const useProfileSetup = () => {
         username: username.trim(),
       });
 
+      // Para usuários OAuth que já têm um registro básico criado no callback,
+      // fazemos UPDATE dos campos name e username
       const { error } = await supabase
         .from('users')
         .update({
           name: name.trim(),
           username: username.trim(),
+          profile_setup_completed: true, // Marcar setup como completo
         })
         .eq('id', user.id);
 
