@@ -31,7 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const profile = await AuthService.fetchUserProfile(user.id);
     setUserProfile(profile);
-  }, []); // Removida dependência de user para evitar loop
+  }, [user]); // Adicionada dependência de user
 
   /**
    * Handlers de autenticação que delegam para o AuthService
