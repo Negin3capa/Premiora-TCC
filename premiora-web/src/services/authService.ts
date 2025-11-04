@@ -1,5 +1,4 @@
 import { supabase } from '../utils/supabaseClient';
-import { generateUniqueUsername } from '../utils/generateUniqueUsername';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -185,20 +184,21 @@ export class AuthService {
                             user.user_metadata?.picture || null;
 
       if (!existingProfile) {
-        // Perfil não existe - criar novo com dados OAuth
-        console.log('📝 Criando novo perfil com dados OAuth');
+        // Perfil não existe - criar novo com username temporário (usuário deve configurar manualmente)
+        console.log('📝 Criando novo perfil básico com dados OAuth (setup será completado manualmente)');
 
-        const baseUsername = user.email ? user.email.split('@')[0] : 'user';
-        const username = await generateUniqueUsername(baseUsername);
+        // Criar username temporário único baseado no ID do usuário
+        const tempUsername = `temp_${user.id.replace(/-/g, '').substring(0, 20)}`;
 
         const { data: insertData, error: insertError } = await supabase
           .from('users')
           .insert({
             id: user.id,
             email: user.email,
-            username: username,
+            username: tempUsername, // Username temporário único
             name: oauthName,
             avatar_url: oauthAvatarUrl,
+            profile_setup_completed: false, // Explicitamente marcar como incompleto
           })
           .select()
           .single();
