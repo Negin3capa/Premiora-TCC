@@ -329,7 +329,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                         />
                         <div>
                           <div className="profile-menu-name">{displayName}</div>
-                          <div className="profile-menu-email">{userName}</div>
+                          <div className="profile-menu-email">@{userName}</div>
                         </div>
                       </div>
                       <div className="profile-menu-divider" />
