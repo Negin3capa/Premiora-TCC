@@ -123,8 +123,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           console.log('👤 Usuário autenticado, buscando perfil em background...');
 
-          // Buscar perfil em background sem afetar loading state
-          refreshUserProfile().catch(err => {
+          // Buscar perfil diretamente para evitar stale closure
+          AuthService.fetchUserProfile(session.user.id).then(profile => {
+            if (isMounted) {
+              setUserProfile(profile);
+            }
+          }).catch(err => {
             console.error('Profile fetch failed:', err);
           });
         } else {
@@ -155,8 +159,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           console.log('👤 Auth state change - usuário autenticado, buscando perfil em background...');
 
-          // Buscar perfil em background sem afetar loading state
-          refreshUserProfile().catch(err => {
+          // Buscar perfil diretamente para evitar stale closure
+          AuthService.fetchUserProfile(session.user.id).then(profile => {
+            if (isMounted) {
+              setUserProfile(profile);
+            }
+          }).catch(err => {
             console.error('Profile fetch failed:', err);
           });
         } else {
@@ -172,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [refreshUserProfile]);
+  }, []);
 
   const value: AuthContextType = {
     user,

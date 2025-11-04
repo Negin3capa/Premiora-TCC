@@ -221,11 +221,16 @@ export class AuthService {
         }
 
         // Só atualizar name/username se o perfil ainda não foi configurado
+        console.log('🔍 Verificando profile_setup_completed:', existingProfile.profile_setup_completed);
         if (!existingProfile.profile_setup_completed) {
+          console.log('⚠️ Perfil não está completo, atualizando dados OAuth');
           if (oauthName && existingProfile.name !== oauthName) {
             updateData.name = oauthName;
+            console.log('📝 Atualizando name para:', oauthName);
           }
           // Username geralmente não deve ser alterado se já existe
+        } else {
+          console.log('✅ Perfil já está completo, não atualizará dados OAuth');
         }
 
         // Só fazer update se há dados para atualizar

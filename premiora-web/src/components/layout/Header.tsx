@@ -24,7 +24,7 @@ interface HeaderProps {
  * @param user - Objeto do usuário autenticado do Supabase
  */
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onToggleSidebar }) => {
-  const { signOut, userProfile } = useAuth();
+  const { signOut, userProfile, loading } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<{
@@ -296,7 +296,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
             </button>
 
             <div className="user-profile">
-              {user ? (
+              {user && !loading ? (
                 <div className="profile-dropdown">
                   <div
                     className="profile-info"
@@ -328,7 +328,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                           className="profile-menu-avatar"
                         />
                         <div>
-                          <div className="profile-menu-name">{userName}</div>
+                          <div className="profile-menu-name">{displayName}</div>
                           <div className="profile-menu-email">{userName}</div>
                         </div>
                       </div>
