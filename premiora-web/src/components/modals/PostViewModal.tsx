@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ContentItem } from '../../types/content';
 
 interface PostViewModalProps {
@@ -17,6 +17,8 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
   onClose,
   userTier
 }) => {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
   if (!isOpen || !item || item.type !== 'post') {
     return null;
   }
@@ -53,8 +55,10 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
             <img
               src={item.thumbnail}
               alt={item.title}
-              className="post-view-image"
+              className="post-view-image clickable-image"
               loading="lazy"
+              onClick={() => setIsImageModalOpen(true)}
+              style={{ cursor: 'pointer' }}
             />
           )}
         </div>
@@ -79,52 +83,77 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content post-view-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <div className="author-info">
-            <img
-              src={item.authorAvatar}
-              alt={item.author}
-              className="author-avatar"
-              loading="lazy"
-            />
-            <div className="author-details">
-              <span className="author-name">{item.author}</span>
-              <span className="post-timestamp">{item.timestamp}</span>
+    <>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content post-view-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <div className="author-info">
+              <img
+                src={item.authorAvatar}
+                alt={item.author}
+                className="author-avatar"
+                loading="lazy"
+              />
+              <div className="author-details">
+                <span className="author-name">{item.author}</span>
+                <span className="post-timestamp">{item.timestamp}</span>
+              </div>
             </div>
-          </div>
-          <button
-            className="close-button"
-            onClick={onClose}
-            aria-label="Fechar"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="modal-body">
-          {renderContent()}
-        </div>
-
-        <div className="modal-footer">
-          <div className="post-stats">
-            <span className="views">{item.views?.toLocaleString('pt-BR')} visualizações</span>
-            <span className="likes">{item.likes?.toLocaleString('pt-BR')} curtidas</span>
-          </div>
-          <div className="post-actions">
-            <button className="action-btn like-btn">
-              <span className="action-icon">❤️</span>
-              Curtir
+            <button
+              className="close-button"
+              onClick={onClose}
+              aria-label="Fechar"
+            >
+              ✕
             </button>
-            <button className="action-btn share-btn">
-              <span className="action-icon">📤</span>
-              Compartilhar
-            </button>
+          </div>
+
+          <div className="modal-body">
+            {renderContent()}
+          </div>
+
+          <div className="modal-footer">
+            <div className="post-stats">
+              <span className="views">{item.views?.toLocaleString('pt-BR')} visualizações</span>
+              <span className="likes">{item.likes?.toLocaleString('pt-BR')} curtidas</span>
+            </div>
+            <div className="post-actions">
+              <button className="action-btn like-btn">
+                <span className="action-icon">❤️</span>
+                Curtir
+              </button>
+              <button className="action-btn share-btn">
+                <span className="action-icon">📤</span>
+                Compartilhar
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Modal de imagem ampliada */}
+      {isImageModalOpen && item.thumbnail && (
+        <div
+          className="image-modal-overlay"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="image-modal-close"
+              onClick={() => setIsImageModalOpen(false)}
+              aria-label="Fechar imagem ampliada"
+            >
+              ✕
+            </button>
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              className="image-modal-image"
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
