@@ -134,32 +134,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           console.log('👤 Usuário autenticado, buscando perfil em background...');
 
-          // Buscar perfil diretamente para evitar stale closure
-          AuthService.fetchUserProfile(session.user.id).then(profile => {
-            if (isMounted) {
-              // Se perfil é null, significa que o usuário foi deletado do banco
-              // mas ainda tem sessão ativa - fazer logout automático
-              if (profile === null) {
-                console.log('🚨 Usuário autenticado mas perfil não encontrado - conta deletada, fazendo logout automático');
-                // Não definir userProfile como null para evitar loop
-                // Em vez disso, fazer logout silencioso
-                supabase.auth.signOut().catch(err => {
-                  console.error('Erro no logout automático:', err);
-                });
-                return;
+          // Aguardar um pouco antes de buscar perfil para dar tempo ao callback OAuth processar
+          setTimeout(async () => {
+            if (!isMounted) return;
+
+            // Buscar perfil diretamente para evitar stale closure
+            AuthService.fetchUserProfile(session.user.id).then(profile => {
+              if (isMounted) {
+                // Se perfil é null, significa que o usuário foi deletado do banco
+                // mas ainda tem sessão ativa - fazer logout automático
+                if (profile === null) {
+                  console.log('🚨 Usuário autenticado mas perfil não encontrado - conta deletada, fazendo logout automático');
+                  // Não definir userProfile como null para evitar loop
+                  // Em vez disso, fazer logout silencioso
+                  supabase.auth.signOut().catch(err => {
+                    console.error('Erro no logout automático:', err);
+                  });
+                  return;
+                }
+                setUserProfile(profile);
               }
-              setUserProfile(profile);
-            }
-          }).catch(err => {
-            console.error('Profile fetch failed:', err);
-            // Em caso de erro, assumir que perfil não existe e fazer logout
-            if (isMounted) {
-              console.log('🚨 Erro ao buscar perfil - fazendo logout automático');
-              supabase.auth.signOut().catch(logoutErr => {
-                console.error('Erro no logout automático:', logoutErr);
-              });
-            }
-          });
+            }).catch(err => {
+              console.error('Profile fetch failed:', err);
+              // Em caso de erro, assumir que perfil não existe e fazer logout
+              if (isMounted) {
+                console.log('🚨 Erro ao buscar perfil - fazendo logout automático');
+                supabase.auth.signOut().catch(logoutErr => {
+                  console.error('Erro no logout automático:', logoutErr);
+                });
+              }
+            });
+          }, 1000); // Aguardar 1 segundo para dar tempo ao callback
         } else {
           console.log('❌ Nenhum usuário autenticado');
           if (isMounted) {

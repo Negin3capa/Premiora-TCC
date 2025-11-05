@@ -488,6 +488,10 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px; /* Limita largura máxima para evitar overflow */
 }
 
 .profile-status {
@@ -933,6 +937,13 @@
     display: flex;
   }
 
+  .profile-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px; /* Largura menor no mobile para melhor adaptação */
+  }
+
   .feed {
     padding: var(--space-3);
   }
@@ -1023,6 +1034,10 @@
 @media (max-width: 480px) {
   .profile-details {
     display: none;
+  }
+
+  .profile-name {
+    max-width: 80px; /* Largura ainda menor em telas muito pequenas */
   }
 
   .header-actions {

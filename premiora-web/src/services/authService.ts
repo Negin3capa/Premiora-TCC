@@ -173,9 +173,6 @@ export class AuthService {
         session: !!supabase.auth.getUser()
       });
 
-      // Primeiro, verificar se o perfil já existe
-      const existingProfile = await AuthService.fetchUserProfile(user.id);
-
       // Extrair dados OAuth
       const oauthName = user.user_metadata?.full_name ||
                        user.user_metadata?.name ||
@@ -183,6 +180,9 @@ export class AuthService {
 
       const oauthAvatarUrl = user.user_metadata?.avatar_url ||
                             user.user_metadata?.picture || null;
+
+      // Primeiro, tentar buscar perfil existente
+      const existingProfile = await AuthService.fetchUserProfile(user.id);
 
       if (!existingProfile) {
         // Perfil não existe - criar novo com username temporário (usuário deve configurar manualmente)
@@ -205,6 +205,16 @@ export class AuthService {
           .single();
 
         if (insertError) {
+          // Se erro for de chave duplicada, significa que outra requisição criou o perfil
+          // Vamos tentar buscar novamente
+          if (insertError.code === '23505') {
+            console.log('⚠️ Perfil já existe (criado por outra requisição), tentando buscar novamente...');
+            const retryProfile = await AuthService.fetchUserProfile(user.id);
+            if (retryProfile) {
+              console.log('✅ Perfil encontrado no retry:', retryProfile);
+              return;
+            }
+          }
           console.error('❌ Erro ao criar perfil:', insertError);
           throw insertError;
         } else {

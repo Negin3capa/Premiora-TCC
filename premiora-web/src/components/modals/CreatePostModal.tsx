@@ -4,6 +4,8 @@
  */
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { ContentService } from '../../services/contentService';
+import { useFeed } from '../../hooks/useFeed';
 import '../../styles/modals.css';
 import { CommunityDropdown, FileUpload } from '../common';
 
@@ -41,6 +43,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   onPublish
 }) => {
   const { user } = useAuth();
+  const { addNewPost } = useFeed();
 
   // Estado do formulário
   const [formData, setFormData] = useState<PostFormData>({
@@ -91,21 +94,24 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       return;
     }
 
+    if (!user?.id) {
+      alert('Você precisa estar logado para publicar');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Simulação de processamento
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Criar post usando o ContentService
+      const newPost = await ContentService.createPost(formData, user.id);
 
+      // Adicionar ao feed
+      addNewPost(newPost);
+
+      // Callback opcional
       if (onPublish) {
         onPublish(formData);
       }
-
-      console.log('Post criado:', {
-        ...formData,
-        authorId: user?.id,
-        publishedAt: new Date()
-      });
 
       // Limpar formulário e fechar modal
       handleCancel();
