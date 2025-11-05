@@ -46,6 +46,11 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                       user?.email?.split('@')[0] ||
                       'Usuário';
 
+  // Versão truncada do nome para o header (máximo 20 caracteres)
+  const truncatedDisplayName = displayName.length > 20
+    ? displayName.substring(0, 17) + '...'
+    : displayName;
+
   // Username para o dropdown (vem do banco de dados)
   const userName = userProfile?.username ||
                    user?.email?.split('@')[0] ||
@@ -229,11 +234,11 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
           >
             <img
               src={userAvatar}
-              alt={displayName}
+              alt={truncatedDisplayName}
               className="mobile-avatar"
               onError={(e) => {
                 // Fallback caso a imagem falhe ao carregar
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF424D&color=fff&bold=true`;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(truncatedDisplayName)}&background=FF424D&color=fff&bold=true`;
               }}
             />
           </button>
@@ -313,7 +318,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                       }}
                     />
                     <div className="profile-details">
-                      <span className="profile-name">{displayName}</span>
+                      <span className="profile-name" title={displayName}>{truncatedDisplayName}</span>
                       <span className="profile-status">Online</span>
                     </div>
                     <span className="dropdown-arrow">{showProfileMenu ? '▲' : '▼'}</span>
@@ -328,7 +333,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                           className="profile-menu-avatar"
                         />
                         <div>
-                          <div className="profile-menu-name">{displayName}</div>
+                          <div className="profile-menu-name" title={displayName}>{displayName}</div>
                           <div className="profile-menu-email">@{userName}</div>
                         </div>
                       </div>

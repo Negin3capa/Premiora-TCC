@@ -53,7 +53,7 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
             <img
               src={item.thumbnail}
               alt={item.title}
-              className="post-image"
+              className="post-view-image"
               loading="lazy"
             />
           )}
