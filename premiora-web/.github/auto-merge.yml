@@ -1,0 +1,51 @@
+# Configuração de Auto Merge para Pull Requests
+# Este arquivo define as regras para auto merge automático
+
+# Regras mínimas para auto merge
+min_approvals: 1
+
+# Branches que permitem auto merge
+target_branches:
+  - main
+  - develop
+
+# Tipos de PR que podem ser auto mesclados
+merge_method: squash
+
+# Condições obrigatórias
+required_checks:
+  - test
+  - lint
+  - build
+
+# Labels que ativam auto merge automático
+auto_merge_labels:
+  - "auto-merge"
+  - "dependencies"
+  - "automated"
+
+# Labels que impedem auto merge
+blocking_labels:
+  - "do-not-merge"
+  - "work-in-progress"
+  - "needs-review"
+
+# Usuários autorizados para auto merge
+# Se vazio, permite qualquer usuário aprovado
+authorized_users: []
+
+# Tamanho máximo do PR para auto merge (em linhas)
+max_changes: 1000
+
+# Arquivos que não permitem auto merge automático
+blocked_files:
+  - "package-lock.json"
+  - "*.env*"
+  - "database/migrations/*.sql"
+
+# Mensagem de commit para auto merge
+commit_message: "chore: auto merge PR #{number} - {title}"
+
+# Configurações adicionais
+delete_branch_after_merge: true
+require_branches_up_to_date: true

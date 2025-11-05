@@ -1,6 +1,11 @@
 name: CI
 on: [push, pull_request]
 
+# Permissões necessárias para auto merge
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -23,3 +28,39 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+
+  # Job para auto merge de pull requests
+  auto-merge:
+    runs-on: ubuntu-latest
+    # Só executa em pull requests e quando o job de teste passou
+    if: github.event_name == 'pull_request' && needs.test.result == 'success'
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check auto merge conditions
+        id: check-conditions
+        run: |
+          # Verificar se o PR tem labels de auto merge
+          PR_LABELS=$(gh pr view ${{ github.event.number }} --json labels --jq '.labels[].name')
+          echo "PR Labels: $PR_LABELS"
+
+          # Verificar se tem label de auto merge
+          if echo "$PR_LABELS" | grep -q "auto-merge\|dependencies\|automated"; then
+            echo "Auto merge label found"
+            echo "should_merge=true" >> $GITHUB_OUTPUT
+          else
+            echo "No auto merge label found"
+            echo "should_merge=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto merge
+        if: steps.check-conditions.outputs.should_merge == 'true'
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.number }}
+          merge-method: squash
