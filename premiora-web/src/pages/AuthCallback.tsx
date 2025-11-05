@@ -51,12 +51,24 @@ const AuthCallback: React.FC = () => {
           console.log('👤 Criando/atualizando perfil do usuário OAuth...');
           await AuthService.upsertUserProfile(user);
 
+          // Aguardar um pouco para garantir que o perfil foi criado
+          await new Promise(resolve => setTimeout(resolve, 500));
+
           // Verificar se o perfil já está completo
           console.log('🔍 Verificando se perfil está completo...');
           const userProfile = await AuthService.fetchUserProfile(user.id);
 
-          const isProfileComplete = userProfile &&
-                                   userProfile.name &&
+          if (!userProfile) {
+            console.error('❌ Perfil não foi criado corretamente');
+            setStatus('error');
+            setMessage('Erro ao criar perfil. Tente novamente.');
+            redirectTimer = setTimeout(() => {
+              navigate('/login', { replace: true });
+            }, 3000);
+            return;
+          }
+
+          const isProfileComplete = userProfile.name &&
                                    userProfile.username &&
                                    userProfile.profile_setup_completed;
 
