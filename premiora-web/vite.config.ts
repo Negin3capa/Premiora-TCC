@@ -50,7 +50,7 @@ export default defineConfig({
           // Separar componentes de conteúdo
           'content-components': [
             './src/components/content/Feed',
-            './src/components/content/ContentCard',
+            './src/components/ContentCard',
             './src/components/content/UserSuggestions'
           ],
 

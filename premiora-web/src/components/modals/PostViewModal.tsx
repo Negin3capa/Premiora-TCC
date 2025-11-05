@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ContentItem } from '../../types/content';
 
 interface PostViewModalProps {
@@ -18,6 +18,29 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
   userTier
 }) => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [savedScrollPosition, setSavedScrollPosition] = useState(0);
+
+  // Gerencia o scroll do body quando o modal está aberto
+  useEffect(() => {
+    if (isOpen) {
+      // Salva a posição atual de scroll
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+      setSavedScrollPosition(currentScroll);
+      document.body.classList.add('modal-open');
+    } else {
+      // Restaura a posição de scroll salva
+      document.body.classList.remove('modal-open');
+      // Pequeno delay para garantir que o DOM foi atualizado
+      setTimeout(() => {
+        window.scrollTo(0, savedScrollPosition);
+      }, 0);
+    }
+
+    // Cleanup: remove a classe quando o componente é desmontado
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [isOpen, savedScrollPosition]);
 
   if (!isOpen || !item || item.type !== 'post') {
     return null;

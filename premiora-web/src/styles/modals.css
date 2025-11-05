@@ -415,6 +415,11 @@
   animation: fadeIn var(--transition-fast);
 }
 
+/* Previne scroll do body quando modal está aberto */
+body.modal-open {
+  overflow: hidden;
+}
+
 .post-view-modal {
   position: fixed;
   top: 50%;
@@ -430,6 +435,7 @@
   border: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Previne overflow do container principal */
 }
 
 .modal-header {
@@ -491,7 +497,10 @@
   padding: var(--space-6);
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* Previne overflow horizontal */
   min-height: 0;
+  word-wrap: break-word; /* Quebra palavras longas */
+  overflow-wrap: break-word;
 }
 
 .post-full-content .post-title {
@@ -515,14 +524,20 @@
   color: var(--color-text-primary);
   margin-bottom: var(--space-4);
   white-space: pre-wrap;
+  word-wrap: break-word; /* Quebra palavras longas */
+  overflow-wrap: break-word;
+  hyphens: auto; /* Hifenização automática para melhor quebra */
 }
 
 .post-view-image {
   width: 100%;
-  max-height: 600px;
+  max-width: 100%; /* Garante que não ultrapasse o container */
+  height: auto;
+  max-height: 400px; /* Reduzido para evitar scroll desnecessário */
   object-fit: contain;
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-4);
+  display: block; /* Remove possíveis espaços extras */
 }
 
 .access-required {

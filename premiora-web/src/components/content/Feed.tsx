@@ -1,5 +1,5 @@
 import React from 'react';
-import ContentCard from './ContentCard';
+import ContentCard from '../ContentCard';
 import UserSuggestions from './UserSuggestions';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import type { ContentItem } from '../../types/content';
