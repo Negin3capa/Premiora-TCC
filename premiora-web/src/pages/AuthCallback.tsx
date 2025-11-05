@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { handleOAuthCallback } from '../lib/supabaseAuth';
 import { AuthService } from '../services/authService';
+import { setSetupLock } from '../utils/profileUtils';
 
 /**
  * Página de callback para processar autenticação OAuth
@@ -70,6 +71,11 @@ const AuthCallback: React.FC = () => {
             }, 2000);
           } else {
             console.log('⚠️ Perfil incompleto, redirecionando para setup');
+
+            // Bloquear setup para este usuário
+            setSetupLock(user.id, true);
+            console.log('🔒 Setup bloqueado para novo usuário OAuth');
+
             setStatus('success');
             setMessage('Login realizado com sucesso! Configurando perfil...');
 

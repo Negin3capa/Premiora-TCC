@@ -99,7 +99,7 @@ const UserSuggestions: React.FC<UserSuggestionsProps> = ({ suggestions }) => {
                 />
                 <div className="suggestion-info">
                   <div className="suggestion-name">
-                    <span className="suggestion-username">{user.username}</span>
+                    <span className="suggestion-username">@{user.username}</span>
                     {user.isVerified && (
                       <span className="verification-badge">✓</span>
                     )}

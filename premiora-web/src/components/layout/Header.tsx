@@ -24,7 +24,7 @@ interface HeaderProps {
  * @param user - Objeto do usuário autenticado do Supabase
  */
 const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onToggleSidebar }) => {
-  const { signOut, userProfile } = useAuth();
+  const { signOut, userProfile, loading } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState<{
@@ -38,10 +38,16 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
   const lastScrollY = useRef(0);
   const scrollTimeoutRef = useRef<number | null>(null);
   
-  // Extrai informações do perfil do usuário
-  const userName = user?.user_metadata?.full_name ||
-                   user?.user_metadata?.name ||
-                   userProfile?.name ||
+  // Nome de exibição (usado no header principal) - prioriza o name do banco
+  const displayName = userProfile?.name ||
+                      user?.user_metadata?.full_name ||
+                      user?.user_metadata?.name ||
+                      userProfile?.username ||
+                      user?.email?.split('@')[0] ||
+                      'Usuário';
+
+  // Username para o dropdown (vem do banco de dados)
+  const userName = userProfile?.username ||
                    user?.email?.split('@')[0] ||
                    'Usuário';
 
@@ -223,11 +229,11 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
           >
             <img
               src={userAvatar}
-              alt={userName}
+              alt={displayName}
               className="mobile-avatar"
               onError={(e) => {
                 // Fallback caso a imagem falhe ao carregar
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF424D&color=fff&bold=true`;
               }}
             />
           </button>
@@ -290,24 +296,24 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
             </button>
 
             <div className="user-profile">
-              {user ? (
+              {user && !loading ? (
                 <div className="profile-dropdown">
                   <div
                     className="profile-info"
-                    title={`Perfil de ${userName}`}
+                    title={`Perfil de ${displayName}`}
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
                   >
                     <img
                       src={userAvatar}
-                      alt={userName}
+                      alt={displayName}
                       className="profile-avatar"
                       onError={(e) => {
                         // Fallback caso a imagem falhe ao carregar
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF424D&color=fff&bold=true`;
                       }}
                     />
                     <div className="profile-details">
-                      <span className="profile-name">{userName}</span>
+                      <span className="profile-name">{displayName}</span>
                       <span className="profile-status">Online</span>
                     </div>
                     <span className="dropdown-arrow">{showProfileMenu ? '▲' : '▼'}</span>
@@ -322,8 +328,8 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                           className="profile-menu-avatar"
                         />
                         <div>
-                          <div className="profile-menu-name">{userName}</div>
-                          <div className="profile-menu-email">{user.email}</div>
+                          <div className="profile-menu-name">{displayName}</div>
+                          <div className="profile-menu-email">@{userName}</div>
                         </div>
                       </div>
                       <div className="profile-menu-divider" />

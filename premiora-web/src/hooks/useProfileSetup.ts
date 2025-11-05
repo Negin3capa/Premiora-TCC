@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from './useAuth';
+import { clearSetupLock } from '../utils/profileUtils';
 
 /**
  * Estado de validação do username
@@ -52,17 +53,14 @@ export const useProfileSetup = () => {
       console.log('🔍 Verificando disponibilidade do username:', username);
 
       const { data, error } = await supabase
-        .from('users')
-        .select('id')
-        .eq('username', username)
-        .maybeSingle();
+        .rpc('check_username_availability', { check_username: username });
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('❌ Erro ao verificar username:', error);
         throw error;
       }
 
-      const isAvailable = !data;
+      const isAvailable = data;
       console.log(isAvailable ? '✅ Username disponível' : '❌ Username já em uso', username);
       return isAvailable;
     } catch (error) {
@@ -161,6 +159,12 @@ export const useProfileSetup = () => {
       }
 
       console.log('✅ Perfil salvo com sucesso');
+
+      // Limpar bloqueio do setup
+      if (user) {
+        clearSetupLock(user.id);
+        console.log('🔓 Setup desbloqueado após conclusão bem-sucedida');
+      }
 
       // Atualizar perfil no contexto
       await refreshUserProfile();

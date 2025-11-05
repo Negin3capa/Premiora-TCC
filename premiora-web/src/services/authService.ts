@@ -1,5 +1,5 @@
 import { supabase } from '../utils/supabaseClient';
-import { generateUniqueUsername } from '../utils/generateUniqueUsername';
+import { supabaseAdmin } from '../utils/supabaseAdminClient';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -185,20 +185,21 @@ export class AuthService {
                             user.user_metadata?.picture || null;
 
       if (!existingProfile) {
-        // Perfil não existe - criar novo com dados OAuth
-        console.log('📝 Criando novo perfil com dados OAuth');
+        // Perfil não existe - criar novo com username temporário (usuário deve configurar manualmente)
+        console.log('📝 Criando novo perfil básico com dados OAuth (setup será completado manualmente)');
 
-        const baseUsername = user.email ? user.email.split('@')[0] : 'user';
-        const username = await generateUniqueUsername(baseUsername);
+        // Criar username temporário único baseado no ID do usuário
+        const tempUsername = `temp_${user.id.replace(/-/g, '').substring(0, 20)}`;
 
-        const { data: insertData, error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabaseAdmin
           .from('users')
           .insert({
             id: user.id,
             email: user.email,
-            username: username,
+            username: tempUsername, // Username temporário único
             name: oauthName,
             avatar_url: oauthAvatarUrl,
+            profile_setup_completed: false, // Explicitamente marcar como incompleto
           })
           .select()
           .single();
@@ -221,16 +222,21 @@ export class AuthService {
         }
 
         // Só atualizar name/username se o perfil ainda não foi configurado
+        console.log('🔍 Verificando profile_setup_completed:', existingProfile.profile_setup_completed);
         if (!existingProfile.profile_setup_completed) {
+          console.log('⚠️ Perfil não está completo, atualizando dados OAuth');
           if (oauthName && existingProfile.name !== oauthName) {
             updateData.name = oauthName;
+            console.log('📝 Atualizando name para:', oauthName);
           }
           // Username geralmente não deve ser alterado se já existe
+        } else {
+          console.log('✅ Perfil já está completo, não atualizará dados OAuth');
         }
 
         // Só fazer update se há dados para atualizar
         if (Object.keys(updateData).length > 0) {
-          const { data: updateResult, error: updateError } = await supabase
+          const { data: updateResult, error: updateError } = await supabaseAdmin
             .from('users')
             .update(updateData)
             .eq('id', user.id)
@@ -255,13 +261,14 @@ export class AuthService {
 
   /**
    * Busca o perfil do usuário do banco de dados
+   * Usa cliente admin para bypass de RLS policies durante OAuth
    * @param userId - ID do usuário
    * @returns Promise com dados do perfil ou null se não encontrado
    */
   static async fetchUserProfile(userId: string): Promise<any> {
     console.log('🔍 Buscando perfil do usuário:', userId);
     try {
-      const { data: profile, error } = await supabase
+      const { data: profile, error } = await supabaseAdmin
         .from('users')
         .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
         .eq('id', userId)

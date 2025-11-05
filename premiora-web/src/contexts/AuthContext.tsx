@@ -1,8 +1,9 @@
-import React, { createContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AuthService } from '../services/authService';
 import { signOut } from '../lib/supabaseAuth';
+import { clearSetupLock, clearExpiredSetupLocks } from '../utils/profileUtils';
 import type { UserProfile, AuthContextType } from '../types/auth';
 
 // Criar contexto
@@ -19,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const currentUserIdRef = useRef<string | null>(null);
 
   /**
    * Busca e atualiza o perfil do usuário no estado local
@@ -31,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const profile = await AuthService.fetchUserProfile(user.id);
     setUserProfile(profile);
-  }, []); // Removida dependência de user para evitar loop
+  }, [user]); // Adicionada dependência de user
 
   /**
    * Handlers de autenticação que delegam para o AuthService
@@ -82,6 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const handleSignOut = useCallback(async () => {
     setLoading(true);
     try {
+      // Limpar bloqueio do setup antes do logout
+      if (user?.id) {
+        clearSetupLock(user.id);
+        console.log('🔓 Setup lock removido no logout para usuário:', user.id);
+      }
+
       const result = await signOut();
       if (result.error) {
         throw result.error;
@@ -95,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   // Escutar mudanças na sessão e gerenciar estado
   useEffect(() => {
@@ -103,6 +111,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
+        // Limpar bloqueios expirados na inicialização
+        clearExpiredSetupLocks();
+
         console.log('🔄 Inicializando autenticação...');
         const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -123,9 +134,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           console.log('👤 Usuário autenticado, buscando perfil em background...');
 
-          // Buscar perfil em background sem afetar loading state
-          refreshUserProfile().catch(err => {
+          // Buscar perfil diretamente para evitar stale closure
+          AuthService.fetchUserProfile(session.user.id).then(profile => {
+            if (isMounted) {
+              // Se perfil é null, significa que o usuário foi deletado do banco
+              // mas ainda tem sessão ativa - fazer logout automático
+              if (profile === null) {
+                console.log('🚨 Usuário autenticado mas perfil não encontrado - conta deletada, fazendo logout automático');
+                // Não definir userProfile como null para evitar loop
+                // Em vez disso, fazer logout silencioso
+                supabase.auth.signOut().catch(err => {
+                  console.error('Erro no logout automático:', err);
+                });
+                return;
+              }
+              setUserProfile(profile);
+            }
+          }).catch(err => {
             console.error('Profile fetch failed:', err);
+            // Em caso de erro, assumir que perfil não existe e fazer logout
+            if (isMounted) {
+              console.log('🚨 Erro ao buscar perfil - fazendo logout automático');
+              supabase.auth.signOut().catch(logoutErr => {
+                console.error('Erro no logout automático:', logoutErr);
+              });
+            }
           });
         } else {
           console.log('❌ Nenhum usuário autenticado');
@@ -145,9 +178,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event: string, session) => {
         console.log('🔄 Auth state change:', event, { hasSession: !!session, userId: session?.user?.id });
 
+        // Limpar bloqueios expirados periodicamente
+        if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          clearExpiredSetupLocks();
+        }
+
+        // Se usuário fez logout, limpar setup locks usando o ref
+        if (event === 'SIGNED_OUT' && currentUserIdRef.current) {
+          clearSetupLock(currentUserIdRef.current);
+          console.log('🔓 Setup lock removido no sign out para usuário:', currentUserIdRef.current);
+          currentUserIdRef.current = null;
+        }
+
         if (isMounted) {
           setSession(session);
           setUser(session?.user ?? null);
+          // Atualizar ref com ID do usuário atual
+          currentUserIdRef.current = session?.user?.id ?? null;
           setLoading(false); // Finalizar loading imediatamente
         }
 
@@ -155,9 +202,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           console.log('👤 Auth state change - usuário autenticado, buscando perfil em background...');
 
-          // Buscar perfil em background sem afetar loading state
-          refreshUserProfile().catch(err => {
+          // Buscar perfil diretamente para evitar stale closure
+          AuthService.fetchUserProfile(session.user.id).then(profile => {
+            if (isMounted) {
+              // Se perfil é null, significa que o usuário foi deletado do banco
+              // mas ainda tem sessão ativa - fazer logout automático
+              if (profile === null) {
+                console.log('🚨 Auth state change - usuário autenticado mas perfil não encontrado - conta deletada, fazendo logout automático');
+                // Fazer logout silencioso
+                supabase.auth.signOut().catch(err => {
+                  console.error('Erro no logout automático:', err);
+                });
+                return;
+              }
+              setUserProfile(profile);
+            }
+          }).catch(err => {
             console.error('Profile fetch failed:', err);
+            // Em caso de erro, assumir que perfil não existe e fazer logout
+            if (isMounted) {
+              console.log('🚨 Auth state change - erro ao buscar perfil - fazendo logout automático');
+              supabase.auth.signOut().catch(logoutErr => {
+                console.error('Erro no logout automático:', logoutErr);
+              });
+            }
           });
         } else {
           console.log('❌ Auth state change - nenhum usuário autenticado');
@@ -172,7 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [refreshUserProfile]);
+  }, []);
 
   const value: AuthContextType = {
     user,
