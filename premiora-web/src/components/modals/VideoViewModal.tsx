@@ -5,6 +5,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import type { ContentItem } from '../../types/content';
+import {
+  X,
+  Pause,
+  Play,
+  VolumeX,
+  Volume2,
+  Minimize,
+  Maximize,
+  Lock,
+  Heart,
+  MessageCircle,
+  Share,
+  ThumbsUp
+} from 'lucide-react';
 
 interface VideoViewModalProps {
   item: ContentItem | null;
@@ -217,7 +231,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
             onClick={onClose}
             aria-label="Fechar"
           >
-            ✕
+            <X size={16} />
           </button>
         </div>
 
@@ -233,9 +247,13 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
                   onLoadedMetadata={handleLoadedMetadata}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
+                  controls={false} // Desabilitar controles nativos pois temos controles customizados
                 >
-                  {/* TODO: Adicionar source do vídeo quando disponível */}
-                  <source src="" type="video/mp4" />
+                  {item.videoUrl ? (
+                    <source src={item.videoUrl} type="video/mp4" />
+                  ) : (
+                    <source src="" type="video/mp4" />
+                  )}
                   Seu navegador não suporta o elemento de vídeo.
                 </video>
 
@@ -254,12 +272,12 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
 
                   <div className="control-buttons">
                     <button onClick={handlePlayPause} className="play-pause-btn">
-                      {isPlaying ? '⏸️' : '▶️'}
+                      {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                     </button>
 
                     <div className="volume-control">
                       <button onClick={handleMute} className="mute-btn">
-                        {isMuted ? '🔇' : '🔊'}
+                        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
                       </button>
                       <input
                         type="range"
@@ -277,7 +295,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
                     </div>
 
                     <button onClick={handleFullscreen} className="fullscreen-btn">
-                      {isFullscreen ? '🗗' : '🗖'}
+                      {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
                     </button>
                   </div>
                 </div>
@@ -291,7 +309,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
                     className="preview-thumbnail"
                   />
                   <div className="preview-overlay">
-                    <div className="lock-icon">🔒</div>
+                    <div className="lock-icon"><Lock size={24} /></div>
                     <p>Este vídeo é exclusivo para {item.requiredTier || 'assinantes'}</p>
                     <button className="upgrade-button">
                       Fazer Upgrade
@@ -322,21 +340,21 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
               className={`action-btn like-btn ${isLiked ? 'liked' : ''}`}
               onClick={handleLike}
             >
-              <span className="action-icon">{isLiked ? '❤️' : '🤍'}</span>
+              <span className="action-icon"><Heart size={16} /></span>
               {likes?.toLocaleString('pt-BR')}
             </button>
             <button
               className="action-btn comment-btn"
               onClick={() => setShowComments(!showComments)}
             >
-              <span className="action-icon">💬</span>
+              <span className="action-icon"><MessageCircle size={16} /></span>
               {comments.length}
             </button>
             <button
               className="action-btn share-btn"
               onClick={handleShare}
             >
-              <span className="action-icon">📤</span>
+              <span className="action-icon"><Share size={16} /></span>
               Compartilhar
             </button>
           </div>
@@ -398,7 +416,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
                       <p className="comment-text">{comment.content}</p>
                       <div className="comment-actions">
                         <button className="comment-like-btn">
-                          👍 {comment.likes}
+                          <ThumbsUp size={14} /> {comment.likes}
                         </button>
                         <button className="comment-reply-btn">
                           Responder

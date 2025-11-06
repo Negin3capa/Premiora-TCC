@@ -3,6 +3,7 @@
  * Responsável por busca e paginação de conteúdo do feed
  */
 import { supabase } from '../../utils/supabaseClient';
+import { VideoService } from './VideoService';
 
 /**
  * Resultado da busca de posts do feed
@@ -17,11 +18,11 @@ export interface FeedResult {
  */
 export class FeedService {
   /**
-   * Busca posts para o feed com paginação
+   * Busca conteúdo para o feed com paginação (posts + vídeos)
    * @param page - Página atual
-   * @param limit - Número de posts por página
+   * @param limit - Número de itens por página
    * @param userId - ID do usuário (para controle de acesso)
-   * @returns Promise com posts e metadados
+   * @returns Promise com conteúdo e metadados
    */
   static async getFeedPosts(
     page: number = 1,
@@ -29,39 +30,49 @@ export class FeedService {
     userId?: string
   ): Promise<FeedResult> {
     try {
-      // Primeiro, obter o total de registros para evitar erros de range
-      let countQuery = supabase
-        .from('posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_published', true);
+      // Buscar posts e vídeos em paralelo
+      const [postsResult, videosResult] = await Promise.all([
+        this.getPostsOnly(page, limit, userId),
+        VideoService.getFeedVideos(page, limit, userId)
+      ]);
 
-      // Aplicar filtros de acesso baseado no usuário
-      if (userId) {
-        countQuery = countQuery.or(`is_premium.eq.false,creator_id.eq.${userId}`);
-      } else {
-        // Usuário não logado vê apenas conteúdo público
-        countQuery = countQuery.eq('is_premium', false);
-      }
+      // Mesclar e ordenar por data de publicação
+      const allContent = [
+        ...postsResult.posts.map(post => ({ ...post, contentType: 'post' })),
+        ...videosResult.map(video => ({ ...video, contentType: 'video' }))
+      ].sort((a, b) => new Date(b.timestamp || b.published_at).getTime() - new Date(a.timestamp || a.published_at).getTime());
 
-      const { count, error: countError } = await countQuery;
-
-      if (countError) {
-        throw new Error(`Erro ao contar posts: ${countError.message}`);
-      }
-
-      const totalPosts = count || 0;
+      // Aplicar paginação no resultado mesclado
       const from = (page - 1) * limit;
+      const paginatedContent = allContent.slice(from, from + limit);
 
-      // Se não há mais posts para carregar, retornar vazio
-      if (from >= totalPosts) {
-        return {
-          posts: [],
-          hasMore: false
-        };
-      }
+      // Verificar se há mais conteúdo
+      const hasMore = allContent.length > from + limit;
 
-      // Ajustar o limite se estamos na última página
-      const actualLimit = Math.min(limit, totalPosts - from);
+      return {
+        posts: paginatedContent,
+        hasMore
+      };
+    } catch (error) {
+      console.error('Erro geral ao buscar conteúdo do feed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Busca apenas posts (método auxiliar para compatibilidade)
+   * @param page - Página atual
+   * @param limit - Número de posts por página
+   * @param userId - ID do usuário (para controle de acesso)
+   * @returns Promise com posts
+   */
+  static async getPostsOnly(
+    page: number = 1,
+    limit: number = 10,
+    userId?: string
+  ): Promise<{ posts: any[] }> {
+    try {
+      const from = (page - 1) * limit;
 
       let dataQuery = supabase
         .from('posts')
@@ -84,8 +95,9 @@ export class FeedService {
           )
         `)
         .eq('is_published', true)
+        .neq('content_type', 'video') // Excluir vídeos pois são buscados separadamente
         .order('published_at', { ascending: false })
-        .range(from, from + actualLimit - 1);
+        .range(from, from + limit - 1);
 
       // Aplicar filtros de acesso baseado no usuário
       if (userId) {
@@ -101,14 +113,11 @@ export class FeedService {
         throw new Error(`Erro ao buscar posts: ${dataError.message}`);
       }
 
-      const hasMore = (from + actualLimit) < totalPosts;
-
       return {
-        posts: data || [],
-        hasMore
+        posts: data || []
       };
     } catch (error) {
-      console.error('Erro geral ao buscar posts do feed:', error);
+      console.error('Erro ao buscar posts:', error);
       throw error;
     }
   }
