@@ -1,0 +1,155 @@
+/**
+ * Estilos para o componente ProfileBanner
+ * Banner do perfil com gradiente escuro estilo Patreon
+ */
+
+/* Container principal do banner */
+.profile-banner {
+  width: 100%;
+  background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
+  position: relative;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+}
+
+/* Conteúdo do banner */
+.banner-content {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* Informações do criador */
+.creator-info {
+  flex: 1;
+  max-width: 600px;
+  color: #DADADA;
+}
+
+.creator-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.creator-stats {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.creator-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  max-width: 500px;
+}
+
+/* Botão de ação */
+.join-button {
+  background: linear-gradient(135deg, #FF424D 0%, #E63946 100%);
+  color: #FFFFFF;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
+}
+
+.join-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 66, 77, 0.4);
+}
+
+.join-button:active {
+  transform: translateY(0);
+}
+
+/* Ilustração no lado direito */
+.banner-illustration {
+  flex-shrink: 0;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.illustration-svg {
+  width: 100%;
+  height: 100%;
+  opacity: 0.6;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .creator-info {
+    max-width: 100%;
+  }
+
+  .creator-name {
+    font-size: 2rem;
+  }
+
+  .creator-description {
+    max-width: 100%;
+  }
+
+  .banner-illustration {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-banner {
+    min-height: 250px;
+  }
+
+  .banner-content {
+    padding: 1rem;
+  }
+
+  .creator-name {
+    font-size: 1.75rem;
+  }
+
+  .creator-stats {
+    font-size: 1rem;
+  }
+
+  .creator-description {
+    font-size: 0.9rem;
+  }
+
+  .join-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+  }
+
+  .banner-illustration {
+    width: 120px;
+    height: 120px;
+  }
+}

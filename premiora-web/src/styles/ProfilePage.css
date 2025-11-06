@@ -1,0 +1,49 @@
+/**
+ * Estilos para a página ProfilePage
+ * Layout completo da página de perfil estilo Patreon
+ */
+
+/* Container principal da página */
+.profile-page {
+  min-height: 100vh;
+  background-color: #0D0D0D;
+  color: #DADADA;
+  display: flex;
+}
+
+/* Conteúdo principal */
+.profile-main {
+  flex: 1;
+  margin-left: 280px; /* Largura da sidebar */
+  min-height: 100vh;
+}
+
+/* Container do conteúdo do perfil */
+.profile-content {
+  padding: 2rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+  .profile-main {
+    margin-left: 240px; /* Sidebar menor em tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-main {
+    margin-left: 0; /* Remove sidebar em mobile */
+  }
+
+  .profile-content {
+    padding: 1.5rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-content {
+    padding: 1rem 0;
+  }
+}
