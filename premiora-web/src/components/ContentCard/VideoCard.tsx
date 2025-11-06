@@ -3,6 +3,7 @@
  * Card específico para exibir vídeos
  */
 import React from 'react';
+import { Play } from 'lucide-react';
 import type { ContentItem } from '../../types/content';
 
 interface VideoCardProps {
@@ -24,7 +25,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ item, onPlay }) => {
           loading="lazy"
         />
         <div className="play-overlay">
-          <span className="play-icon">▶️</span>
+          <span className="play-icon"><Play size={24} /></span>
         </div>
         <div className="video-duration">
           {((item.views || 0) % 20) + 1}:{((item.views || 0) % 60).toString().padStart(2, '0')}

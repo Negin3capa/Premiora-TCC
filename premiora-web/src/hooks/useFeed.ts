@@ -25,8 +25,8 @@ export const useFeed = () => {
     try {
       const { posts, hasMore: moreAvailable } = await ContentService.getFeedPosts(pageNum, 10, userId);
 
-      // Converter posts do banco para ContentItem
-      const contentItems = posts.map(post => ContentService.transformPostToContentItem(post));
+      // Converter posts/vídeos do banco para ContentItem
+      const contentItems = posts.map(post => ContentService.transformToContentItem(post));
 
       // Inserir sugestões de usuários
       const contentWithSuggestions = ContentService.insertUserSuggestions(

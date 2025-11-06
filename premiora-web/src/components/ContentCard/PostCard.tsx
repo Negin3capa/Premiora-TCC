@@ -3,6 +3,7 @@
  * Card específico para exibir posts
  */
 import React from 'react';
+import { Lock } from 'lucide-react';
 import type { ContentItem } from '../../types/content';
 
 interface PostCardProps {
@@ -33,7 +34,7 @@ const PostCard: React.FC<PostCardProps> = ({ item, onClick }) => {
       )}
       {item.isLocked && (
         <div className="locked-indicator">
-          <span className="lock-icon">🔒</span>
+          <span className="lock-icon"><Lock size={16} /></span>
           <span className="lock-text">
             {item.requiredTier ? `${item.requiredTier}` : 'Exclusivo'}
           </span>

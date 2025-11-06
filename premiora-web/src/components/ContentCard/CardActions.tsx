@@ -3,6 +3,7 @@
  * Ações compartilhadas para todos os tipos de cards
  */
 import React from 'react';
+import { Heart, MessageCircle, Send } from 'lucide-react';
 import type { ContentItem } from '../../types/content';
 
 interface CardActionsProps {
@@ -30,7 +31,7 @@ const CardActions: React.FC<CardActionsProps> = ({
         aria-label="Curtir"
         title="Curtir"
       >
-        <span className="action-icon">❤️</span>
+        <span className="action-icon"><Heart size={16} /></span>
         <span className="action-count">{item.likes?.toLocaleString('pt-BR')}</span>
       </button>
       <button
@@ -39,7 +40,7 @@ const CardActions: React.FC<CardActionsProps> = ({
         aria-label="Comentar"
         title="Comentar"
       >
-        <span className="action-icon">💬</span>
+        <span className="action-icon"><MessageCircle size={16} /></span>
         <span className="action-count">{Math.floor((item.likes || 0) / 5)}</span>
       </button>
       <button
@@ -48,7 +49,7 @@ const CardActions: React.FC<CardActionsProps> = ({
         aria-label="Compartilhar"
         title="Compartilhar"
       >
-        <span className="action-icon">📤</span>
+        <span className="action-icon"><Send size={16} /></span>
       </button>
     </div>
   );

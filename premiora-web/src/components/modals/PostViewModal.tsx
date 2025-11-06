@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Lock, X, Heart, Share } from 'lucide-react';
 import type { ContentItem } from '../../types/content';
 
 interface PostViewModalProps {
@@ -94,7 +95,7 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
             {item.previewContent || item.content?.substring(0, 200) + '...'}
           </div>
           <div className="access-required">
-            <div className="lock-icon">🔒</div>
+            <div className="lock-icon"><Lock size={24} /></div>
             <p>Este conteúdo é exclusivo para {item.requiredTier || 'assinantes'}</p>
             <button className="upgrade-button">
               Fazer Upgrade
@@ -127,7 +128,7 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
               onClick={onClose}
               aria-label="Fechar"
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
 
@@ -142,11 +143,11 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
             </div>
             <div className="post-actions">
               <button className="action-btn like-btn">
-                <span className="action-icon">❤️</span>
+                <span className="action-icon"><Heart size={16} /></span>
                 Curtir
               </button>
               <button className="action-btn share-btn">
-                <span className="action-icon">📤</span>
+                <span className="action-icon"><Share size={16} /></span>
                 Compartilhar
               </button>
             </div>
@@ -166,7 +167,7 @@ const PostViewModal: React.FC<PostViewModalProps> = ({
               onClick={() => setIsImageModalOpen(false)}
               aria-label="Fechar imagem ampliada"
             >
-              ✕
+              <X size={16} />
             </button>
             <img
               src={item.thumbnail}

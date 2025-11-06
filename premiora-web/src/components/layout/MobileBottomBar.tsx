@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Home, Bell, MessageCircle, Users, Settings } from 'lucide-react';
 
 interface MobileBottomBarProps {
   className?: string;
@@ -20,11 +21,11 @@ const MobileBottomBar: React.FC<MobileBottomBarProps> = ({ className = '' }) => 
 
   // Itens de navegação para a barra móvel (apenas os essenciais)
   const mobileNavigationItems = [
-    { icon: '🏠', label: 'Home', route: '/home' },
-    { icon: '🔔', label: 'Notificações', route: '/notifications' },
-    { icon: '💬', label: 'Mensagens', route: '/messages' },
-    { icon: '🏘️', label: 'Comunidades', route: '/communities' },
-    { icon: '⚙️', label: 'Configurações', route: '/settings' },
+    { icon: <Home size={20} />, label: 'Home', route: '/home' },
+    { icon: <Bell size={20} />, label: 'Notificações', route: '/notifications' },
+    { icon: <MessageCircle size={20} />, label: 'Mensagens', route: '/messages' },
+    { icon: <Users size={20} />, label: 'Comunidades', route: '/communities' },
+    { icon: <Settings size={20} />, label: 'Configurações', route: '/settings' },
   ];
 
   /**
