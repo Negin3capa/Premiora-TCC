@@ -3,7 +3,7 @@
  * Card de conteúdo que exibe posts, vídeos e perfis
  */
 import React, { useState } from 'react';
-import './ContentCard.css';
+import '../../styles/ContentCard.css';
 import { useAuth } from '../../hooks/useAuth';
 import type { ContentItem } from '../../types/content';
 import { PostViewModal, VideoViewModal } from '../modals';

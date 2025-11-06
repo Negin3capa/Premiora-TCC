@@ -292,21 +292,191 @@
 
 /* ==================== Responsive Design ==================== */
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .content-card {
+    border-radius: var(--radius-md);
+    margin: 0 var(--space-1);
+  }
+
+  .card-header {
+    padding: var(--space-3);
+  }
+
+  .author-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .author-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .content-title {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-2);
+  }
+
+  .card-content {
+    padding: 0 var(--space-3) var(--space-3);
+  }
+
   .card-actions {
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-3);
     gap: var(--space-1);
   }
 
   .action-btn {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-size-xs);
+  }
+
+  .action-count {
+    font-size: var(--font-size-xs);
+  }
+
+  /* Video Card Mobile */
+  .video-thumbnail img {
+    height: 280px;
+  }
+
+  /* Post Card Mobile */
+  .post-image {
+    height: 300px;
+  }
+
+  .post-body {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+  }
+
+  /* Profile Card Mobile */
+  .profile-content {
+    padding: var(--space-3);
+  }
+
+  .profile-image {
+    width: 60px;
+    height: 60px;
+    margin-bottom: var(--space-2);
+  }
+
+  .profile-stats {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-3);
+  }
+}
+
+@media (max-width: 480px) {
+  .content-card {
+    border-radius: var(--radius-sm);
+    margin: 0;
+  }
+
+  .card-header {
     padding: var(--space-2);
   }
 
+  .author-info {
+    gap: var(--space-2);
+  }
+
+  .author-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .author-details {
+    gap: 1px;
+  }
+
+  .author-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .content-type {
+    font-size: var(--font-size-xs);
+  }
+
+  .content-title {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-1);
+  }
+
+  .card-content {
+    padding: 0 var(--space-2) var(--space-2);
+  }
+
+  .card-actions {
+    padding: var(--space-2) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .action-btn {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .action-icon {
+    font-size: var(--font-size-sm);
+  }
+
+  .action-count {
+    font-size: var(--font-size-xs);
+  }
+
+  /* Video Card Mobile Small */
   .video-thumbnail img {
     height: 200px;
   }
 
+  .play-overlay {
+    width: 48px;
+    height: 48px;
+  }
+
+  .play-icon {
+    font-size: var(--font-size-xl);
+  }
+
+  .video-duration {
+    font-size: var(--font-size-xs);
+    padding: 2px var(--space-1);
+  }
+
+  /* Post Card Mobile Small */
   .post-image {
     height: 250px;
+  }
+
+  .post-body {
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--space-2);
+  }
+
+  .locked-indicator {
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-2);
+  }
+
+  /* Profile Card Mobile Small */
+  .profile-content {
+    padding: var(--space-2);
+  }
+
+  .profile-image {
+    width: 50px;
+    height: 50px;
+    margin-bottom: var(--space-2);
+  }
+
+  .profile-stats {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-2);
+  }
+
+  .support-button {
+    padding: var(--space-1) var(--space-4);
+    font-size: var(--font-size-xs);
   }
 }

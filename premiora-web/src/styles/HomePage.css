@@ -91,7 +91,51 @@
 
 /* ==================== Responsive Design ==================== */
 
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 70px; /* Reduced header height on mobile */
+  }
 
+  .feed {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .feed-content {
+    max-width: 100%;
+    margin: 0;
+    padding: 0 var(--space-2);
+  }
+
+  .content-grid {
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+}
+
+@media (max-width: 480px) {
+  .feed {
+    padding: var(--space-2);
+  }
+
+  .feed-content {
+    padding: 0;
+  }
+
+  .content-grid {
+    gap: var(--space-2);
+  }
+
+  .empty-state {
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .loading-state {
+    padding: var(--space-6) var(--space-4);
+  }
+}
 
 /* ==================== Mobile Bottom Bar ==================== */
 

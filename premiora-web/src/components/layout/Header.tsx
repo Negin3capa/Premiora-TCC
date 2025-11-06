@@ -2,8 +2,8 @@
  * Componente Header
  * Barra superior com busca, notificações, perfil do usuário e logout
  */
-import React, { useState, useEffect, useRef } from 'react';
-import './Header.css';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import '../../styles/Header.css';
 import type { User } from '@supabase/supabase-js';
 import { Search, Bell, MessageCircle, ChevronUp, ChevronDown, User as UserIcon, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -58,24 +58,25 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                    user?.email?.split('@')[0] ||
                    'Usuário';
 
-  /**
-   * Helper function to extract avatar URL from user metadata
-   * Handles different OAuth provider structures (Google, Facebook, etc.)
-   */
-  const getAvatarUrl = () => {
-    const metadata = user?.user_metadata;
+  // Memoized avatar URL that updates when user or userProfile changes
+  const userAvatar = useMemo(() => {
+    // Prioritize database avatar_url as it's more reliable than OAuth metadata
+    if (userProfile?.avatar_url) {
+      return userProfile.avatar_url;
+    }
 
-    // Try different possible avatar field names from OAuth providers
+    // Fallback to OAuth metadata if database doesn't have it
+    const metadata = user?.user_metadata;
     const possibleFields = ['avatar_url', 'picture', 'photo', 'profile_picture', 'image'];
 
-    // Check direct metadata fields first (Facebook typically stores here, Google also uses 'picture')
+    // Check direct metadata fields
     for (const field of possibleFields) {
       if (metadata?.[field]) {
         return metadata[field];
       }
     }
 
-    // Check nested identities data (common for some OAuth setups)
+    // Check nested identities data
     if (metadata?.identities && Array.isArray(metadata.identities)) {
       for (const identity of metadata.identities) {
         if (identity?.identity_data) {
@@ -88,16 +89,9 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
       }
     }
 
-    // Fallback to database profile (stored user profile)
-    if (userProfile?.avatar_url) {
-      return userProfile.avatar_url;
-    }
-
     // Final fallback to generated avatar with user initials
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}&background=FF424D&color=fff&bold=true`;
-  };
-
-  const userAvatar = getAvatarUrl();
+  }, [user, userProfile, userName]);
 
   /**
    * Effect para buscar resultados quando a query muda

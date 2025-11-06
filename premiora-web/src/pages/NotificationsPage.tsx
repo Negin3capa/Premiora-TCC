@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { Heart, MessageCircle, User, Building2, Bell, MoreHorizontal } from 'lucide-react';
-import './NotificationsPage.css';
+import '../styles/NotificationsPage.css';
 
 /**
  * Página de notificações do usuário

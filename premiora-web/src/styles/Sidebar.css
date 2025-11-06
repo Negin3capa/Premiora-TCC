@@ -190,9 +190,138 @@
     transform: translateX(-100%);
     transition: transform var(--transition-slow);
     z-index: var(--z-modal);
+    width: 280px; /* Keep full width on mobile for better UX */
   }
 
   .sidebar.mobile-open {
     transform: translateX(0);
+  }
+
+  .sidebar-header {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .sidebar-logo {
+    font-size: var(--font-size-xl);
+  }
+
+  .sidebar-nav {
+    padding: var(--space-3) 0;
+  }
+
+  .nav-item {
+    padding: 0 var(--space-2);
+  }
+
+  .nav-button {
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  .nav-icon {
+    width: 20px;
+  }
+
+  .sidebar-footer {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .creator-section h3 {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-2);
+  }
+
+  .mini-creator-list {
+    gap: var(--space-1);
+  }
+
+  .mini-creator-item {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-2);
+  }
+
+  .mini-creator-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .mini-creator-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .mini-creator-status {
+    font-size: var(--font-size-xs);
+  }
+
+  .mini-creator-status::before {
+    width: 5px;
+    height: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 280px; /* Keep fixed width for better UX, even on small screens */
+  }
+
+  .sidebar-header {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .sidebar-logo {
+    font-size: var(--font-size-lg);
+  }
+
+  .sidebar-nav {
+    padding: var(--space-2) 0;
+  }
+
+  .nav-item {
+    padding: 0 var(--space-1);
+  }
+
+  .nav-button {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .nav-label {
+    font-size: var(--font-size-sm);
+  }
+
+  .sidebar-footer {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .creator-section h3 {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-1);
+  }
+
+  .mini-creator-list {
+    gap: var(--space-1);
+  }
+
+  .mini-creator-item {
+    padding: var(--space-1);
+    gap: var(--space-1);
+  }
+
+  .mini-creator-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mini-creator-name {
+    font-size: var(--font-size-xs);
+  }
+
+  .mini-creator-status {
+    font-size: var(--font-size-xs);
+  }
+
+  .mini-creator-status::before {
+    width: 4px;
+    height: 4px;
   }
 }
