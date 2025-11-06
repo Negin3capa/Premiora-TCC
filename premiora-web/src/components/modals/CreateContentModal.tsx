@@ -3,6 +3,7 @@
  * Permite ao usuário escolher o tipo de conteúdo a ser criado
  */
 import React from 'react';
+import { FileText, Video, Users, ChevronRight } from 'lucide-react';
 
 /**
  * Tipos de conteúdo disponíveis para criação
@@ -29,21 +30,21 @@ const contentOptions = [
     type: 'post' as ContentType,
     title: 'Post',
     description: 'Compartilhe suas ideias e pensamentos',
-    icon: '📝',
+    icon: FileText,
     color: 'var(--color-primary)'
   },
   {
     type: 'video' as ContentType,
     title: 'Vídeo',
     description: 'Publique conteúdo em vídeo',
-    icon: '🎥',
+    icon: Video,
     color: 'var(--color-success)'
   },
   {
     type: 'community' as ContentType,
     title: 'Comunidade',
     description: 'Crie uma nova comunidade',
-    icon: '👥',
+    icon: Users,
     color: 'var(--color-info)'
   }
 ];
@@ -172,9 +173,13 @@ const CreateContentModal: React.FC<CreateContentModalProps> = ({
               <span style={{
                 fontSize: 'var(--font-size-3xl)',
                 width: '48px',
-                textAlign: 'center'
+                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-text-primary)'
               }}>
-                {option.icon}
+                <option.icon size={32} />
               </span>
 
               <div style={{ flex: 1 }}>
@@ -196,13 +201,10 @@ const CreateContentModal: React.FC<CreateContentModalProps> = ({
                 </p>
               </div>
 
-              <span style={{
-                fontSize: 'var(--font-size-lg)',
+              <ChevronRight size={20} style={{
                 color: 'var(--color-text-tertiary)',
                 transition: 'color var(--transition-fast)'
-              }}>
-                ›
-              </span>
+              }} />
             </button>
           ))}
         </div>
