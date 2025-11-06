@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { PenTool, MessageCircle, ArrowLeft, MoreHorizontal, Send } from 'lucide-react';
-import '../styles/HomePage.css';
+import './MessagesPage.css';
 
 /**
  * Página de mensagens do usuário

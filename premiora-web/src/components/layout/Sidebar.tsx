@@ -3,6 +3,7 @@
  * Barra lateral com navegação e perfil do usuário
  */
 import React from 'react';
+import './Sidebar.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Flame, Bell, MessageCircle, Users, Building2, Settings, PenTool } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';

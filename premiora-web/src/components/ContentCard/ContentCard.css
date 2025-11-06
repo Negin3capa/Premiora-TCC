@@ -1,0 +1,312 @@
+/**
+ * Estilos do componente ContentCard
+ * Contém estilos para cards de conteúdo (posts, vídeos, perfis)
+ */
+
+/* ==================== Content Card ==================== */
+
+.content-card {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-light);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  animation: slideInUp var(--transition-base);
+}
+
+.content-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-medium);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 2px solid var(--color-border-light);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.author-avatar:hover {
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.author-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.author-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.author-name:hover {
+  color: var(--color-primary);
+}
+
+.content-type {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.card-menu {
+  background: none;
+  border: none;
+  padding: var(--space-2);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xl);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.card-menu:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.card-content {
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.content-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  line-height: var(--line-height-tight);
+}
+
+.content-stats {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ==================== Estilos Específicos por Tipo de Card ==================== */
+
+/* Profile Card */
+.profile-content {
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  margin: 0 auto var(--space-3);
+  border: 3px solid var(--color-border-light);
+}
+
+.profile-stats {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.support-button {
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+  padding: var(--space-2) var(--space-6);
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-sm);
+}
+
+.support-button:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Video Card */
+.video-thumbnail {
+  position: relative;
+  cursor: pointer;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.video-thumbnail img {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.video-thumbnail:hover img {
+  transform: scale(1.05);
+}
+
+.play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: var(--radius-full);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  backdrop-filter: blur(4px);
+}
+
+.video-thumbnail:hover .play-overlay {
+  opacity: 1;
+}
+
+.play-icon {
+  color: var(--color-text-white);
+  font-size: var(--font-size-2xl);
+}
+
+.video-duration {
+  position: absolute;
+  bottom: var(--space-2);
+  right: var(--space-2);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: var(--color-text-white);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Post Card */
+.post-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+}
+
+.post-body {
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-base);
+}
+
+.locked-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.lock-icon {
+  font-size: var(--font-size-lg);
+}
+
+.lock-text {
+  font-weight: var(--font-weight-medium);
+}
+
+/* ==================== Card Actions ==================== */
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.action-btn:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.like-btn:hover {
+  color: var(--color-like);
+}
+
+.comment-btn:hover {
+  color: var(--color-comment);
+}
+
+.share-btn:hover {
+  color: var(--color-share);
+}
+
+.action-count {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 480px) {
+  .card-actions {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+  }
+
+  .action-btn {
+    padding: var(--space-2);
+  }
+
+  .video-thumbnail img {
+    height: 200px;
+  }
+
+  .post-image {
+    height: 250px;
+  }
+}

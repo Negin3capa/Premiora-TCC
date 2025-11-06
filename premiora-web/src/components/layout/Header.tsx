@@ -3,6 +3,7 @@
  * Barra superior com busca, notificações, perfil do usuário e logout
  */
 import React, { useState, useEffect, useRef } from 'react';
+import './Header.css';
 import type { User } from '@supabase/supabase-js';
 import { Search, Bell, MessageCircle, ChevronUp, ChevronDown, User as UserIcon, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
