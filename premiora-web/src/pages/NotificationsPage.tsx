@@ -5,7 +5,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { Heart, MessageCircle, User, Building2, Bell, MoreHorizontal } from 'lucide-react';
 import '../styles/HomePage.css';
 
 /**
@@ -66,11 +65,11 @@ const NotificationsPage: React.FC = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'like': return <Heart size={16} />;
-      case 'comment': return <MessageCircle size={16} />;
-      case 'follow': return <User size={16} />;
-      case 'community': return <Building2 size={16} />;
-      default: return <Bell size={16} />;
+      case 'like': return '❤️';
+      case 'comment': return '💬';
+      case 'follow': return '👤';
+      case 'community': return '🏘️';
+      default: return '🔔';
     }
   };
 
@@ -97,7 +96,7 @@ const NotificationsPage: React.FC = () => {
             <div className="notifications-container">
               {mockNotifications.length === 0 ? (
                 <div className="empty-state">
-                  <div className="empty-icon"><Bell size={48} /></div>
+                  <div className="empty-icon">🔔</div>
                   <h3>Nenhuma notificação</h3>
                   <p>Quando alguém interagir com seu conteúdo, você verá aqui.</p>
                 </div>
@@ -136,7 +135,7 @@ const NotificationsPage: React.FC = () => {
 
                       <div className="notification-actions">
                         <button className="action-button" title="Mais opções">
-                          <MoreHorizontal size={16} />
+                          ⋯
                         </button>
                       </div>
                     </div>

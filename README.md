@@ -15,13 +15,10 @@ Para informações detalhadas sobre a arquitetura técnica, padrões de design e
 ### Tecnologias Principais
 
 - **Framework**: React 19.2.0 com TypeScript ~5.9.3
-- **Build Tool**: Vite ^7.1.7 com code splitting otimizado
+- **Build Tool**: Vite ^7.1.7
 - **Roteamento**: React Router DOM ^7.9.4
-- **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
+- **Backend**: Supabase (PostgreSQL + Auth + Storage)
 - **Estilização**: CSS personalizado com variáveis CSS
-- **Ícones**: Lucide React ^0.552.0
-- **Captcha**: HCaptcha React ^1.14.0
-- **Git Hooks**: Husky ^9.1.7 + Commitlint ^20.1.0
 
 ### Autenticação
 
@@ -29,35 +26,6 @@ Para informações detalhadas sobre a arquitetura técnica, padrões de design e
 - **Métodos**: Login com Google OAuth, Facebook OAuth e email/senha
 - **Gerenciamento**: AuthService + AuthContext para estado global
 - **Proteção**: ProtectedRoute e PublicRoute para controle de acesso
-
-### Sistema de Tiers (Monetização)
-
-O Premiora implementa um sistema de monetização inspirado no Patreon, onde criadores têm controle total sobre suas assinaturas:
-
-#### Funcionalidades do Sistema de Tiers
-
-- **Controle Total do Criador**: Criadores definem nome, preço e benefícios de cada tier
-- **Acesso Hierárquico**: Conteúdo organizado por níveis (public, supporters, premium)
-- **Conteúdo Exclusivo**: Posts, vídeos e recursos bloqueados para não-assinantes
-- **Preview de Conteúdo**: Amostra do conteúdo premium para atrair assinantes
-- **Gestão de Assinaturas**: Interface completa para gerenciar tiers e assinantes
-
-#### Níveis de Acesso
-
-```typescript
-type AccessLevel = 'public' | 'supporters' | 'premium';
-```
-
-- **Public**: Conteúdo gratuito acessível a todos
-- **Supporters**: Conteúdo exclusivo para assinantes básicos
-- **Premium**: Conteúdo VIP com benefícios exclusivos
-
-#### Benefícios por Tier
-
-- **Perfil do Criador**: Acesso a conteúdo exclusivo no perfil
-- **Comunidades Privadas**: Participação em grupos restritos
-- **Conteúdo Premium**: Posts, vídeos e recursos especiais
-- **Interação Direta**: Comunicação privilegiada com o criador
 
 ### Estrutura de Arquivos
 
@@ -121,22 +89,8 @@ premiora-web/
 │   │   ├── LandingPage.tsx
 │   │   ├── Login.tsx
 │   │   └── SettingsPage.tsx
-│   ├── services/        # Serviços organizados por domínio (arquitetura modular)
-│   │   ├── auth/        # Serviços de autenticação
-│   │   │   ├── EmailAuthService.ts
-│   │   │   ├── OAuthService.ts
-│   │   │   ├── ProfileService.ts
-│   │   │   ├── RedirectService.ts
-│   │   │   └── index.ts
-│   │   ├── content/     # Serviços de conteúdo
-│   │   │   ├── ContentTransformer.ts
-│   │   │   ├── FeedService.ts
-│   │   │   ├── FileUploadService.ts
-│   │   │   ├── PostService.ts
-│   │   │   ├── VideoService.ts
-│   │   │   └── index.ts
-│   │   ├── authService.ts  # Serviço legado (manter compatibilidade)
-│   │   └── contentService.ts # Serviço legado (manter compatibilidade)
+│   ├── services/        # Serviços para lógica de negócio e API
+│   │   └── authService.ts
 │   ├── styles/          # Arquivos de estilo organizados
 │   │   ├── CommunitiesPage.css
 │   │   ├── CommunityPage.css
@@ -237,38 +191,15 @@ Para ativar o login com Facebook, é necessário:
 
 ### CI/CD
 
-- **Plataforma**: GitHub Actions com auto-merge inteligente
-- **Conventional Commits**: Padrão de commits obrigatório com Commitlint
-- **Git Hooks**: Husky para validação automática de commits
-- **Auto-merge**: Fusão automática de PRs com labels específicas
-- **Workflow**: Build, lint e testes automatizados em pushes e PRs
-- **Ambiente**: Ubuntu com Node.js 20
-
-#### Funcionalidades de CI/CD
-
-- **Validação de Commits**: Commits seguem padrão conventional (feat, fix, refactor, etc.)
-- **Linting Automático**: ESLint e TypeScript strict mode
-- **Build Otimizado**: Code splitting e chunking inteligente
-- **Auto-merge**: PRs com labels `auto-merge`, `dependencies` ou `automated` são mesclados automaticamente
-- **Deploy Preview**: Ambiente de staging para testes (atualmente desabilitado)
-
-#### Conventional Commits
-
-```bash
-# Exemplos de commits válidos
-feat: adicionar sistema de autenticação Facebook
-fix: corrigir bug no upload de imagens
-refactor: reorganizar estrutura de serviços
-docs: atualizar documentação do README
-```
+- **Plataforma**: GitHub Actions
+- **Workflow**: Build automatizado em pushes e pull requests para a branch main
+- **Ambiente**: Ubuntu com Node.js 18
 
 ### Desenvolvimento
 
-- **Git Hooks**: Husky + Commitlint para qualidade de commits
-- **Linting**: ESLint integrado ao processo de build
+- **Linting**: Markdownlint para documentação
+- **Formatação**: Prettier para padronização de código
 - **TypeScript**: Configuração strict com checagem rigorosa de tipos
-- **Code Splitting**: Otimização automática de bundles com Vite
-- **Hot Reload**: Recarregamento instantâneo durante desenvolvimento
 
 ## Setup
 
@@ -329,32 +260,9 @@ npm run preview
 
 ### Funcionalidades
 
-#### Autenticação e Usuários
-
-- **Registro**: Crie uma conta usando email/senha, Google OAuth ou Facebook OAuth
-- **Login**: Acesse sua conta existente com múltiplos provedores
-- **Logout**: Desconecte-se da plataforma com limpeza de sessão
-- **Perfil**: Gerencie seu perfil e configurações pessoais
-
-#### Sistema de Tiers (Monetização)
-
-- **Criação de Tiers**: Criadores definem níveis de assinatura (Supporters, Premium)
-- **Controle de Acesso**: Conteúdo exclusivo baseado em tier do usuário
-- **Preview de Conteúdo**: Amostra de conteúdo premium para não-assinantes
-- **Gestão de Assinaturas**: Interface para gerenciar assinantes e tiers
-
-#### Conteúdo e Feed
-
-- **Posts e Vídeos**: Crie e compartilhe conteúdo diversificado
-- **Feed Personalizado**: Timeline com conteúdo relevante
-- **Upload de Arquivos**: Suporte a imagens e vídeos
-- **Interação Social**: Likes, comentários e compartilhamento
-
-#### Comunidades (Em Desenvolvimento)
-
-- **Estrutura Preparada**: Base para funcionalidades de comunidades
-- **Integração com Tiers**: Controle de acesso baseado em assinatura
-- **Sistema de Tags**: Organização de conteúdo por categorias
+- **Registro**: Crie uma conta usando email/senha ou Google OAuth
+- **Login**: Acesse sua conta existente
+- **Logout**: Desconecte-se da plataforma
 
 ### Servidor de Desenvolvimento
 
@@ -391,78 +299,11 @@ O deploy no Vercel está temporariamente desabilitado para desenvolvimento local
 
 ## Contribuição
 
-### Processo de Contribuição
-
 1. Faça um fork do projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças seguindo o padrão **Conventional Commits**
+3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
 4. Push para a branch (`git push origin feature/nova-feature`)
 5. Abra um Pull Request
-
-### Conventional Commits
-
-Este projeto utiliza **Conventional Commits** para manter um histórico de mudanças claro e automatizar o versionamento. Todos os commits devem seguir o padrão:
-
-```bash
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-#### Tipos de Commit
-
-- `feat`: Nova funcionalidade
-- `fix`: Correção de bug
-- `refactor`: Refatoração de código (sem mudança funcional)
-- `docs`: Mudanças na documentação
-- `style`: Mudanças de estilo (formatação, etc.)
-- `test`: Adição ou correção de testes
-- `chore`: Mudanças em ferramentas, configurações, etc.
-
-#### Exemplos
-
-```bash
-feat: adicionar sistema de autenticação Facebook
-fix: corrigir bug no upload de imagens
-refactor: reorganizar estrutura de serviços
-docs: atualizar documentação do README
-chore: atualizar dependências do package.json
-```
-
-#### Commits Inválidos
-
-```bash
-# ❌ Não usar
-"adiciona nova feature"
-"fix bug"
-"update"
-```
-
-### Git Hooks
-
-O projeto utiliza **Husky** para executar hooks de git automaticamente:
-
-- **pre-commit**: Executa linting e formatação
-- **commit-msg**: Valida formato do commit com Commitlint
-
-### Pull Requests
-
-- Use títulos descritivos seguindo conventional commits
-- Adicione labels apropriadas para auto-merge quando aplicável:
-  - `auto-merge`: PRs que podem ser mesclados automaticamente
-  - `dependencies`: Atualizações de dependências
-  - `automated`: Mudanças geradas por ferramentas
-- Mantenha PRs pequenos e focados em uma funcionalidade
-- Inclua testes quando aplicável
-
-### Desenvolvimento Local
-
-1. Instale dependências: `npm install`
-2. Execute em modo desenvolvimento: `npm run dev`
-3. Para commits, use: `npm run commit` (abre interface interativa)
-4. Para build: `npm run build`
 
 ## Licença
 

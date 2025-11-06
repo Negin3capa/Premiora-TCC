@@ -8,7 +8,6 @@ import { ContentService } from '../../services/contentService';
 import { useFeed } from '../../hooks/useFeed';
 import '../../styles/modals.css';
 import { CommunityDropdown, FileUpload } from '../common';
-import { Loader } from 'lucide-react';
 
 /**
  * Props do componente CreatePostModal
@@ -226,7 +225,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           >
             {isSubmitting ? (
               <>
-                <Loader size={16} className="spinner" />
+                <span className="spinner">⏳</span>
                 Publicando...
               </>
             ) : (

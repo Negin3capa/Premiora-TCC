@@ -52,14 +52,6 @@ export class ContentService {
 
   /**
    * Converte dados do banco para formato ContentItem
-   * @deprecated Use ContentTransformer.transformToContentItem
-   */
-  static transformToContentItem(data: any): ContentItem {
-    return ContentTransformer.transformToContentItem(data);
-  }
-
-  /**
-   * Converte dados do post do banco para formato ContentItem
    * @deprecated Use ContentTransformer.transformPostToContentItem
    */
   static transformPostToContentItem(postData: any): ContentItem {

@@ -10,17 +10,6 @@ import type { ContentItem } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import Feed from '../components/content/Feed';
 import { getCommunityByName, isCommunityMember } from '../utils/communityUtils';
-import {
-  Bell,
-  Pin,
-  Flame,
-  Sparkles,
-  TrendingUp,
-  MessageCircle,
-  Users,
-  Calendar,
-  Tag
-} from 'lucide-react';
 import '../styles/CommunityPage.css';
 
 /**
@@ -288,7 +277,7 @@ const CommunityPage: React.FC = () => {
                 {isJoined ? 'Membro' : 'Participar'}
               </button>
               <button className="notification-button" title="Notificações">
-                <Bell size={16} />
+                🔔
               </button>
             </div>
           </div>
@@ -302,7 +291,7 @@ const CommunityPage: React.FC = () => {
             {/* Community Highlights */}
             <div className="community-highlights">
               <div className="highlights-header">
-                <span className="highlights-icon"><Pin size={16} /></span>
+                <span className="highlights-icon">📌</span>
                 Destaques da comunidade
                 <button className="expand-button">▼</button>
               </div>
@@ -312,19 +301,19 @@ const CommunityPage: React.FC = () => {
             {/* Sort Controls */}
             <div className="sort-controls">
               <button className="sort-button active">
-                <Flame size={16} />
+                <span>🔥</span>
                 Quente
               </button>
               <button className="sort-button">
-                <Sparkles size={16} />
+                <span>🆕</span>
                 Novo
               </button>
               <button className="sort-button">
-                <TrendingUp size={16} />
+                <span>⬆️</span>
                 Mais votado
               </button>
               <button className="sort-button">
-                <MessageCircle size={16} />
+                <span>💬</span>
                 Comentado
               </button>
             </div>
@@ -349,11 +338,11 @@ const CommunityPage: React.FC = () => {
 
               <div className="community-stats">
                 <div className="stat-item">
-                  <span className="stat-icon"><Users size={14} /></span>
+                  <span className="stat-icon">👥</span>
                   <span>{community.memberCount.toLocaleString()} membros</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-icon"><Calendar size={14} /></span>
+                  <span className="stat-icon">📅</span>
                   <span>Criada em {new Date(community.createdAt).toLocaleDateString('pt-BR')}</span>
                 </div>
               </div>
@@ -378,7 +367,7 @@ const CommunityPage: React.FC = () => {
             <div className="sidebar-section user-flair-section">
               <h4 className="sidebar-subtitle">Seu flair nesta comunidade</h4>
               <div className="user-flair-preview">
-                <span className="flair-icon"><Tag size={14} /></span>
+                <span className="flair-icon">🏷️</span>
                 <span className="flair-text">Nenhum flair definido</span>
                 <span className="flair-badge">Editar</span>
               </div>

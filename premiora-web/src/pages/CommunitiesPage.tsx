@@ -8,7 +8,6 @@ import { useAuth } from '../hooks/useAuth';
 import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { Search, Flame, Users, Sparkles, Eye, Heart, Video, FileText, Calendar } from 'lucide-react';
 import '../styles/CommunitiesPage.css';
 
 /**
@@ -320,25 +319,25 @@ const CommunitiesPage: React.FC = () => {
                 className={`sort-button ${sortBy === 'relevance' ? 'active' : ''}`}
                 onClick={() => setSortBy('relevance')}
               >
-                <Search size={16} /> Relevância
+                🔍 Relevância
               </button>
               <button
                 className={`sort-button ${sortBy === 'trending' ? 'active' : ''}`}
                 onClick={() => setSortBy('trending')}
               >
-                <Flame size={16} /> Tendência
+                🔥 Tendência
               </button>
               <button
                 className={`sort-button ${sortBy === 'popular' ? 'active' : ''}`}
                 onClick={() => setSortBy('popular')}
               >
-                <Users size={16} /> Popular
+                👥 Popular
               </button>
               <button
                 className={`sort-button ${sortBy === 'new' ? 'active' : ''}`}
                 onClick={() => setSortBy('new')}
               >
-                <Sparkles size={16} /> Novo
+                🆕 Novo
               </button>
             </div>
           </div>
@@ -371,10 +370,10 @@ const CommunitiesPage: React.FC = () => {
 
                   <div className="community-stats">
                     <span className="stat">
-                      <Users size={14} /> {community.memberCount.toLocaleString()} membros
+                      👥 {community.memberCount.toLocaleString()} membros
                     </span>
                     <span className="stat">
-                      <Calendar size={14} /> Criada em {new Date(community.createdAt).toLocaleDateString('pt-BR')}
+                      📅 Criada em {new Date(community.createdAt).toLocaleDateString('pt-BR')}
                     </span>
                   </div>
                 </div>
@@ -413,7 +412,7 @@ const CommunitiesPage: React.FC = () => {
                               <span className="showcase-timestamp">{item.timestamp}</span>
                             </div>
                             <span className="showcase-type">
-                              {item.type === 'video' ? <Video size={14} /> : <FileText size={14} />}
+                              {item.type === 'video' ? '🎥' : '📝'}
                             </span>
                           </div>
                           <h5 className="showcase-item-title">{item.title}</h5>
@@ -421,8 +420,8 @@ const CommunitiesPage: React.FC = () => {
                             <p className="showcase-item-preview">{item.content}</p>
                           )}
                           <div className="showcase-item-stats">
-                            <span><Eye size={14} /> {item.views}</span>
-                            <span><Heart size={14} /> {item.likes}</span>
+                            <span>👁️ {item.views}</span>
+                            <span>❤️ {item.likes}</span>
                           </div>
                         </div>
                       ))}

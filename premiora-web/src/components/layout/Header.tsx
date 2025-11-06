@@ -4,7 +4,6 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { Search, Bell, MessageCircle, ChevronUp, ChevronDown, User as UserIcon, Settings, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { searchCommunities } from '../../utils/communityUtils';
 import SearchResults from '../common/SearchResults';
@@ -268,7 +267,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                 console.log('Buscando:', searchQuery);
               }}
             >
-              <span className="search-icon"><Search size={16} /></span>
+              <span className="search-icon">🔍</span>
             </button>
           </div>
 
@@ -290,7 +289,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
               aria-label="Notificações"
               title="Notificações"
             >
-              <span className="action-icon"><Bell size={16} /></span>
+              <span className="action-icon">🔔</span>
             </button>
 
             <button
@@ -298,7 +297,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
               aria-label="Mensagens"
               title="Mensagens"
             >
-              <span className="action-icon"><MessageCircle size={16} /></span>
+              <span className="action-icon">💬</span>
             </button>
 
             <div className="user-profile">
@@ -322,7 +321,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                       <span className="profile-name" title={displayName}>{truncatedDisplayName}</span>
                       <span className="profile-status">Online</span>
                     </div>
-                    <span className="dropdown-arrow">{showProfileMenu ? <ChevronUp size={12} /> : <ChevronDown size={12} />}</span>
+                    <span className="dropdown-arrow">{showProfileMenu ? '▲' : '▼'}</span>
                   </div>
 
                   {showProfileMenu && (
@@ -340,11 +339,11 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                       </div>
                       <div className="profile-menu-divider" />
                       <button className="profile-menu-item">
-                        <UserIcon size={16} />
+                        <span>👤</span>
                         Ver Perfil
                       </button>
                       <button className="profile-menu-item">
-                        <Settings size={16} />
+                        <span>⚙️</span>
                         Configurações
                       </button>
                       <div className="profile-menu-divider" />
@@ -352,7 +351,7 @@ const Header: React.FC<HeaderProps> = ({ searchQuery, onSearchChange, user, onTo
                         className="profile-menu-item logout-item"
                         onClick={handleLogout}
                       >
-                        <LogOut size={16} />
+                        <span>🚪</span>
                         Sair
                       </button>
                     </div>

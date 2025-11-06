@@ -5,7 +5,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { PenTool, MessageCircle, ArrowLeft, MoreHorizontal, Send } from 'lucide-react';
 import '../styles/HomePage.css';
 
 /**
@@ -110,14 +109,14 @@ const MessagesPage: React.FC = () => {
             <div className="conversations-header">
               <h2>Mensagens</h2>
               <button className="new-message-button" title="Nova mensagem">
-                <PenTool size={16} />
+                ✏️
               </button>
             </div>
 
             <div className="conversations-list">
               {mockConversations.length === 0 ? (
                 <div className="empty-state">
-                  <div className="empty-icon"><MessageCircle size={48} /></div>
+                  <div className="empty-icon">💬</div>
                   <h3>Nenhuma conversa</h3>
                   <p>Comece uma conversa enviando uma mensagem para alguém.</p>
                 </div>
@@ -172,7 +171,7 @@ const MessagesPage: React.FC = () => {
                       onClick={() => setIsMobileChatView(false)}
                       title="Voltar para conversas"
                     >
-                      <ArrowLeft size={16} />
+                      ←
                     </button>
                     <img
                       src={selectedConversationData?.user.avatar}
@@ -188,7 +187,7 @@ const MessagesPage: React.FC = () => {
                   </div>
                   <div className="chat-actions">
                     <button className="chat-action-button" title="Mais opções">
-                      <MoreHorizontal size={16} />
+                      ⋯
                     </button>
                   </div>
                 </div>
@@ -217,14 +216,14 @@ const MessagesPage: React.FC = () => {
                       className="message-input"
                     />
                     <button className="send-button" title="Enviar">
-                      <Send size={16} />
+                      📤
                     </button>
                   </div>
                 </div>
               </>
             ) : (
               <div className="no-chat-selected">
-                <div className="empty-icon"><MessageCircle size={48} /></div>
+                <div className="empty-icon">💬</div>
                 <h3>Selecione uma conversa</h3>
                 <p>Escolha uma conversa da lista para começar a conversar.</p>
               </div>

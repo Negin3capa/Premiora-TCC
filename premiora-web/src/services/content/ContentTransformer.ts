@@ -10,22 +10,6 @@ import type { ContentItem } from '../../types/content';
 export class ContentTransformer {
   /**
    * Converte dados do banco para formato ContentItem
-   * @param data - Dados do post/vídeo do banco
-   * @returns ContentItem formatado
-   */
-  static transformToContentItem(data: any): ContentItem {
-    // Verificar se é vídeo baseado na estrutura dos dados
-    const isVideo = data.contentType === 'video' || data.type === 'video' || data.videoUrl;
-
-    if (isVideo) {
-      return this.transformVideoToContentItem(data);
-    } else {
-      return this.transformPostToContentItem(data);
-    }
-  }
-
-  /**
-   * Converte dados do post do banco para formato ContentItem
    * @param postData - Dados do post do banco
    * @returns ContentItem formatado
    */
@@ -48,36 +32,6 @@ export class ContentTransformer {
       communityId: postData.community?.id,
       communityName: postData.community?.display_name,
       communityAvatar: postData.community?.avatar_url
-    };
-  }
-
-  /**
-   * Converte dados do vídeo para formato ContentItem
-   * @param videoData - Dados do vídeo
-   * @returns ContentItem formatado
-   */
-  static transformVideoToContentItem(videoData: any): ContentItem {
-    // Para vídeos, os dados já vêm pré-processados do VideoService.transformVideoForFeed()
-    // então apenas mapeamos as propriedades existentes
-    return {
-      id: videoData.id,
-      type: 'video' as const,
-      title: videoData.title || '',
-      author: videoData.author || videoData.creators?.display_name || 'Usuário',
-      authorAvatar: videoData.authorAvatar || videoData.creators?.profile_image_url || '',
-      thumbnail: videoData.thumbnail,
-      videoUrl: videoData.videoUrl, // Já definido pelo VideoService
-      content: videoData.content,
-      views: videoData.views || 0,
-      likes: videoData.likes || 0,
-      timestamp: videoData.timestamp ? this.formatTimestamp(videoData.timestamp) : videoData.timestamp || '',
-      duration: videoData.duration,
-      resolution: videoData.resolution,
-      fileSize: videoData.fileSize,
-      communityId: videoData.communityId,
-      communityName: videoData.communityName,
-      communityAvatar: videoData.communityAvatar,
-      creatorId: videoData.creatorId
     };
   }
 

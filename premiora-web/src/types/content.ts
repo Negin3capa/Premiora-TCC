@@ -46,12 +46,6 @@ export interface ContentItem {
   communityLikes?: number;
   communityComments?: number;
   isPinned?: boolean;
-  // Propriedades específicas para vídeos
-  videoUrl?: string;
-  duration?: number;
-  resolution?: string;
-  fileSize?: number;
-  creatorId?: string;
 }
 
 /**

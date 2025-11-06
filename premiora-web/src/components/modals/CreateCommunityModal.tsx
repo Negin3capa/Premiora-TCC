@@ -5,7 +5,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createCommunity, getCommunityByName } from '../../utils/communityUtils';
-import { Loader, Check, X, Image, User } from 'lucide-react';
 
 /**
  * Props do componente CreateCommunityModal
@@ -363,16 +362,18 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                   gap: 'var(--space-1)'
                 }}>
                   {checkingName && (
-                    <Loader size={14} style={{ color: 'var(--color-text-tertiary)' }} />
+                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-tertiary)' }}>
+                      ⏳
+                    </span>
                   )}
                   {nameAvailable === true && (
-                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
-                      <Check size={14} /> Disponível
+                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-success)' }}>
+                      ✓ Disponível
                     </span>
                   )}
                   {nameAvailable === false && (
-                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-error)', display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
-                      <X size={14} /> Indisponível
+                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-error)' }}>
+                      ✗ Indisponível
                     </span>
                   )}
                 </div>
@@ -687,12 +688,9 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                 <div style={{
                   fontSize: 'var(--font-size-2xl)',
                   color: 'var(--color-text-tertiary)',
-                  marginBottom: 'var(--space-2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  marginBottom: 'var(--space-2)'
                 }}>
-                  <Image size={32} />
+                  🖼️
                 </div>
                 <div style={{
                   fontSize: 'var(--font-size-sm)',
@@ -763,14 +761,11 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                     cursor: 'pointer',
                     padding: 'var(--space-2)',
                     borderRadius: 'var(--radius-md)',
-                    fontSize: 'var(--font-size-lg)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    fontSize: 'var(--font-size-lg)'
                   }}
                   title="Remover banner"
                 >
-                  <X size={16} />
+                  ✕
                 </button>
               </div>
             )}
@@ -814,12 +809,9 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                 <div style={{
                   fontSize: 'var(--font-size-2xl)',
                   color: 'var(--color-text-tertiary)',
-                  marginBottom: 'var(--space-2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
+                  marginBottom: 'var(--space-2)'
                 }}>
-                  <User size={32} />
+                  👤
                 </div>
                 <div style={{
                   fontSize: 'var(--font-size-sm)',
@@ -890,14 +882,11 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
                     cursor: 'pointer',
                     padding: 'var(--space-2)',
                     borderRadius: 'var(--radius-md)',
-                    fontSize: 'var(--font-size-lg)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    fontSize: 'var(--font-size-lg)'
                   }}
                   title="Remover avatar"
                 >
-                  <X size={16} />
+                  ✕
                 </button>
               </div>
             )}
@@ -979,7 +968,7 @@ const CreateCommunityModal: React.FC<CreateCommunityModalProps> = ({
           >
             {isSubmitting ? (
               <>
-                <Loader size={16} className="spinner" />
+                <span style={{ animation: 'spin 1s linear infinite' }}>⏳</span>
                 Criando...
               </>
             ) : (

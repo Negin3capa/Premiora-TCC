@@ -2,24 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useUI } from '../hooks/useUI';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import {
-  Palette,
-  User,
-  Bell,
-  Lock,
-  Accessibility,
-  Database,
-  DollarSign,
-  Sun,
-  Moon,
-  Monitor,
-  Download,
-  Settings as SettingsIcon,
-  Upload,
-  BarChart3,
-  Trash2,
-  Ban
-} from 'lucide-react';
 import '../styles/SettingsPage.css';
 
 /**
@@ -131,13 +113,13 @@ const SettingsPage: React.FC = () => {
   };
 
   const sections = [
-    { id: 'appearance', label: 'Aparência', icon: <Palette size={20} /> },
-    { id: 'account', label: 'Conta', icon: <User size={20} /> },
-    { id: 'notifications', label: 'Notificações', icon: <Bell size={20} /> },
-    { id: 'privacy', label: 'Privacidade', icon: <Lock size={20} /> },
-    { id: 'accessibility', label: 'Acessibilidade', icon: <Accessibility size={20} /> },
-    { id: 'data', label: 'Dados e Privacidade', icon: <Database size={20} /> },
-    { id: 'monetization', label: 'Monetização', icon: <DollarSign size={20} /> },
+    { id: 'appearance', label: 'Aparência', icon: '🎨' },
+    { id: 'account', label: 'Conta', icon: '👤' },
+    { id: 'notifications', label: 'Notificações', icon: '🔔' },
+    { id: 'privacy', label: 'Privacidade', icon: '🔒' },
+    { id: 'accessibility', label: 'Acessibilidade', icon: '♿' },
+    { id: 'data', label: 'Dados e Privacidade', icon: '💾' },
+    { id: 'monetization', label: 'Monetização', icon: '💰' },
   ];
 
   return (
@@ -182,9 +164,9 @@ const SettingsPage: React.FC = () => {
                         value={theme}
                         onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
                       >
-                        <option value="light"><Sun size={16} /> Claro</option>
-                        <option value="dark"><Moon size={16} /> Escuro</option>
-                        <option value="system"><Monitor size={16} /> Sistema</option>
+                        <option value="light">☀️ Claro</option>
+                        <option value="dark">🌙 Escuro</option>
+                        <option value="system">🖥️ Sistema</option>
                       </select>
                     </label>
                     <p className="setting-description">
@@ -202,9 +184,9 @@ const SettingsPage: React.FC = () => {
                         value={language}
                         onChange={(e) => setLanguage(e.target.value as 'pt-BR' | 'en-US' | 'es-ES')}
                       >
-                        <option value="pt-BR">Português (Brasil)</option>
-                        <option value="en-US">English (US)</option>
-                        <option value="es-ES">Español</option>
+                        <option value="pt-BR">🇧🇷 Português (Brasil)</option>
+                        <option value="en-US">🇺🇸 English (US)</option>
+                        <option value="es-ES">🇪🇸 Español</option>
                       </select>
                     </label>
                     <p className="setting-description">
@@ -606,7 +588,7 @@ const SettingsPage: React.FC = () => {
                   <h4>Exportar Dados</h4>
                   <div className="setting-item">
                     <button className="btn-secondary">
-                      <Download size={16} /> Baixar Meus Dados
+                      📥 Baixar Meus Dados
                     </button>
                     <p className="setting-description">
                       Baixe uma cópia completa de todos os seus dados pessoais em formato JSON
@@ -615,7 +597,7 @@ const SettingsPage: React.FC = () => {
 
                   <div className="setting-item">
                     <button className="btn-secondary">
-                      <SettingsIcon size={16} /> Exportar Configurações
+                      ⚙️ Exportar Configurações
                     </button>
                     <p className="setting-description">
                       Exporte todas as suas configurações e preferências
@@ -627,7 +609,7 @@ const SettingsPage: React.FC = () => {
                   <h4>Importar Dados</h4>
                   <div className="setting-item">
                     <button className="btn-secondary">
-                      <Upload size={16} /> Importar Configurações
+                      📤 Importar Configurações
                     </button>
                     <p className="setting-description">
                       Importe configurações de um arquivo previamente exportado
@@ -639,7 +621,7 @@ const SettingsPage: React.FC = () => {
                   <h4>Histórico de Atividades</h4>
                   <div className="setting-item">
                     <button className="btn-secondary">
-                      <BarChart3 size={16} /> Ver Histórico
+                      📊 Ver Histórico
                     </button>
                     <p className="setting-description">
                       Visualize seu histórico de atividades na plataforma
@@ -651,7 +633,7 @@ const SettingsPage: React.FC = () => {
                   <h4>Exclusão de Dados</h4>
                   <div className="setting-item">
                     <button className="btn-danger">
-                      <Trash2 size={16} /> Solicitar Exclusão de Dados
+                      🗑️ Solicitar Exclusão de Dados
                     </button>
                     <p className="setting-description">
                       Solicite a exclusão permanente de todos os seus dados (conforme LGPD)
@@ -660,7 +642,7 @@ const SettingsPage: React.FC = () => {
 
                   <div className="setting-item">
                     <button className="btn-danger">
-                      <Ban size={16} /> Anonimizar Dados
+                      🚫 Anonimizar Dados
                     </button>
                     <p className="setting-description">
                       Torne seus dados anônimos mantendo apenas estatísticas agregadas

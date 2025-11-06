@@ -3,7 +3,6 @@
  * Suporta diferentes tipos de arquivo com preview e progresso
  */
 import React from 'react';
-import { Camera, Film, Video, X } from 'lucide-react';
 
 /**
  * Tipos de arquivo suportados
@@ -95,8 +94,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
    * Obtém ícone baseado no tipo de arquivo
    */
   const getFileIcon = () => {
-    if (fileType === 'video') return <Film size={32} />;
-    return <Camera size={32} />;
+    if (fileType === 'video') return '🎬';
+    return '📸';
   };
 
   /**
@@ -120,8 +119,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
             className="file-preview-image"
           />
         ) : (
-          <div style={{ fontSize: 'var(--font-size-2xl)', color: 'var(--color-success)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Video size={32} />
+          <div style={{ fontSize: 'var(--font-size-2xl)', color: 'var(--color-success)' }}>
+            🎥
           </div>
         )}
 
@@ -145,9 +144,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           className="file-preview-remove"
           title="Remover arquivo"
           disabled={disabled || isUploading}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <X size={16} />
+          ✕
         </button>
 
         {isUploading && (

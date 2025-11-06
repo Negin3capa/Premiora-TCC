@@ -42,54 +42,6 @@ This repository uses GitHub Actions to run the build and checks on `main`. Pull 
 
 If a CI run fails with an error referencing a missing folder or file (for example `premiora-landing`), please verify the repository structure and update the workflow or documentation accordingly. We recently migrated the app folder to `premiora-web`.
 
-## Auto Merge
-
-Este repositório possui **auto merge automático** configurado para pull requests que atendem aos critérios definidos. O auto merge é ativado automaticamente quando:
-
-### Condições para Auto Merge
-
-- ✅ Todos os testes CI passaram (lint, test, build)
-- ✅ Pelo menos 1 aprovação do pull request
-- ✅ Uma das seguintes labels está presente:
-  - `auto-merge` - Para mudanças gerais que podem ser mescladas automaticamente
-  - `dependencies` - Para atualizações de dependências
-  - `automated` - Para mudanças automatizadas (bots, scripts)
-
-### Labels que Bloqueiam Auto Merge
-
-- ❌ `do-not-merge` - Impede qualquer auto merge
-- ❌ `work-in-progress` - PR ainda em desenvolvimento
-- ❌ `needs-review` - Requer revisão adicional
-
-### Como Usar
-
-1. **Para PRs simples** (correções de bug, pequenas melhorias):
-   - Adicione a label `auto-merge` ao seu PR
-   - Aguarde os testes passarem
-   - O merge acontecerá automaticamente
-
-2. **Para atualizações de dependências**:
-   - Adicione a label `dependencies`
-   - O sistema fará o merge automático após aprovação
-
-3. **Para mudanças que NÃO devem ser auto mescladas**:
-   - Adicione `do-not-merge` ou `needs-review`
-   - O merge será manual
-
-### Configuração
-
-A configuração do auto merge está definida em:
-
-- `.github/auto-merge.yml` - Regras e condições
-- `.github/workflows/ci.yml` - Workflow de CI com job de auto merge
-
-### Limitações
-
-- Máximo de 1000 linhas alteradas por PR
-- Não mescla arquivos sensíveis (package-lock.json, .env\*, migrations SQL)
-- Requer branch atualizado com a main
-- Só funciona para branches `main` e `develop`
-
 ## Tests & Quality
 
 - Add tests alongside bug fixes and features when practical.

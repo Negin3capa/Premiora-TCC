@@ -4,12 +4,9 @@
  */
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { useNotification } from '../../hooks/useNotification';
-import { VideoService } from '../../services/content/VideoService';
 import type { VideoFormData } from '../../types/content';
 import { UPLOAD_CONFIG } from '../../utils/constants';
 import { CommunityDropdown, FileUpload } from '../common';
-import { Loader } from 'lucide-react';
 import '../../styles/modals.css';
 
 /**
@@ -34,7 +31,6 @@ const CreateVideoModal: React.FC<CreateVideoModalProps> = ({
   onPublish
 }) => {
   const { user } = useAuth();
-  const { showSuccess, showError } = useNotification();
 
   // Estado do formulário
   const [formData, setFormData] = useState<VideoFormData>({
@@ -83,39 +79,32 @@ const CreateVideoModal: React.FC<CreateVideoModalProps> = ({
    */
   const handlePublish = async () => {
     if (!formData.title.trim() || !formData.description.trim() || !formData.video) {
-      showError('Campos obrigatórios', 'Preencha todos os campos obrigatórios e selecione um vídeo');
-      return;
-    }
-
-    if (!user?.id) {
-      showError('Erro de autenticação', 'Você precisa estar logado para publicar vídeos');
+      alert('Preencha todos os campos obrigatórios e selecione um vídeo');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      // Criar vídeo usando o serviço
-      const result = await VideoService.createVideo(formData, user.id);
+      // Simulação de processamento
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Notificar sucesso
-      showSuccess(
-        'Vídeo publicado!',
-        `Seu vídeo "${result.title}" foi publicado com sucesso.`
-      );
-
-      // Chamar callback se fornecido
       if (onPublish) {
         onPublish(formData);
       }
+
+      console.log('Vídeo criado:', {
+        ...formData,
+        authorId: user?.id,
+        publishedAt: new Date()
+      });
 
       // Limpar formulário e fechar modal
       handleCancel();
 
     } catch (error) {
       console.error('Erro ao publicar vídeo:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      showError('Erro ao publicar vídeo', errorMessage);
+      alert('Erro ao publicar vídeo. Tente novamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -237,7 +226,7 @@ const CreateVideoModal: React.FC<CreateVideoModalProps> = ({
           >
             {isSubmitting ? (
               <>
-                <Loader size={16} className="spinner" />
+                <span className="spinner">⏳</span>
                 Publicando...
               </>
             ) : (

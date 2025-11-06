@@ -101,18 +101,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
       <article className={`content-card ${item.type}-card`}>
         <div className="card-header">
           <div className="author-info">
-            {item.authorAvatar ? (
-              <img
-                src={item.authorAvatar}
-                alt={item.author}
-                className="author-avatar"
-                loading="lazy"
-              />
-            ) : (
-              <div className="author-avatar-placeholder">
-                {item.author.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img
+              src={item.authorAvatar}
+              alt={item.author}
+              className="author-avatar"
+              loading="lazy"
+            />
             <div className="author-details">
               <span className="author-name">{item.author}</span>
               <span className="content-type">{item.type}</span>

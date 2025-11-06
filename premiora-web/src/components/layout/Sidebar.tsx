@@ -4,7 +4,6 @@
  */
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Flame, Bell, MessageCircle, Users, Building2, Settings, PenTool } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../hooks/useModal';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
@@ -116,13 +115,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   };
 
   const navigationItems = [
-    { icon: <Home size={20} />, label: 'Home', route: '/home', active: true },
-    { icon: <Flame size={20} />, label: 'Trending', route: '/trending', active: false },
-    { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: false },
-    { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: false },
-    { icon: <Users size={20} />, label: 'Following', route: '/following', active: false },
-    { icon: <Building2 size={20} />, label: 'Communities', route: '/communities', active: false },
-    { icon: <Settings size={20} />, label: 'Settings', route: '/settings', active: false },
+    { icon: '🏠', label: 'Home', route: '/home', active: true },
+    { icon: '🔥', label: 'Trending', route: '/trending', active: false },
+    { icon: '🔔', label: 'Notifications', route: '/notifications', active: false },
+    { icon: '💬', label: 'Messages', route: '/messages', active: false },
+    { icon: '👥', label: 'Following', route: '/following', active: false },
+    { icon: '🏘️', label: 'Communities', route: '/communities', active: false },
+    { icon: '⚙️', label: 'Settings', route: '/settings', active: false },
   ];
 
   /**
@@ -228,12 +227,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
             fontSize: 'var(--font-size-xl)',
             width: '24px',
             textAlign: 'center',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            flexShrink: 0
           }}>
-            <PenTool size={20} />
+            ✏️
           </span>
           <span className="create-label">Criar</span>
         </button>
