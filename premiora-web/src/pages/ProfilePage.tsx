@@ -5,7 +5,8 @@ import { Sidebar, Header } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
-import type { CreatorProfile, Post } from '../types/profile';
+import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
+import type { CreatorProfile, Post, PostMedia } from '../types/profile';
 import '../styles/globals.css';
 
 /**
@@ -56,17 +57,27 @@ const ProfilePage: React.FC = () => {
 
       if (postsResult.posts && postsResult.posts.length > 0) {
         // Converter posts para formato Post
-        const formattedPosts: Post[] = postsResult.posts.map((post: any) => ({
-          id: post.id,
-          title: post.title,
-          description: post.content,
-          thumbnailUrl: post.media_urls?.[0] || 'placeholder',
-          createdAt: post.published_at,
-          views: post.views || 0,
-          likes: post.post_likes?.length || 0,
-          comments: post.comments || 0,
-          locked: post.is_premium
-        }));
+        const formattedPosts: Post[] = postsResult.posts.map((post: any) => {
+          // Extrair informações de mídia
+          const mediaUrls: PostMedia[] = post.media_urls || [];
+          const firstMedia = mediaUrls[0];
+          const thumbnailUrl = firstMedia ? extractThumbnailUrl(firstMedia) || 'placeholder' : 'placeholder';
+          const isVideo = firstMedia ? isVideoMedia(firstMedia) : false;
+
+          return {
+            id: post.id,
+            title: post.title,
+            description: post.content,
+            thumbnailUrl,
+            mediaUrls,
+            createdAt: post.published_at,
+            views: post.views || 0,
+            likes: post.post_likes?.length || 0,
+            comments: post.comments || 0,
+            locked: post.is_premium,
+            contentType: isVideo ? 'video' : (firstMedia ? 'image' : 'text')
+          };
+        });
 
         setRecentPosts(formattedPosts);
 

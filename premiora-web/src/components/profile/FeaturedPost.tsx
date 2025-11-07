@@ -58,17 +58,38 @@ export const FeaturedPost: React.FC<FeaturedPostProps> = ({ post }) => {
     <div className={styles.featuredPost}>
       <div className={styles.thumbnailContainer}>
         <div className={styles.thumbnail}>
-          {/* Placeholder para thumbnail do vídeo */}
-          <div className={styles.thumbnailPlaceholder}>
-            <div className={styles.playIcon}>
-              <svg viewBox="0 0 24 24" width="48" height="48">
-                <path
-                  d="M8 5v14l11-7z"
-                  fill="white"
-                />
-              </svg>
+          {post.thumbnailUrl && post.thumbnailUrl !== 'placeholder' ? (
+            <img
+              src={post.thumbnailUrl}
+              alt={post.title}
+              className={styles.thumbnailImage}
+              loading="lazy"
+            />
+          ) : (
+            <div className={styles.thumbnailPlaceholder}>
+              <div className={styles.playIcon}>
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                  <path
+                    d="M8 5v14l11-7z"
+                    fill="white"
+                  />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
+          {/* Overlay de play para vídeos */}
+          {post.contentType === 'video' && (
+            <div className={styles.videoOverlay}>
+              <div className={styles.playIcon}>
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                  <path
+                    d="M8 5v14l11-7z"
+                    fill="white"
+                  />
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
