@@ -3,7 +3,6 @@
  * Exibe conversas e mensagens diretas do usuário
  */
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { PenTool, MessageCircle, ArrowLeft, MoreHorizontal, Send } from 'lucide-react';
 import '../styles/MessagesPage.css';
@@ -13,18 +12,9 @@ import '../styles/MessagesPage.css';
  * Mostra lista de conversas e interface de chat
  */
 const MessagesPage: React.FC = () => {
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobileChatView, setIsMobileChatView] = useState(false);
-
-  /**
-   * Handler para alternar visibilidade da sidebar em dispositivos móveis
-   */
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   // Mock conversations data
   const mockConversations = [
@@ -97,12 +87,7 @@ const MessagesPage: React.FC = () => {
     <div className="homepage">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          user={user}
-          onToggleSidebar={toggleSidebar}
-        />
+        <Header />
 
         <div className="messages-layout">
           {/* Conversations List */}

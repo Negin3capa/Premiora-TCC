@@ -1,0 +1,140 @@
+/* Posts Recentes com Scroll Horizontal */
+.recentPosts {
+  margin: 3rem 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.navButton {
+  background: #121212;
+  border: 1px solid #343536;
+  color: #DADADA;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.navButton:hover:not(.disabled) {
+  background: #1a1a1a;
+  border-color: #474849;
+  color: #FFFFFF;
+}
+
+.navButton.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.navButton svg {
+  transition: transform 0.2s ease;
+}
+
+.navButton:hover:not(.disabled) svg {
+  transform: scale(1.1);
+}
+
+.scrollContainer {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  max-width: 100%;
+  position: relative;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.postsGrid {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  min-width: max-content;
+  width: max-content;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .recentPosts {
+    margin: 2rem 0;
+  }
+
+  .header {
+    margin-bottom: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .navButton {
+    width: 36px;
+    height: 36px;
+  }
+
+  .navButton svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .postsGrid {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .recentPosts {
+    margin: 1.5rem 0;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .navigation {
+    align-self: flex-end;
+  }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .navButton svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .postsGrid {
+    gap: 0.5rem;
+  }
+}

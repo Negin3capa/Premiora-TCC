@@ -1,0 +1,150 @@
+/* Banner do Perfil do Criador */
+.banner {
+  width: 100%;
+  background: linear-gradient(135deg, #0D0D0D 0%, #1a1a1a 50%, #0D0D0D 100%);
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+}
+
+.bannerContent {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+.creatorInfo {
+  flex: 1;
+  color: #DADADA;
+  max-width: 600px;
+}
+
+.creatorName {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #FFFFFF;
+  line-height: 1.2;
+}
+
+.postCount {
+  font-size: 1.125rem;
+  color: #DADADA;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.description {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: #DADADA;
+}
+
+.ctaButton {
+  background: linear-gradient(135deg, #FF424D 0%, #E63946 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
+}
+
+.ctaButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 66, 77, 0.4);
+}
+
+.illustration {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.placeholderIllustration {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svgIllustration {
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .banner {
+    min-height: 300px;
+  }
+
+  .bannerContent {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .creatorInfo {
+    max-width: 100%;
+  }
+
+  .creatorName {
+    font-size: 2.5rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .ctaButton {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .illustration {
+    order: -1;
+  }
+
+  .placeholderIllustration {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .creatorName {
+    font-size: 2rem;
+  }
+
+  .postCount {
+    font-size: 1rem;
+  }
+
+  .description {
+    font-size: 0.875rem;
+  }
+
+  .ctaButton {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .placeholderIllustration {
+    width: 120px;
+    height: 120px;
+  }
+}

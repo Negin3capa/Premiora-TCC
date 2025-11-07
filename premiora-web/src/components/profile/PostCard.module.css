@@ -1,0 +1,146 @@
+/* Cartão de Post */
+.postCard {
+  background: #121212;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 280px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.postCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.postCard.locked {
+  opacity: 0.8;
+}
+
+.thumbnail {
+  width: 100%;
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.thumbnailPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.lockOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  backdrop-filter: blur(2px);
+}
+
+.lockText {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.content {
+  padding: 1rem;
+}
+
+.title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.metadata {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #DADADA;
+  opacity: 0.7;
+}
+
+.date {
+  color: #DADADA;
+  opacity: 0.6;
+}
+
+.views,
+.comments {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #DADADA;
+  opacity: 0.7;
+}
+
+.views svg,
+.comments svg {
+  color: #DADADA;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .postCard {
+    width: 240px;
+  }
+
+  .thumbnail {
+    height: 140px;
+  }
+
+  .content {
+    padding: 0.875rem;
+  }
+
+  .title {
+    font-size: 0.8125rem;
+  }
+
+  .metadata {
+    font-size: 0.6875rem;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .postCard {
+    width: 200px;
+  }
+
+  .thumbnail {
+    height: 120px;
+  }
+
+  .content {
+    padding: 0.75rem;
+  }
+
+  .title {
+    font-size: 0.75rem;
+  }
+}

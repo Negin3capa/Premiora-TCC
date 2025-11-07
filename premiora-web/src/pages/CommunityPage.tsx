@@ -4,7 +4,6 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
@@ -29,8 +28,7 @@ import '../styles/CommunityPage.css';
  */
 const CommunityPage: React.FC = () => {
   const { communityName } = useParams<{ communityName: string }>();
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery] = useState('');
   const [feedItems, setFeedItems] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -38,13 +36,6 @@ const CommunityPage: React.FC = () => {
   const [community, setCommunity] = useState<Community | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /**
-   * Handler para alternar visibilidade da sidebar em dispositivos móveis
-   */
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   // Mock data generator for community posts
   const generateMockCommunityContent = useCallback((startIndex: number, count: number): ContentItem[] => {
@@ -251,12 +242,7 @@ const CommunityPage: React.FC = () => {
     <div className="community-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          user={user}
-          onToggleSidebar={toggleSidebar}
-        />
+        <Header />
 
         {/* Community Header Banner */}
         <div
