@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import type { Post } from '../../types/profile';
 import styles from './PostCard.module.css';
 
@@ -14,6 +15,9 @@ interface PostCardProps {
 }
 
 export const PostCard: React.FC<PostCardProps> = ({ post }) => {
+  const navigate = useNavigate();
+  const { username } = useParams<{ username: string }>();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -26,8 +30,22 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
     return `${Math.floor(diffDays / 30)}mo`;
   };
 
+  /**
+   * Handler para visualizar post detalhado
+   * Navega para a PostViewPage com o username e postId
+   */
+  const handleViewPost = () => {
+    if (username && post.id) {
+      navigate(`/u/${username}/status/${post.id}`);
+    }
+  };
+
   return (
-    <div className={`${styles.postCard} ${post.locked ? styles.locked : ''}`}>
+    <div
+      className={`${styles.postCard} ${post.locked ? styles.locked : ''}`}
+      onClick={handleViewPost}
+      style={{ cursor: post.locked ? 'default' : 'pointer' }}
+    >
       <div className={styles.thumbnail}>
         {post.thumbnailUrl && post.thumbnailUrl !== 'placeholder' ? (
           <img

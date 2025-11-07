@@ -152,7 +152,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #666;
+  color: #FFFFFF;
   background: linear-gradient(135deg, #FF424D 0%, #FF6B75 100%);
   box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
   gap: 8px;

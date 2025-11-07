@@ -37,6 +37,7 @@ export class ContentTransformer {
       type: 'post',
       title: postData.title || '',
       author: postData.creator?.display_name || 'Usuário',
+      authorUsername: postData.creator?.users?.username, // Username real da tabela users
       authorAvatar: postData.creator?.profile_image_url || '',
       thumbnail: postData.media_urls?.[0] || undefined,
       content: postData.content,

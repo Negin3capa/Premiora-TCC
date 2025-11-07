@@ -81,7 +81,10 @@ export class FeedService {
           creator:creator_id (
             id,
             display_name,
-            profile_image_url
+            profile_image_url,
+            users!creators_id_fkey (
+              username
+            )
           ),
           community:community_id (
             id,
@@ -179,7 +182,10 @@ export class FeedService {
           creator:creator_id (
             id,
             display_name,
-            profile_image_url
+            profile_image_url,
+            users!creators_id_fkey (
+              username
+            )
           ),
           community:community_id (
             id,
@@ -280,7 +286,10 @@ export class FeedService {
           creator:creator_id (
             id,
             display_name,
-            profile_image_url
+            profile_image_url,
+            users!creators_id_fkey (
+              username
+            )
           ),
           community:community_id (
             id,
