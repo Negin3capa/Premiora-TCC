@@ -78,8 +78,18 @@ export class ProfileService {
 
         const updateData: any = {};
 
-        // Atualizar avatar se não foi customizado ou se é diferente
-        if (oauthAvatarUrl && (!existingProfile.avatar_url || existingProfile.avatar_url !== oauthAvatarUrl)) {
+        // Só atualizar avatar OAuth se o perfil não estiver completo ou se o avatar atual for o mesmo OAuth (não foi customizado)
+        if (oauthAvatarUrl && !existingProfile.profile_setup_completed) {
+          console.log('⚠️ Perfil não está completo, atualizando avatar OAuth');
+          updateData.avatar_url = oauthAvatarUrl;
+        } else if (oauthAvatarUrl && existingProfile.avatar_url === oauthAvatarUrl) {
+          console.log('✅ Avatar já é o mesmo OAuth, mantendo');
+          // Não atualizar se já é o mesmo
+        } else if (oauthAvatarUrl && existingProfile.avatar_url && existingProfile.avatar_url !== oauthAvatarUrl) {
+          console.log('⚠️ Avatar atual é diferente do OAuth - mantendo avatar customizado');
+          // Não atualizar se é um avatar customizado diferente
+        } else if (oauthAvatarUrl && !existingProfile.avatar_url) {
+          console.log('📝 Perfil completo mas sem avatar, definindo avatar OAuth');
           updateData.avatar_url = oauthAvatarUrl;
         }
 

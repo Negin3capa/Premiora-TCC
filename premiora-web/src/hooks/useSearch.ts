@@ -19,7 +19,9 @@ export const useSearch = () => {
    * Executa busca global com debouncing
    */
   const performSearch = useCallback(async (query: string) => {
+    console.log('performSearch called with query:', query);
     if (!query.trim()) {
+      console.log('Query is empty, clearing results');
       setUsers([]);
       setCommunities([]);
       setContent([]);
@@ -32,12 +34,14 @@ export const useSearch = () => {
     setError(null);
 
     try {
+      console.log('Calling SearchService.globalSearch...');
       const results = await SearchService.globalSearch(query, {
         usersLimit: 5,
         communitiesLimit: 5,
         contentLimit: 8
       });
 
+      console.log('Search results:', results);
       setUsers(results.users);
       setCommunities(results.communities);
       setContent(results.content);

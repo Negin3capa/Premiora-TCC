@@ -11,22 +11,22 @@
   --color-primary-light: #FFE8E9;
   
   /* Cores de Fundo */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F5F7FA;
-  --color-bg-tertiary: #E8EBF0;
-  --color-bg-hover: #F0F2F5;
-  --color-bg-dark: #1A1A1B;
-  
+  --color-bg-primary: #0D0D0D;
+  --color-bg-secondary: #121212;
+  --color-bg-tertiary: #1A1A1A;
+  --color-bg-hover: #1A1A1A;
+  --color-bg-dark: #000000;
+
   /* Cores de Texto */
-  --color-text-primary: #1A1A1B;
-  --color-text-secondary: #7C7C7C;
-  --color-text-tertiary: #B8B8B8;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #DADADA;
+  --color-text-tertiary: #666666;
   --color-text-white: #FFFFFF;
-  
+
   /* Cores de Borda */
-  --color-border-light: #EDEDED;
-  --color-border-medium: #D7DADD;
-  --color-border-dark: #CCCCCC;
+  --color-border-light: #1A1A1A;
+  --color-border-medium: #343536;
+  --color-border-dark: #2F3336;
   
   /* Cores de Estado */
   --color-success: #46A758;
@@ -347,23 +347,7 @@ img {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Modo Escuro (preparado para futura implementação) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg-primary: #1A1A1B;
-    --color-bg-secondary: #0F0F10;
-    --color-bg-tertiary: #272729;
-    --color-bg-hover: #2F2F31;
-    
-    --color-text-primary: #FFFFFF;
-    --color-text-secondary: #B8B8B8;
-    --color-text-tertiary: #7C7C7C;
-    
-    --color-border-light: #343536;
-    --color-border-medium: #474849;
-    --color-border-dark: #5A5A5B;
-  }
-}
+
 
 /* Acessibilidade */
 .sr-only {

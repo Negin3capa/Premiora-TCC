@@ -135,7 +135,10 @@ const Header: React.FC = () => {
       setIsDropdownOpen(false);
       navigate('/login');
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('Error during logout:', error);
+      // Mesmo com erro, fechar dropdown e navegar (logout local foi feito)
+      setIsDropdownOpen(false);
+      navigate('/login');
     }
   };
 
