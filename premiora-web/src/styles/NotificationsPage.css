@@ -125,3 +125,150 @@
   background-color: var(--color-bg-hover);
   color: var(--color-text-primary);
 }
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+  .notifications-header {
+    margin-bottom: var(--space-4);
+    padding: 0 var(--space-4);
+  }
+
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .page-subtitle {
+    font-size: var(--font-size-sm);
+  }
+
+  .notifications-container {
+    max-width: 100%;
+    padding: 0 var(--space-2);
+  }
+
+  .notifications-list {
+    gap: var(--space-2);
+  }
+
+  .notification-item {
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+  }
+
+  .notification-item.unread {
+    border-left-width: 3px;
+  }
+
+  .avatar-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .notification-type-icon {
+    width: 20px;
+    height: 20px;
+    font-size: var(--font-size-xs);
+    bottom: -2px;
+    right: -2px;
+  }
+
+  .notification-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .notification-message {
+    font-size: var(--font-size-sm);
+  }
+
+  .notification-meta {
+    gap: var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+
+  .unread-indicator {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notifications-header {
+    margin-bottom: var(--space-3);
+    padding: 0 var(--space-2);
+  }
+
+  .page-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .page-subtitle {
+    font-size: var(--font-size-xs);
+  }
+
+  .notifications-container {
+    padding: 0;
+  }
+
+  .notifications-list {
+    gap: var(--space-1);
+  }
+
+  .notification-item {
+    gap: var(--space-2);
+    padding: var(--space-2);
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .notification-avatar {
+    align-self: flex-start;
+  }
+
+  .avatar-image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .notification-type-icon {
+    width: 18px;
+    height: 18px;
+    font-size: var(--font-size-xs);
+  }
+
+  .notification-content {
+    width: 100%;
+  }
+
+  .notification-text {
+    margin-bottom: var(--space-1);
+  }
+
+  .notification-title {
+    font-size: var(--font-size-sm);
+    display: block;
+    margin-right: 0;
+    margin-bottom: var(--space-1);
+  }
+
+  .notification-message {
+    font-size: var(--font-size-sm);
+    display: block;
+  }
+
+  .notification-meta {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .notification-actions {
+    align-self: flex-end;
+    margin-top: var(--space-1);
+  }
+
+  .action-button {
+    padding: var(--space-1);
+    font-size: var(--font-size-base);
+  }
+}

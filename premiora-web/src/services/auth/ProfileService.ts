@@ -155,6 +155,68 @@ export class ProfileService {
   }
 
   /**
+   * Busca creator por username
+   * @param username - Username do usuário
+   * @returns Promise com dados combinados do usuário e creator
+   */
+  static async getCreatorByUsername(username: string): Promise<any> {
+    try {
+      console.log('🔍 Buscando creator por username:', username);
+
+      // Primeiro buscar o usuário pelo username
+      const { data: userData, error: userError } = await supabaseAdmin
+        .from('users')
+        .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
+        .eq('username', username)
+        .single();
+
+      if (userError) {
+        console.error('❌ Erro ao buscar usuário:', userError);
+        return null;
+      }
+
+      // Depois buscar dados do creator
+      const { data: creatorData, error: creatorError } = await supabaseAdmin
+        .from('creators')
+        .select('*')
+        .eq('id', userData.id)
+        .single();
+
+      if (creatorError) {
+        // Se não existe creator, retornar dados básicos do usuário
+        console.log('⚠️ Creator não encontrado, retornando dados básicos do usuário');
+        return {
+          user: userData,
+          creator: null,
+          // Dados compatíveis com CreatorProfile
+          name: userData.name || userData.username || 'Usuário',
+          totalPosts: 0,
+          description: null,
+          bannerImage: null,
+          avatar_url: userData.avatar_url,
+          username: userData.username
+        };
+      }
+
+      // Retornar dados combinados
+      return {
+        user: userData,
+        creator: creatorData,
+        // Dados compatíveis com CreatorProfile
+        name: creatorData.display_name || userData.name || userData.username || 'Usuário',
+        totalPosts: creatorData.total_subscribers || 0, // Nota: pode precisar ajustar baseado na estrutura real
+        description: creatorData.bio || null,
+        bannerImage: creatorData.cover_image_url || null,
+        avatar_url: userData.avatar_url,
+        username: userData.username
+      };
+    } catch (err) {
+      console.error('💥 Erro geral ao buscar creator por username:', err);
+      return null;
+    }
+  }
+
+  /**
    * Atualiza o perfil do usuário
    * @param userId - ID do usuário
    * @param updateData - Dados para atualizar

@@ -391,6 +391,42 @@
     left: -100%; /* Hide when viewing a chat */
   }
 
+  .conversations-header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .conversations-header h2 {
+    font-size: var(--font-size-base);
+  }
+
+  .conversation-item {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .conversation-avatar .avatar-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .conversation-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .conversation-time {
+    font-size: var(--font-size-xs);
+  }
+
+  .last-message {
+    font-size: var(--font-size-xs);
+  }
+
+  .unread-badge {
+    font-size: var(--font-size-xs);
+    padding: 1px 5px;
+    min-width: 16px;
+  }
+
   .chat-area {
     width: 100%;
     position: absolute;
@@ -404,7 +440,194 @@
     left: 0; /* Show when a conversation is selected */
   }
 
+  .chat-header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .chat-user-info {
+    gap: var(--space-2);
+  }
+
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chat-user-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .chat-status {
+    font-size: var(--font-size-xs);
+    padding: 1px 6px;
+  }
+
+  .messages-container {
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .message-content {
+    max-width: 85%;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .message-text {
+    font-size: var(--font-size-sm);
+  }
+
+  .message-time {
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-1);
+  }
+
+  .message-input-container {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .message-input-wrapper {
+    padding: var(--space-2) var(--space-3);
+  }
+
   .back-button {
     display: flex; /* Show back button on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .messages-layout {
+    height: calc(100vh - 120px); /* Adjust for smaller screens */
+  }
+
+  .conversations-header {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .conversations-header h2 {
+    font-size: var(--font-size-sm);
+  }
+
+  .new-message-button {
+    padding: var(--space-1);
+    font-size: var(--font-size-base);
+  }
+
+  .conversation-item {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .conversation-avatar .avatar-image {
+    width: 36px;
+    height: 36px;
+  }
+
+  .conversation-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .conversation-time {
+    font-size: var(--font-size-xs);
+  }
+
+  .last-message {
+    font-size: var(--font-size-xs);
+  }
+
+  .unread-badge {
+    font-size: var(--font-size-xs);
+    padding: 1px 4px;
+    min-width: 14px;
+  }
+
+  .chat-header {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .chat-user-info {
+    gap: var(--space-2);
+  }
+
+  .back-button {
+    padding: var(--space-1);
+    font-size: var(--font-size-base);
+  }
+
+  .chat-avatar {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chat-user-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .chat-status {
+    font-size: var(--font-size-xs);
+    padding: 1px 5px;
+  }
+
+  .chat-actions {
+    gap: var(--space-1);
+  }
+
+  .chat-action-button {
+    padding: var(--space-1);
+    font-size: var(--font-size-base);
+  }
+
+  .messages-container {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+  }
+
+  .message-content {
+    max-width: 90%;
+    padding: var(--space-2);
+  }
+
+  .message-text {
+    font-size: var(--font-size-sm);
+  }
+
+  .message-time {
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-1);
+  }
+
+  .message-input-container {
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .message-input-wrapper {
+    padding: var(--space-2);
+    gap: var(--space-2);
+  }
+
+  .message-input {
+    font-size: var(--font-size-sm);
+  }
+
+  .send-button {
+    padding: var(--space-1);
+    font-size: var(--font-size-base);
+  }
+
+  .no-chat-selected {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .no-chat-selected .empty-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-3);
+  }
+
+  .no-chat-selected h3 {
+    font-size: var(--font-size-base);
+    margin: var(--space-3) 0 var(--space-1) 0;
+  }
+
+  .no-chat-selected p {
+    font-size: var(--font-size-sm);
   }
 }

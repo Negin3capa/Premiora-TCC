@@ -21,6 +21,7 @@ const CommunitiesPage = React.lazy(() => import('./pages/CommunitiesPage'));
 const SettingsPage = React.lazy(() => import('./pages/SettingsPage'));
 const NotificationsPage = React.lazy(() => import('./pages/NotificationsPage'));
 const MessagesPage = React.lazy(() => import('./pages/MessagesPage'));
+const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
 
 /**
  * Componente de loading para páginas em lazy loading
@@ -177,6 +178,26 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <MessagesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Perfil por username (apenas para autenticados) */}
+        <Route
+          path="/u/:username"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Perfil legado - redireciona para perfil do usuário atual */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

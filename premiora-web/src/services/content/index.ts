@@ -15,3 +15,5 @@ export { FeedService } from './FeedService';
 export type { FeedResult } from './FeedService';
 
 export { VideoService } from './VideoService';
+
+export { SearchService } from './SearchService';

@@ -4,7 +4,6 @@
  */
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
 import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
@@ -16,7 +15,6 @@ import '../styles/CommunitiesPage.css';
  * Permite ordenação por relevância, tendência, popularidade, etc.
  */
 const CommunitiesPage: React.FC = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'relevance' | 'trending' | 'popular' | 'new'>('popular');
@@ -25,13 +23,6 @@ const CommunitiesPage: React.FC = () => {
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [communityContent, setCommunityContent] = useState<ContentItem[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /**
-   * Handler para alternar visibilidade da sidebar em dispositivos móveis
-   */
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   // Mock data generator for communities
   const generateMockCommunities = (): Community[] => {
@@ -296,12 +287,7 @@ const CommunitiesPage: React.FC = () => {
     <div className="communities-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          user={user}
-          onToggleSidebar={toggleSidebar}
-        />
+        <Header />
 
         <div className="communities-container">
           {/* Header Section */}

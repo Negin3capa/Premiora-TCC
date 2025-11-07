@@ -29,7 +29,7 @@ import '../styles/SettingsPage.css';
  * @component
  */
 const SettingsPage: React.FC = () => {
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const {
     theme,
     language,
@@ -43,15 +43,7 @@ const SettingsPage: React.FC = () => {
   } = useUI();
   const [activeSection, setActiveSection] = useState('appearance');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /**
-   * Handler para alternar visibilidade da sidebar em dispositivos móveis
-   */
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   // Estados para configurações com valores padrão
   const defaultSettings = {
@@ -144,12 +136,7 @@ const SettingsPage: React.FC = () => {
     <div className="settings-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          user={user}
-          onToggleSidebar={toggleSidebar}
-        />
+        <Header />
 
         <div className="settings-container">
           <div className="settings-sidebar">

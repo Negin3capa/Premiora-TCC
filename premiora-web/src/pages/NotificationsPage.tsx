@@ -3,26 +3,16 @@
  * Exibe todas as notificações do usuário
  */
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { Heart, MessageCircle, User, Building2, Bell, MoreHorizontal } from 'lucide-react';
-import './NotificationsPage.css';
+import '../styles/NotificationsPage.css';
 
 /**
  * Página de notificações do usuário
  * Mostra lista de notificações com filtros e ações
  */
 const NotificationsPage: React.FC = () => {
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /**
-   * Handler para alternar visibilidade da sidebar em dispositivos móveis
-   */
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   // Mock notifications data
   const mockNotifications = [
@@ -78,12 +68,7 @@ const NotificationsPage: React.FC = () => {
     <div className="homepage">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          user={user}
-          onToggleSidebar={toggleSidebar}
-        />
+        <Header />
 
         <div className="feed">
           <div className="feed-content">

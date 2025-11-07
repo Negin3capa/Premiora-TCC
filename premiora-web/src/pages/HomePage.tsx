@@ -1,7 +1,6 @@
 import React, { Suspense, useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { useFeed } from '../hooks/useFeed';
-import { useSearch } from '../hooks/useSearch';
+import { useLocalSearch } from '../hooks/useSearch';
 import { Sidebar, MobileBottomBar } from '../components/layout';
 import '../styles/HomePage.css';
 
@@ -33,29 +32,16 @@ const ComponentLoader: React.FC = () => (
  * @component
  */
 const HomePage: React.FC = () => {
-  const { user } = useAuth();
   const { feedItems, loading, hasMore, loadMoreContent } = useFeed();
-  const { searchQuery, setSearchQuery, filteredItems } = useSearch(feedItems);
+  const { filteredItems } = useLocalSearch(feedItems);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  /**
-   * Handler para alternar visibilidade da sidebar em dispositivos móveis
-   */
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
 
   return (
     <div className="homepage">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Suspense fallback={<ComponentLoader />}>
-          <Header
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            user={user}
-            onToggleSidebar={toggleSidebar}
-          />
+          <Header />
         </Suspense>
         <Suspense fallback={<ComponentLoader />}>
           <Feed

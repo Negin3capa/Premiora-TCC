@@ -1,0 +1,63 @@
+/**
+ * Estilos do Layout Raiz da Aplicação
+ * Layout persistente que mantém sidebar entre navegações
+ */
+
+/* ==================== Layout Raiz ==================== */
+
+.root-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+  overflow-x: hidden;
+}
+
+/* Sidebar persistente */
+.root-layout .sidebar {
+  flex-shrink: 0;
+  width: 80px;
+  position: relative;
+}
+
+/* Conteúdo principal */
+.root-layout .main-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Conteúdo das páginas */
+.root-layout .page-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 64px); /* Account for fixed header (64px height) */
+  overflow-x: hidden;
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+  .root-layout .sidebar {
+    display: none; /* Hide sidebar on mobile, shown via overlay */
+  }
+
+  .root-layout .main-content {
+    width: 100%;
+  }
+
+  .root-layout .page-content {
+    min-height: calc(100vh - 70px); /* Reduced header height on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .root-layout .page-content {
+    min-height: calc(100vh - 70px - 80px); /* Account for mobile bottom bar */
+  }
+}

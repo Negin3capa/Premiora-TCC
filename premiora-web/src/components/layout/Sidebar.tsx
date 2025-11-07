@@ -3,7 +3,7 @@
  * Barra lateral com navegação e perfil do usuário
  */
 import React from 'react';
-import './Sidebar.css';
+import '../../styles/Sidebar.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Flame, Bell, MessageCircle, Users, Building2, Settings, PenTool } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -117,13 +117,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   };
 
   const navigationItems = [
-    { icon: <Home size={20} />, label: 'Home', route: '/home', active: true },
-    { icon: <Flame size={20} />, label: 'Trending', route: '/trending', active: false },
-    { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: false },
-    { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: false },
-    { icon: <Users size={20} />, label: 'Following', route: '/following', active: false },
-    { icon: <Building2 size={20} />, label: 'Communities', route: '/communities', active: false },
-    { icon: <Settings size={20} />, label: 'Settings', route: '/settings', active: false },
+    { icon: <Home size={20} />, label: 'Home', route: '/dashboard', active: location.pathname === '/dashboard' },
+    { icon: <Flame size={20} />, label: 'Trending', route: '/dashboard', active: false }, // TODO: Add trending page
+    { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: location.pathname === '/notifications' },
+    { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: location.pathname === '/messages' },
+    { icon: <Users size={20} />, label: 'Following', route: '/dashboard', active: false }, // TODO: Add following page
+    { icon: <Building2 size={20} />, label: 'Communities', route: '/communities', active: location.pathname === '/communities' },
+    { icon: <Settings size={20} />, label: 'Settings', route: '/settings', active: location.pathname === '/settings' },
   ];
 
   /**
@@ -165,153 +165,56 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
       )}
 
       <aside className={`sidebar ${isOpen ? 'mobile-open' : ''}`} onClick={handleSidebarContentClick}>
-      <div className="sidebar-header">
-        <h2 className="sidebar-logo">Premiora</h2>
-      </div>
-      
-      <nav className="sidebar-nav">
-        <ul className="nav-list">
-          {navigationItems.map((item, index) => {
-            const isActive = location.pathname === item.route;
-            return (
-              <li key={index} className={`nav-item ${isActive ? 'active' : ''}`}>
-                <button
-                  className="nav-button"
-                  aria-label={item.label}
-                  aria-current={isActive ? 'page' : undefined}
-                  onClick={() => handleNavigation(item.route)}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-label">{item.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-
-      {/* Botão Criar */}
-      <div className="create-section" style={{
-        padding: '0 var(--space-4)',
-        marginBottom: 'var(--space-4)'
-      }}>
-        <button
-          className="create-button"
-          onClick={() => openModal('createContent')}
-          aria-label="Criar novo conteúdo"
-          title="Criar novo conteúdo"
-          style={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-3)',
-            padding: 'var(--space-4)',
-            borderRadius: 'var(--radius-lg)',
-            border: 'none',
-            background: 'linear-gradient(135deg, var(--color-primary) 0%, #FF6B75 100%)',
-            color: 'var(--color-text-white)',
-            fontSize: 'var(--font-size-sm)',
-            fontWeight: 'var(--font-weight-semibold)',
-            cursor: 'pointer',
-            transition: 'all var(--transition-fast)',
-            boxShadow: '0 4px 12px rgba(255, 66, 77, 0.3)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(255, 66, 77, 0.4)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 66, 77, 0.3)';
-          }}
-        >
-          <span className="create-icon" style={{
-            fontSize: 'var(--font-size-xl)',
-            width: '24px',
-            textAlign: 'center',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <PenTool size={20} />
-          </span>
-          <span className="create-label">Criar</span>
-        </button>
-      </div>
-
-      <div className="sidebar-footer">
-        {user && (
-          <div className="user-section" style={{ 
-            padding: 'var(--space-3)', 
-            marginBottom: 'var(--space-4)',
-            borderRadius: 'var(--radius-lg)',
-            backgroundColor: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border-light)'
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 'var(--space-3)',
-              cursor: 'pointer'
-            }}>
+        <div className="sidebar-content">
+          {/* User Avatar Section */}
+          <div className="sidebar-avatar-section">
+            <button
+              className="sidebar-avatar-container"
+              onClick={() => handleNavigation('/profile')}
+              aria-label="Ir para perfil"
+              title="Ir para perfil"
+            >
               <img
                 src={userAvatar}
                 alt={displayName}
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: 'var(--radius-full)',
-                  objectFit: 'cover',
-                  border: '2px solid var(--color-primary)'
-                }}
+                className="sidebar-avatar"
                 onError={(e) => {
                   e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF424D&color=fff&bold=true`;
                 }}
               />
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontSize: 'var(--font-size-sm)',
-                  fontWeight: 'var(--font-weight-semibold)',
-                  color: 'var(--color-text-primary)',
-                  marginBottom: '2px'
-                }}>
-                  {displayName}
-                </div>
-                <div style={{ 
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--color-text-secondary)'
-                }}>
-                  Ver perfil
-                </div>
-              </div>
-            </div>
+            </button>
           </div>
-        )}
-        
-        <div className="creator-section">
-          <h3>Creators em Alta</h3>
-          <div className="mini-creator-list">
-            {[
-              { name: 'Ana Silva', status: 'Online' },
-              { name: 'João Santos', status: 'Online' },
-              { name: 'Maria Costa', status: 'Online' }
-            ].map((creator, i) => (
-              <div key={i} className="mini-creator-item">
-                <img 
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(creator.name)}&background=random&color=fff`}
-                  alt={creator.name}
-                  className="mini-creator-avatar"
-                />
-                <div className="mini-creator-info">
-                  <span className="mini-creator-name">{creator.name}</span>
-                  <span className="mini-creator-status">{creator.status}</span>
-                </div>
-              </div>
-            ))}
+
+          {/* Navigation Icons */}
+          <nav className="sidebar-nav">
+            <ul className="sidebar-nav-list">
+              {navigationItems.map((item, index) => (
+                <li key={index} className="sidebar-nav-item">
+                  <button
+                    className={`sidebar-nav-button ${item.active ? 'active' : ''}`}
+                    aria-label={item.label}
+                    title={item.label}
+                    onClick={() => handleNavigation(item.route)}
+                  >
+                    <span className="sidebar-nav-icon">{item.icon}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Create Button */}
+          <div className="sidebar-create-section">
+            <button
+              className="sidebar-create-button"
+              onClick={() => openModal('createContent')}
+              aria-label="Criar novo conteúdo"
+              title="Criar novo conteúdo"
+            >
+              <PenTool size={20} />
+            </button>
           </div>
         </div>
-      </div>
 
       {/* Modal de criação de conteúdo */}
       <CreateContentModal
