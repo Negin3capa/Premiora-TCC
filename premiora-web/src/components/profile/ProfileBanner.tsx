@@ -24,8 +24,8 @@ export const ProfileBanner: React.FC<ProfileBannerProps> = ({ profile }) => {
 
   const handleButtonClick = () => {
     if (isOwnProfile) {
-      // Redirecionar para página de configurações ou edição de perfil
-      navigate('/settings');
+      // Redirecionar para página de edição de perfil
+      navigate(`/u/${profile.username}/edit`);
     } else {
       // Lógica para "Become a member" - pode ser implementada futuramente
       console.log('Become a member clicked');

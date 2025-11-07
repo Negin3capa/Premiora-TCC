@@ -26,14 +26,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Busca e atualiza o perfil do usuário no estado local
    */
-  const refreshUserProfile = useCallback(async () => {
+  const refreshUserProfile = useCallback(async (forceFresh: boolean = false) => {
     if (!user) {
+      console.log('🔄 refreshUserProfile: Nenhum usuário logado');
       setUserProfile(null);
       return;
     }
 
-    const profile = await AuthService.fetchUserProfile(user.id);
-    setUserProfile(profile);
+    console.log('🔄 refreshUserProfile: Buscando perfil atualizado para userId:', user.id, forceFresh ? '(forçando busca fresca)' : '');
+    try {
+      const profile = await AuthService.fetchUserProfile(user.id, forceFresh);
+      console.log('🔄 refreshUserProfile: Perfil obtido:', profile);
+
+      // Forçar atualização mesmo se for igual para garantir re-render
+      userProfileRef.current = profile;
+      setUserProfile(profile);
+
+      console.log('✅ refreshUserProfile: Contexto atualizado com novo perfil');
+    } catch (error) {
+      console.error('❌ refreshUserProfile: Erro ao buscar perfil:', error);
+    }
   }, [user]); // Adicionada dependência de user
 
   /**

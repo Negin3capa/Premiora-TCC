@@ -71,7 +71,7 @@ export class AuthService {
    * Busca o perfil do usuário do banco de dados
    * @deprecated Use ProfileService.fetchUserProfile
    */
-  static async fetchUserProfile(userId: string): Promise<any> {
-    return ProfileService.fetchUserProfile(userId);
+  static async fetchUserProfile(userId: string, forceFresh: boolean = false): Promise<any> {
+    return ProfileService.fetchUserProfile(userId, forceFresh);
   }
 }

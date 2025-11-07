@@ -1,8 +1,13 @@
+/**
+ * Página de edição de perfil
+ * Mostra um preview interativo do perfil para edição
+ */
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ProfileBanner, FeaturedPost, RecentPosts } from '../components/profile';
+import { ProfileBannerEditable, FeaturedPost, RecentPosts } from '../components/profile';
 import { Sidebar, Header } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
+import { useProfileEdit } from '../hooks/useProfileEdit';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
 import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
@@ -10,14 +15,14 @@ import type { CreatorProfile, Post, PostMedia } from '../types/profile';
 import '../styles/globals.css';
 
 /**
- * Página de perfil do criador
- * Exibe informações do perfil, post em destaque e lista de posts recentes
+ * Página de edição de perfil do criador
+ * Permite edição interativa do perfil com preview em tempo real
  *
  * @component
  */
-const ProfilePage: React.FC = () => {
+const ProfileEditPage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  const { userProfile } = useAuth();
+  const { userProfile, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
 
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
@@ -26,10 +31,47 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Hook para gerenciar edição do perfil
+  const {
+    profile: editedProfile,
+    hasChanges,
+    isSaving,
+    isUploading,
+    error: editError,
+    updateName,
+    updateDescription,
+    updateAvatar,
+    updateBanner,
+    saveChanges,
+    cancelChanges,
+    clearError
+  } = useProfileEdit(creatorProfile);
+
+  // Verificar se usuário tem permissão para editar este perfil
+  const isOwnProfile = userProfile?.username === username;
+
+  // Redirecionar se não for o próprio perfil
+  useEffect(() => {
+    if (username && userProfile?.username && !isOwnProfile) {
+      navigate(`/u/${username}`, { replace: true });
+      return;
+    }
+  }, [username, userProfile, isOwnProfile, navigate]);
+
+  // Marcar que estamos na página de edição
+  useEffect(() => {
+    sessionStorage.setItem('previousPage', 'profile-edit');
+
+    return () => {
+      // Limpar quando sair da página
+      sessionStorage.removeItem('previousPage');
+    };
+  }, []);
+
   // Se não há username na rota, redirecionar para o perfil do usuário atual
   useEffect(() => {
     if (!username && userProfile?.username) {
-      navigate(`/u/${userProfile.username}`, { replace: true });
+      navigate(`/u/${userProfile.username}/edit`, { replace: true });
       return;
     }
   }, [username, userProfile, navigate]);
@@ -94,28 +136,9 @@ const ProfilePage: React.FC = () => {
     }
   }, [username, userProfile?.id]); // userProfile?.id é usado na busca de posts, então deve estar nas dependências
 
-  // Buscar dados do perfil quando username muda ou quando volta de edição
+  // Buscar dados do perfil quando username muda
   useEffect(() => {
     fetchProfileData();
-  }, [fetchProfileData]);
-
-  // Refresh automático apenas quando volta da edição (mais específico)
-  useEffect(() => {
-    const handleFocus = () => {
-      // Verificar se acabamos de voltar da página de edição
-      const previousPage = sessionStorage.getItem('previousPage');
-      if (previousPage === 'profile-edit') {
-        console.log('🔄 Voltando da edição - fazendo refresh do perfil');
-        fetchProfileData();
-        sessionStorage.removeItem('previousPage');
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
   }, [fetchProfileData]);
 
   /**
@@ -150,6 +173,47 @@ const ProfilePage: React.FC = () => {
     return (views * 1) + (likes * 2) + (comments * 3);
   };
 
+  /**
+   * Handler para salvar mudanças
+   */
+  const handleSaveChanges = useCallback(async () => {
+    try {
+      console.log('💾 Iniciando salvamento de mudanças do perfil...');
+      await saveChanges();
+      console.log('✅ Mudanças salvas no banco de dados');
+
+      // Aguardar um momento para garantir que a sincronização terminou
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Atualizar contexto global com busca fresca
+      console.log('🔄 Atualizando contexto global com busca fresca...');
+      await refreshUserProfile(true);
+      console.log('✅ Contexto global atualizado');
+
+      // Mostrar feedback de sucesso
+      alert('Perfil atualizado com sucesso!');
+
+      // Redirecionar para página normal do perfil
+      console.log('🔀 Redirecionando para página do perfil...');
+      navigate(`/u/${username}`);
+    } catch (error) {
+      console.error('❌ Erro ao salvar mudanças:', error);
+      alert('Erro ao salvar mudanças. Tente novamente.');
+    }
+  }, [saveChanges, refreshUserProfile, navigate, username]);
+
+  /**
+   * Handler para cancelar mudanças
+   */
+  const handleCancelChanges = useCallback(() => {
+    cancelChanges();
+    // Limpar erros
+    clearError();
+    // Redirecionar para página normal do perfil
+    navigate(`/u/${username}`);
+  }, [cancelChanges, clearError, navigate, username]);
+
+  // Mostrar loading inicial
   if (loading) {
     return (
       <div style={{
@@ -165,6 +229,7 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // Mostrar erro se não conseguir carregar
   if (error || !creatorProfile) {
     return (
       <div style={{
@@ -195,6 +260,37 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // Verificar permissão
+  if (!isOwnProfile) {
+    return (
+      <div style={{
+        backgroundColor: '#0D0D0D',
+        minHeight: '100vh',
+        color: '#DADADA',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column'
+      }}>
+        <h2>Você não tem permissão para editar este perfil</h2>
+        <button
+          onClick={() => navigate(`/u/${username}`)}
+          style={{
+            marginTop: '1rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Voltar ao Perfil
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div style={{
       backgroundColor: '#0D0D0D',
@@ -208,7 +304,7 @@ const ProfilePage: React.FC = () => {
       {/* Global Header */}
       <Header />
 
-      {/* Profile Banner - Full screen width */}
+      {/* Profile Banner Editable - Full screen width */}
       <div style={{
         position: 'relative',
         width: '100vw',
@@ -218,7 +314,18 @@ const ProfilePage: React.FC = () => {
         marginRight: '-50vw',
         marginTop: '64px', /* Account for header height */
       }}>
-        <ProfileBanner profile={creatorProfile} />
+        <ProfileBannerEditable
+          profile={editedProfile}
+          isUploading={isUploading}
+          onUpdateName={updateName}
+          onUpdateDescription={updateDescription}
+          onUpdateAvatar={updateAvatar}
+          onUpdateBanner={updateBanner}
+          onSave={handleSaveChanges}
+          onCancel={handleCancelChanges}
+          hasChanges={hasChanges}
+          isSaving={isSaving}
+        />
       </div>
 
       {/* Main content container - adjusted for fixed sidebar and header */}
@@ -238,8 +345,40 @@ const ProfilePage: React.FC = () => {
           <RecentPosts posts={recentPosts} />
         </div>
       </div>
+
+      {/* Error Display */}
+      {(error || editError) && (
+        <div style={{
+          position: 'fixed',
+          top: '80px',
+          right: '20px',
+          backgroundColor: '#dc3545',
+          color: 'white',
+          padding: '1rem',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+          zIndex: 1000,
+          maxWidth: '400px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{error || editError}</span>
+            <button
+              onClick={clearError}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '1.2rem'
+              }}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default React.memo(ProfilePage);
+export default React.memo(ProfileEditPage);
