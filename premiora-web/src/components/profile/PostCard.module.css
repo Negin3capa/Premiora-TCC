@@ -26,6 +26,17 @@
   overflow: hidden;
 }
 
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.postCard:hover .thumbnailImage {
+  transform: scale(1.05);
+}
+
 .thumbnailPlaceholder {
   width: 100%;
   height: 100%;
@@ -34,6 +45,24 @@
   align-items: center;
   justify-content: center;
   position: relative;
+}
+
+.videoOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.postCard:hover .videoOverlay {
+  opacity: 1;
 }
 
 .lockOverlay {

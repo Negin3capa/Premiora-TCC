@@ -26,14 +26,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Busca e atualiza o perfil do usuário no estado local
    */
-  const refreshUserProfile = useCallback(async () => {
+  const refreshUserProfile = useCallback(async (forceFresh: boolean = false) => {
     if (!user) {
+      console.log('🔄 refreshUserProfile: Nenhum usuário logado');
       setUserProfile(null);
       return;
     }
 
-    const profile = await AuthService.fetchUserProfile(user.id);
-    setUserProfile(profile);
+    console.log('🔄 refreshUserProfile: Buscando perfil atualizado para userId:', user.id, forceFresh ? '(forçando busca fresca)' : '');
+    try {
+      const profile = await AuthService.fetchUserProfile(user.id, forceFresh);
+      console.log('🔄 refreshUserProfile: Perfil obtido:', profile);
+
+      // Forçar atualização mesmo se for igual para garantir re-render
+      userProfileRef.current = profile;
+      setUserProfile(profile);
+
+      console.log('✅ refreshUserProfile: Contexto atualizado com novo perfil');
+    } catch (error) {
+      console.error('❌ refreshUserProfile: Erro ao buscar perfil:', error);
+    }
   }, [user]); // Adicionada dependência de user
 
   /**
@@ -88,19 +100,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Limpar bloqueio do setup antes do logout
       if (user?.id) {
         clearSetupLock(user.id);
-        console.log('🔓 Setup lock removido no logout para usuário:', user.id);
       }
 
       const result = await signOut();
       if (result.error) {
-        throw result.error;
+        console.warn('Supabase signOut failed, but clearing local state anyway:', result.error);
+        // Mesmo com erro, continuar com logout local
       }
       setUser(null);
       setUserProfile(null);
       setSession(null);
     } catch (err) {
-      setLoading(false);
-      throw err;
+      console.error('Error during signOut:', err);
+      // Mesmo com erro, definir estados para null para garantir logout local
+      setUser(null);
+      setUserProfile(null);
+      setSession(null);
     } finally {
       setLoading(false);
     }
@@ -213,8 +228,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (session?.user) {
           console.log('👤 Auth state change - usuário autenticado, buscando perfil em background...');
 
-          // Buscar perfil diretamente para evitar stale closure
-          AuthService.fetchUserProfile(session.user.id).then(profile => {
+          // Buscar perfil diretamente para evitar stale closure, forçando busca fresca após login
+          const forceFresh = event === 'SIGNED_IN';
+          AuthService.fetchUserProfile(session.user.id, forceFresh).then(profile => {
             if (isMounted) {
               // Se perfil é null, significa que o usuário foi deletado do banco
               // mas ainda tem sessão ativa - fazer logout automático
@@ -227,10 +243,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 return;
               }
 
-              // Só atualizar se o perfil mudou para evitar re-renderizações desnecessárias
-              if (JSON.stringify(userProfileRef.current) !== JSON.stringify(profile)) {
+              // Sempre atualizar após login para garantir avatar correto
+              if (forceFresh || JSON.stringify(userProfileRef.current) !== JSON.stringify(profile)) {
                 userProfileRef.current = profile;
                 setUserProfile(profile);
+                console.log('✅ Auth state change - perfil atualizado:', profile);
               }
             }
           }).catch(err => {

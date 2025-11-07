@@ -29,19 +29,43 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
   return (
     <div className={`${styles.postCard} ${post.locked ? styles.locked : ''}`}>
       <div className={styles.thumbnail}>
-        <div className={styles.thumbnailPlaceholder}>
-          {post.locked && (
-            <div className={styles.lockOverlay}>
-              <svg viewBox="0 0 24 24" width="24" height="24">
-                <path
-                  d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm3 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
-                  fill="white"
-                />
-              </svg>
-              <span className={styles.lockText}>Locked</span>
-            </div>
-          )}
-        </div>
+        {post.thumbnailUrl && post.thumbnailUrl !== 'placeholder' ? (
+          <img
+            src={post.thumbnailUrl}
+            alt={post.title}
+            className={styles.thumbnailImage}
+            loading="lazy"
+          />
+        ) : (
+          <div className={styles.thumbnailPlaceholder}>
+            {/* Placeholder vazio para posts sem mídia */}
+          </div>
+        )}
+
+        {/* Overlay de bloqueio para posts premium */}
+        {post.locked && (
+          <div className={styles.lockOverlay}>
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <path
+                d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm3 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"
+                fill="white"
+              />
+            </svg>
+            <span className={styles.lockText}>Locked</span>
+          </div>
+        )}
+
+        {/* Overlay de play para vídeos */}
+        {post.contentType === 'video' && !post.locked && (
+          <div className={styles.videoOverlay}>
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path
+                d="M8 5v14l11-7z"
+                fill="white"
+              />
+            </svg>
+          </div>
+        )}
       </div>
 
       <div className={styles.content}>

@@ -15,6 +15,29 @@ export type CreatorProfile = {
 };
 
 /**
+ * Informações de mídia anexada a um post
+ */
+export type MediaInfo = {
+  url: string;
+  path?: string;
+  metadata?: {
+    duration?: number;
+    width?: number;
+    height?: number;
+    fileSize?: number;
+    mimeType?: string;
+  };
+};
+
+/**
+ * Estrutura de mídia para posts
+ */
+export type PostMedia = {
+  video?: MediaInfo;
+  thumbnail?: MediaInfo;
+} | string; // Pode ser uma string (URL direta) ou objeto estruturado
+
+/**
  * Dados de um post individual
  */
 export type Post = {
@@ -22,9 +45,11 @@ export type Post = {
   title: string;
   description?: string;
   thumbnailUrl: string;
+  mediaUrls?: PostMedia[]; // Array de mídias anexadas
   createdAt: string;
   views?: number;
   likes?: number;
   comments?: number;
   locked?: boolean; // for "locked" posts (like Patreon)
+  contentType?: 'text' | 'image' | 'video'; // Tipo de conteúdo
 };

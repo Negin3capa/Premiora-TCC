@@ -23,15 +23,17 @@ A aplicação segue uma arquitetura **Component-Based Architecture** com os segu
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   User Interface │───▶│  Custom Hooks   │───▶│  State Updates  │
 │   (Components)   │    │   (useFeed,     │    │   (Context)     │
-│                  │    │    useSearch)   │    │                 │
+│                  │    │    useSearch,   │    │                 │
+│                  │    │    useModal,    │    │                 │
+│                  │    │    useUI)       │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Business      │◀───│   API Services  │◀───│   Supabase       │
-│   Logic         │    │   (AuthService) │    │   (Backend)      │
-│   (Services)    │    └─────────────────┘    └─────────────────┘
-└─────────────────┘
+│   Logic         │    │   (AuthService, │    │   (Backend)      │
+│   (Services)    │    │    ContentService)│    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
 ## Arquitetura de Componentes
@@ -40,31 +42,36 @@ A aplicação segue uma arquitetura **Component-Based Architecture** com os segu
 
 ```
 App (Root)
-├── AuthProvider (Context Provider)
-│   └── BrowserRouter (Routing)
-│       ├── Public Routes
-│       │   ├── LandingPage
-│       │   │   ├── Header
-│       │   │   ├── Hero
-│       │   │   ├── Features
-│       │   │   ├── Testimonials
-│       │   │   ├── Pricing
-│       │   │   ├── FAQ
-│       │   │   ├── CTA
-│       │   │   └── Footer
-│       │   └── LoginPage
-│       │       └── LoginForm
-│       └── Protected Routes
-│           └── HomePage
-│               ├── Navbar
-│               ├── Sidebar
-│               ├── Feed
-│               │   └── ContentCard[]
-│               └── Modals[]
-│                   ├── CreatePostModal
-│                   ├── CreateVideoModal
-│                   ├── CreateCommunityModal
-│                   └── CreateContentModal
+├── UIProvider (Context Provider)
+│   ├── NotificationProvider (Context Provider)
+│   │   ├── ModalProvider (Context Provider)
+│   │   │   ├── AuthProvider (Context Provider)
+│   │   │   │   └── BrowserRouter (Routing)
+│   │   │   │       ├── Public Routes
+│   │   │   │       │   ├── LandingPage
+│   │   │   │       │   │   ├── Header
+│   │   │   │       │   │   ├── Hero
+│   │   │   │       │   │   ├── Features
+│   │   │   │       │   │   ├── Testimonials
+│   │   │   │       │   │   ├── Pricing
+│   │   │   │       │   │   ├── FAQ
+│   │   │   │       │   │   ├── CTA
+│   │   │   │       │   │   └── Footer
+│   │   │   │       │   └── LoginPage
+│   │   │   │       │       └── LoginForm
+│   │   │   │       └── Protected Routes
+│   │   │   │           └── Dashboard
+│   │   │   │               ├── Sidebar
+│   │   │   │               ├── Header
+│   │   │   │               ├── Feed
+│   │   │   │               │   └── ContentCard[]
+│   │   │   │               ├── FeedSidebar
+│   │   │   │               ├── MobileBottomBar
+│   │   │   │               └── Modals[]
+│   │   │   │                   ├── CreatePostModal
+│   │   │   │                   ├── CreateVideoModal
+│   │   │   │                   ├── CreateCommunityModal
+│   │   │   │                   └── CreateContentModal
 ```
 
 ### Tipos de Componentes
@@ -182,12 +189,64 @@ interface AuthContextType {
 // src/App.tsx
 const App: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <Suspense fallback={<PageLoader />}>
+      <NotificationContainer />
+      <Routes>
+        {/* Rota raiz - Landing Page (apenas para não autenticados) */}
+        <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+
+        {/* Rota de Login (apenas para não autenticados) */}
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+
+        {/* Rota de Signup (apenas para não autenticados) */}
+        <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+
+        {/* Rota de Callback OAuth (acessível para todos) */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
+
+        {/* Rota de Confirmação de Email (acessível para todos os estados de autenticação) */}
+        <Route path="/email-confirmation" element={<EmailConfirmation />} />
+
+        {/* Rota de Sucesso da Confirmação de Email */}
+        <Route path="/email-confirmation-success" element={<EmailConfirmationSuccess />} />
+
+        {/* Rota de Setup de Perfil (apenas para autenticados) */}
+        <Route path="/setup" element={<ProtectedRoute><ProfileSetup /></ProtectedRoute>} />
+
+        {/* Rota Dashboard (apenas para autenticados com perfil completo) */}
+        <Route path="/dashboard" element={<ProtectedRoute><ProfileSetupGuard><Dashboard /></ProfileSetupGuard></ProtectedRoute>} />
+
+        {/* Rota Home (redirect para dashboard) */}
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Rota Lista de Comunidades (apenas para autenticados) */}
+        <Route path="/communities" element={<ProtectedRoute><CommunitiesPage /></ProtectedRoute>} />
+
+        {/* Rota Comunidades (apenas para autenticados) */}
+        <Route path="/r/:communityName" element={<ProtectedRoute><CommunityPage /></ProtectedRoute>} />
+
+        {/* Rota Configurações (apenas para autenticados) */}
+        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+        {/* Rota Notificações (apenas para autenticados) */}
+        <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+
+        {/* Rota Mensagens (apenas para autenticados) */}
+        <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+
+        {/* Rota Edição de Perfil (apenas para autenticados) */}
+        <Route path="/u/:username/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
+
+        {/* Rota Perfil por username (apenas para autenticados) */}
+        <Route path="/u/:username" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+        {/* Rota Perfil legado - redireciona para perfil do usuário atual */}
+        <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+        {/* Rota catch-all - redireciona para landing page */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 };
 ```
@@ -197,7 +256,7 @@ const App: React.FC = () => {
 #### PublicRoute
 
 - **Permite acesso**: Apenas usuários não autenticados
-- **Redirecionamento**: Usuários logados → `/home`
+- **Redirecionamento**: Usuários logados → `/dashboard`
 - **Uso**: Landing page, página de login
 
 #### ProtectedRoute
@@ -233,7 +292,7 @@ sequenceDiagram
     F->>S: Valida sessão
     S->>DB: Upsert perfil usuário
     DB->>F: Retorna dados do perfil
-    F->>U: Redireciona para /home
+    F->>U: Redireciona para /dashboard
 ```
 
 ### Gerenciamento de Sessões
@@ -589,6 +648,7 @@ interface ModalContextType {
 ```
 
 **Benefícios Alcançados**:
+
 - ✅ **Estado Centralizado**: Controle único do estado de abertura/fechamento de todos os modais
 - ✅ **Reutilização**: Lógica de modal compartilhada entre componentes via `useModal` hook
 - ✅ **Performance**: Evita re-renders desnecessários de componentes pai
@@ -596,6 +656,7 @@ interface ModalContextType {
 - ✅ **Type Safety**: Tipagem completa com TypeScript
 
 **Arquivos Criados**:
+
 - `src/types/modal.ts` - Tipos e interfaces
 - `src/contexts/ModalContext.tsx` - Provider e lógica
 - `src/hooks/useModal.ts` - Hook personalizado
@@ -608,7 +669,7 @@ interface ModalContextType {
 ```typescript
 interface NotificationContextType {
   notifications: Notification[];
-  addNotification: (notification: Omit<Notification, 'id'>) => string;
+  addNotification: (notification: Omit<Notification, "id">) => string;
   removeNotification: (id: string) => void;
   clearAllNotifications: () => void;
   showSuccess: (title: string, message?: string, duration?: number) => string;
@@ -619,6 +680,7 @@ interface NotificationContextType {
 ```
 
 **Benefícios Alcançados**:
+
 - ✅ **UX Aprimorada**: Feedback visual consistente para ações do usuário
 - ✅ **Acessibilidade**: Notificações screen reader friendly com ARIA
 - ✅ **Gerenciamento**: Controle centralizado de múltiplas notificações
@@ -626,6 +688,7 @@ interface NotificationContextType {
 - ✅ **Ações Customizadas**: Suporte a botões de ação nas notificações
 
 **Arquivos Criados**:
+
 - `src/types/notification.ts` - Tipos e interfaces
 - `src/contexts/NotificationContext.tsx` - Provider e lógica
 - `src/hooks/useNotification.ts` - Hook personalizado
@@ -656,6 +719,7 @@ interface UIContextType {
 ```
 
 **Benefícios Alcançados**:
+
 - ✅ **Tema Global**: Suporte completo a dark/light mode e tema do sistema
 - ✅ **Persistência**: Preferências salvas automaticamente no localStorage
 - ✅ **Acessibilidade**: Configurações de contraste, fonte e redução de movimento
@@ -664,6 +728,7 @@ interface UIContextType {
 - ✅ **Performance**: Aplicação otimizada de temas via CSS custom properties
 
 **Arquivos Criados**:
+
 - `src/types/ui.ts` - Tipos completos e configurações padrão
 - `src/contexts/UIContext.tsx` - Provider com persistência e aplicação de temas
 - `src/hooks/useUI.ts` - Hook principal e hooks especializados (useTheme, useLanguage, useLayout, useAccessibility)
@@ -678,12 +743,14 @@ Existem oportunidades adicionais para implementar mais padrões de contexto:
 **Problema Atual**: Estado de comunidades espalhado entre múltiplas páginas (CommunitiesPage, CommunityPage) sem compartilhamento consistente.
 
 **Benefícios da Implementação**:
+
 - **Cache Inteligente**: Dados de comunidades em cache global
 - **Sincronização**: Estado consistente entre páginas
 - **Performance**: Redução de chamadas API desnecessárias
 - **Navegação Fluida**: Transições suaves entre comunidades
 
 **Implementação Sugerida**:
+
 ```typescript
 interface CommunityContextType {
   communities: Community[];
@@ -702,12 +769,14 @@ interface CommunityContextType {
 **Problema Atual**: Múltiplos modais de criação sem compartilhamento de estado ou drafts.
 
 **Benefícios da Implementação**:
+
 - **Drafts Automáticos**: Salvamento automático de rascunhos
 - **Continuidade**: Usuário pode continuar de onde parou
 - **Validação**: Validação consistente entre tipos de conteúdo
 - **Upload Progress**: Gerenciamento centralizado de uploads
 
 **Implementação Sugerida**:
+
 ```typescript
 interface ContentCreationContextType {
   drafts: ContentDraft[];
@@ -723,26 +792,31 @@ interface ContentCreationContextType {
 ### Estratégia de Implementação
 
 #### **Fase 1: ModalContext ✅ IMPLEMENTADO (Prioridade Alta)**
+
 - Impacto imediato na UX
 - Simplifica gerenciamento de múltiplos modais
 - Baixo risco de breaking changes
 
 #### **Fase 2: NotificationContext ✅ IMPLEMENTADO (Prioridade Alta)**
+
 - Melhora significativamente a experiência do usuário
 - Fácil de implementar e integrar
 - Valor imediato para funcionalidades existentes
 
 #### **Fase 3: UIContext ✅ IMPLEMENTADO (Prioridade Média)**
+
 - Adiciona polimento e profissionalismo
 - Suporte a dark mode e personalização
 - Pode ser implementado gradualmente
 
 #### **Fase 4: CommunityContext (Prioridade Média)**
+
 - Melhora performance de navegação
 - Requer refatoração de páginas existentes
 - Maior impacto na arquitetura
 
 #### **Fase 5: ContentCreationContext (Prioridade Baixa)**
+
 - Funcionalidade avançada para usuários power users
 - Requer mudanças significativas na UX
 - Pode ser implementado como feature flag

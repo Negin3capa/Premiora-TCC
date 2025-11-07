@@ -10,14 +10,14 @@
   left: 0;
   top: 0;
   height: 100vh;
-  width: 80px;
+  width: 220px;
   background-color: #0D0D0D;
   border-right: 1px solid #1A1A1A;
   z-index: 100;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
+  align-items: flex-start;
+  padding: 22px 16px 20px 16px;
 }
 
 .sidebar-content {
@@ -28,36 +28,21 @@
   height: 100%;
 }
 
-/* Avatar Section */
-.sidebar-avatar-section {
-  margin-bottom: 40px;
-}
-
-.sidebar-avatar-container {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 2px solid #FF424D;
-  transition: all 0.2s ease;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-avatar-container:hover {
-  border-color: #FF6B75;
-  transform: scale(1.05);
-}
-
-.sidebar-avatar {
+/* Sidebar Header/Logo */
+.sidebar-header {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  padding: 0px 16px 20px 16px;
+  text-align: center;
+  border-bottom: 1px solid #1A1A1A;
+  margin-bottom: 20px;
+}
+
+.sidebar-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  letter-spacing: -0.5px;
 }
 
 /* Navigation */
@@ -83,22 +68,24 @@
 .sidebar-nav-item {
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .sidebar-nav-button {
-  width: 48px;
+  width: 100%;
   height: 48px;
   border: none;
   background: none;
   border-radius: 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #666;
   position: relative;
+  padding: 0 12px;
+  gap: 12px;
 }
 
 .sidebar-nav-button:hover {
@@ -128,6 +115,16 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-label {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
 }
 
 .sidebar-nav-button:hover .sidebar-nav-icon {
@@ -138,10 +135,14 @@
 .sidebar-create-section {
   margin-top: auto;
   margin-bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .sidebar-create-button {
-  width: 48px;
+  width: 100%;
+  max-width: 180px;
   height: 48px;
   border: none;
   background: none;
@@ -154,10 +155,19 @@
   color: #666;
   background: linear-gradient(135deg, #FF424D 0%, #FF6B75 100%);
   box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.sidebar-create-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFFFFF;
+  white-space: nowrap;
 }
 
 .sidebar-create-button:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
   box-shadow: 0 6px 16px rgba(255, 66, 77, 0.4);
   color: #FFFFFF;
 }
@@ -166,26 +176,26 @@
 
 @media (max-width: 1024px) {
   .sidebar {
-    width: 64px;
-  }
-
-  .sidebar-avatar-container {
-    width: 40px;
-    height: 40px;
+    width: 200px;
   }
 
   .sidebar-nav-button {
-    width: 40px;
-    height: 40px;
+    height: 44px;
+    padding: 0 10px;
+    gap: 10px;
   }
 
   .sidebar-nav-list {
     gap: 12px;
   }
 
+  .sidebar-nav-label {
+    font-size: 13px;
+  }
+
   .sidebar-create-button {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -194,35 +204,59 @@
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     z-index: 1000;
-    width: 80px; /* Keep minimal width on mobile */
+    width: 80px; /* Icon-only on mobile */
+    padding: 40px 12px 20px 12px;
   }
 
   .sidebar.mobile-open {
     transform: translateX(0);
   }
+
+  .sidebar-nav-button {
+    width: 56px;
+    height: 48px;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .sidebar-nav-label {
+    display: none;
+  }
+
+  .sidebar-nav-list {
+    gap: 16px;
+  }
+
+  .sidebar-create-button {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    gap: 0;
+  }
+
+  .sidebar-create-label {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
   .sidebar {
-    width: 56px;
-  }
-
-  .sidebar-avatar-container {
-    width: 36px;
-    height: 36px;
+    width: 72px;
+    padding: 40px 8px 20px 8px;
   }
 
   .sidebar-nav-button {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 44px;
   }
 
   .sidebar-nav-list {
-    gap: 8px;
+    gap: 12px;
   }
 
   .sidebar-create-button {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 }

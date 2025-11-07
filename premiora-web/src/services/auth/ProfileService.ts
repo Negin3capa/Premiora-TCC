@@ -78,8 +78,18 @@ export class ProfileService {
 
         const updateData: any = {};
 
-        // Atualizar avatar se não foi customizado ou se é diferente
-        if (oauthAvatarUrl && (!existingProfile.avatar_url || existingProfile.avatar_url !== oauthAvatarUrl)) {
+        // Só atualizar avatar OAuth se o perfil não estiver completo ou se o avatar atual for o mesmo OAuth (não foi customizado)
+        if (oauthAvatarUrl && !existingProfile.profile_setup_completed) {
+          console.log('⚠️ Perfil não está completo, atualizando avatar OAuth');
+          updateData.avatar_url = oauthAvatarUrl;
+        } else if (oauthAvatarUrl && existingProfile.avatar_url === oauthAvatarUrl) {
+          console.log('✅ Avatar já é o mesmo OAuth, mantendo');
+          // Não atualizar se já é o mesmo
+        } else if (oauthAvatarUrl && existingProfile.avatar_url && existingProfile.avatar_url !== oauthAvatarUrl) {
+          console.log('⚠️ Avatar atual é diferente do OAuth - mantendo avatar customizado');
+          // Não atualizar se é um avatar customizado diferente
+        } else if (oauthAvatarUrl && !existingProfile.avatar_url) {
+          console.log('📝 Perfil completo mas sem avatar, definindo avatar OAuth');
           updateData.avatar_url = oauthAvatarUrl;
         }
 
@@ -125,16 +135,23 @@ export class ProfileService {
    * Busca o perfil do usuário do banco de dados
    * Usa cliente admin para bypass de RLS policies durante OAuth
    * @param userId - ID do usuário
+   * @param forceFresh - Força busca fresca ignorando cache
    * @returns Promise com dados do perfil ou null se não encontrado
    */
-  static async fetchUserProfile(userId: string): Promise<any> {
-    console.log('🔍 Buscando perfil do usuário:', userId);
+  static async fetchUserProfile(userId: string, forceFresh: boolean = false): Promise<any> {
+    console.log('🔍 Buscando perfil do usuário:', userId, forceFresh ? '(forçando busca fresca)' : '');
     try {
-      const { data: profile, error } = await supabaseAdmin
+      let query = supabaseAdmin
         .from('users')
         .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
-        .eq('id', userId)
-        .single();
+        .eq('id', userId);
+
+      // Adicionar timestamp para forçar busca fresca e evitar cache
+      if (forceFresh) {
+        query = query.select('id, name, username, email, avatar_url, tier, profile_setup_completed, updated_at');
+      }
+
+      const { data: profile, error } = await query.single();
 
       if (error) {
         console.error('❌ Erro ao buscar perfil do usuário:', {
@@ -175,14 +192,33 @@ export class ProfileService {
         return null;
       }
 
-      // Depois buscar dados do creator
+      // Primeiro buscar dados do creator para obter o ID correto
       const { data: creatorData, error: creatorError } = await supabaseAdmin
         .from('creators')
         .select('*')
         .eq('id', userData.id)
         .single();
 
-      if (creatorError) {
+      let postsCount = 0;
+      if (creatorError && creatorError.code !== 'PGRST116') {
+        console.error('❌ Erro ao buscar creator:', creatorError);
+      } else if (creatorData) {
+        // Buscar contagem de posts do creator (usando creator_id)
+        const { count, error: postsError } = await supabaseAdmin
+          .from('posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('creator_id', creatorData.id)
+          .eq('is_published', true); // Só contar posts publicados
+
+        if (postsError) {
+          console.error('❌ Erro ao contar posts:', postsError);
+        } else {
+          postsCount = count || 0;
+          console.log('✅ Contagem de posts do creator:', postsCount);
+        }
+      }
+
+      if (creatorError && creatorError.code === 'PGRST116') {
         // Se não existe creator, retornar dados básicos do usuário
         console.log('⚠️ Creator não encontrado, retornando dados básicos do usuário');
         return {
@@ -190,7 +226,7 @@ export class ProfileService {
           creator: null,
           // Dados compatíveis com CreatorProfile
           name: userData.name || userData.username || 'Usuário',
-          totalPosts: 0,
+          totalPosts: postsCount,
           description: null,
           bannerImage: null,
           avatar_url: userData.avatar_url,
@@ -204,7 +240,7 @@ export class ProfileService {
         creator: creatorData,
         // Dados compatíveis com CreatorProfile
         name: creatorData.display_name || userData.name || userData.username || 'Usuário',
-        totalPosts: creatorData.total_subscribers || 0, // Nota: pode precisar ajustar baseado na estrutura real
+        totalPosts: postsCount,
         description: creatorData.bio || null,
         bannerImage: creatorData.cover_image_url || null,
         avatar_url: userData.avatar_url,
@@ -228,7 +264,7 @@ export class ProfileService {
     avatar_url: string;
     profile_setup_completed: boolean;
   }>): Promise<any> {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('users')
       .update(updateData)
       .eq('id', userId)
@@ -240,6 +276,255 @@ export class ProfileService {
       throw error;
     }
 
+    // Se o avatar foi atualizado, sincronizar com a tabela creators
+    if (updateData.avatar_url !== undefined) {
+      console.log('🔄 Iniciando sincronização do avatar com tabela creators:', updateData.avatar_url);
+
+      try {
+        // Verificar se existe registro de creator
+        const { data: existingCreator, error: creatorCheckError } = await supabaseAdmin
+          .from('creators')
+          .select('id, profile_image_url')
+          .eq('id', userId)
+          .single();
+
+        console.log('🔍 Verificação de creator existente:', {
+          exists: !!existingCreator,
+          error: creatorCheckError?.code,
+          currentProfileImageUrl: existingCreator?.profile_image_url
+        });
+
+        if (creatorCheckError && creatorCheckError.code !== 'PGRST116') {
+          console.error('❌ Erro ao verificar creator para sincronização:', creatorCheckError);
+        } else if (existingCreator) {
+          console.log('📝 Creator encontrado, atualizando profile_image_url');
+
+          // Atualizar avatar na tabela creators
+          const { data: updatedCreator, error: updateCreatorError } = await supabaseAdmin
+            .from('creators')
+            .update({ profile_image_url: updateData.avatar_url })
+            .eq('id', userId)
+            .select('id, profile_image_url')
+            .single();
+
+          if (updateCreatorError) {
+            console.error('❌ Erro ao sincronizar avatar com creators:', updateCreatorError);
+          } else {
+            console.log('✅ Avatar sincronizado com sucesso:', {
+              creatorId: updatedCreator.id,
+              newProfileImageUrl: updatedCreator.profile_image_url
+            });
+          }
+        } else {
+          console.log('⚠️ Creator não encontrado - avatar será sincronizado quando creator for criado');
+        }
+      } catch (syncError) {
+        console.error('💥 Erro geral na sincronização do avatar:', syncError);
+        // Não falhar a operação principal se a sincronização falhar
+      }
+    }
+
     return data;
+  }
+
+  /**
+   * Atualiza o banner do perfil do usuário
+   * @param userId - ID do usuário
+   * @param bannerImage - URL da imagem do banner
+   * @returns Promise com dados do perfil atualizado
+   */
+  static async updateProfileBanner(userId: string, bannerImage: string): Promise<any> {
+    try {
+      console.log('🔄 Atualizando banner do perfil:', { userId, bannerImage });
+
+      // Primeiro buscar dados atuais do creator
+      const { data: creatorData, error: creatorError } = await supabaseAdmin
+        .from('creators')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (creatorError && creatorError.code !== 'PGRST116') { // PGRST116 = not found
+        console.error('❌ Erro ao buscar creator:', creatorError);
+        throw creatorError;
+      }
+
+      // Se creator não existe, criar um novo
+      if (!creatorData) {
+        console.log('📝 Criando novo registro de creator para banner');
+        const { data: newCreator, error: createError } = await supabaseAdmin
+          .from('creators')
+          .insert({
+            id: userId,
+            cover_image_url: bannerImage,
+            bio: null,
+            display_name: null,
+            total_subscribers: 0
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ Erro ao criar creator:', createError);
+          throw createError;
+        }
+
+        console.log('✅ Creator criado com banner:', newCreator);
+        return newCreator;
+      }
+
+      // Atualizar banner existente
+      const { data: updatedCreator, error: updateError } = await supabaseAdmin
+        .from('creators')
+        .update({ cover_image_url: bannerImage })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('❌ Erro ao atualizar banner:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ Banner atualizado:', updatedCreator);
+      return updatedCreator;
+    } catch (err) {
+      console.error('💥 Erro geral ao atualizar banner:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Atualiza a bio/descrição do perfil do usuário
+   * @param userId - ID do usuário
+   * @param bio - Texto da bio
+   * @returns Promise com dados do perfil atualizado
+   */
+  static async updateProfileBio(userId: string, bio: string): Promise<any> {
+    try {
+      console.log('🔄 Atualizando bio do perfil:', { userId, bio });
+
+      // Primeiro buscar dados atuais do creator
+      const { data: creatorData, error: creatorError } = await supabaseAdmin
+        .from('creators')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (creatorError && creatorError.code !== 'PGRST116') { // PGRST116 = not found
+        console.error('❌ Erro ao buscar creator:', creatorError);
+        throw creatorError;
+      }
+
+      // Se creator não existe, criar um novo
+      if (!creatorData) {
+        console.log('📝 Criando novo registro de creator para bio');
+        const { data: newCreator, error: createError } = await supabaseAdmin
+          .from('creators')
+          .insert({
+            id: userId,
+            cover_image_url: null,
+            bio: bio,
+            display_name: null,
+            total_subscribers: 0
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ Erro ao criar creator:', createError);
+          throw createError;
+        }
+
+        console.log('✅ Creator criado com bio:', newCreator);
+        return newCreator;
+      }
+
+      // Atualizar bio existente
+      const { data: updatedCreator, error: updateError } = await supabaseAdmin
+        .from('creators')
+        .update({ bio: bio })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('❌ Erro ao atualizar bio:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ Bio atualizada:', updatedCreator);
+      return updatedCreator;
+    } catch (err) {
+      console.error('💥 Erro geral ao atualizar bio:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Atualiza o nome de exibição do perfil do usuário (display_name)
+   * @param userId - ID do usuário
+   * @param displayName - Nome de exibição
+   * @returns Promise com dados do perfil atualizado
+   */
+  static async updateProfileDisplayName(userId: string, displayName: string): Promise<any> {
+    try {
+      console.log('🔄 Atualizando display_name do perfil:', { userId, displayName });
+
+      // Primeiro buscar dados atuais do creator
+      const { data: creatorData, error: creatorError } = await supabaseAdmin
+        .from('creators')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (creatorError && creatorError.code !== 'PGRST116') { // PGRST116 = not found
+        console.error('❌ Erro ao buscar creator:', creatorError);
+        throw creatorError;
+      }
+
+      // Se creator não existe, criar um novo
+      if (!creatorData) {
+        console.log('📝 Criando novo registro de creator para display_name');
+        const { data: newCreator, error: createError } = await supabaseAdmin
+          .from('creators')
+          .insert({
+            id: userId,
+            cover_image_url: null,
+            bio: null,
+            display_name: displayName,
+            total_subscribers: 0
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ Erro ao criar creator:', createError);
+          throw createError;
+        }
+
+        console.log('✅ Creator criado com display_name:', newCreator);
+        return newCreator;
+      }
+
+      // Atualizar display_name existente
+      const { data: updatedCreator, error: updateError } = await supabaseAdmin
+        .from('creators')
+        .update({ display_name: displayName })
+        .eq('id', userId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('❌ Erro ao atualizar display_name:', updateError);
+        throw updateError;
+      }
+
+      console.log('✅ Display_name atualizado:', updatedCreator);
+      return updatedCreator;
+    } catch (err) {
+      console.error('💥 Erro geral ao atualizar display_name:', err);
+      throw err;
+    }
   }
 }

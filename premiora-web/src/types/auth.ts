@@ -27,5 +27,5 @@ export interface AuthContextType {
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
-  refreshUserProfile: () => Promise<void>;
+  refreshUserProfile: (forceFresh?: boolean) => Promise<void>;
 }

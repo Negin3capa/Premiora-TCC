@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import type { Post } from '../../types/profile';
 import { PostCard } from './PostCard';
 import styles from './RecentPosts.module.css';
 
 /**
  * Componente de posts recentes com scroll horizontal
- * Exibe lista de posts com botões de navegação
+ * Exibe lista de posts com botões de navegação funcionais
  *
  * @component
  * @param posts - Array de posts para exibir
@@ -16,6 +16,16 @@ interface RecentPostsProps {
 
 export const RecentPosts: React.FC<RecentPostsProps> = ({ posts }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeftState, setCanScrollLeftState] = useState(false);
+  const [canScrollRightState, setCanScrollRightState] = useState(false);
+
+  const updateScrollButtons = () => {
+    if (!scrollContainerRef.current) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+    setCanScrollLeftState(scrollLeft > 0);
+    setCanScrollRightState(scrollLeft < scrollWidth - clientWidth - 1);
+  };
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -35,16 +45,22 @@ export const RecentPosts: React.FC<RecentPostsProps> = ({ posts }) => {
     }
   };
 
-  const canScrollLeft = () => {
-    if (!scrollContainerRef.current) return false;
-    return scrollContainerRef.current.scrollLeft > 0;
-  };
+  // Atualizar estado dos botões quando o componente monta e quando o scroll muda
+  useEffect(() => {
+    updateScrollButtons();
 
-  const canScrollRight = () => {
-    if (!scrollContainerRef.current) return false;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-    return scrollLeft < scrollWidth - clientWidth - 1;
-  };
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', updateScrollButtons);
+      // Também atualizar quando a janela é redimensionada
+      window.addEventListener('resize', updateScrollButtons);
+
+      return () => {
+        scrollContainer.removeEventListener('scroll', updateScrollButtons);
+        window.removeEventListener('resize', updateScrollButtons);
+      };
+    }
+  }, [posts]); // Re-executar quando posts mudam
 
   return (
     <div className={styles.recentPosts}>
@@ -52,9 +68,9 @@ export const RecentPosts: React.FC<RecentPostsProps> = ({ posts }) => {
         <h2 className={styles.title}>Recent Posts</h2>
         <div className={styles.navigation}>
           <button
-            className={`${styles.navButton} ${!canScrollLeft() ? styles.disabled : ''}`}
+            className={`${styles.navButton} ${!canScrollLeftState ? styles.disabled : ''}`}
             onClick={scrollLeft}
-            disabled={!canScrollLeft()}
+            disabled={!canScrollLeftState}
             aria-label="Scroll left"
           >
             <svg viewBox="0 0 24 24" width="20" height="20">
@@ -65,9 +81,9 @@ export const RecentPosts: React.FC<RecentPostsProps> = ({ posts }) => {
             </svg>
           </button>
           <button
-            className={`${styles.navButton} ${!canScrollRight() ? styles.disabled : ''}`}
+            className={`${styles.navButton} ${!canScrollRightState ? styles.disabled : ''}`}
             onClick={scrollRight}
-            disabled={!canScrollRight()}
+            disabled={!canScrollRightState}
             aria-label="Scroll right"
           >
             <svg viewBox="0 0 24 24" width="20" height="20">

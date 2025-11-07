@@ -59,25 +59,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   if (loading) {
     return (
-      <div className="search-results" style={{
-        position: 'absolute',
-        top: '100%',
-        left: 0,
-        right: 0,
-        backgroundColor: 'var(--color-bg-primary)',
-        border: '1px solid var(--color-border-light)',
-        borderRadius: 'var(--radius-lg)',
-        boxShadow: 'var(--shadow-xl)',
-        maxHeight: '400px',
-        overflowY: 'auto',
-        zIndex: 1000
-      }}>
-        <div style={{
-          padding: 'var(--space-4)',
-          textAlign: 'center',
-          color: 'var(--color-text-secondary)'
-        }}>
-          <div className="loading-spinner" style={{ margin: '0 auto var(--space-2)' }}></div>
+      <div className="search-results">
+        <div className="search-loading">
+          <div className="loading-spinner"></div>
           Buscando...
         </div>
       </div>
@@ -91,19 +75,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   const hasResults = users.length > 0 || communities.length > 0 || content.length > 0;
 
   return (
-    <div className="search-results" style={{
-      position: 'absolute',
-      top: '100%',
-      left: 0,
-      right: 0,
-      backgroundColor: 'var(--color-bg-primary)',
-      border: '1px solid var(--color-border-light)',
-      borderRadius: 'var(--radius-lg)',
-      boxShadow: 'var(--shadow-xl)',
-      maxHeight: '400px',
-      overflowY: 'auto',
-      zIndex: 1000
-    }}>
+    <div className="search-results">
       {!hasResults ? (
         <div style={{
           padding: 'var(--space-4)',

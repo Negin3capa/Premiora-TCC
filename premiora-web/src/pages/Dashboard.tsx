@@ -1,7 +1,7 @@
 import React, { Suspense, useState } from 'react';
 import { useFeed } from '../hooks/useFeed';
 import { useLocalSearch } from '../hooks/useSearch';
-import { Sidebar, MobileBottomBar } from '../components/layout';
+import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
 import '../styles/HomePage.css';
 
 // Lazy loading dos componentes para otimização
@@ -52,6 +52,7 @@ const Dashboard: React.FC = () => {
           />
         </Suspense>
       </div>
+      <FeedSidebar />
       <MobileBottomBar />
     </div>
   );
