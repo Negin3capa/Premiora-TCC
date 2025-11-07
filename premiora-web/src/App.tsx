@@ -182,7 +182,17 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Rota Perfil (apenas para autenticados) */}
+        {/* Rota Perfil por username (apenas para autenticados) */}
+        <Route
+          path="/u/:username"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Perfil legado - redireciona para perfil do usuário atual */}
         <Route
           path="/profile"
           element={

@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ProfileBanner, FeaturedPost, RecentPosts } from '../components/profile';
 import { Sidebar, Header } from '../components/layout';
+import { useAuth } from '../hooks/useAuth';
+import { ProfileService } from '../services/auth/ProfileService';
+import { FeedService } from '../services/content/FeedService';
 import type { CreatorProfile, Post } from '../types/profile';
 import '../styles/globals.css';
 
@@ -11,83 +15,154 @@ import '../styles/globals.css';
  * @component
  */
 const ProfilePage: React.FC = () => {
-  // Mock data para o perfil do criador
-  const creatorProfile: CreatorProfile = {
-    name: 'Kurzgesagt',
-    totalPosts: 476,
-    description: 'We make videos explaining things with optimistic nihilism. We’re a small team funded by over 10 million patrons. Thank you for supporting us!',
+  const { username } = useParams<{ username: string }>();
+  const { userProfile } = useAuth();
+  const navigate = useNavigate();
+
+  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
+  const [featuredPost, setFeaturedPost] = useState<Post | null>(null);
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Se não há username na rota, redirecionar para o perfil do usuário atual
+  useEffect(() => {
+    if (!username && userProfile?.username) {
+      navigate(`/u/${userProfile.username}`, { replace: true });
+      return;
+    }
+  }, [username, userProfile, navigate]);
+
+  // Buscar dados do perfil
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      if (!username) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Buscar dados do creator
+        const profileData = await ProfileService.getCreatorByUsername(username);
+
+        if (!profileData) {
+          setError('Perfil não encontrado');
+          return;
+        }
+
+        setCreatorProfile(profileData);
+
+        // Buscar posts do creator
+        const postsResult = await FeedService.getCreatorPosts(profileData.user.id, 1, 20, userProfile?.id);
+
+        if (postsResult.posts && postsResult.posts.length > 0) {
+          // Converter posts para formato Post
+          const formattedPosts: Post[] = postsResult.posts.map((post: any) => ({
+            id: post.id,
+            title: post.title,
+            description: post.content,
+            thumbnailUrl: post.media_urls?.[0] || 'placeholder',
+            createdAt: post.published_at,
+            views: post.views || 0,
+            likes: post.post_likes?.length || 0,
+            comments: post.comments || 0,
+            locked: post.is_premium
+          }));
+
+          setRecentPosts(formattedPosts);
+
+          // Calcular post em destaque baseado em engajamento
+          const featured = calculateFeaturedPost(formattedPosts);
+          setFeaturedPost(featured);
+        }
+
+      } catch (err) {
+        console.error('Erro ao buscar dados do perfil:', err);
+        setError('Erro ao carregar perfil');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [username, userProfile]);
+
+  /**
+   * Calcula qual post deve ser o em destaque baseado em engajamento
+   * Fórmula: (views * 1) + (likes * 2) + (comments * 3)
+   */
+  const calculateFeaturedPost = (posts: Post[]): Post | null => {
+    if (posts.length === 0) return null;
+
+    let bestPost = posts[0];
+    let bestScore = calculateEngagementScore(bestPost);
+
+    for (const post of posts) {
+      const score = calculateEngagementScore(post);
+      if (score > bestScore) {
+        bestScore = score;
+        bestPost = post;
+      }
+    }
+
+    return bestPost;
   };
 
-  // Mock data para o post em destaque
-  const featuredPost: Post = {
-    id: 'featured-1',
-    title: 'The Egg - A Short Story',
-    description: 'A mind-bending short story about existence, consciousness, and the universe. One of our most popular videos that explores deep philosophical questions.',
-    thumbnailUrl: 'placeholder',
-    createdAt: '2024-01-15T10:00:00Z',
-    views: 45000000,
-    likes: 1200000,
-    comments: 89000,
+  /**
+   * Calcula pontuação de engajamento de um post
+   */
+  const calculateEngagementScore = (post: Post): number => {
+    const views = post.views || 0;
+    const likes = post.likes || 0;
+    const comments = post.comments || 0;
+
+    return (views * 1) + (likes * 2) + (comments * 3);
   };
 
-  // Mock data para posts recentes
-  const recentPosts: Post[] = [
-    {
-      id: '1',
-      title: 'Why Are We Afraid of the Dark?',
-      thumbnailUrl: 'placeholder',
-      createdAt: '2024-03-10T14:30:00Z',
-      views: 2500000,
-      comments: 15000,
-    },
-    {
-      id: '2',
-      title: 'The Universe in 4K',
-      thumbnailUrl: 'placeholder',
-      createdAt: '2024-03-05T09:15:00Z',
-      views: 1800000,
-      likes: 95000,
-      comments: 12000,
-    },
-    {
-      id: '3',
-      title: 'What Happens If You Destroy a Black Hole?',
-      thumbnailUrl: 'placeholder',
-      createdAt: '2024-02-28T16:45:00Z',
-      views: 3200000,
-      likes: 180000,
-      comments: 22000,
-      locked: true,
-    },
-    {
-      id: '4',
-      title: 'The Day the Dinosaurs Died',
-      thumbnailUrl: 'placeholder',
-      createdAt: '2024-02-20T11:20:00Z',
-      views: 4100000,
-      likes: 210000,
-      comments: 28000,
-    },
-    {
-      id: '5',
-      title: 'How to Destroy the Universe',
-      thumbnailUrl: 'placeholder',
-      createdAt: '2024-02-15T13:10:00Z',
-      views: 2900000,
-      likes: 165000,
-      comments: 19500,
-    },
-    {
-      id: '6',
-      title: 'The Most Efficient Way to Destroy the Universe',
-      thumbnailUrl: 'placeholder',
-      createdAt: '2024-02-10T08:30:00Z',
-      views: 3500000,
-      likes: 195000,
-      comments: 24000,
-      locked: true,
-    },
-  ];
+  if (loading) {
+    return (
+      <div style={{
+        backgroundColor: '#0D0D0D',
+        minHeight: '100vh',
+        color: '#DADADA',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}>
+        Carregando perfil...
+      </div>
+    );
+  }
+
+  if (error || !creatorProfile) {
+    return (
+      <div style={{
+        backgroundColor: '#0D0D0D',
+        minHeight: '100vh',
+        color: '#DADADA',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'column'
+      }}>
+        <h2>{error || 'Perfil não encontrado'}</h2>
+        <button
+          onClick={() => navigate('/dashboard')}
+          style={{
+            marginTop: '1rem',
+            padding: '0.5rem 1rem',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          Voltar ao Dashboard
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{

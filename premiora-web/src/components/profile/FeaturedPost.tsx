@@ -7,13 +7,41 @@ import styles from './FeaturedPost.module.css';
  * Exibe um post grande com thumbnail e detalhes
  *
  * @component
- * @param post - Dados do post em destaque
+ * @param post - Dados do post em destaque (pode ser null se não houver posts)
  */
 interface FeaturedPostProps {
-  post: Post;
+  post: Post | null;
 }
 
 export const FeaturedPost: React.FC<FeaturedPostProps> = ({ post }) => {
+  // Se não há post em destaque, mostrar placeholder
+  if (!post) {
+    return (
+      <div className={styles.featuredPost}>
+        <div className={styles.thumbnailContainer}>
+          <div className={styles.thumbnail}>
+            <div className={styles.thumbnailPlaceholder}>
+              <div className={styles.noPostIcon}>
+                <svg viewBox="0 0 24 24" width="48" height="48">
+                  <path
+                    d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+                    fill="rgba(255,255,255,0.3)"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.content}>
+          <h2 className={styles.title}>Nenhum post em destaque</h2>
+          <p className={styles.description}>
+            Este criador ainda não possui posts publicados ou eles estão sendo processados.
+          </p>
+        </div>
+      </div>
+    );
+  }
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();

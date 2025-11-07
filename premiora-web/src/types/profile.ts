@@ -8,8 +8,10 @@
 export type CreatorProfile = {
   name: string;
   totalPosts: number;
-  description: string;
-  bannerImage?: string; // optional background
+  description: string | null;
+  bannerImage?: string | null; // optional background
+  avatar_url?: string | null; // avatar do usuário
+  username?: string | null; // username do usuário
 };
 
 /**
