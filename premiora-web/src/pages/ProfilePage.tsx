@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ProfileBanner, FeaturedPost, RecentPosts } from '../components/profile';
 import { Sidebar, Header } from '../components/layout';
@@ -33,59 +33,60 @@ const ProfilePage: React.FC = () => {
     }
   }, [username, userProfile, navigate]);
 
-  // Buscar dados do perfil
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!username) return;
+  // Buscar dados do perfil - memoizado para evitar recriações desnecessárias
+  const fetchProfileData = useCallback(async () => {
+    if (!username) return;
 
-      try {
-        setLoading(true);
-        setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Buscar dados do creator
-        const profileData = await ProfileService.getCreatorByUsername(username);
+      // Buscar dados do creator
+      const profileData = await ProfileService.getCreatorByUsername(username);
 
-        if (!profileData) {
-          setError('Perfil não encontrado');
-          return;
-        }
-
-        setCreatorProfile(profileData);
-
-        // Buscar posts do creator
-        const postsResult = await FeedService.getCreatorPosts(profileData.user.id, 1, 20, userProfile?.id);
-
-        if (postsResult.posts && postsResult.posts.length > 0) {
-          // Converter posts para formato Post
-          const formattedPosts: Post[] = postsResult.posts.map((post: any) => ({
-            id: post.id,
-            title: post.title,
-            description: post.content,
-            thumbnailUrl: post.media_urls?.[0] || 'placeholder',
-            createdAt: post.published_at,
-            views: post.views || 0,
-            likes: post.post_likes?.length || 0,
-            comments: post.comments || 0,
-            locked: post.is_premium
-          }));
-
-          setRecentPosts(formattedPosts);
-
-          // Calcular post em destaque baseado em engajamento
-          const featured = calculateFeaturedPost(formattedPosts);
-          setFeaturedPost(featured);
-        }
-
-      } catch (err) {
-        console.error('Erro ao buscar dados do perfil:', err);
-        setError('Erro ao carregar perfil');
-      } finally {
-        setLoading(false);
+      if (!profileData) {
+        setError('Perfil não encontrado');
+        return;
       }
-    };
 
+      setCreatorProfile(profileData);
+
+      // Buscar posts do creator
+      const postsResult = await FeedService.getCreatorPosts(profileData.user.id, 1, 20, userProfile?.id);
+
+      if (postsResult.posts && postsResult.posts.length > 0) {
+        // Converter posts para formato Post
+        const formattedPosts: Post[] = postsResult.posts.map((post: any) => ({
+          id: post.id,
+          title: post.title,
+          description: post.content,
+          thumbnailUrl: post.media_urls?.[0] || 'placeholder',
+          createdAt: post.published_at,
+          views: post.views || 0,
+          likes: post.post_likes?.length || 0,
+          comments: post.comments || 0,
+          locked: post.is_premium
+        }));
+
+        setRecentPosts(formattedPosts);
+
+        // Calcular post em destaque baseado em engajamento
+        const featured = calculateFeaturedPost(formattedPosts);
+        setFeaturedPost(featured);
+      }
+
+    } catch (err) {
+      console.error('Erro ao buscar dados do perfil:', err);
+      setError('Erro ao carregar perfil');
+    } finally {
+      setLoading(false);
+    }
+  }, [username, userProfile?.id]); // userProfile?.id é usado na busca de posts, então deve estar nas dependências
+
+  // Buscar dados do perfil quando username muda
+  useEffect(() => {
     fetchProfileData();
-  }, [username, userProfile]);
+  }, [fetchProfileData]);
 
   /**
    * Calcula qual post deve ser o em destaque baseado em engajamento
@@ -211,4 +212,4 @@ const ProfilePage: React.FC = () => {
   );
 };
 
-export default ProfilePage;
+export default React.memo(ProfilePage);

@@ -18,6 +18,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const userProfileRef = useRef<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const currentUserIdRef = useRef<string | null>(null);
@@ -152,7 +153,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   });
                   return;
                 }
-                setUserProfile(profile);
+
+                // Só atualizar se o perfil mudou para evitar re-renderizações desnecessárias
+                if (JSON.stringify(userProfileRef.current) !== JSON.stringify(profile)) {
+                  userProfileRef.current = profile;
+                  setUserProfile(profile);
+                }
               }
             }).catch(err => {
               console.error('Profile fetch failed:', err);
@@ -220,7 +226,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 });
                 return;
               }
-              setUserProfile(profile);
+
+              // Só atualizar se o perfil mudou para evitar re-renderizações desnecessárias
+              if (JSON.stringify(userProfileRef.current) !== JSON.stringify(profile)) {
+                userProfileRef.current = profile;
+                setUserProfile(profile);
+              }
             }
           }).catch(err => {
             console.error('Profile fetch failed:', err);

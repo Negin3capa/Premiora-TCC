@@ -1,6 +1,6 @@
 import React, { Suspense, useState } from 'react';
 import { useFeed } from '../hooks/useFeed';
-import { useSearch } from '../hooks/useSearch';
+import { useLocalSearch } from '../hooks/useSearch';
 import { Sidebar, MobileBottomBar } from '../components/layout';
 import '../styles/HomePage.css';
 
@@ -33,7 +33,7 @@ const ComponentLoader: React.FC = () => (
  */
 const Dashboard: React.FC = () => {
   const { feedItems, loading, hasMore, loadMoreContent } = useFeed();
-  const { filteredItems } = useSearch(feedItems);
+  const { filteredItems } = useLocalSearch(feedItems);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (

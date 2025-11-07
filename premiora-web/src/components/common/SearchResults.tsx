@@ -9,6 +9,7 @@ import type { ContentItem } from '../../types/content';
 
 interface SearchResultsProps {
   query: string;
+  users?: any[];
   communities: Community[];
   content: ContentItem[];
   loading: boolean;
@@ -20,6 +21,7 @@ interface SearchResultsProps {
  */
 const SearchResults: React.FC<SearchResultsProps> = ({
   query,
+  users = [],
   communities,
   content,
   loading,
@@ -36,11 +38,22 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   };
 
   /**
+   * Handler para navegar para um usuário
+   */
+  const handleUserClick = (user: any) => {
+    navigate(`/u/${user.username}`);
+    onClose();
+  };
+
+  /**
    * Handler para navegar para conteúdo
    */
   const handleContentClick = (item: ContentItem) => {
-    // TODO: Implementar navegação para conteúdo específico
-    console.log('Navegar para conteúdo:', item.id);
+    // Por enquanto, navega para a comunidade do conteúdo
+    // TODO: Implementar navegação para conteúdo específico quando disponível
+    if (item.communityId) {
+      navigate(`/r/${item.communityName}`);
+    }
     onClose();
   };
 
@@ -75,7 +88,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return null;
   }
 
-  const hasResults = communities.length > 0 || content.length > 0;
+  const hasResults = users.length > 0 || communities.length > 0 || content.length > 0;
 
   return (
     <div className="search-results" style={{
@@ -101,6 +114,99 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         </div>
       ) : (
         <>
+          {/* Resultados de usuários */}
+          {users.length > 0 && (
+            <div className="search-section">
+              <div style={{
+                padding: 'var(--space-3) var(--space-4)',
+                backgroundColor: 'var(--color-bg-secondary)',
+                borderBottom: '1px solid var(--color-border-light)',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: 'var(--font-weight-semibold)',
+                color: 'var(--color-text-secondary)'
+              }}>
+                Usuários
+              </div>
+              {users.slice(0, 5).map(user => (
+                <div
+                  key={user.id}
+                  onClick={() => handleUserClick(user)}
+                  style={{
+                    padding: 'var(--space-3) var(--space-4)',
+                    borderBottom: '1px solid var(--color-border-light)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-3)',
+                    transition: 'background-color var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-bg-hover)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                >
+                  {user.avatar_url ? (
+                    <img
+                      src={user.avatar_url}
+                      alt={user.name || user.username}
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: 'var(--radius-full)',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: 'var(--radius-full)',
+                      backgroundColor: 'var(--color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontSize: 'var(--font-size-sm)',
+                      fontWeight: 'bold'
+                    }}>
+                      {user.name?.charAt(0)?.toUpperCase() || user.username?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontSize: 'var(--font-size-base)',
+                      fontWeight: 'var(--font-weight-semibold)',
+                      color: 'var(--color-text-primary)',
+                      marginBottom: '2px'
+                    }}>
+                      {user.name || user.username}
+                    </div>
+                    <div style={{
+                      fontSize: 'var(--font-size-sm)',
+                      color: 'var(--color-text-secondary)'
+                    }}>
+                      @{user.username}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {users.length > 5 && (
+                <div style={{
+                  padding: 'var(--space-3) var(--space-4)',
+                  textAlign: 'center',
+                  color: 'var(--color-primary)',
+                  cursor: 'pointer',
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: 'var(--font-weight-semibold)'
+                }}>
+                  Ver mais usuários...
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Resultados de comunidades */}
           {communities.length > 0 && (
             <div className="search-section">
