@@ -1,6 +1,6 @@
 # Premiora-TCC
 
-Projeto SaaS, buscando unir as qualidades do Patreon/Discord/Reddit/Youtube em um só lugar.
+Projeto SaaS, buscando unir as qualidades do Patreon/Twitter/Reddit/Youtube em um só lugar.
 
 ## Descrição
 
@@ -18,10 +18,12 @@ Para informações detalhadas sobre a arquitetura técnica, padrões de design e
 - **Build Tool**: Vite ^7.1.7 com code splitting otimizado
 - **Roteamento**: React Router DOM ^7.9.4
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
-- **Estilização**: CSS personalizado com variáveis CSS
+- **Estilização**: CSS personalizado com variáveis CSS e suporte a temas
 - **Ícones**: Lucide React ^0.552.0
 - **Captcha**: HCaptcha React ^1.14.0
 - **Git Hooks**: Husky ^9.1.7 + Commitlint ^20.1.0
+- **Context API**: Gerenciamento de estado global com 4 contexts especializados
+- **Hooks Customizados**: Lógica reutilizável extraída para hooks
 
 ### Autenticação
 
@@ -45,7 +47,7 @@ O Premiora implementa um sistema de monetização inspirado no Patreon, onde cri
 #### Níveis de Acesso
 
 ```typescript
-type AccessLevel = 'public' | 'supporters' | 'premium';
+type AccessLevel = "public" | "supporters" | "premium";
 ```
 
 - **Public**: Conteúdo gratuito acessível a todos
@@ -66,18 +68,29 @@ premiora-web/
 ├── src/
 │   ├── components/      # Componentes React organizados por domínio
 │   │   ├── auth/        # Componentes de autenticação
+│   │   │   ├── AuthForm.tsx
+│   │   │   ├── ProfileSetupGuard.tsx
 │   │   │   ├── ProtectedRoute.tsx
+│   │   │   ├── ProviderButtons.tsx
 │   │   │   └── PublicRoute.tsx
 │   │   ├── common/      # Componentes reutilizáveis
 │   │   │   ├── CommunityDropdown.tsx
 │   │   │   ├── ErrorBoundary.tsx
 │   │   │   ├── FileUpload.tsx
+│   │   │   ├── NotificationContainer.tsx
 │   │   │   └── SearchResults.tsx
 │   │   ├── content/     # Componentes de conteúdo e feed
 │   │   │   ├── ContentCard.tsx
 │   │   │   ├── Feed.tsx
 │   │   │   ├── UserSuggestions.tsx
 │   │   │   └── index.ts
+│   │   ├── ContentCard/ # Componentes específicos de cards
+│   │   │   ├── CardActions.tsx
+│   │   │   ├── ContentCard.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── PostCard.tsx
+│   │   │   ├── ProfileCard.tsx
+│   │   │   └── VideoCard.tsx
 │   │   ├── forms/       # Componentes de formulários
 │   │   │   └── Benefits.tsx
 │   │   ├── landing/     # Componentes da landing page
@@ -93,67 +106,119 @@ premiora-web/
 │   │   │   ├── Testimonials.tsx
 │   │   │   └── index.ts
 │   │   ├── layout/      # Componentes de layout estrutural
+│   │   │   ├── FeedSidebar.tsx
 │   │   │   ├── Header.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── MobileBottomBar.tsx
 │   │   │   ├── Navbar.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── index.ts
-│   │   └── modals/      # Componentes modais
-│   │       ├── CreateCommunityModal.tsx
-│   │       ├── CreateContentModal.tsx
-│   │       ├── CreatePostModal.tsx
-│   │       ├── CreateVideoModal.tsx
-│   │       ├── PostViewModal.tsx
-│   │       ├── VideoViewModal.tsx
-│   │       └── index.ts
+│   │   │   ├── RootLayout.tsx
+│   │   │   └── Sidebar.tsx
+│   │   ├── modals/      # Componentes modais
+│   │   │   ├── CreateCommunityModal.tsx
+│   │   │   ├── CreateContentModal.tsx
+│   │   │   ├── CreatePostModal.tsx
+│   │   │   ├── CreateVideoModal.tsx
+│   │   │   ├── index.ts
+│   │   │   ├── PostViewModal.tsx
+│   │   │   └── VideoViewModal.tsx
+│   │   └── profile/     # Componentes de perfil do usuário
+│   │       ├── FeaturedPost.module.css
+│   │       ├── FeaturedPost.tsx
+│   │       ├── ImageCropModal.module.css
+│   │       ├── ImageCropModal.tsx
+│   │       ├── index.ts
+│   │       ├── PostCard.module.css
+│   │       ├── PostCard.tsx
+│   │       ├── ProfileBanner.module.css
+│   │       ├── ProfileBanner.tsx
+│   │       ├── ProfileBannerEditable.module.css
+│   │       ├── ProfileBannerEditable.tsx
+│   │       ├── RecentPosts.module.css
+│   │       └── RecentPosts.tsx
 │   ├── contexts/        # Contextos React para estado global
-│   │   └── AuthContext.tsx
+│   │   ├── AuthContext.tsx
+│   │   ├── ModalContext.tsx
+│   │   ├── NotificationContext.tsx
+│   │   └── UIContext.tsx
 │   ├── hooks/           # Hooks customizados para lógica reutilizável
 │   │   ├── useAuth.ts
 │   │   ├── useFeed.ts
 │   │   ├── useInfiniteScroll.ts
-│   │   └── useSearch.ts
+│   │   ├── useModal.ts
+│   │   ├── useNotification.ts
+│   │   ├── useProfileEdit.ts
+│   │   ├── useProfileSetup.ts
+│   │   ├── useSearch.ts
+│   │   └── useUI.ts
+│   ├── lib/             # Bibliotecas e configurações
+│   │   └── supabaseAuth.ts
 │   ├── pages/           # Componentes de página (rotas)
+│   │   ├── AuthCallback.tsx
 │   │   ├── CommunitiesPage.tsx
 │   │   ├── CommunityPage.tsx
+│   │   ├── Dashboard.tsx
 │   │   ├── EmailConfirmation.tsx
-│   │   ├── EmailConfirmationSuccess.tsx
+│   │   │   ├── EmailConfirmationSuccess.tsx
 │   │   ├── HomePage.tsx
 │   │   ├── LandingPage.tsx
 │   │   ├── Login.tsx
-│   │   └── SettingsPage.tsx
+│   │   ├── MessagesPage.tsx
+│   │   ├── NotificationsPage.tsx
+│   │   ├── ProfileEditPage.tsx
+│   │   ├── ProfilePage.tsx
+│   │   ├── ProfileSetup.tsx
+│   │   ├── SettingsPage.tsx
+│   │   └── Signup.tsx
 │   ├── services/        # Serviços organizados por domínio (arquitetura modular)
 │   │   ├── auth/        # Serviços de autenticação
 │   │   │   ├── EmailAuthService.ts
+│   │   │   ├── index.ts
 │   │   │   ├── OAuthService.ts
 │   │   │   ├── ProfileService.ts
-│   │   │   ├── RedirectService.ts
-│   │   │   └── index.ts
+│   │   │   └── RedirectService.ts
+│   │   ├── authService.ts  # Serviço legado (manter compatibilidade)
 │   │   ├── content/     # Serviços de conteúdo
 │   │   │   ├── ContentTransformer.ts
 │   │   │   ├── FeedService.ts
 │   │   │   ├── FileUploadService.ts
+│   │   │   ├── index.ts
 │   │   │   ├── PostService.ts
-│   │   │   ├── VideoService.ts
-│   │   │   └── index.ts
-│   │   ├── authService.ts  # Serviço legado (manter compatibilidade)
+│   │   │   ├── SearchService.ts
+│   │   │   └── VideoService.ts
 │   │   └── contentService.ts # Serviço legado (manter compatibilidade)
 │   ├── styles/          # Arquivos de estilo organizados
 │   │   ├── CommunitiesPage.css
 │   │   ├── CommunityPage.css
+│   │   ├── ContentCard.css
+│   │   ├── FeedSidebar.css
 │   │   ├── globals.css
+│   │   ├── Header.css
 │   │   ├── HomePage.css
 │   │   ├── landing-page.css
 │   │   ├── login.css
+│   │   ├── MessagesPage.css
 │   │   ├── modals.css
+│   │   ├── notifications.css
+│   │   ├── NotificationsPage.css
+│   │   ├── RootLayout.css
 │   │   ├── SettingsPage.css
+│   │   ├── Sidebar.css
 │   │   └── UserSuggestions.css
 │   ├── types/           # Definições TypeScript organizadas por domínio
 │   │   ├── auth.ts      # Tipos de autenticação
 │   │   ├── community.ts # Tipos de comunidades
-│   │   └── content.ts   # Tipos de conteúdo
+│   │   ├── content.ts   # Tipos de conteúdo
+│   │   ├── modal.ts     # Tipos de modais
+│   │   ├── notification.ts # Tipos de notificações
+│   │   ├── profile.ts   # Tipos de perfil
+│   │   └── ui.ts        # Tipos de interface do usuário
 │   ├── utils/           # Utilitários e configurações
 │   │   ├── communityUtils.ts
 │   │   ├── constants.ts
+│   │   ├── generateUniqueUsername.ts
+│   │   ├── mediaUtils.ts
+│   │   ├── profileUtils.ts
+│   │   ├── supabaseAdminClient.ts
 │   │   └── supabaseClient.ts
 │   ├── App.tsx          # Componente raiz com roteamento
 │   └── main.tsx         # Ponto de entrada da aplicação
@@ -184,7 +249,7 @@ A aplicação suporta login com Facebook através do Supabase OAuth. A integraç
 
 - **Login com Facebook**: Permite que usuários façam login utilizando suas contas do Facebook
 - **Botão dedicado**: Interface intuitiva com botão azul característico do Facebook
-- **Redirecionamento automático**: Após login bem-sucedido, redireciona para `/home`
+- **Redirecionamento automático**: Após login bem-sucedido, redireciona para `/dashboard`
 - **Tratamento de erros**: Exibe mensagens específicas para falhas na autenticação
 
 #### Implementação Técnica
@@ -325,7 +390,8 @@ npm run preview
 ### Navegação
 
 - **Página Inicial (/)**: Landing page com informações sobre a plataforma
-- **Login (/login)**: Página de autenticação com opções de login via Google ou email/senha
+- **Dashboard (/dashboard)**: Página principal após login com feed de conteúdo
+- **Login (/login)**: Página de autenticação com opções de login via Google, Facebook ou email/senha
 
 ### Funcionalidades
 

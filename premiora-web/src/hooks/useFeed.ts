@@ -4,6 +4,22 @@ import { supabase } from '../utils/supabaseClient';
 import { useAuth } from './useAuth';
 import type { ContentItem } from '../types/content';
 
+// Cache global para prefetch - acessível via window
+declare global {
+  interface Window {
+    ProfilePrefetchCache?: {
+      getInstance(): {
+        getCachedFeed(): any[] | null;
+        getCachedProfile(username: string): {
+          profile: import('../types/profile').CreatorProfile | null;
+          posts: import('../types/profile').Post[];
+          featuredPost: import('../types/profile').Post | null;
+        } | null;
+      };
+    };
+  }
+}
+
 /**
  * Hook personalizado para gerenciar estado e lógica do feed
  * Centraliza toda a lógica relacionada ao feed de conteúdo
@@ -23,6 +39,17 @@ export const useFeed = () => {
    */
   const loadFeedContent = useCallback(async (pageNum: number, append: boolean = false) => {
     try {
+      // Verificar se há dados em cache para a primeira página
+      if (pageNum === 1 && !append) {
+        const cachedFeed = window.ProfilePrefetchCache?.getInstance().getCachedFeed();
+        if (cachedFeed && cachedFeed.length > 0) {
+          console.log('📦 Usando dados do feed em cache');
+          setFeedItems(cachedFeed);
+          setHasMore(true); // Assumir que há mais conteúdo se temos cache
+          return;
+        }
+      }
+
       const { posts, hasMore: moreAvailable } = await ContentService.getFeedPosts(pageNum, 10, userId);
 
       // Converter posts/vídeos do banco para ContentItem
