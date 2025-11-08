@@ -197,6 +197,19 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   };
 
   /**
+   * Handler para navegar para o perfil do usuário
+   */
+  const handleProfileClick = () => {
+    if (item.authorUsername) {
+      navigate(`/u/${item.authorUsername}`);
+    } else {
+      // Fallback: tentar usar o nome do autor como username
+      const fallbackUsername = item.author?.toLowerCase().replace(/\s+/g, '') || 'usuario';
+      navigate(`/u/${fallbackUsername}`);
+    }
+  };
+
+  /**
    * Handler para mouse enter - inicia prefetching
    */
   const handleMouseEnter = () => {
@@ -258,7 +271,16 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
             )}
             <div className="author-details">
               <div className="author-meta">
-                <span className="author-name">{item.author}</span>
+                <Link
+                  to={item.authorUsername ? `/u/${item.authorUsername}` : `/u/${item.author?.toLowerCase().replace(/\s+/g, '') || 'usuario'}`}
+                  className="author-name"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleProfileClick();
+                  }}
+                >
+                  {item.author}
+                </Link>
                 {item.communityId && (
                   <Link to={`/r/${item.communityName}`} className="community-flair">
                     {item.communityAvatar && (

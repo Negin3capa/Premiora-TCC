@@ -241,59 +241,6 @@ premiora-web/
 4. Perfil do usuário é sincronizado com a tabela 'users' no Supabase
 5. Sessão é mantida e atualizada automaticamente
 
-### Integração Facebook OAuth
-
-A aplicação suporta login com Facebook através do Supabase OAuth. A integração é implementada utilizando as seguintes funcionalidades:
-
-#### Funcionalidades Implementadas
-
-- **Login com Facebook**: Permite que usuários façam login utilizando suas contas do Facebook
-- **Botão dedicado**: Interface intuitiva com botão azul característico do Facebook
-- **Redirecionamento automático**: Após login bem-sucedido, redireciona para `/dashboard`
-- **Tratamento de erros**: Exibe mensagens específicas para falhas na autenticação
-
-#### Implementação Técnica
-
-```typescript
-/**
- * Realiza login com Facebook usando OAuth do Supabase
- * Requer configuração prévia do aplicativo Facebook no Supabase
- */
-const signInWithFacebook = async () => {
-  setLoading(true);
-  try {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "facebook",
-      options: {
-        redirectTo: `${window.location.origin}/home`,
-      },
-    });
-    if (error) {
-      console.error("Erro ao fazer login com Facebook:", error.message);
-      throw error;
-    }
-  } catch (err) {
-    setLoading(false);
-    throw err;
-  }
-};
-```
-
-#### Configuração Necessária
-
-Para ativar o login com Facebook, é necessário:
-
-1. **Aplicativo Facebook**: Criar um app no [Facebook Developers](https://developers.facebook.com/)
-2. **Supabase Dashboard**: Configurar as credenciais OAuth no painel do Supabase
-3. **Permissões**: Solicitar permissões básicas (email, public_profile)
-4. **URL de Redirecionamento**: Configurar URL de callback no Facebook e no Supabase
-
-#### Componentes Modificados
-
-- `AuthContext.tsx`: Adicionado método `signInWithFacebook` e interface atualizada
-- `Login.tsx`: Adicionado botão Facebook e handler correspondente
-- `index.css`: Estilos para `.facebook-login-button` e `.facebook-icon`
-
 #### Segurança
 
 - **Sem exposição de chaves**: As credenciais são armazenadas no servidor Supabase

@@ -15,7 +15,7 @@ export class ContentTransformer {
    */
   static transformToContentItem(data: any): ContentItem {
     // Verificar se é vídeo baseado na estrutura dos dados
-    const isVideo = data.contentType === 'video' || data.type === 'video' || data.videoUrl;
+    const isVideo = data.content_type === 'video' || data.contentType === 'video' || data.type === 'video' || data.videoUrl;
 
     if (isVideo) {
       return this.transformVideoToContentItem(data);
@@ -55,34 +55,66 @@ export class ContentTransformer {
 
   /**
    * Converte dados do vídeo para formato ContentItem
-   * @param videoData - Dados do vídeo
+   * @param videoData - Dados do vídeo (raw do banco ou pré-processados)
    * @returns ContentItem formatado
    */
   static transformVideoToContentItem(videoData: any): ContentItem {
-    // Para vídeos, os dados já vêm pré-processados do VideoService.transformVideoForFeed()
-    // então apenas mapeamos as propriedades existentes
-    return {
-      id: videoData.id,
-      type: 'video' as const,
-      title: videoData.title || '',
-      author: videoData.author || videoData.creators?.display_name || 'Usuário',
-      authorUsername: videoData.authorUsername || videoData.username, // Username do criador
-      authorAvatar: videoData.authorAvatar || videoData.creators?.profile_image_url || '',
-      thumbnail: videoData.thumbnail,
-      videoUrl: videoData.videoUrl, // Já definido pelo VideoService
-      content: videoData.content,
-      views: videoData.views || 0,
-      likes: videoData.likes || 0,
-      timestamp: videoData.timestamp ? this.formatTimestamp(videoData.timestamp) : videoData.timestamp || '',
-      duration: videoData.duration,
-      resolution: videoData.resolution,
-      fileSize: videoData.fileSize,
-      communityId: videoData.communityId,
-      communityName: videoData.communityName, // URL slug
-      communityDisplayName: videoData.communityDisplayName || videoData.communityName, // Fallback para display name
-      communityAvatar: videoData.communityAvatar,
-      creatorId: videoData.creatorId
-    };
+    // Verificar se os dados já estão pré-processados (do VideoService) ou raw do banco
+    const isPreprocessed = videoData.type === 'video' && videoData.thumbnail;
+
+    if (isPreprocessed) {
+      // Dados já pré-processados do VideoService.transformVideoForFeed()
+      return {
+        id: videoData.id,
+        type: 'video' as const,
+        title: videoData.title || '',
+        author: videoData.author || videoData.creators?.display_name || 'Usuário',
+        authorUsername: videoData.authorUsername || videoData.username,
+        authorAvatar: videoData.authorAvatar || videoData.creators?.profile_image_url || '',
+        thumbnail: videoData.thumbnail,
+        videoUrl: videoData.videoUrl,
+        content: videoData.content,
+        views: videoData.views || videoData.views_count || 0,
+        likes: videoData.likes || videoData.likes_count || 0,
+        timestamp: videoData.timestamp ? this.formatTimestamp(videoData.timestamp) : videoData.timestamp || '',
+        duration: videoData.duration,
+        resolution: videoData.resolution,
+        fileSize: videoData.fileSize,
+        communityId: videoData.communityId || videoData.community_id,
+        communityName: videoData.communityName || videoData.community?.name,
+        communityDisplayName: videoData.communityDisplayName || videoData.communityName || videoData.community?.display_name,
+        communityAvatar: videoData.communityAvatar || videoData.community?.avatar_url,
+        creatorId: videoData.creatorId || videoData.creator_id
+      };
+    } else {
+      // Dados raw do banco - extrair informações do media_urls
+      const mediaUrls = videoData.media_urls?.[0] || {};
+      const videoInfo = mediaUrls.video || {};
+      const thumbnailInfo = mediaUrls.thumbnail || {};
+
+      return {
+        id: videoData.id,
+        type: 'video' as const,
+        title: videoData.title || '',
+        author: videoData.creator?.display_name || 'Usuário',
+        authorUsername: videoData.username,
+        authorAvatar: videoData.creator?.profile_image_url || '',
+        thumbnail: thumbnailInfo.url || videoInfo.url, // Fallback para thumbnail
+        videoUrl: videoInfo.url,
+        content: videoData.content,
+        views: videoData.views_count || 0,
+        likes: videoData.likes_count || 0,
+        timestamp: this.formatTimestamp(videoData.published_at),
+        duration: videoInfo.metadata?.duration,
+        resolution: videoInfo.metadata ? `${videoInfo.metadata.width}x${videoInfo.metadata.height}` : undefined,
+        fileSize: videoInfo.metadata?.fileSize,
+        communityId: videoData.community_id,
+        communityName: videoData.community?.name,
+        communityDisplayName: videoData.community?.display_name || videoData.community?.name,
+        communityAvatar: videoData.community?.avatar_url,
+        creatorId: videoData.creator_id
+      };
+    }
   }
 
   /**
