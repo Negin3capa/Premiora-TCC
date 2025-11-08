@@ -33,6 +33,10 @@ const CreateCommunityPage: React.FC = () => {
     clearError
   } = useCommunityCreate();
 
+  // State for description editing
+  const [editingDescription, setEditingDescription] = React.useState(false);
+  const [tempDescription, setTempDescription] = React.useState('');
+
 
 
   return (
@@ -168,54 +172,53 @@ const CreateCommunityPage: React.FC = () => {
                 {/* Community Info Card */}
                 <div className="sidebar-section community-info-card">
                   <h3 className="sidebar-title">Sobre a comunidade</h3>
-                  <p
-                    className="community-description"
-                    style={{
-                      cursor: 'text',
-                      opacity: community.description ? 1 : 0.6
-                    }}
-                    title="Clique para editar a descrição da comunidade"
-                  >
-                    <span
-                      contentEditable
-                      suppressContentEditableWarning
-                      dir="ltr"
-                      onInput={(e) => updateDescription(e.currentTarget.textContent || '')}
-                      onBlur={(e) => {
-                        const text = e.currentTarget.textContent || '';
-                        if (!text.trim()) {
-                          e.currentTarget.textContent = 'Descrição da comunidade';
-                          updateDescription('');
-                        }
-                      }}
-                      onFocus={(e) => {
-                        if (e.currentTarget.textContent === 'Descrição da comunidade') {
-                          e.currentTarget.textContent = '';
-                        }
-                      }}
+                  <div style={{ position: 'relative' }}>
+                    <p
+                      className="community-description"
+                      onClick={() => setEditingDescription(true)}
                       style={{
-                        outline: 'none',
-                        border: '2px solid transparent',
-                        borderRadius: '4px',
-                        padding: '0.25rem',
-                        transition: 'border-color 0.2s ease',
-                        minHeight: '1.2em',
-                        display: 'inline-block',
-                        width: '100%',
-                        direction: 'ltr',
-                        textAlign: 'left',
-                        unicodeBidi: 'normal'
+                        cursor: 'pointer',
+                        opacity: community.description ? 1 : 0.6
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = 'transparent';
-                      }}
+                      title="Clique para editar a descrição da comunidade"
                     >
                       {community.description || 'Descrição da comunidade'}
-                    </span>
-                  </p>
+                    </p>
+                    {editingDescription && (
+                      <input
+                        type="text"
+                        value={tempDescription}
+                        onChange={(e) => setTempDescription(e.target.value)}
+                        onBlur={() => {
+                          updateDescription(tempDescription);
+                          setEditingDescription(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            updateDescription(tempDescription);
+                            setEditingDescription(false);
+                          } else if (e.key === 'Escape') {
+                            setEditingDescription(false);
+                          }
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          padding: '0.25rem',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '4px',
+                          color: 'var(--color-text-primary)',
+                          fontSize: '0.9rem',
+                          outline: 'none'
+                        }}
+                        autoFocus
+                        maxLength={500}
+                      />
+                    )}
+                  </div>
 
                   <div className="community-stats">
                     <div className="stat-item">

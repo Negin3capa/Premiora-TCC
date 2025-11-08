@@ -2,7 +2,7 @@
  * Componente do banner da comunidade em modo de edição
  * Permite edição interativa de avatar, banner, nome e descrição da comunidade
  */
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Edit3, X, Save } from 'lucide-react';
 import { ImageCropModal } from './ImageCropModal';
 
@@ -70,6 +70,15 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
     title: '',
     onComplete: () => {}
   });
+
+  const [editingField, setEditingField] = useState<'displayName' | 'name' | null>(null);
+  const [tempValues, setTempValues] = useState({
+    displayName: '',
+    name: ''
+  });
+
+  const displayNameRef = useRef<HTMLHeadingElement>(null);
+  const nameRef = useRef<HTMLSpanElement>(null);
 
 
 
@@ -342,59 +351,69 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
 
           {/* Informações da comunidade */}
           <div style={{ flex: 1, color: 'white' }}>
-            {/* Nome de exibição com edição live inline */}
-            <h1
-              contentEditable
-              suppressContentEditableWarning
-              dir="ltr"
-              onInput={(e) => onUpdateDisplayName(e.currentTarget.textContent || '')}
-              onBlur={(e) => {
-                const text = e.currentTarget.textContent || '';
-                if (!text.trim()) {
-                  e.currentTarget.textContent = 'Nome da comunidade';
-                  onUpdateDisplayName('');
-                }
-              }}
-              onFocus={(e) => {
-                if (e.currentTarget.textContent === 'Nome da comunidade') {
-                  e.currentTarget.textContent = '';
-                }
-              }}
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: 'bold',
-                margin: '0 0 0.5rem 0',
-                cursor: 'text',
-                outline: 'none',
-                border: '2px solid transparent',
-                borderRadius: '4px',
-                padding: '0.25rem',
-                transition: 'border-color 0.2s ease',
-                opacity: community.displayName ? 1 : 0.6,
-                minWidth: '200px',
-                direction: 'ltr',
-                textAlign: 'left',
-                unicodeBidi: 'normal'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'transparent';
-              }}
-              title="Clique para editar o nome de exibição"
-            >
-              {community.displayName || 'Nome da comunidade'}
-            </h1>
+            {/* Nome de exibição com edição inline */}
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <h1
+                ref={displayNameRef}
+                onClick={() => {
+                  setEditingField('displayName');
+                  setTempValues(prev => ({ ...prev, displayName: community.displayName || '' }));
+                }}
+                style={{
+                  fontSize: '2.5rem',
+                  fontWeight: 'bold',
+                  margin: '0 0 0.5rem 0',
+                  cursor: 'pointer',
+                  opacity: community.displayName ? 1 : 0.6,
+                  minWidth: '200px'
+                }}
+                title="Clique para editar o nome de exibição"
+              >
+                {community.displayName || 'Nome da comunidade'}
+              </h1>
+              {editingField === 'displayName' && (
+                <input
+                  type="text"
+                  value={tempValues.displayName}
+                  onChange={(e) => setTempValues(prev => ({ ...prev, displayName: e.target.value }))}
+                  onBlur={() => {
+                    onUpdateDisplayName(tempValues.displayName);
+                    setEditingField(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onUpdateDisplayName(tempValues.displayName);
+                      setEditingField(null);
+                    } else if (e.key === 'Escape') {
+                      setEditingField(null);
+                    }
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    fontSize: '2.5rem',
+                    fontWeight: 'bold',
+                    background: 'rgba(0, 0, 0, 0.8)',
+                    color: 'white',
+                    border: '2px solid #FF424D',
+                    borderRadius: '4px',
+                    padding: '0.25rem',
+                    minWidth: '200px',
+                    outline: 'none'
+                  }}
+                  autoFocus
+                />
+              )}
+            </div>
 
-            {/* Nome da comunidade com edição live inline */}
+            {/* Nome da comunidade com edição inline */}
             <p
               style={{
                 fontSize: '1.2rem',
                 opacity: 0.9,
                 margin: '0 0 1rem 0',
                 fontWeight: 500,
-                cursor: 'text',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem'
@@ -402,44 +421,56 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
               title="Clique para editar o nome da comunidade"
             >
               <span style={{ opacity: 0.7 }}>r/</span>
-              <span
-                contentEditable
-                suppressContentEditableWarning
-                dir="ltr"
-                onInput={(e) => onUpdateName(e.currentTarget.textContent?.replace(/[^a-zA-Z0-9_]/g, '') || '')}
-                onBlur={(e) => {
-                  const text = e.currentTarget.textContent || '';
-                  if (!text.trim()) {
-                    e.currentTarget.textContent = 'nome-da-comunidade';
-                    onUpdateName('');
-                  }
-                }}
-                onFocus={(e) => {
-                  if (e.currentTarget.textContent === 'nome-da-comunidade') {
-                    e.currentTarget.textContent = '';
-                  }
-                }}
-                style={{
-                  outline: 'none',
-                  border: '2px solid transparent',
-                  borderRadius: '4px',
-                  padding: '0.125rem 0.25rem',
-                  transition: 'border-color 0.2s ease',
-                  minWidth: '120px',
-                  flex: 1,
-                  direction: 'ltr',
-                  textAlign: 'left',
-                  unicodeBidi: 'normal'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'transparent';
-                }}
-              >
-                {community.name || 'nome-da-comunidade'}
-              </span>
+              <div style={{ position: 'relative', display: 'inline-block', flex: 1 }}>
+                <span
+                  ref={nameRef}
+                  onClick={() => {
+                    setEditingField('name');
+                    setTempValues(prev => ({ ...prev, name: community.name || '' }));
+                  }}
+                  style={{
+                    cursor: 'pointer',
+                    minWidth: '120px',
+                    display: 'inline-block'
+                  }}
+                >
+                  {community.name || 'nome-da-comunidade'}
+                </span>
+                {editingField === 'name' && (
+                  <input
+                    type="text"
+                    value={tempValues.name}
+                    onChange={(e) => setTempValues(prev => ({ ...prev, name: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') }))}
+                    onBlur={() => {
+                      onUpdateName(tempValues.name);
+                      setEditingField(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        onUpdateName(tempValues.name);
+                        setEditingField(null);
+                      } else if (e.key === 'Escape') {
+                        setEditingField(null);
+                      }
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      fontSize: '1.2rem',
+                      fontWeight: 500,
+                      background: 'rgba(0, 0, 0, 0.8)',
+                      color: 'white',
+                      border: '2px solid #FF424D',
+                      borderRadius: '4px',
+                      padding: '0.125rem 0.25rem',
+                      minWidth: '120px',
+                      outline: 'none'
+                    }}
+                    autoFocus
+                  />
+                )}
+              </div>
             </p>
 
 
