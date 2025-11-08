@@ -250,7 +250,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
         style={{
           position: 'relative',
           width: '100%',
-          height: '300px',
+          height: '180px',
           backgroundImage: community.bannerUrl ? `url(${community.bannerUrl})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
