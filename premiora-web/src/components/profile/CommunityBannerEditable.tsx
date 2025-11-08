@@ -354,8 +354,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
             {/* Nome de exibição com edição inline */}
             <div style={{
               position: 'relative',
-              display: 'inline-block',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+              display: 'inline-block'
             }}>
               <h1
                 ref={displayNameRef}
@@ -369,8 +368,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                   margin: '0 0 0.5rem 0',
                   cursor: 'pointer',
                   opacity: community.displayName ? 1 : 0.6,
-                  minWidth: '200px',
-                  textShadow: 'none' // Remove shadow from text, apply to wrapper
+                  minWidth: '200px'
                 }}
                 title="Clique para editar o nome de exibição"
               >
