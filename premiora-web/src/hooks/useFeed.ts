@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ContentService } from '../services/contentService';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from './useAuth';
@@ -31,21 +31,30 @@ export const useFeed = () => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [userId, setUserId] = useState<string | undefined>();
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const hasMoreRef = useRef(true); // Ref to track current hasMore state
 
   /**
    * Carrega conteúdo do feed do banco de dados
    * @param pageNum - Número da página
    * @param append - Se deve adicionar aos itens existentes
+   * @param isRetry - Se é uma tentativa de retry
    */
-  const loadFeedContent = useCallback(async (pageNum: number, append: boolean = false) => {
+  const loadFeedContent = useCallback(async (pageNum: number, append: boolean = false, isRetry: boolean = false) => {
     try {
+      // Limpar erro anterior se não for retry
+      if (!isRetry) {
+        setError(null);
+      }
+
       // Verificar se há dados em cache para a primeira página
       if (pageNum === 1 && !append) {
         const cachedFeed = window.ProfilePrefetchCache?.getInstance().getCachedFeed();
         if (cachedFeed && cachedFeed.length > 0) {
-          console.log('📦 Usando dados do feed em cache');
           setFeedItems(cachedFeed);
           setHasMore(true); // Assumir que há mais conteúdo se temos cache
+          setError(null); // Limpar qualquer erro anterior
           return;
         }
       }
@@ -55,48 +64,96 @@ export const useFeed = () => {
       // Converter posts/vídeos do banco para ContentItem
       const contentItems = posts.map(post => ContentService.transformToContentItem(post));
 
-      // Inserir sugestões de usuários
-      const contentWithSuggestions = ContentService.insertUserSuggestions(
-        contentItems,
-        append ? feedItems.length : 0
-      );
-
+      // Inserir sugestões de usuários e atualizar estado
       if (append) {
-        setFeedItems(prev => [...prev, ...contentWithSuggestions]);
+        setFeedItems(prev => {
+          const startIndex = prev.length;
+          const contentWithSuggestions = ContentService.insertUserSuggestions(
+            contentItems,
+            startIndex
+          );
+
+          const newItems = [...prev, ...contentWithSuggestions];
+          return newItems;
+        });
       } else {
+        const contentWithSuggestions = ContentService.insertUserSuggestions(
+          contentItems,
+          0
+        );
         setFeedItems(contentWithSuggestions);
       }
 
       setHasMore(moreAvailable);
-    } catch (error) {
-      console.error('Erro ao carregar feed:', error);
+      hasMoreRef.current = moreAvailable; // Update ref
+      setError(null); // Limpar erro em caso de sucesso
+      if (isRetry) {
+        setRetryCount(0); // Resetar contador de retry em caso de sucesso
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido ao carregar feed';
+      console.error('❌ Erro ao carregar feed:', err);
+
+      setError(errorMessage);
+
       // Em caso de erro, manter itens existentes ou mostrar estado vazio
       if (!append) {
         setFeedItems([]);
       }
+
+      // Incrementar contador de retry se for uma tentativa de carregamento normal
+      if (!isRetry) {
+        setRetryCount(prev => prev + 1);
+      }
+
+      throw err; // Re-throw para que o chamador possa lidar com o erro
     }
-  }, [userId, feedItems.length]);
+  }, [userId]); // Removido feedItems.length da dependência para evitar recriação desnecessária
 
   /**
    * Carrega mais conteúdo para scroll infinito
+   * Inclui proteção contra race conditions e tratamento de erros
    */
-  const loadMoreContent = useCallback(() => {
-    if (loading || !hasMore) return;
+  const loadMoreContent = useCallback(async () => {
+    // Proteção contra múltiplas chamadas simultâneas usando ref para hasMore
+    if (loading || !hasMoreRef.current) {
+      return;
+    }
 
     setLoading(true);
     const nextPage = page + 1;
 
-    loadFeedContent(nextPage, true)
-      .then(() => {
-        setPage(nextPage);
-      })
-      .catch((error) => {
-        console.error('Erro ao carregar mais conteúdo:', error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [loading, hasMore, page, loadFeedContent]);
+    try {
+      await loadFeedContent(nextPage, true);
+      setPage(nextPage);
+    } catch (error) {
+      console.error('Erro ao carregar mais conteúdo:', error);
+      // Em caso de erro, não avançar a página para permitir retry
+      // O estado de loading será resetado no finally
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, page, loadFeedContent]);
+
+  /**
+   * Tenta recarregar o conteúdo em caso de erro
+   * Limita o número de tentativas para evitar loops infinitos
+   */
+  const retryLoadContent = useCallback(async () => {
+    if (retryCount >= 3) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await loadFeedContent(page, false, true);
+    } catch (error) {
+      console.error('Erro no retry:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [retryCount, page, loadFeedContent]);
 
   /**
    * Atualiza o feed quando um novo post é criado
@@ -174,8 +231,11 @@ export const useFeed = () => {
     feedItems,
     loading,
     hasMore,
+    error,
     loadMoreContent,
     addNewPost,
-    refreshFeed: () => loadFeedContent(1, false)
+    refreshFeed: () => loadFeedContent(1, false),
+    retryLoadContent,
+    canRetry: retryCount < 3 && error !== null
   };
 };
