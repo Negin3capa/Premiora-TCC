@@ -354,48 +354,47 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
             {/* Nome de exibição com edição inline */}
             <div style={{
               position: 'relative',
-              display: 'inline-block'
+              display: 'inline-block',
+              minWidth: '200px'
             }}>
-              <h1
-                ref={displayNameRef}
-                onClick={() => {
-                  setEditingField('displayName');
-                  setTempValues(prev => ({ ...prev, displayName: community.displayName || '' }));
-                }}
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 'bold',
-                  margin: '0 0 0.5rem 0',
-                  cursor: 'pointer',
-                  opacity: community.displayName ? 1 : 0.6,
-                  minWidth: '200px'
-                }}
-                title="Clique para editar o nome de exibição"
-              >
-                {community.displayName || 'Nome da comunidade'}
-              </h1>
-              {editingField === 'displayName' && (
+              {!editingField || editingField !== 'displayName' ? (
+                <h1
+                  ref={displayNameRef}
+                  onClick={() => {
+                    setEditingField('displayName');
+                    setTempValues(prev => ({ ...prev, displayName: community.displayName || '' }));
+                  }}
+                  style={{
+                    fontSize: '2.5rem',
+                    fontWeight: 'bold',
+                    margin: '0 0 0.5rem 0',
+                    cursor: 'pointer',
+                    opacity: community.displayName ? 1 : 0.6
+                  }}
+                  title="Clique para editar o nome de exibição"
+                >
+                  {community.displayName || 'Nome da comunidade'}
+                </h1>
+              ) : (
                 <input
                   type="text"
                   value={tempValues.displayName}
                   onChange={(e) => {
                     setTempValues(prev => ({ ...prev, displayName: e.target.value }));
-                    onUpdateDisplayName(e.target.value);
                   }}
                   onBlur={() => {
+                    onUpdateDisplayName(tempValues.displayName);
                     setEditingField(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
+                      onUpdateDisplayName(tempValues.displayName);
                       setEditingField(null);
                     } else if (e.key === 'Escape') {
                       setEditingField(null);
                     }
                   }}
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
                     fontSize: '2.5rem',
                     fontWeight: 'bold',
                     background: 'transparent',
@@ -404,7 +403,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                     padding: '0',
                     minWidth: '200px',
                     outline: 'none',
-                    textShadow: 'none' // No shadow on input
+                    margin: '0 0 0.5rem 0'
                   }}
                   autoFocus
                 />
@@ -425,44 +424,42 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
               title="Clique para editar o nome da comunidade"
             >
               <span style={{ opacity: 0.7 }}>r/</span>
-              <div style={{ position: 'relative', display: 'inline-block', flex: 1 }}>
-                <span
-                  ref={nameRef}
-                  onClick={() => {
-                    setEditingField('name');
-                    setTempValues(prev => ({ ...prev, name: community.name || '' }));
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    minWidth: '120px',
-                    display: 'inline-block'
-                  }}
-                >
-                  {community.name || 'nome-da-comunidade'}
-                </span>
-                {editingField === 'name' && (
+              <div style={{ position: 'relative', display: 'inline-block', flex: 1, minWidth: '120px' }}>
+                {(!editingField || editingField !== 'name') ? (
+                  <span
+                    ref={nameRef}
+                    onClick={() => {
+                      setEditingField('name');
+                      setTempValues(prev => ({ ...prev, name: community.name || '' }));
+                    }}
+                    style={{
+                      cursor: 'pointer',
+                      display: 'inline-block'
+                    }}
+                  >
+                    {community.name || 'nome-da-comunidade'}
+                  </span>
+                ) : (
                   <input
                     type="text"
                     value={tempValues.name}
                     onChange={(e) => {
                       const filteredValue = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
                       setTempValues(prev => ({ ...prev, name: filteredValue }));
-                      onUpdateName(filteredValue);
                     }}
                     onBlur={() => {
+                      onUpdateName(tempValues.name);
                       setEditingField(null);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
+                        onUpdateName(tempValues.name);
                         setEditingField(null);
                       } else if (e.key === 'Escape') {
                         setEditingField(null);
                       }
                     }}
                     style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
                       fontSize: '1.2rem',
                       fontWeight: 500,
                       background: 'transparent',

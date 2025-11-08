@@ -173,39 +173,41 @@ const CreateCommunityPage: React.FC = () => {
                 <div className="sidebar-section community-info-card">
                   <h3 className="sidebar-title">Sobre a comunidade</h3>
                   <div style={{ position: 'relative' }}>
-                    <p
-                      className="community-description"
-                      onClick={() => setEditingDescription(true)}
-                      style={{
-                        cursor: 'pointer',
-                        opacity: community.description ? 1 : 0.6
-                      }}
-                      title="Clique para editar a descrição da comunidade"
-                    >
-                      {community.description || 'Descrição da comunidade'}
-                    </p>
-                    {editingDescription && (
+                    {!editingDescription ? (
+                      <p
+                        className="community-description"
+                        onClick={() => {
+                          setEditingDescription(true);
+                          setTempDescription(community.description || '');
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          opacity: community.description ? 1 : 0.6
+                        }}
+                        title="Clique para editar a descrição da comunidade"
+                      >
+                        {community.description || 'Descrição da comunidade'}
+                      </p>
+                    ) : (
                       <input
                         type="text"
                         value={tempDescription}
                         onChange={(e) => {
                           setTempDescription(e.target.value);
-                          updateDescription(e.target.value);
                         }}
                         onBlur={() => {
+                          updateDescription(tempDescription);
                           setEditingDescription(false);
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
+                            updateDescription(tempDescription);
                             setEditingDescription(false);
                           } else if (e.key === 'Escape') {
                             setEditingDescription(false);
                           }
                         }}
                         style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
                           width: '100%',
                           padding: '0',
                           background: 'transparent',
