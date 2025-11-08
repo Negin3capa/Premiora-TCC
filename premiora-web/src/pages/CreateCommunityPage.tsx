@@ -33,24 +33,7 @@ const CreateCommunityPage: React.FC = () => {
     clearError
   } = useCommunityCreate();
 
-  // State for description editing
-  const [editingDescription, setEditingDescription] = React.useState(false);
-  const [tempDescription, setTempDescription] = React.useState('');
 
-  const handleStartDescriptionEdit = () => {
-    setEditingDescription(true);
-    setTempDescription(community.description);
-  };
-
-  const handleConfirmDescriptionEdit = () => {
-    updateDescription(tempDescription);
-    setEditingDescription(false);
-  };
-
-  const handleCancelDescriptionEdit = () => {
-    setEditingDescription(false);
-    setTempDescription('');
-  };
 
   return (
     <div className="community-page">
@@ -185,88 +168,50 @@ const CreateCommunityPage: React.FC = () => {
                 {/* Community Info Card */}
                 <div className="sidebar-section community-info-card">
                   <h3 className="sidebar-title">Sobre a comunidade</h3>
-                  {editingDescription ? (
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      borderRadius: '8px',
-                      padding: '1rem',
-                      marginTop: '0.5rem'
-                    }}>
-                      <textarea
-                        value={tempDescription}
-                        onChange={(e) => setTempDescription(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.5rem',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '4px',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          color: 'var(--color-text-primary)',
-                          fontSize: '0.9rem',
-                          resize: 'vertical',
-                          minHeight: '80px'
-                        }}
-                        placeholder="Descrição da comunidade"
-                        rows={3}
-                        autoFocus
-                        maxLength={500}
-                      />
-                      <div style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        justifyContent: 'flex-end',
-                        marginTop: '0.5rem'
-                      }}>
-                        <button
-                          type="button"
-                          onClick={handleConfirmDescriptionEdit}
-                          disabled={isCreating}
-                          style={{
-                            background: 'var(--color-primary)',
-                            color: 'white',
-                            border: 'none',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            cursor: isCreating ? 'not-allowed' : 'pointer',
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          Salvar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleCancelDescriptionEdit}
-                          disabled={isCreating}
-                          style={{
-                            background: 'none',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            color: 'var(--color-text-secondary)',
-                            padding: '0.5rem 1rem',
-                            borderRadius: '4px',
-                            cursor: isCreating ? 'not-allowed' : 'pointer',
-                            fontSize: '0.85rem'
-                          }}
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <p
-                      className="community-description"
-                      onClick={handleStartDescriptionEdit}
+                  <p
+                    className="community-description"
+                    style={{
+                      cursor: 'text',
+                      opacity: community.description ? 1 : 0.6
+                    }}
+                    title="Clique para editar a descrição da comunidade"
+                  >
+                    <span
+                      contentEditable
+                      suppressContentEditableWarning
+                      onInput={(e) => updateDescription(e.currentTarget.textContent || '')}
+                      onBlur={(e) => {
+                        const text = e.currentTarget.textContent || '';
+                        if (!text.trim()) {
+                          e.currentTarget.textContent = 'Descrição da comunidade';
+                          updateDescription('');
+                        }
+                      }}
+                      onFocus={(e) => {
+                        if (e.currentTarget.textContent === 'Descrição da comunidade') {
+                          e.currentTarget.textContent = '';
+                        }
+                      }}
                       style={{
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
+                        outline: 'none',
+                        border: '2px solid transparent',
+                        borderRadius: '4px',
+                        padding: '0.25rem',
+                        transition: 'border-color 0.2s ease',
+                        minHeight: '1.2em',
+                        display: 'inline-block',
+                        width: '100%'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'transparent';
                       }}
                     >
-                      {community.description || 'Clique para adicionar descrição'}
-                      <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>✏️</span>
-                    </p>
-                  )}
+                      {community.description || 'Descrição da comunidade'}
+                    </span>
+                  </p>
 
                   <div className="community-stats">
                     <div className="stat-item">

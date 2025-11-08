@@ -71,96 +71,12 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
     onComplete: () => {}
   });
 
-  const [editingField, setEditingField] = useState<'name' | 'displayName' | 'description' | null>(null);
-  const [tempValues, setTempValues] = useState<{
-    name: string;
-    displayName: string;
-    description: string;
-  }>({
-    name: '',
-    displayName: '',
-    description: ''
-  });
 
-  // Refs for contentEditable elements
-  const displayNameRef = useRef<HTMLHeadingElement>(null);
-  const nameRef = useRef<HTMLParagraphElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * Handler para iniciar edição inline
-   */
-  const handleStartInlineEdit = (field: 'name' | 'displayName') => {
-    setEditingField(field);
-    // Focus the element after state update
-    setTimeout(() => {
-      if (field === 'displayName' && displayNameRef.current) {
-        displayNameRef.current.focus();
-        // Select all text
-        const range = document.createRange();
-        range.selectNodeContents(displayNameRef.current);
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-      } else if (field === 'name' && nameRef.current) {
-        nameRef.current.focus();
-        // Select all text
-        const range = document.createRange();
-        range.selectNodeContents(nameRef.current);
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-      }
-    }, 0);
-  };
 
-  /**
-   * Handler para mudança de texto em tempo real
-   */
-  const handleInlineInput = (field: 'name' | 'displayName', event: React.FormEvent<HTMLHeadingElement | HTMLParagraphElement>) => {
-    const target = event.currentTarget;
-    const text = target.textContent || '';
-
-    if (field === 'displayName') {
-      onUpdateDisplayName(text);
-    } else if (field === 'name') {
-      // Remove 'r/' prefix if present and clean the name
-      const cleanName = text.replace(/^r\//, '').replace(/[^a-zA-Z0-9_]/g, '');
-      onUpdateName(cleanName);
-      // Update the display to show r/ prefix
-      if (target.textContent !== `r/${cleanName}`) {
-        target.textContent = `r/${cleanName}`;
-      }
-    }
-  };
-
-  /**
-   * Handler para finalizar edição inline
-   */
-  const handleInlineBlur = () => {
-    setEditingField(null);
-  };
-
-  /**
-   * Handler para teclas especiais
-   */
-  const handleInlineKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      setEditingField(null);
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      setEditingField(null);
-      // Reset to original values
-      if (editingField === 'displayName' && displayNameRef.current) {
-        displayNameRef.current.textContent = community.displayName;
-      } else if (editingField === 'name' && nameRef.current) {
-        nameRef.current.textContent = `r/${community.name}`;
-      }
-    }
-  };
 
   /**
    * Handler para abrir modal de crop do avatar
@@ -426,55 +342,96 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
 
           {/* Informações da comunidade */}
           <div style={{ flex: 1, color: 'white' }}>
-            {/* Nome de exibição com edição inline */}
+            {/* Nome de exibição com edição live inline */}
             <h1
-              ref={displayNameRef}
-              contentEditable={editingField === 'displayName'}
-              suppressContentEditableWarning={true}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={(e) => onUpdateDisplayName(e.currentTarget.textContent || '')}
+              onBlur={(e) => {
+                const text = e.currentTarget.textContent || '';
+                if (!text.trim()) {
+                  e.currentTarget.textContent = 'Nome da comunidade';
+                  onUpdateDisplayName('');
+                }
+              }}
+              onFocus={(e) => {
+                if (e.currentTarget.textContent === 'Nome da comunidade') {
+                  e.currentTarget.textContent = '';
+                }
+              }}
               style={{
                 fontSize: '2.5rem',
                 fontWeight: 'bold',
                 margin: '0 0 0.5rem 0',
-                cursor: editingField === 'displayName' ? 'text' : 'pointer',
-                outline: editingField === 'displayName' ? '2px solid #FF424D' : 'none',
-                borderRadius: editingField === 'displayName' ? '4px' : '0',
-                padding: editingField === 'displayName' ? '4px' : '0',
-                backgroundColor: editingField === 'displayName' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                display: 'inline-block',
+                cursor: 'text',
+                outline: 'none',
+                border: '2px solid transparent',
+                borderRadius: '4px',
+                padding: '0.25rem',
+                transition: 'border-color 0.2s ease',
+                opacity: community.displayName ? 1 : 0.6,
                 minWidth: '200px'
               }}
-              onClick={() => handleStartInlineEdit('displayName')}
-              onInput={(e) => handleInlineInput('displayName', e)}
-              onBlur={handleInlineBlur}
-              onKeyDown={handleInlineKeyDown}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'transparent';
+              }}
+              title="Clique para editar o nome de exibição"
             >
-              {community.displayName}
+              {community.displayName || 'Nome da comunidade'}
             </h1>
 
-            {/* Nome da comunidade */}
+            {/* Nome da comunidade com edição live inline */}
             <p
-              ref={nameRef}
-              contentEditable={editingField === 'name'}
-              suppressContentEditableWarning={true}
               style={{
                 fontSize: '1.2rem',
                 opacity: 0.9,
                 margin: '0 0 1rem 0',
                 fontWeight: 500,
-                cursor: editingField === 'name' ? 'text' : 'pointer',
-                outline: editingField === 'name' ? '2px solid #FF424D' : 'none',
-                borderRadius: editingField === 'name' ? '4px' : '0',
-                padding: editingField === 'name' ? '4px' : '0',
-                backgroundColor: editingField === 'name' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-                display: 'inline-block',
-                minWidth: '150px'
+                cursor: 'text',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}
-              onClick={() => handleStartInlineEdit('name')}
-              onInput={(e) => handleInlineInput('name', e)}
-              onBlur={handleInlineBlur}
-              onKeyDown={handleInlineKeyDown}
+              title="Clique para editar o nome da comunidade"
             >
-              r/{community.name}
+              <span style={{ opacity: 0.7 }}>r/</span>
+              <span
+                contentEditable
+                suppressContentEditableWarning
+                onInput={(e) => onUpdateName(e.currentTarget.textContent?.replace(/[^a-zA-Z0-9_]/g, '') || '')}
+                onBlur={(e) => {
+                  const text = e.currentTarget.textContent || '';
+                  if (!text.trim()) {
+                    e.currentTarget.textContent = 'nome-da-comunidade';
+                    onUpdateName('');
+                  }
+                }}
+                onFocus={(e) => {
+                  if (e.currentTarget.textContent === 'nome-da-comunidade') {
+                    e.currentTarget.textContent = '';
+                  }
+                }}
+                style={{
+                  outline: 'none',
+                  border: '2px solid transparent',
+                  borderRadius: '4px',
+                  padding: '0.125rem 0.25rem',
+                  transition: 'border-color 0.2s ease',
+                  minWidth: '120px',
+                  flex: 1
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'transparent';
+                }}
+              >
+                {community.name || 'nome-da-comunidade'}
+              </span>
             </p>
 
 
