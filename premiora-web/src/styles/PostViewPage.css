@@ -142,6 +142,13 @@
   gap: 2px;
 }
 
+.author-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
 .author-name {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
@@ -431,6 +438,65 @@
   height: 20px;
   border-radius: var(--radius-full);
   object-fit: cover;
+}
+
+/* Inline Community Flair (beside author name) */
+.community-flair {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  margin-left: var(--space-2);
+}
+
+.community-flair:hover {
+  background-color: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  color: var(--color-text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.community-avatar-small {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  border: 1px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.community-flair:hover .community-avatar-small {
+  border-color: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.community-name-small {
+  font-weight: var(--font-weight-medium);
+  color: inherit;
+  transition: color var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.community-flair:hover .community-name-small {
+  color: var(--color-primary);
+}
+
+.community-prefix {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-normal);
+  margin-right: 2px;
 }
 
 /* Ações do post */

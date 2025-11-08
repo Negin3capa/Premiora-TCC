@@ -194,6 +194,16 @@ const App: React.FC = () => {
           }
         />
 
+        {/* Rota Visualização de Post de Comunidade (apenas para autenticados) */}
+        <Route
+          path="/r/:communityName/u/:username/status/:postId"
+          element={
+            <ProtectedRoute>
+              <PostViewPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Rota Edição de Perfil (apenas para autenticados) */}
         <Route
           path="/u/:username/edit"

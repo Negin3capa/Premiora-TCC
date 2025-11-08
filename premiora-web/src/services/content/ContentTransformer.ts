@@ -47,7 +47,8 @@ export class ContentTransformer {
       accessLevel: postData.is_premium ? 'premium' : 'public',
       isLocked: postData.is_premium,
       communityId: postData.community?.id,
-      communityName: postData.community?.display_name,
+      communityName: postData.community?.name,
+      communityDisplayName: postData.community?.name,
       communityAvatar: postData.community?.avatar_url
     };
   }
@@ -77,7 +78,8 @@ export class ContentTransformer {
       resolution: videoData.resolution,
       fileSize: videoData.fileSize,
       communityId: videoData.communityId,
-      communityName: videoData.communityName,
+      communityName: videoData.communityName, // URL slug
+      communityDisplayName: videoData.communityDisplayName || videoData.communityName, // Fallback para display name
       communityAvatar: videoData.communityAvatar,
       creatorId: videoData.creatorId
     };

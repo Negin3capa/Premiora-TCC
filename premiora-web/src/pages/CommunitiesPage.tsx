@@ -8,6 +8,7 @@ import type { Community } from '../types/community';
 import type { ContentItem } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { Search, Flame, Users, Sparkles, Eye, Heart, Video, FileText, Calendar } from 'lucide-react';
+import { getCommunities, searchCommunities } from '../utils/communityUtils';
 import '../styles/CommunitiesPage.css';
 
 /**
@@ -213,16 +214,59 @@ const CommunitiesPage: React.FC = () => {
   useEffect(() => {
     const loadCommunities = async () => {
       setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
+      try {
+        const realCommunities = await getCommunities();
+        setCommunities(realCommunities);
+      } catch (error) {
+        console.error('Erro ao carregar comunidades:', error);
+        // Fallback to mock data if API fails
         const mockCommunities = generateMockCommunities();
         setCommunities(mockCommunities);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     loadCommunities();
   }, []);
+
+  // Handle search functionality
+  useEffect(() => {
+    const performSearch = async () => {
+      if (!searchQuery.trim()) {
+        // If search is empty, reload all communities
+        const loadCommunities = async () => {
+          try {
+            const realCommunities = await getCommunities();
+            setCommunities(realCommunities);
+          } catch (error) {
+            console.error('Erro ao recarregar comunidades:', error);
+          }
+        };
+        loadCommunities();
+        return;
+      }
+
+      try {
+        const searchResults = await searchCommunities(searchQuery);
+        setCommunities(searchResults);
+      } catch (error) {
+        console.error('Erro ao buscar comunidades:', error);
+        // Fallback to client-side filtering of mock data
+        const mockCommunities = generateMockCommunities();
+        const filtered = mockCommunities.filter(community =>
+          community.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          community.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          community.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setCommunities(filtered);
+      }
+    };
+
+    // Debounce search to avoid too many API calls
+    const timeoutId = setTimeout(performSearch, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
 
   // Load showcase content when a community is selected
   useEffect(() => {
@@ -232,16 +276,10 @@ const CommunitiesPage: React.FC = () => {
     }
   }, [selectedCommunity]);
 
-  // Sort and filter communities
-  const sortedAndFilteredCommunities = useMemo(() => {
-    let filtered = communities.filter(community =>
-      community.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      community.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      community.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-
+  // Sort communities
+  const sortedCommunities = useMemo(() => {
     // Add mock trending/popularity scores for sorting
-    const communitiesWithScores = filtered.map(community => ({
+    const communitiesWithScores = communities.map(community => ({
       ...community,
       trendingScore: Math.random() * 100, // Mock trending score
       popularityScore: community.memberCount + Math.random() * 1000, // Based on member count + random
@@ -261,7 +299,7 @@ const CommunitiesPage: React.FC = () => {
       default:
         return communitiesWithScores.sort((a, b) => b.relevanceScore - a.relevanceScore);
     }
-  }, [communities, searchQuery, sortBy]);
+  }, [communities, sortBy]);
 
   const handleCommunityClick = (community: Community) => {
     navigate(`/r/${community.name}`);
@@ -298,6 +336,29 @@ const CommunitiesPage: React.FC = () => {
             </p>
           </div>
 
+          {/* Search Bar */}
+          <div className="search-bar">
+            <div className="search-input-container">
+              <Search size={20} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Buscar comunidades..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+              {searchQuery && (
+                <button
+                  className="clear-search"
+                  onClick={() => setSearchQuery('')}
+                  title="Limpar busca"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Sort Controls */}
           <div className="sort-controls">
             <span className="sort-label">Ordenar por:</span>
@@ -331,7 +392,7 @@ const CommunitiesPage: React.FC = () => {
 
           {/* Communities Grid */}
           <div className="communities-grid">
-            {sortedAndFilteredCommunities.map((community) => (
+            {sortedCommunities.map((community: Community) => (
               <div key={community.id} className="community-card">
                 {/* Community Banner */}
                 <div className="community-banner">
@@ -419,7 +480,7 @@ const CommunitiesPage: React.FC = () => {
             ))}
           </div>
 
-          {sortedAndFilteredCommunities.length === 0 && (
+          {sortedCommunities.length === 0 && (
             <div className="no-communities">
               <p>Nenhuma comunidade encontrada para "{searchQuery}"</p>
               <button

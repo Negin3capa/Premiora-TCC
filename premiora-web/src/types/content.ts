@@ -2,8 +2,6 @@
  * Tipos relacionados ao conteúdo da plataforma Premiora
  */
 
-import type { PostFlair, UserFlair, CommunityTag } from './community';
-
 /**
  * Tipos de conteúdo suportados na plataforma
  */
@@ -37,12 +35,9 @@ export interface ContentItem {
   fullContent?: string; // Conteúdo completo (só para usuários autorizados)
   // Propriedades de comunidade
   communityId?: string;
-  communityName?: string;
+  communityName?: string; // URL slug (name field from database)
+  communityDisplayName?: string; // Human-readable name (display_name field)
   communityAvatar?: string;
-  // Propriedades de flairs e tags
-  postFlair?: PostFlair;
-  userFlairs?: (UserFlair & { flair?: PostFlair })[];
-  tags?: CommunityTag[];
   // Propriedades de engajamento da comunidade
   communityLikes?: number;
   communityComments?: number;
