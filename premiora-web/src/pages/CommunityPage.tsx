@@ -69,9 +69,9 @@ const CommunityPage: React.FC = () => {
 
       setLoading(true);
       try {
-        const result = await FeedService.getCommunityPosts(communityName, 1, 10);
+      const result = await FeedService.getCommunityPosts(communityName, 1, 10);
         const transformedItems = result.posts.map(post =>
-          ContentTransformer.transformPostToContentItem(post)
+          ContentTransformer.transformToContentItem(post)
         );
         setFeedItems(transformedItems);
         setHasMore(result.hasMore);
@@ -98,7 +98,7 @@ const CommunityPage: React.FC = () => {
       const nextPage = page + 1;
       const result = await FeedService.getCommunityPosts(communityName, nextPage, 10);
       const transformedItems = result.posts.map(post =>
-        ContentTransformer.transformPostToContentItem(post)
+        ContentTransformer.transformToContentItem(post)
       );
       setFeedItems(prev => [...prev, ...transformedItems]);
       setHasMore(result.hasMore);

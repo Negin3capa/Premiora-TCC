@@ -70,9 +70,9 @@ const Dashboard: React.FC = () => {
     };
   }, [handleVisibilityChange, handleNavigation]);
 
-  // Refresh inicial apenas uma vez
+  // Refresh inicial apenas uma vez - apenas se não houver conteúdo carregado
   useEffect(() => {
-    if (!hasInitialRefreshedRef.current) {
+    if (!hasInitialRefreshedRef.current && feedItems.length === 0) {
       hasInitialRefreshedRef.current = true;
       // Pequeno delay para garantir que o componente está totalmente montado
       const timer = setTimeout(() => {
@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
 
       return () => clearTimeout(timer);
     }
-  }, []); // Dependência vazia - executa apenas uma vez
+  }, [feedItems.length]); // Adicionada dependência para verificar se conteúdo foi carregado
 
   return (
     <div className="homepage">

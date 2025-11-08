@@ -39,6 +39,22 @@ export const useInfiniteScroll = (
 
     if (loadMoreRef.current) {
       observerRef.current.observe(loadMoreRef.current);
+
+      // Check if element is already visible after setting up observer
+      // Only trigger for short content (no scrolling needed) to avoid unnecessary loads
+      setTimeout(() => {
+        if (loadMoreRef.current && hasMore && !loading) {
+          const rect = loadMoreRef.current.getBoundingClientRect();
+          // Only trigger initial load if content is short (no scrolling needed)
+          // For long content, rely on scroll-triggered intersection
+          const contentIsShort = document.documentElement.scrollHeight <= window.innerHeight;
+          const elementIsVisible = rect.top <= window.innerHeight + 50 && rect.bottom >= -50;
+
+          if (contentIsShort && elementIsVisible) {
+            loadMoreCallback();
+          }
+        }
+      }, 100);
     }
 
     return () => {
@@ -46,7 +62,7 @@ export const useInfiniteScroll = (
         observerRef.current.disconnect();
       }
     };
-  }, [loadMoreCallback, threshold]);
+  }, [loadMoreCallback, threshold, hasMore, loading]);
 
   return loadMoreRef;
 };
