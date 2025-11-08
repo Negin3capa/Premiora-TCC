@@ -35,7 +35,18 @@ export class PostService {
       }
     }
 
-    // Primeiro, verificar se o usuário tem um registro de creator
+    // Primeiro, buscar dados do usuário (sempre necessário para o username)
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('name, username, avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (userError) {
+      throw new Error(`Erro ao buscar dados do usuário: ${userError.message}`);
+    }
+
+    // Verificar se o usuário tem um registro de creator
     let creatorId = userId;
 
     const { data: existingCreator, error: creatorCheckError } = await supabase
@@ -52,17 +63,6 @@ export class PostService {
     // Se não existe creator, criar um automaticamente
     if (!existingCreator) {
       console.log('Criando registro de creator para usuário:', userId);
-
-      // Buscar dados do usuário para criar o creator
-      const { data: userData, error: userError } = await supabase
-        .from('users')
-        .select('name, username, avatar_url')
-        .eq('id', userId)
-        .single();
-
-      if (userError) {
-        throw new Error(`Erro ao buscar dados do usuário: ${userError.message}`);
-      }
 
       const { error: createCreatorError } = await supabaseAdmin
         .from('creators')
@@ -100,6 +100,7 @@ export class PostService {
         media_urls: mediaUrls,
         community_id: postData.communityId || null,
         creator_id: creatorId,
+        username: userData.username, // Foreign key direta para users.username
         is_premium: false, // Por padrão, posts são públicos
         is_published: true
       })

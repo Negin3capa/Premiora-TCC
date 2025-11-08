@@ -110,6 +110,15 @@
   border-radius: 2px;
 }
 
+/* Active indicator for mobile */
+@media (max-width: 768px) {
+  .sidebar-nav-button.active::after {
+    left: -16px;
+    width: 4px;
+    height: 24px;
+  }
+}
+
 .sidebar-nav-icon {
   display: flex;
   align-items: center;
@@ -152,7 +161,7 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #666;
+  color: #FFFFFF;
   background: linear-gradient(135deg, #FF424D 0%, #FF6B75 100%);
   box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
   gap: 8px;
@@ -199,29 +208,58 @@
   }
 }
 
+/* ==================== Overlay Mobile ==================== */
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1999; /* Just below sidebar z-index */
+  display: block;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    z-index: 1000;
-    width: 80px; /* Icon-only on mobile */
-    padding: 40px 12px 20px 12px;
+    z-index: 2000; /* Higher z-index to overlay everything */
+    width: 50vw; /* At least half screen width */
+    min-width: 280px; /* Minimum width for usability */
+    max-width: 320px; /* Maximum width */
+    padding: 40px 20px 20px 20px;
   }
 
   .sidebar.mobile-open {
     transform: translateX(0);
   }
 
-  .sidebar-nav-button {
-    width: 56px;
-    height: 48px;
-    padding: 0;
-    justify-content: center;
-    gap: 0;
+  /* Always hide logo on mobile */
+  .sidebar-logo {
+    display: none;
   }
 
-  .sidebar-nav-label {
+  /* Show labels when sidebar is open on mobile */
+  .sidebar.mobile-open .sidebar-nav-label {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .sidebar:not(.mobile-open) .sidebar-nav-label {
     display: none;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .sidebar-nav-button {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    justify-content: flex-start;
+    gap: 16px;
   }
 
   .sidebar-nav-list {
@@ -229,14 +267,14 @@
   }
 
   .sidebar-create-button {
-    width: 48px;
+    width: 100%;
     height: 48px;
-    padding: 0;
-    gap: 0;
+    padding: 0 16px;
+    gap: 16px;
   }
 
   .sidebar-create-label {
-    display: none;
+    display: block;
   }
 }
 

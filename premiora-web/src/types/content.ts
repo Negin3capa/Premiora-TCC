@@ -22,6 +22,7 @@ export interface ContentItem {
   type: ContentType;
   title: string;
   author: string;
+  authorUsername?: string; // Username real da tabela users
   authorAvatar: string;
   thumbnail?: string;
   content?: string;

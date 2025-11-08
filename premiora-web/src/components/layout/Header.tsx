@@ -8,12 +8,20 @@ import { useSearch } from '../../hooks/useSearch';
 import { useAuth } from '../../hooks/useAuth';
 import SearchResults from '../common/SearchResults';
 import '../../styles/Header.css';
-import { Search, Bell, X, LogOut, UserPlus } from 'lucide-react';
+import { Search, Bell, X, LogOut, UserPlus, Menu } from 'lucide-react';
+
+/**
+ * Props do componente Header
+ */
+interface HeaderProps {
+  /** Callback para alternar estado da sidebar principal */
+  onToggleSidebar?: () => void;
+}
 
 /**
  * Header com funcionalidade de busca integrada
  */
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -175,8 +183,22 @@ const Header: React.FC = () => {
   return (
     <header className="header">
       <div className="header-content">
-        {/* Left side - App title */}
+        {/* Left side - Hamburger menu for mobile */}
         <div className="header-left">
+          {onToggleSidebar && (
+            <button
+              className="header-hamburger-button"
+              aria-label="Menu lateral"
+              title="Menu lateral"
+              onClick={onToggleSidebar}
+            >
+              <Menu size={20} />
+            </button>
+          )}
+        </div>
+
+        {/* Center - Logo */}
+        <div className="header-center">
           <h1 className="header-title">Premiora</h1>
         </div>
 

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Search, Flame, TrendingUp, Rocket, Users, X } from 'lucide-react';
 import UserSuggestions from '../content/UserSuggestions';
 import SearchResults from '../common/SearchResults';
 import { useSearch } from '../../hooks/useSearch';
@@ -26,6 +27,8 @@ interface FeedSidebarProps {
   isOpen?: boolean;
   /** Callback para fechar a sidebar */
   onClose?: () => void;
+  /** Indica se deve ser ocultada por padrão em mobile */
+  hideOnMobile?: boolean;
 }
 
 /**
@@ -152,7 +155,7 @@ const FeedSidebar: React.FC<FeedSidebarProps> = ({ isOpen = false, onClose }) =>
           <section className="feed-sidebar-section search-section">
             <div className="search-container">
               <div className="search-input-wrapper">
-                <span className="search-icon">🔍</span>
+                <Search className="search-icon" size={18} />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -171,7 +174,7 @@ const FeedSidebar: React.FC<FeedSidebarProps> = ({ isOpen = false, onClose }) =>
                     className="clear-search-btn"
                     aria-label="Limpar busca"
                   >
-                    ✕
+                    <X size={16} />
                   </button>
                 )}
               </div>
@@ -196,7 +199,7 @@ const FeedSidebar: React.FC<FeedSidebarProps> = ({ isOpen = false, onClose }) =>
           <section className="feed-sidebar-section">
             <div className="section-header">
               <h3 className="section-title">Tópicos em Tendência</h3>
-              <span className="section-icon">🔥</span>
+              <Flame className="section-icon" size={18} />
             </div>
 
             <div className="trending-topics">
@@ -229,12 +232,12 @@ const FeedSidebar: React.FC<FeedSidebarProps> = ({ isOpen = false, onClose }) =>
           <section className="feed-sidebar-section">
             <div className="section-header">
               <h3 className="section-title">O que está acontecendo</h3>
-              <span className="section-icon">📈</span>
+              <TrendingUp className="section-icon" size={18} />
             </div>
 
             <div className="happening-items">
               <div className="happening-item">
-                <div className="happening-icon">🚀</div>
+                <Rocket className="happening-icon" size={20} />
                 <div className="happening-content">
                   <p className="happening-text">
                     <strong>Novos recursos</strong> chegando em breve
@@ -244,7 +247,7 @@ const FeedSidebar: React.FC<FeedSidebarProps> = ({ isOpen = false, onClose }) =>
               </div>
 
               <div className="happening-item">
-                <div className="happening-icon">👥</div>
+                <Users className="happening-icon" size={20} />
                 <div className="happening-content">
                   <p className="happening-text">
                     <strong>+500 usuários</strong> se juntaram hoje

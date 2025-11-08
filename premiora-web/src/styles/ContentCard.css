@@ -98,6 +98,10 @@
   color: var(--color-text-primary);
   margin-bottom: var(--space-2);
   line-height: var(--line-height-tight);
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .content-stats {
@@ -207,7 +211,24 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.video-description {
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-base);
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
 /* Post Card */
+.post-content {
+  width: 100%;
+  text-align: left;
+  display: block;
+}
+
 .post-image {
   width: 100%;
   height: 400px;
@@ -221,6 +242,13 @@
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--space-3);
   font-size: var(--font-size-base);
+  text-align: left !important;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  width: 100%;
+  display: block;
+  white-space: pre-wrap;
 }
 
 .locked-indicator {
@@ -314,6 +342,10 @@
   .content-title {
     font-size: var(--font-size-base);
     margin-bottom: var(--space-2);
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   .card-content {
@@ -339,6 +371,11 @@
     height: 280px;
   }
 
+  .video-description {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+  }
+
   /* Post Card Mobile */
   .post-image {
     height: 300px;
@@ -347,6 +384,10 @@
   .post-body {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-relaxed);
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   /* Profile Card Mobile */

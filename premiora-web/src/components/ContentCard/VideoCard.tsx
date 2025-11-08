@@ -33,6 +33,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ item, onPlay }) => {
       </div>
       <div className="video-info">
         <h3 className="content-title">{item.title}</h3>
+        {item.content && (
+          <div className="video-description">
+            {item.content.substring(0, 150) + (item.content.length > 150 ? '...' : '')}
+          </div>
+        )}
         <p className="content-stats">
           {item.views?.toLocaleString('pt-BR')} visualizações • {item.timestamp}
         </p>

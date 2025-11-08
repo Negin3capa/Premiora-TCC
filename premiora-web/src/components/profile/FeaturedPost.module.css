@@ -1,16 +1,33 @@
 /* Post em Destaque */
 .featuredPost {
+  margin: 3rem 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.postContent {
   background: #121212;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
-  margin: 2rem 0;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
 
-.featuredPost:hover {
+.postContent:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
@@ -34,7 +51,7 @@
   transition: transform 0.3s ease;
 }
 
-.featuredPost:hover .thumbnailImage {
+.postContent:hover .thumbnailImage {
   transform: scale(1.05);
 }
 
@@ -62,7 +79,7 @@
   transition: opacity 0.2s ease;
 }
 
-.featuredPost:hover .videoOverlay {
+.postContent:hover .videoOverlay {
   opacity: 1;
 }
 
@@ -71,7 +88,7 @@
   transition: opacity 0.2s ease;
 }
 
-.featuredPost:hover .playIcon {
+.postContent:hover .playIcon {
   opacity: 1;
 }
 
@@ -84,7 +101,7 @@
   color: #DADADA;
 }
 
-.title {
+.postTitle {
   font-size: 1.875rem;
   font-weight: 700;
   margin-bottom: 1rem;
@@ -132,82 +149,26 @@
 }
 
 /* Responsividade */
-@media (max-width: 1024px) {
-  .thumbnailContainer {
-    flex: 0 0 300px;
-  }
-
-  .thumbnail {
-    height: 200px;
-  }
-
-  .content {
-    padding: 1.5rem;
-  }
-
-  .title {
-    font-size: 1.5rem;
-  }
-
-  .description {
-    font-size: 1rem;
-  }
-}
-
 @media (max-width: 768px) {
   .featuredPost {
-    flex-direction: column;
-    margin: 1.5rem 0;
+    margin: 2rem 0;
   }
 
-  .thumbnailContainer {
-    flex: none;
-  }
-
-  .thumbnail {
-    height: 180px;
-  }
-
-  .content {
-    padding: 1.25rem;
-  }
-
-  .title {
-    font-size: 1.375rem;
-  }
-
-  .description {
-    font-size: 0.875rem;
+  .header {
     margin-bottom: 1rem;
-  }
-
-  .metadata {
-    gap: 1rem;
-  }
-
-  .stat {
-    font-size: 0.75rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .thumbnail {
-    height: 150px;
-  }
-
-  .content {
-    padding: 1rem;
   }
 
   .title {
     font-size: 1.25rem;
   }
+}
 
-  .description {
-    font-size: 0.8125rem;
+@media (max-width: 480px) {
+  .featuredPost {
+    margin: 1.5rem 0;
   }
 
-  .metadata {
-    gap: 0.75rem;
+  .title {
+    font-size: 1.125rem;
   }
 }

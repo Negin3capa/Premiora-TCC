@@ -175,11 +175,11 @@
   .suggestion-card {
     flex: 0 0 240px;
   }
-  
+
   .suggestions-scroll {
     gap: var(--space-2);
   }
-  
+
   .user-suggestions {
     padding: var(--space-3);
   }
@@ -190,12 +190,12 @@
     flex: 0 0 200px;
     padding: var(--space-2);
   }
-  
+
   .suggestion-header {
     gap: var(--space-2);
     margin-bottom: var(--space-2);
   }
-  
+
   .suggestion-avatar {
     width: 32px;
     height: 32px;

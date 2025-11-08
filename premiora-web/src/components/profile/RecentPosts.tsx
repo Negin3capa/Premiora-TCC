@@ -65,7 +65,7 @@ export const RecentPosts: React.FC<RecentPostsProps> = ({ posts }) => {
   return (
     <div className={styles.recentPosts}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Recent Posts</h2>
+        <h2 className={styles.title}>Posts Recentes</h2>
         <div className={styles.navigation}>
           <button
             className={`${styles.navButton} ${!canScrollLeftState ? styles.disabled : ''}`}

@@ -7,28 +7,27 @@
 
 .feed-sidebar {
   position: fixed;
-  right: 200px;
+  right: 20px;
   top: 100px;
-  height: calc(100vh - 120px);
-  width: 280px;
+  width: 300px;
   background-color: #0D0D0D;
   border-left: 1px solid #1A1A1A;
   border-radius: 12px;
   z-index: 90;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 /* ==================== Barra de Busca ==================== */
 
 .search-section {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
   background-color: #0D0D0D;
+  margin-bottom: 12px;
 }
 
 .search-container {
@@ -44,10 +43,6 @@
   border-radius: 8px;
   padding: 8px 12px;
   transition: all 0.2s ease;
-}
-
-.search-input-wrapper:focus-within {
-  /* No red styling on focus */
 }
 
 .search-icon {
@@ -101,7 +96,7 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  max-height: 400px;
+  max-height: 300px;
   overflow: hidden;
   border-radius: 8px;
   margin-top: 4px;
@@ -112,7 +107,7 @@
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
@@ -305,12 +300,14 @@
 @media (max-width: 1200px) {
   .feed-sidebar {
     width: 280px;
+    right: 20px;
   }
 }
 
 @media (max-width: 1024px) {
   .feed-sidebar {
     width: 260px;
+    right: 20px;
   }
 
   .feed-sidebar-content {
@@ -329,10 +326,12 @@
     transition: transform 0.3s ease;
     z-index: 1000;
     width: 300px;
+    display: none; /* Hidden by default on mobile */
   }
 
   .feed-sidebar.mobile-open {
     transform: translateX(0);
+    display: block; /* Show when open */
   }
 
   .feed-sidebar-content {

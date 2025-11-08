@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useFeed } from '../hooks/useFeed';
 import { useLocalSearch } from '../hooks/useSearch';
 import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
@@ -32,16 +32,65 @@ const ComponentLoader: React.FC = () => (
  * @component
  */
 const Dashboard: React.FC = () => {
-  const { feedItems, loading, hasMore, loadMoreContent } = useFeed();
+  const { feedItems, loading, hasMore, loadMoreContent, refreshFeed } = useFeed();
   const { filteredItems } = useLocalSearch(feedItems);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFeedSidebarOpen, setIsFeedSidebarOpen] = useState(false);
+
+  // Controlar se já fizemos o refresh inicial
+  const hasInitialRefreshedRef = useRef(false);
+
+  // Memoizar handlers para evitar re-criação
+  const handleVisibilityChange = useCallback(() => {
+    if (!document.hidden && hasInitialRefreshedRef.current) {
+      // Quando a página fica visível novamente, fazer refresh do feed (apenas se já foi inicializado)
+      refreshFeed();
+    }
+  }, [refreshFeed]);
+
+  const handleNavigation = useCallback(() => {
+    if (hasInitialRefreshedRef.current) {
+      // Delay maior para garantir que a navegação foi completada
+      setTimeout(() => {
+        refreshFeed();
+      }, 300);
+    }
+  }, [refreshFeed]);
+
+  // Setup dos event listeners apenas uma vez
+  useEffect(() => {
+    // Adicionar listeners
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('popstate', handleNavigation);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('popstate', handleNavigation);
+    };
+  }, [handleVisibilityChange, handleNavigation]);
+
+  // Refresh inicial apenas uma vez
+  useEffect(() => {
+    if (!hasInitialRefreshedRef.current) {
+      hasInitialRefreshedRef.current = true;
+      // Pequeno delay para garantir que o componente está totalmente montado
+      const timer = setTimeout(() => {
+        refreshFeed();
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, []); // Dependência vazia - executa apenas uma vez
 
   return (
     <div className="homepage">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Suspense fallback={<ComponentLoader />}>
-          <Header />
+          <Header
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
         </Suspense>
         <Suspense fallback={<ComponentLoader />}>
           <Feed
@@ -52,7 +101,10 @@ const Dashboard: React.FC = () => {
           />
         </Suspense>
       </div>
-      <FeedSidebar />
+      <FeedSidebar
+        isOpen={isFeedSidebarOpen}
+        onClose={() => setIsFeedSidebarOpen(false)}
+      />
       <MobileBottomBar />
     </div>
   );

@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-A Premiora é uma plataforma SaaS que combina as melhores características do Patreon, Discord, Reddit e YouTube em um ecossistema unificado. Esta documentação detalha a arquitetura técnica da aplicação frontend, focando em escalabilidade, manutenibilidade e experiência do usuário.
+A Premiora é uma plataforma SaaS que combina as melhores características do Patreon, Twitter, Reddit e YouTube em um ecossistema unificado. Esta documentação detalha a arquitetura técnica da aplicação frontend, focando em escalabilidade, manutenibilidade e experiência do usuário.
 
 ## Arquitetura de Alto Nível
 
