@@ -8,7 +8,7 @@ import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal 
 import { useAuth } from '../hooks/useAuth';
 import { PostService } from '../services/content/PostService';
 import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
-import type { ContentItem } from '../types/content';
+import type { ContentItem, ContentType } from '../types/content';
 import '../styles/PostViewPage.css';
 
 // Lazy loading dos componentes para otimização
@@ -68,23 +68,44 @@ const usePost = (postId: string, username: string) => {
 
         const postData = await PostService.getPostById(postId, user?.id);
 
-        // Validar se o username corresponde ao autor do post
-        const actualUsername = postData.creator?.users?.username;
-        const displayNameSlug = postData.creator?.display_name?.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').substring(0, 20);
-
-        if (actualUsername !== username && displayNameSlug !== username) {
+        // Validar se o username corresponde ao autor do post (usando foreign key direta)
+        if (postData.username !== username) {
           throw new Error('Post não encontrado ou username incorreto');
+        }
+
+        // Determinar tipo de conteúdo baseado no content_type
+        const contentType: ContentType = postData.content_type === 'video' ? 'video' : 'post';
+
+        // Extrair URLs de mídia baseado no tipo
+        let mediaUrls: any = {};
+        if (postData.media_urls && postData.media_urls.length > 0) {
+          if (contentType === 'video') {
+            // Para vídeos, extrair video e thumbnail separadamente
+            const mediaData = postData.media_urls[0];
+            mediaUrls = {
+              videoUrl: mediaData.video?.url,
+              thumbnail: mediaData.thumbnail?.url || mediaData.video?.url,
+              duration: mediaData.video?.metadata?.duration,
+              resolution: mediaData.video?.metadata ? `${mediaData.video.metadata.width}x${mediaData.video.metadata.height}` : undefined,
+              fileSize: mediaData.video?.metadata?.fileSize
+            };
+          } else {
+            // Para posts, usar primeira URL como thumbnail
+            mediaUrls = {
+              thumbnail: postData.media_urls[0]
+            };
+          }
         }
 
         // Converter dados do banco para formato ContentItem
         const contentItem: ContentItem = {
           id: postData.id,
-          type: 'post',
+          type: contentType,
           title: postData.title,
           author: postData.creator?.display_name || 'Usuário',
           authorAvatar: postData.creator?.profile_image_url || '',
           content: postData.content,
-          thumbnail: postData.media_urls?.[0],
+          ...mediaUrls,
           views: postData.views || 0,
           likes: postData.post_likes?.length || 0,
           timestamp: new Date(postData.created_at).toLocaleDateString('pt-BR'),
@@ -112,6 +133,29 @@ const usePost = (postId: string, username: string) => {
   }, [postId, username, user?.id]);
 
   return { post, loading, error };
+};
+
+/**
+ * Componente VideoPlayer
+ * Player de vídeo customizado com controles
+ */
+interface VideoPlayerProps {
+  src: string;
+  poster?: string;
+}
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
+  return (
+    <div className="post-video-container">
+      <video
+        className="post-video"
+        src={src}
+        poster={poster}
+        controls={true}
+        preload="metadata"
+      />
+    </div>
+  );
 };
 
 /**
@@ -318,26 +362,51 @@ const PostViewPage: React.FC = () => {
 
                 {/* Título e conteúdo */}
                 <div className="post-body">
-                  <h1 className="post-title">{post.title}</h1>
-
-                  {post.content && (
-                    <div className="post-text">
-                      {post.content.split('\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Imagem do post */}
-                  {post.thumbnail && (
-                    <div className="post-image-container">
-                      <img
-                        src={post.thumbnail}
-                        alt={post.title}
-                        className="post-image"
-                        loading="lazy"
+                  {/* Para vídeos: mostrar player primeiro, depois título e descrição */}
+                  {post.type === 'video' && post.videoUrl ? (
+                    <>
+                      <VideoPlayer
+                        src={post.videoUrl}
+                        poster={post.thumbnail}
                       />
-                    </div>
+
+                      <div className="video-info-section">
+                        <h1 className="post-title">{post.title}</h1>
+
+                        {post.content && (
+                          <div className="post-text">
+                            {post.content.split('\n').map((paragraph, index) => (
+                              <p key={index}>{paragraph}</p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    /* Para posts não-vídeos: manter estrutura original */
+                    <>
+                      <h1 className="post-title">{post.title}</h1>
+
+                      {post.content && (
+                        <div className="post-text">
+                          {post.content.split('\n').map((paragraph, index) => (
+                            <p key={index}>{paragraph}</p>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Mídia do post - imagem */}
+                      {post.thumbnail ? (
+                        <div className="post-image-container">
+                          <img
+                            src={post.thumbnail}
+                            alt={post.title}
+                            className="post-image"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : null}
+                    </>
                   )}
                 </div>
 

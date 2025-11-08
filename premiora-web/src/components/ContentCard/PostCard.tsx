@@ -19,11 +19,11 @@ const PostCard: React.FC<PostCardProps> = ({ item, onClick }) => {
   return (
     <div className="post-content" onClick={onClick} style={{ cursor: 'pointer' }}>
       <h3 className="content-title">{item.title}</h3>
-      <p className="post-body">
+      <div className="post-body">
         {item.isLocked && item.previewContent
           ? item.previewContent
           : item.content?.substring(0, 150) + (item.content && item.content.length > 150 ? '...' : '')}
-      </p>
+      </div>
       {item.thumbnail && (
         <img
           src={item.thumbnail}

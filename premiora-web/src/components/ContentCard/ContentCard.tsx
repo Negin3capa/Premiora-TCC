@@ -44,11 +44,8 @@ const usePostPrefetch = () => {
       try {
         const postData = await PostService.getPostById(postId, user?.id);
 
-        // Validar se o username corresponde
-        const actualUsername = postData.creator?.users?.username;
-        const displayNameSlug = postData.creator?.display_name?.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').substring(0, 20);
-
-        if (actualUsername !== username && displayNameSlug !== username) {
+        // Validar se o username corresponde (usando foreign key direta)
+        if (postData.username !== username) {
           return; // Username não corresponde, não cacheia
         }
 
@@ -145,20 +142,19 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Handler para visualizar post detalhado - navega para página dedicada
    */
   const handleViewPost = () => {
-    if (item.type === 'post' && item.id) {
-      // Usar username real se disponível, senão usar display_name sanitizado como fallback
-      const username = item.authorUsername || item.author.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').substring(0, 20);
-
-      navigate(`/u/${username}/status/${item.id}`);
+    if (item.type === 'post' && item.id && item.authorUsername) {
+      // Usar apenas o username da tabela users
+      navigate(`/u/${item.authorUsername}/status/${item.id}`);
     }
   };
 
   /**
-   * Handler para reproduzir vídeo
+   * Handler para reproduzir vídeo - redireciona para página de visualização
    */
   const handlePlay = () => {
-    if (item.type === 'video') {
-      setIsVideoModalOpen(true);
+    if (item.type === 'video' && item.id && item.authorUsername) {
+      // Redirecionar para página de visualização do vídeo
+      navigate(`/u/${item.authorUsername}/status/${item.id}`);
     }
   };
 
@@ -197,10 +193,9 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Handler para mouse enter - inicia prefetching
    */
   const handleMouseEnter = () => {
-    if (item.type === 'post' && item.id) {
-      // Usar username real se disponível, senão usar display_name sanitizado como fallback
-      const username = item.authorUsername || item.author.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').substring(0, 20);
-      prefetchPost(item.id, username);
+    if (item.type === 'post' && item.id && item.authorUsername) {
+      // Usar apenas o username da tabela users
+      prefetchPost(item.id, item.authorUsername);
     }
   };
 
@@ -208,10 +203,9 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Handler para mouse leave - cancela prefetching
    */
   const handleMouseLeave = () => {
-    if (item.type === 'post' && item.id) {
-      // Usar username real se disponível, senão usar display_name sanitizado como fallback
-      const username = item.authorUsername || item.author.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '').substring(0, 20);
-      cancelPrefetch(item.id, username);
+    if (item.type === 'post' && item.id && item.authorUsername) {
+      // Usar apenas o username da tabela users
+      cancelPrefetch(item.id, item.authorUsername);
     }
   };
 

@@ -77,7 +77,18 @@ export class VideoService {
       // 3. Extrair metadados do vídeo
       const metadata = await this.extractVideoMetadata(videoData.video!);
 
-      // 4. Preparar dados para inserção no banco
+      // 4. Buscar dados do usuário (necessário para o username)
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('name, username, avatar_url')
+        .eq('id', creatorId)
+        .single();
+
+      if (userError) {
+        throw new Error(`Erro ao buscar dados do usuário: ${userError.message}`);
+      }
+
+      // 6. Preparar dados para inserção no banco
       const videoRecord = {
         title: videoData.title,
         content: videoData.description,
@@ -97,11 +108,12 @@ export class VideoService {
         }],
         community_id: videoData.communityId || null,
         creator_id: creatorId,
+        username: userData.username, // Foreign key direta para users.username
         is_published: true,
         published_at: new Date().toISOString()
       };
 
-      // 5. Inserir no banco de dados
+      // 7. Inserir no banco de dados
       const { data, error } = await supabase
         .from('posts')
         .insert(videoRecord)
@@ -112,7 +124,7 @@ export class VideoService {
         throw new Error(`Erro ao salvar vídeo no banco: ${error.message}`);
       }
 
-      // 6. Retornar resultado
+      // 8. Retornar resultado
       return {
         id: data.id,
         title: data.title,
@@ -276,6 +288,7 @@ export class VideoService {
           views_count,
           published_at,
           created_at,
+          username,
           communities (
             id,
             name,
@@ -305,8 +318,60 @@ export class VideoService {
         throw new Error(`Erro ao buscar vídeos: ${error.message}`);
       }
 
+      // Se não há vídeos reais, retornar dados mock para teste
+      const realVideos = (data || []).map(video => this.transformVideoForFeed(video));
+
+      if (realVideos.length === 0) {
+        // Dados mock para teste
+        const mockVideos = [
+          {
+            id: 'mock-video-1',
+            type: 'video' as const,
+            title: 'Vídeo de Teste - Tutorial React',
+            content: 'Este é um vídeo tutorial sobre React para testar a funcionalidade de redirecionamento.',
+            author: 'Usuário Teste',
+            authorUsername: 'testuser',
+            authorAvatar: '',
+            thumbnail: 'https://via.placeholder.com/640x360/4f46e5/ffffff?text=React+Tutorial',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            views: 1250,
+            likes: 45,
+            timestamp: new Date().toISOString(),
+            duration: 596, // 9:56
+            resolution: '1280x720',
+            fileSize: 5242880, // 5MB
+            communityId: null,
+            communityName: null,
+            communityAvatar: null,
+            creatorId: 'test-user-id'
+          },
+          {
+            id: 'mock-video-2',
+            type: 'video' as const,
+            title: 'Vídeo de Teste - TypeScript Tips',
+            content: 'Dicas avançadas de TypeScript para desenvolvedores.',
+            author: 'Usuário Teste',
+            authorUsername: 'testuser',
+            authorAvatar: '',
+            thumbnail: 'https://via.placeholder.com/640x360/059669/ffffff?text=TypeScript+Tips',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            views: 890,
+            likes: 32,
+            timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 dia atrás
+            duration: 654, // 10:54
+            resolution: '1280x720',
+            fileSize: 7340032, // 7MB
+            communityId: null,
+            communityName: null,
+            communityAvatar: null,
+            creatorId: 'test-user-id'
+          }
+        ];
+        return mockVideos;
+      }
+
       // Transformar dados para o formato do feed
-      return (data || []).map(video => this.transformVideoForFeed(video));
+      return realVideos;
 
     } catch (error) {
       console.error('Erro ao buscar vídeos do feed:', error);
@@ -330,6 +395,7 @@ export class VideoService {
       title: videoData.title,
       content: videoData.content,
       author: videoData.creators?.display_name || 'Usuário',
+      authorUsername: videoData.username, // Username do criador
       authorAvatar: videoData.creators?.profile_image_url || '',
       thumbnail: thumbnailInfo.url || videoInfo.url, // Fallback para thumbnail
       videoUrl: videoInfo.url,

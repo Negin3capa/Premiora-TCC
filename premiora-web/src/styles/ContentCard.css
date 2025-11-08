@@ -207,6 +207,17 @@
   font-weight: var(--font-weight-semibold);
 }
 
+.video-description {
+  color: var(--color-text-primary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-base);
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
 /* Post Card */
 .post-image {
   width: 100%;
@@ -221,6 +232,10 @@
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--space-3);
   font-size: var(--font-size-base);
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .locked-indicator {
@@ -337,6 +352,11 @@
   /* Video Card Mobile */
   .video-thumbnail img {
     height: 280px;
+  }
+
+  .video-description {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
   }
 
   /* Post Card Mobile */

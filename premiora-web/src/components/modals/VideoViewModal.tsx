@@ -7,12 +7,6 @@ import { useAuth } from '../../hooks/useAuth';
 import type { ContentItem } from '../../types/content';
 import {
   X,
-  Pause,
-  Play,
-  VolumeX,
-  Volume2,
-  Minimize,
-  Maximize,
   Lock,
   Heart,
   MessageCircle,
@@ -53,13 +47,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
   const { userProfile } = useAuth();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Estados do player
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+
 
   // Estados da interface
   const [showComments, setShowComments] = useState(false);
@@ -113,72 +101,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
     return userTierLevel >= requiredTierLevel;
   };
 
-  /**
-   * Handlers do player de vídeo
-   */
-  const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
-
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      setDuration(videoRef.current.duration);
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    if (videoRef.current) {
-      videoRef.current.volume = newVolume;
-      setVolume(newVolume);
-      setIsMuted(newVolume === 0);
-    }
-  };
-
-  const handleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleFullscreen = () => {
-    if (videoRef.current) {
-      if (!isFullscreen) {
-        videoRef.current.requestFullscreen?.();
-      } else {
-        document.exitFullscreen?.();
-      }
-      setIsFullscreen(!isFullscreen);
-    }
-  };
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
 
   /**
    * Handlers de engajamento
@@ -243,11 +166,7 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
                   ref={videoRef}
                   className="video-player"
                   poster={item.thumbnail}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                  controls={false} // Desabilitar controles nativos pois temos controles customizados
+                  controls={true} // Usar controles padrão do navegador
                 >
                   {item.videoUrl ? (
                     <source src={item.videoUrl} type="video/mp4" />
@@ -256,49 +175,6 @@ const VideoViewModal: React.FC<VideoViewModalProps> = ({
                   )}
                   Seu navegador não suporta o elemento de vídeo.
                 </video>
-
-                {/* Controles do player */}
-                <div className="video-controls">
-                  <div className="progress-bar">
-                    <input
-                      type="range"
-                      min="0"
-                      max={duration}
-                      value={currentTime}
-                      onChange={handleSeek}
-                      className="progress-input"
-                    />
-                  </div>
-
-                  <div className="control-buttons">
-                    <button onClick={handlePlayPause} className="play-pause-btn">
-                      {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-                    </button>
-
-                    <div className="volume-control">
-                      <button onClick={handleMute} className="mute-btn">
-                        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                      </button>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.1"
-                        value={isMuted ? 0 : volume}
-                        onChange={handleVolumeChange}
-                        className="volume-input"
-                      />
-                    </div>
-
-                    <div className="time-display">
-                      {formatTime(currentTime)} / {formatTime(duration)}
-                    </div>
-
-                    <button onClick={handleFullscreen} className="fullscreen-btn">
-                      {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
-                    </button>
-                  </div>
-                </div>
               </div>
             ) : (
               <div className="video-preview-container">

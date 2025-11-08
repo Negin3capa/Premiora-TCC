@@ -37,7 +37,7 @@ export class ContentTransformer {
       type: 'post',
       title: postData.title || '',
       author: postData.creator?.display_name || 'Usuário',
-      authorUsername: postData.creator?.users?.username, // Username real da tabela users
+      authorUsername: postData.username, // Foreign key direta para users.username
       authorAvatar: postData.creator?.profile_image_url || '',
       thumbnail: postData.media_urls?.[0] || undefined,
       content: postData.content,
@@ -65,6 +65,7 @@ export class ContentTransformer {
       type: 'video' as const,
       title: videoData.title || '',
       author: videoData.author || videoData.creators?.display_name || 'Usuário',
+      authorUsername: videoData.authorUsername || videoData.username, // Username do criador
       authorAvatar: videoData.authorAvatar || videoData.creators?.profile_image_url || '',
       thumbnail: videoData.thumbnail,
       videoUrl: videoData.videoUrl, // Já definido pelo VideoService
