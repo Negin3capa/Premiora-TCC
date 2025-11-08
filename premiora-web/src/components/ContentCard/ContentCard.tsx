@@ -142,9 +142,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Handler para visualizar post detalhado - navega para página dedicada
    */
   const handleViewPost = () => {
-    if (item.type === 'post' && item.id && item.authorUsername) {
-      // Usar apenas o username da tabela users
-      navigate(`/u/${item.authorUsername}/status/${item.id}`);
+    if (item.type === 'post' && item.id) {
+      // Usar authorUsername se disponível, senão tentar usar author como fallback
+      const username = item.authorUsername || item.author?.toLowerCase().replace(/\s+/g, '') || 'usuario';
+      navigate(`/u/${username}/status/${item.id}`);
     }
   };
 

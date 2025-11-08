@@ -27,6 +27,8 @@ interface FeedSidebarProps {
   isOpen?: boolean;
   /** Callback para fechar a sidebar */
   onClose?: () => void;
+  /** Indica se deve ser ocultada por padrão em mobile */
+  hideOnMobile?: boolean;
 }
 
 /**

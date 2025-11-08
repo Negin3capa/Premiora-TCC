@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { PostService } from '../services/content/PostService';
 import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
@@ -172,6 +172,8 @@ const PostViewPage: React.FC = () => {
   const [likesCount, setLikesCount] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFeedSidebarOpen, setIsFeedSidebarOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Atualizar estado local quando o post for carregado
   useEffect(() => {
@@ -306,14 +308,16 @@ const PostViewPage: React.FC = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Suspense fallback={<ComponentLoader />}>
-          <Header />
+          <Header
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          />
         </Suspense>
         <div className="post-view-page">
           <div className="post-view-container">
             {/* Header com navegação */}
             <header className="post-view-header">
               <div className="breadcrumb">
-                <ArrowLeft size={16} className="breadcrumb-arrow" />
+                <ArrowLeft size={16} className="breadcrumb-arrow" onClick={handleBack} />
                 <Link to="/dashboard" className="breadcrumb-link" onClick={handleBack}>Início</Link>
                 <span className="breadcrumb-separator">›</span>
                 {post.communityId && (
@@ -361,7 +365,7 @@ const PostViewPage: React.FC = () => {
                 </header>
 
                 {/* Título e conteúdo */}
-                <div className="post-body">
+                <div className="post-view-body">
                   {/* Para vídeos: mostrar player primeiro, depois título e descrição */}
                   {post.type === 'video' && post.videoUrl ? (
                     <>
@@ -401,8 +405,10 @@ const PostViewPage: React.FC = () => {
                           <img
                             src={post.thumbnail}
                             alt={post.title}
-                            className="post-image"
+                            className="post-image clickable-image"
                             loading="lazy"
+                            onClick={() => setIsImageModalOpen(true)}
+                            style={{ cursor: 'pointer' }}
                           />
                         </div>
                       ) : null}
@@ -486,8 +492,34 @@ const PostViewPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <FeedSidebar />
+      <FeedSidebar
+        isOpen={isFeedSidebarOpen}
+        onClose={() => setIsFeedSidebarOpen(false)}
+      />
       <MobileBottomBar />
+
+      {/* Modal de imagem ampliada */}
+      {isImageModalOpen && post.thumbnail && (
+        <div
+          className="image-modal-overlay"
+          onClick={() => setIsImageModalOpen(false)}
+        >
+          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="image-modal-close"
+              onClick={() => setIsImageModalOpen(false)}
+              aria-label="Fechar imagem ampliada"
+            >
+              <X size={16} />
+            </button>
+            <img
+              src={post.thumbnail}
+              alt={post.title}
+              className="image-modal-image"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

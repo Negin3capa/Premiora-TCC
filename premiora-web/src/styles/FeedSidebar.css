@@ -7,9 +7,9 @@
 
 .feed-sidebar {
   position: fixed;
-  right: 200px;
+  right: 20px;
   top: 100px;
-  width: 280px;
+  width: 300px;
   background-color: #0D0D0D;
   border-left: 1px solid #1A1A1A;
   border-radius: 12px;
@@ -17,6 +17,8 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 /* ==================== Barra de Busca ==================== */
@@ -298,12 +300,14 @@
 @media (max-width: 1200px) {
   .feed-sidebar {
     width: 280px;
+    right: 20px;
   }
 }
 
 @media (max-width: 1024px) {
   .feed-sidebar {
     width: 260px;
+    right: 20px;
   }
 
   .feed-sidebar-content {
@@ -322,10 +326,12 @@
     transition: transform 0.3s ease;
     z-index: 1000;
     width: 300px;
+    display: none; /* Hidden by default on mobile */
   }
 
   .feed-sidebar.mobile-open {
     transform: translateX(0);
+    display: block; /* Show when open */
   }
 
   .feed-sidebar-content {

@@ -17,8 +17,14 @@ interface PostCardProps {
  */
 const PostCard: React.FC<PostCardProps> = ({ item, onClick }) => {
   return (
-    <div className="post-content" onClick={onClick} style={{ cursor: 'pointer' }}>
-      <h3 className="content-title">{item.title}</h3>
+    <div
+      className="post-content"
+      onClick={onClick}
+      style={{ cursor: 'pointer' }}
+    >
+      <h3 className="content-title">
+        {item.title}
+      </h3>
       <div className="post-body">
         {item.isLocked && item.previewContent
           ? item.previewContent
