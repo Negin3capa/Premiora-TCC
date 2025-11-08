@@ -207,13 +207,13 @@ const CreateCommunityPage: React.FC = () => {
                           top: 0,
                           left: 0,
                           width: '100%',
-                          padding: '0.25rem',
-                          background: 'rgba(255, 255, 255, 0.1)',
-                          border: '1px solid rgba(255, 255, 255, 0.2)',
-                          borderRadius: '4px',
+                          padding: '0',
+                          background: 'transparent',
+                          border: 'none',
                           color: 'var(--color-text-primary)',
                           fontSize: '0.9rem',
-                          outline: 'none'
+                          outline: 'none',
+                          textShadow: '0 0 8px rgba(0,0,0,0.8)'
                         }}
                         autoFocus
                         maxLength={500}

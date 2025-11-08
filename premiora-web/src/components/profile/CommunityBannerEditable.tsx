@@ -395,13 +395,13 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                     left: 0,
                     fontSize: '2.5rem',
                     fontWeight: 'bold',
-                    background: 'rgba(0, 0, 0, 0.8)',
+                    background: 'transparent',
                     color: 'white',
-                    border: '2px solid #FF424D',
-                    borderRadius: '4px',
-                    padding: '0.25rem',
+                    border: 'none',
+                    padding: '0',
                     minWidth: '200px',
-                    outline: 'none'
+                    outline: 'none',
+                    textShadow: '0 0 8px rgba(0,0,0,0.8)'
                   }}
                   autoFocus
                 />
@@ -462,13 +462,13 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                       left: 0,
                       fontSize: '1.2rem',
                       fontWeight: 500,
-                      background: 'rgba(0, 0, 0, 0.8)',
+                      background: 'transparent',
                       color: 'white',
-                      border: '2px solid #FF424D',
-                      borderRadius: '4px',
-                      padding: '0.125rem 0.25rem',
+                      border: 'none',
+                      padding: '0',
                       minWidth: '120px',
-                      outline: 'none'
+                      outline: 'none',
+                      textShadow: '0 0 8px rgba(0,0,0,0.8)'
                     }}
                     autoFocus
                   />
