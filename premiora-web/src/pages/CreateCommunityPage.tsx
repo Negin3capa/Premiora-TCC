@@ -88,7 +88,7 @@ const CreateCommunityPage: React.FC = () => {
           marginLeft: '80px', /* Account for sidebar width */
           marginTop: '0', /* Banner now handles the top spacing */
           padding: '2rem 1rem',
-          overflow: 'hidden',
+          overflow: 'visible', /* Changed from hidden to visible to allow button to show */
         }}>
           {/* Content container */}
           <div style={{
