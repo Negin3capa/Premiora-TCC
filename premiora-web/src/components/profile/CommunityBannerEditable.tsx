@@ -266,23 +266,21 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
           title="Alterar banner"
           style={{
             position: 'absolute',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '80px',
-            height: '80px',
-            background: '#ff0000',
+            top: '20px',
+            right: '20px',
+            width: '60px',
+            height: '60px',
+            background: 'rgba(0, 0, 0, 0.7)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            opacity: 1,
+            opacity: 0.8,
             transition: '0.2s',
             cursor: 'pointer',
-            zIndex: 100,
+            zIndex: 10,
             pointerEvents: 'auto',
-            border: '4px solid #ffffff',
-            boxShadow: '0 0 20px rgba(255, 0, 0, 0.8)'
+            border: '2px solid rgba(255, 255, 255, 0.3)'
           }}
           onClick={handleBannerClick}
         >
