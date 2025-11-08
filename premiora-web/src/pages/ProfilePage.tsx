@@ -42,6 +42,7 @@ const ProfilePage: React.FC = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Se não há username na rota, redirecionar para o perfil do usuário atual
   useEffect(() => {
@@ -220,7 +221,9 @@ const ProfilePage: React.FC = () => {
         <Sidebar />
 
         {/* Global Header */}
-        <Header />
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
 
         {/* Profile Banner Skeleton */}
         <div style={{
@@ -317,7 +320,9 @@ const ProfilePage: React.FC = () => {
       <Sidebar />
 
       {/* Global Header */}
-      <Header />
+      <Header
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
 
       {/* Profile Banner - Full screen width */}
       <div style={{

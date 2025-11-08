@@ -30,6 +30,7 @@ const ProfileEditPage: React.FC = () => {
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Hook para gerenciar edição do perfil
   const {
@@ -302,7 +303,9 @@ const ProfileEditPage: React.FC = () => {
       <Sidebar />
 
       {/* Global Header */}
-      <Header />
+      <Header
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
 
       {/* Profile Banner Editable - Full screen width */}
       <div style={{

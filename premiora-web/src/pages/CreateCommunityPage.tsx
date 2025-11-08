@@ -36,6 +36,7 @@ const CreateCommunityPage: React.FC = () => {
   // State for description editing
   const [editingDescription, setEditingDescription] = React.useState(false);
   const [tempDescription, setTempDescription] = React.useState('');
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
 
 
@@ -43,7 +44,9 @@ const CreateCommunityPage: React.FC = () => {
     <div className="community-page">
       <Sidebar />
       <div className="main-content">
-        <Header />
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
 
         {/* Community Banner Editable - Full screen width */}
         <div style={{

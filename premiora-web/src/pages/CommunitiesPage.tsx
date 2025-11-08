@@ -325,7 +325,9 @@ const CommunitiesPage: React.FC = () => {
     <div className="communities-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header />
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
 
         <div className="communities-container">
           {/* Header Section */}

@@ -5,7 +5,7 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import '../../styles/Sidebar.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Flame, Bell, MessageCircle, Users, Building2, Settings, PenTool, User } from 'lucide-react';
+import { Home, Compass, Bell, MessageCircle, Users, Building2, Settings, PenTool, User } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { useAuth } from '../../hooks/useAuth';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
@@ -308,7 +308,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
 
   const navigationItems = [
     { icon: <Home size={20} />, label: 'Home', route: '/dashboard', active: location.pathname === '/dashboard' },
-    { icon: <Flame size={20} />, label: 'Trending', route: '/dashboard', active: false }, // TODO: Add trending page
+    { icon: <Compass size={20} />, label: 'Explore', route: '/explore', active: location.pathname === '/explore' },
     { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: location.pathname === '/notifications' },
     { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: location.pathname === '/messages' },
     { icon: <Users size={20} />, label: 'Following', route: '/dashboard', active: false }, // TODO: Add following page

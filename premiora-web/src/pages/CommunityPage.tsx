@@ -161,7 +161,9 @@ const CommunityPage: React.FC = () => {
     <div className="community-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header />
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
 
         {/* Community Header Banner */}
         <div

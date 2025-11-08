@@ -186,6 +186,12 @@
 @media (max-width: 1024px) {
   .sidebar {
     width: 200px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
   }
 
   .sidebar-nav-button {
@@ -203,12 +209,19 @@
   }
 
   .sidebar-create-button {
-    width: 44px;
+    width: 100%;
+    max-width: 160px;
     height: 44px;
+    padding: 0 12px;
+    gap: 6px;
+  }
+
+  .sidebar-create-label {
+    font-size: 13px;
   }
 }
 
-/* ==================== Overlay Mobile ==================== */
+/* ==================== Overlay ==================== */
 
 .sidebar-overlay {
   position: fixed;
@@ -226,40 +239,36 @@
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     z-index: 2000; /* Higher z-index to overlay everything */
-    width: 50vw; /* At least half screen width */
-    min-width: 280px; /* Minimum width for usability */
-    max-width: 320px; /* Maximum width */
-    padding: 40px 20px 20px 20px;
+    width: 220px; /* Same width as desktop */
+    padding: 22px 16px 20px 16px; /* Same padding as desktop */
   }
 
   .sidebar.mobile-open {
     transform: translateX(0);
   }
 
-  /* Always hide logo on mobile */
-  .sidebar-logo {
-    display: none;
-  }
-
-  /* Show labels when sidebar is open on mobile */
-  .sidebar.mobile-open .sidebar-nav-label {
+  /* Show logo on mobile when open */
+  .sidebar.mobile-open .sidebar-logo {
     display: block;
-    opacity: 1;
-    visibility: visible;
   }
 
-  .sidebar:not(.mobile-open) .sidebar-nav-label {
+  .sidebar:not(.mobile-open) .sidebar-logo {
     display: none;
-    opacity: 0;
-    visibility: hidden;
+  }
+
+  /* Always show labels on mobile (same as desktop) */
+  .sidebar-nav-label {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 
   .sidebar-nav-button {
     width: 100%;
     height: 48px;
-    padding: 0 16px;
+    padding: 0 12px;
     justify-content: flex-start;
-    gap: 16px;
+    gap: 12px;
   }
 
   .sidebar-nav-list {
@@ -268,9 +277,10 @@
 
   .sidebar-create-button {
     width: 100%;
+    max-width: 180px;
     height: 48px;
     padding: 0 16px;
-    gap: 16px;
+    gap: 8px;
   }
 
   .sidebar-create-label {
@@ -280,21 +290,26 @@
 
 @media (max-width: 480px) {
   .sidebar {
-    width: 72px;
-    padding: 40px 8px 20px 8px;
+    width: 220px; /* Keep same width as desktop for consistency */
+    padding: 22px 16px 20px 16px; /* Same padding as desktop */
   }
 
   .sidebar-nav-button {
-    width: 56px;
-    height: 44px;
-  }
-
-  .sidebar-nav-list {
+    width: 100%;
+    height: 48px;
+    padding: 0 12px;
     gap: 12px;
   }
 
+  .sidebar-nav-list {
+    gap: 16px;
+  }
+
   .sidebar-create-button {
-    width: 44px;
-    height: 44px;
+    width: 100%;
+    max-width: 180px;
+    height: 48px;
+    padding: 0 16px;
+    gap: 8px;
   }
 }
