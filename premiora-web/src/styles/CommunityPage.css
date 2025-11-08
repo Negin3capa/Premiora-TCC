@@ -54,6 +54,7 @@
   padding: var(--space-6) var(--space-6) var(--space-4);
   color: var(--color-text-white);
   position: relative;
+  height: 300px;
 }
 
 .community-header-banner::before {
