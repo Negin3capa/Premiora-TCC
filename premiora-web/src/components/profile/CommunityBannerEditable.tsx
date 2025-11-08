@@ -352,7 +352,11 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
           {/* Informações da comunidade */}
           <div style={{ flex: 1, color: 'white' }}>
             {/* Nome de exibição com edição inline */}
-            <div style={{ position: 'relative', display: 'inline-block' }}>
+            <div style={{
+              position: 'relative',
+              display: 'inline-block',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+            }}>
               <h1
                 ref={displayNameRef}
                 onClick={() => {
@@ -365,7 +369,8 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                   margin: '0 0 0.5rem 0',
                   cursor: 'pointer',
                   opacity: community.displayName ? 1 : 0.6,
-                  minWidth: '200px'
+                  minWidth: '200px',
+                  textShadow: 'none' // Remove shadow from text, apply to wrapper
                 }}
                 title="Clique para editar o nome de exibição"
               >
@@ -400,7 +405,8 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                     border: 'none',
                     padding: '0',
                     minWidth: '200px',
-                    outline: 'none'
+                    outline: 'none',
+                    textShadow: 'none' // No shadow on input
                   }}
                   autoFocus
                 />
