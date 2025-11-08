@@ -2,8 +2,8 @@
  * Componente do banner da comunidade em modo de edição
  * Permite edição interativa de avatar, banner, nome e descrição da comunidade
  */
-import React, { useState, useRef, useEffect } from 'react';
-import { Camera, Edit3, X, Save } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Camera, X } from 'lucide-react';
 import { ImageCropModal } from './ImageCropModal';
 
 /**
@@ -24,8 +24,6 @@ interface CommunityBannerEditableProps {
   onUpdateName: (name: string) => void;
   /** Callback para atualizar nome de exibição */
   onUpdateDisplayName: (displayName: string) => void;
-  /** Callback para atualizar descrição */
-  onUpdateDescription: (description: string) => void;
   /** Callback para atualizar avatar */
   onUpdateAvatar: (file: File) => void;
   /** Callback para atualizar banner */
@@ -49,7 +47,6 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
   isUploading,
   onUpdateName,
   onUpdateDisplayName,
-  onUpdateDescription,
   onUpdateAvatar,
   onUpdateBanner,
   onSave,

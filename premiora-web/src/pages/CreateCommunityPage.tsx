@@ -60,7 +60,6 @@ const CreateCommunityPage: React.FC = () => {
             isUploading={isUploading}
             onUpdateName={updateName}
             onUpdateDisplayName={updateDisplayName}
-            onUpdateDescription={updateDescription}
             onUpdateAvatar={updateAvatar}
             onUpdateBanner={updateBanner}
             onSave={create}

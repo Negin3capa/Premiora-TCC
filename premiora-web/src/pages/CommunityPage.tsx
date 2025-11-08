@@ -34,7 +34,7 @@ const CommunityPage: React.FC = () => {
   const [feedItems, setFeedItems] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [community, setCommunity] = useState<Community | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -69,13 +69,13 @@ const CommunityPage: React.FC = () => {
 
       setLoading(true);
       try {
-      const result = await FeedService.getCommunityPosts(communityName, 1, 10);
+        const result = await FeedService.getCommunityPostsCursor(communityName, null, 10);
         const transformedItems = result.posts.map(post =>
           ContentTransformer.transformToContentItem(post)
         );
         setFeedItems(transformedItems);
         setHasMore(result.hasMore);
-        setPage(1);
+        setNextCursor(result.nextCursor || null);
       } catch (error) {
         console.error('Erro ao carregar posts da comunidade:', error);
         // Set empty feed if no posts are available
@@ -95,14 +95,13 @@ const CommunityPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const nextPage = page + 1;
-      const result = await FeedService.getCommunityPosts(communityName, nextPage, 10);
+      const result = await FeedService.getCommunityPostsCursor(communityName, nextCursor, 10);
       const transformedItems = result.posts.map(post =>
         ContentTransformer.transformToContentItem(post)
       );
       setFeedItems(prev => [...prev, ...transformedItems]);
       setHasMore(result.hasMore);
-      setPage(nextPage);
+      setNextCursor(result.nextCursor || null);
     } catch (error) {
       console.error('Erro ao carregar mais posts da comunidade:', error);
       // Stop loading more content if there's an error
@@ -110,7 +109,7 @@ const CommunityPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, communityName, page]);
+  }, [loading, hasMore, communityName, nextCursor]);
 
   // Filter content based on search
   const filteredItems = feedItems.filter(item =>

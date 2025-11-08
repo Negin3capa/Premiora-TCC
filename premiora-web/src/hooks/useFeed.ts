@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ContentService } from '../services/contentService';
+import { FeedService } from '../services/content/FeedService';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from './useAuth';
 import type { ContentItem } from '../types/content';
@@ -29,19 +30,27 @@ export const useFeed = () => {
   const [feedItems, setFeedItems] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const hasMoreRef = useRef(true); // Ref to track current hasMore state
+  const loadingRef = useRef(false); // Loading lock to prevent duplicate fetches
 
   /**
-   * Carrega conteúdo do feed do banco de dados
-   * @param pageNum - Número da página
+   * Carrega conteúdo do feed do banco de dados usando cursor
+   * @param cursor - Cursor para paginação (null para primeira página)
    * @param append - Se deve adicionar aos itens existentes
    * @param isRetry - Se é uma tentativa de retry
    */
-  const loadFeedContent = useCallback(async (pageNum: number, append: boolean = false, isRetry: boolean = false) => {
+  const loadFeedContent = useCallback(async (cursor: string | null = null, append: boolean = false, isRetry: boolean = false) => {
+    // Prevent duplicate fetches with loading lock
+    if (loadingRef.current) {
+      return;
+    }
+
+    loadingRef.current = true;
+
     try {
       // Limpar erro anterior se não for retry
       if (!isRetry) {
@@ -49,17 +58,18 @@ export const useFeed = () => {
       }
 
       // Verificar se há dados em cache para a primeira página
-      if (pageNum === 1 && !append) {
+      if (!cursor && !append) {
         const cachedFeed = window.ProfilePrefetchCache?.getInstance().getCachedFeed();
         if (cachedFeed && cachedFeed.length > 0) {
           setFeedItems(cachedFeed);
           setHasMore(true); // Assumir que há mais conteúdo se temos cache
+          setNextCursor(null); // Reset cursor for cache
           setError(null); // Limpar qualquer erro anterior
           return;
         }
       }
 
-      const { posts, hasMore: moreAvailable } = await ContentService.getFeedPosts(pageNum, 10, userId);
+      const { posts, nextCursor, hasMore: moreAvailable } = await FeedService.getFeedPostsCursor(cursor, 10, userId);
 
       // Converter posts/vídeos do banco para ContentItem
       const contentItems = posts.map(post => ContentService.transformToContentItem(post));
@@ -85,6 +95,7 @@ export const useFeed = () => {
       }
 
       setHasMore(moreAvailable);
+      setNextCursor(nextCursor || null);
       hasMoreRef.current = moreAvailable; // Update ref
       setError(null); // Limpar erro em caso de sucesso
       if (isRetry) {
@@ -107,33 +118,33 @@ export const useFeed = () => {
       }
 
       throw err; // Re-throw para que o chamador possa lidar com o erro
+    } finally {
+      loadingRef.current = false;
     }
   }, [userId]); // Removido feedItems.length da dependência para evitar recriação desnecessária
 
   /**
-   * Carrega mais conteúdo para scroll infinito
+   * Carrega mais conteúdo para scroll infinito usando cursor
    * Inclui proteção contra race conditions e tratamento de erros
    */
   const loadMoreContent = useCallback(async () => {
     // Proteção contra múltiplas chamadas simultâneas usando ref para hasMore
-    if (loading || !hasMoreRef.current) {
+    if (loadingRef.current || !hasMoreRef.current) {
       return;
     }
 
     setLoading(true);
-    const nextPage = page + 1;
 
     try {
-      await loadFeedContent(nextPage, true);
-      setPage(nextPage);
+      await loadFeedContent(nextCursor, true);
     } catch (error) {
       console.error('Erro ao carregar mais conteúdo:', error);
-      // Em caso de erro, não avançar a página para permitir retry
+      // Em caso de erro, não avançar o cursor para permitir retry
       // O estado de loading será resetado no finally
     } finally {
       setLoading(false);
     }
-  }, [loading, page, loadFeedContent]);
+  }, [nextCursor, loadFeedContent]);
 
   /**
    * Tenta recarregar o conteúdo em caso de erro
@@ -147,13 +158,13 @@ export const useFeed = () => {
     setLoading(true);
 
     try {
-      await loadFeedContent(page, false, true);
+      await loadFeedContent(null, false, true);
     } catch (error) {
       console.error('Erro no retry:', error);
     } finally {
       setLoading(false);
     }
-  }, [retryCount, page, loadFeedContent]);
+  }, [retryCount, loadFeedContent]);
 
   /**
    * Atualiza o feed quando um novo post é criado
@@ -175,7 +186,7 @@ export const useFeed = () => {
   // Carrega conteúdo inicial
   useEffect(() => {
     setLoading(true);
-    loadFeedContent(1, false).finally(() => {
+    loadFeedContent(null, false).finally(() => {
       setLoading(false);
     });
   }, [loadFeedContent]);
@@ -234,7 +245,7 @@ export const useFeed = () => {
     error,
     loadMoreContent,
     addNewPost,
-    refreshFeed: () => loadFeedContent(1, false),
+    refreshFeed: () => loadFeedContent(null, false),
     retryLoadContent,
     canRetry: retryCount < 3 && error !== null
   };

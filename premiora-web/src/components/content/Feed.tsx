@@ -15,14 +15,21 @@ interface FeedProps {
 }
 
 /**
- * Componente Feed que exibe lista de conteúdo com scroll infinito
- * Gerencia renderização de diferentes tipos de conteúdo e carregamento lazy
- * Inclui funcionalidade manual de carregamento quando o automático falha
+ * Componente Feed que exibe lista de conteúdo com scroll infinito no estilo Twitter/X
+ * Implementa cursor-based pagination com loading row e sentinel detection
+ * Remove carregamento manual - segue padrão Twitter sem botões manuais
  *
  * @component
  */
 const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore, onRetry, canRetry }) => {
-  const { loadMoreRef, loadMoreManually, isManualLoading } = useInfiniteScroll(hasMore, loading, onLoadMore);
+  const { sentinelRef, showLoadingRow, setShowLoadingRow } = useInfiniteScroll(hasMore, loading, onLoadMore);
+
+  // Reset loading row quando loading termina
+  React.useEffect(() => {
+    if (!loading && showLoadingRow) {
+      setShowLoadingRow(false);
+    }
+  }, [loading, showLoadingRow, setShowLoadingRow]);
 
   return (
     <main className="feed">
@@ -48,31 +55,10 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore,
           </div>
         )}
 
-        {loading && (
-          <div className="loading-state">
-            <div className="loading-spinner"></div>
-            <p>Carregando mais conteúdo...</p>
-          </div>
-        )}
-
-        {/* Botão manual de carregamento quando há mais conteúdo disponível */}
-        {hasMore && !loading && !isManualLoading && (
-          <div className="load-more-manual">
-            <button
-              onClick={loadMoreManually}
-              className="load-more-button"
-              aria-label="Carregar mais conteúdo"
-            >
-              Carregar mais conteúdo
-            </button>
-          </div>
-        )}
-
-        {/* Estado de carregamento manual */}
-        {isManualLoading && (
-          <div className="loading-state">
-            <div className="loading-spinner"></div>
-            <p>Carregando...</p>
+        {/* Loading row - Twitter style */}
+        {showLoadingRow && (
+          <div className="feed-loading-row">
+            <div className="spinner"></div>
           </div>
         )}
 
@@ -94,7 +80,8 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore,
           </div>
         )}
 
-        <div ref={loadMoreRef} className="load-more-trigger" />
+        {/* Bottom sentinel for infinite scroll */}
+        <div ref={sentinelRef} className="bottom-sentinel" />
       </div>
     </main>
   );
