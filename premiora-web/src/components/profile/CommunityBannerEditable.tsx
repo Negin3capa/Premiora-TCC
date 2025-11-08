@@ -261,27 +261,38 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
           color: 'white'
         }}
       >
-        {/* Área clicável para banner - posicionada no viewport */}
+        {/* Área clicável para banner - idêntica ao perfil */}
         <div
           title="Alterar banner"
           style={{
             position: 'fixed',
             top: '74px', /* Header height (64px) + 10px from banner top */
             right: '20px',
-            width: '80px',
-            height: '80px',
-            background: '#ff0000',
+            width: '60px',
+            height: '60px',
+            background: 'rgba(0, 0, 0, 0.7)',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            opacity: 1,
-            transition: '0.2s',
+            opacity: 0.8,
+            transition: 'all 0.2s ease',
             cursor: 'pointer',
-            zIndex: 100,
+            zIndex: 2,
             pointerEvents: 'auto',
-            border: '4px solid #ffffff',
-            boxShadow: '0 0 20px rgba(255, 0, 0, 0.8)'
+            border: '2px solid rgba(255, 255, 255, 0.3)'
+          }}
+          onMouseEnter={(e) => {
+            if (!isUploading) {
+              e.currentTarget.style.transform = 'scale(1.1)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isUploading) {
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
+            }
           }}
           onClick={handleBannerClick}
         >
