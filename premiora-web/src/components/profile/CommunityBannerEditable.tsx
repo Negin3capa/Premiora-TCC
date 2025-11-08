@@ -82,47 +82,84 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
     description: ''
   });
 
+  // Refs for contentEditable elements
+  const displayNameRef = useRef<HTMLHeadingElement>(null);
+  const nameRef = useRef<HTMLParagraphElement>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   /**
-   * Handler para iniciar edição de campo de texto
+   * Handler para iniciar edição inline
    */
-  const handleStartEditing = (field: 'name' | 'displayName' | 'description') => {
+  const handleStartInlineEdit = (field: 'name' | 'displayName') => {
     setEditingField(field);
-    setTempValues({
-      name: community.name,
-      displayName: community.displayName,
-      description: community.description
-    });
+    // Focus the element after state update
+    setTimeout(() => {
+      if (field === 'displayName' && displayNameRef.current) {
+        displayNameRef.current.focus();
+        // Select all text
+        const range = document.createRange();
+        range.selectNodeContents(displayNameRef.current);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      } else if (field === 'name' && nameRef.current) {
+        nameRef.current.focus();
+        // Select all text
+        const range = document.createRange();
+        range.selectNodeContents(nameRef.current);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      }
+    }, 0);
   };
 
   /**
-   * Handler para confirmar edição de campo de texto
+   * Handler para mudança de texto em tempo real
    */
-  const handleConfirmEdit = () => {
-    if (editingField === 'name') {
-      onUpdateName(tempValues.name);
-    } else if (editingField === 'displayName') {
-      onUpdateDisplayName(tempValues.displayName);
-    } else if (editingField === 'description') {
-      onUpdateDescription(tempValues.description);
+  const handleInlineInput = (field: 'name' | 'displayName', event: React.FormEvent<HTMLHeadingElement | HTMLParagraphElement>) => {
+    const target = event.currentTarget;
+    const text = target.textContent || '';
+
+    if (field === 'displayName') {
+      onUpdateDisplayName(text);
+    } else if (field === 'name') {
+      // Remove 'r/' prefix if present and clean the name
+      const cleanName = text.replace(/^r\//, '').replace(/[^a-zA-Z0-9_]/g, '');
+      onUpdateName(cleanName);
+      // Update the display to show r/ prefix
+      if (target.textContent !== `r/${cleanName}`) {
+        target.textContent = `r/${cleanName}`;
+      }
     }
+  };
+
+  /**
+   * Handler para finalizar edição inline
+   */
+  const handleInlineBlur = () => {
     setEditingField(null);
   };
 
   /**
-   * Handler para cancelar edição de campo de texto
+   * Handler para teclas especiais
    */
-  const handleCancelEdit = () => {
-    setEditingField(null);
-  };
-
-  /**
-   * Handler para mudança de valor temporário
-   */
-  const handleTempValueChange = (field: 'name' | 'displayName' | 'description', value: string) => {
-    setTempValues(prev => ({ ...prev, [field]: value }));
+  const handleInlineKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      setEditingField(null);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setEditingField(null);
+      // Reset to original values
+      if (editingField === 'displayName' && displayNameRef.current) {
+        displayNameRef.current.textContent = community.displayName;
+      } else if (editingField === 'name' && nameRef.current) {
+        nameRef.current.textContent = `r/${community.name}`;
+      }
+    }
   };
 
   /**
@@ -390,175 +427,55 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
           {/* Informações da comunidade */}
           <div style={{ flex: 1, color: 'white' }}>
             {/* Nome de exibição com edição inline */}
-            {editingField === 'displayName' ? (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                marginBottom: '0.5rem'
-              }}>
-                <input
-                  type="text"
-                  value={tempValues.displayName}
-                  onChange={(e) => handleTempValueChange('displayName', e.target.value)}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    borderRadius: '6px',
-                    color: '#FFFFFF',
-                    fontSize: '1.5rem',
-                    padding: '0.75rem',
-                    fontFamily: 'inherit',
-                    fontWeight: 'bold'
-                  }}
-                  placeholder="Nome de exibição da comunidade"
-                  autoFocus
-                  maxLength={100}
-                />
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  justifyContent: 'flex-end'
-                }}>
-                  <button
-                    type="button"
-                    onClick={handleConfirmEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid #FF424D',
-                      color: '#FF424D',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Save size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      color: '#DADADA',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <h1
-                style={{
-                  fontSize: '2.5rem',
-                  fontWeight: 'bold',
-                  margin: '0 0 0.5rem 0',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-                onClick={() => handleStartEditing('displayName')}
-              >
-                {community.displayName}
-                <Edit3 size={20} style={{ opacity: 0.7 }} />
-              </h1>
-            )}
+            <h1
+              ref={displayNameRef}
+              contentEditable={editingField === 'displayName'}
+              suppressContentEditableWarning={true}
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: 'bold',
+                margin: '0 0 0.5rem 0',
+                cursor: editingField === 'displayName' ? 'text' : 'pointer',
+                outline: editingField === 'displayName' ? '2px solid #FF424D' : 'none',
+                borderRadius: editingField === 'displayName' ? '4px' : '0',
+                padding: editingField === 'displayName' ? '4px' : '0',
+                backgroundColor: editingField === 'displayName' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                display: 'inline-block',
+                minWidth: '200px'
+              }}
+              onClick={() => handleStartInlineEdit('displayName')}
+              onInput={(e) => handleInlineInput('displayName', e)}
+              onBlur={handleInlineBlur}
+              onKeyDown={handleInlineKeyDown}
+            >
+              {community.displayName}
+            </h1>
 
             {/* Nome da comunidade */}
-            {editingField === 'name' ? (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                marginBottom: '1rem'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '1.2rem', opacity: 0.9, fontWeight: 500 }}>r/</span>
-                  <input
-                    type="text"
-                    value={tempValues.name}
-                    onChange={(e) => handleTempValueChange('name', e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      borderRadius: '6px',
-                      color: '#FFFFFF',
-                      fontSize: '1.2rem',
-                      padding: '0.5rem',
-                      fontFamily: 'inherit',
-                      fontWeight: 500,
-                      flex: 1
-                    }}
-                    placeholder="nome-da-comunidade"
-                    autoFocus
-                    maxLength={21}
-                  />
-                </div>
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  justifyContent: 'flex-end'
-                }}>
-                  <button
-                    type="button"
-                    onClick={handleConfirmEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid #FF424D',
-                      color: '#FF424D',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Save size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      color: '#DADADA',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p
-                style={{
-                  fontSize: '1.2rem',
-                  opacity: 0.9,
-                  margin: '0 0 1rem 0',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-                onClick={() => handleStartEditing('name')}
-              >
-                r/{community.name}
-                <Edit3 size={16} style={{ opacity: 0.7 }} />
-              </p>
-            )}
+            <p
+              ref={nameRef}
+              contentEditable={editingField === 'name'}
+              suppressContentEditableWarning={true}
+              style={{
+                fontSize: '1.2rem',
+                opacity: 0.9,
+                margin: '0 0 1rem 0',
+                fontWeight: 500,
+                cursor: editingField === 'name' ? 'text' : 'pointer',
+                outline: editingField === 'name' ? '2px solid #FF424D' : 'none',
+                borderRadius: editingField === 'name' ? '4px' : '0',
+                padding: editingField === 'name' ? '4px' : '0',
+                backgroundColor: editingField === 'name' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                display: 'inline-block',
+                minWidth: '150px'
+              }}
+              onClick={() => handleStartInlineEdit('name')}
+              onInput={(e) => handleInlineInput('name', e)}
+              onBlur={handleInlineBlur}
+              onKeyDown={handleInlineKeyDown}
+            >
+              r/{community.name}
+            </p>
 
 
 
