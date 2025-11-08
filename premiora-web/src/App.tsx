@@ -23,6 +23,7 @@ const NotificationsPage = React.lazy(() => import('./pages/NotificationsPage'));
 const MessagesPage = React.lazy(() => import('./pages/MessagesPage'));
 const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
 const ProfileEditPage = React.lazy(() => import('./pages/ProfileEditPage'));
+const CreateCommunityPage = React.lazy(() => import('./pages/CreateCommunityPage'));
 const PostViewPage = React.lazy(() => import('./pages/PostViewPage'));
 
 /**
@@ -140,6 +141,16 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <CommunitiesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Criação de Comunidade (apenas para autenticados) */}
+        <Route
+          path="/create-community"
+          element={
+            <ProtectedRoute>
+              <CreateCommunityPage />
             </ProtectedRoute>
           }
         />

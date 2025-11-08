@@ -274,7 +274,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         openModal('createVideo');
         break;
       case 'community':
-        openModal('createCommunity');
+        // Navegar para página de criação de comunidade
+        navigate('/create-community');
         break;
       default:
         console.warn(`Tipo de conteúdo não suportado: ${type}`);
