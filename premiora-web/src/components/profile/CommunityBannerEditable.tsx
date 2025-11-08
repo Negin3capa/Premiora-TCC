@@ -375,14 +375,15 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                 <input
                   type="text"
                   value={tempValues.displayName}
-                  onChange={(e) => setTempValues(prev => ({ ...prev, displayName: e.target.value }))}
+                  onChange={(e) => {
+                    setTempValues(prev => ({ ...prev, displayName: e.target.value }));
+                    onUpdateDisplayName(e.target.value);
+                  }}
                   onBlur={() => {
-                    onUpdateDisplayName(tempValues.displayName);
                     setEditingField(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      onUpdateDisplayName(tempValues.displayName);
                       setEditingField(null);
                     } else if (e.key === 'Escape') {
                       setEditingField(null);
@@ -440,14 +441,16 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                   <input
                     type="text"
                     value={tempValues.name}
-                    onChange={(e) => setTempValues(prev => ({ ...prev, name: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') }))}
+                    onChange={(e) => {
+                      const filteredValue = e.target.value.replace(/[^a-zA-Z0-9_]/g, '');
+                      setTempValues(prev => ({ ...prev, name: filteredValue }));
+                      onUpdateName(filteredValue);
+                    }}
                     onBlur={() => {
-                      onUpdateName(tempValues.name);
                       setEditingField(null);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        onUpdateName(tempValues.name);
                         setEditingField(null);
                       } else if (e.key === 'Escape') {
                         setEditingField(null);

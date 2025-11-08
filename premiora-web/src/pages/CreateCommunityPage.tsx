@@ -188,14 +188,15 @@ const CreateCommunityPage: React.FC = () => {
                       <input
                         type="text"
                         value={tempDescription}
-                        onChange={(e) => setTempDescription(e.target.value)}
+                        onChange={(e) => {
+                          setTempDescription(e.target.value);
+                          updateDescription(e.target.value);
+                        }}
                         onBlur={() => {
-                          updateDescription(tempDescription);
                           setEditingDescription(false);
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
-                            updateDescription(tempDescription);
                             setEditingDescription(false);
                           } else if (e.key === 'Escape') {
                             setEditingDescription(false);
