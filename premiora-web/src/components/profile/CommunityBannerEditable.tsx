@@ -400,8 +400,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                     border: 'none',
                     padding: '0',
                     minWidth: '200px',
-                    outline: 'none',
-                    textShadow: '0 0 8px rgba(0,0,0,0.8)'
+                    outline: 'none'
                   }}
                   autoFocus
                 />
@@ -467,8 +466,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                       border: 'none',
                       padding: '0',
                       minWidth: '120px',
-                      outline: 'none',
-                      textShadow: '0 0 8px rgba(0,0,0,0.8)'
+                      outline: 'none'
                     }}
                     autoFocus
                   />
