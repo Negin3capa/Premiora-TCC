@@ -346,6 +346,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
             <h1
               contentEditable
               suppressContentEditableWarning
+              dir="ltr"
               onInput={(e) => onUpdateDisplayName(e.currentTarget.textContent || '')}
               onBlur={(e) => {
                 const text = e.currentTarget.textContent || '';
@@ -370,7 +371,10 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                 padding: '0.25rem',
                 transition: 'border-color 0.2s ease',
                 opacity: community.displayName ? 1 : 0.6,
-                minWidth: '200px'
+                minWidth: '200px',
+                direction: 'ltr',
+                textAlign: 'left',
+                unicodeBidi: 'normal'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
@@ -401,6 +405,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
               <span
                 contentEditable
                 suppressContentEditableWarning
+                dir="ltr"
                 onInput={(e) => onUpdateName(e.currentTarget.textContent?.replace(/[^a-zA-Z0-9_]/g, '') || '')}
                 onBlur={(e) => {
                   const text = e.currentTarget.textContent || '';
@@ -421,7 +426,10 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
                   padding: '0.125rem 0.25rem',
                   transition: 'border-color 0.2s ease',
                   minWidth: '120px',
-                  flex: 1
+                  flex: 1,
+                  direction: 'ltr',
+                  textAlign: 'left',
+                  unicodeBidi: 'normal'
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';

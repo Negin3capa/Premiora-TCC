@@ -179,6 +179,7 @@ const CreateCommunityPage: React.FC = () => {
                     <span
                       contentEditable
                       suppressContentEditableWarning
+                      dir="ltr"
                       onInput={(e) => updateDescription(e.currentTarget.textContent || '')}
                       onBlur={(e) => {
                         const text = e.currentTarget.textContent || '';
@@ -200,7 +201,10 @@ const CreateCommunityPage: React.FC = () => {
                         transition: 'border-color 0.2s ease',
                         minHeight: '1.2em',
                         display: 'inline-block',
-                        width: '100%'
+                        width: '100%',
+                        direction: 'ltr',
+                        textAlign: 'left',
+                        unicodeBidi: 'normal'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
