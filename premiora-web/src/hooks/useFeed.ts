@@ -151,8 +151,16 @@ export const useFeed = () => {
           addNewPost(payload.new);
         }
       )
-      .subscribe((status) => {
-        console.log('📡 Status da subscription:', status);
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('📡 Subscription bem-sucedida');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.warn('📡 Erro na subscription (esperado em desenvolvimento):', err);
+        } else if (status === 'CLOSED') {
+          console.log('📡 Subscription fechada');
+        } else {
+          console.log('📡 Status da subscription:', status);
+        }
       });
 
     // Cleanup da subscription quando o componente desmontar

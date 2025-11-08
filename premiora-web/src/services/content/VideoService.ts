@@ -267,9 +267,9 @@ export class VideoService {
    * @param page - Página atual (começando em 1)
    * @param limit - Número de vídeos por página
    * @param userId - ID do usuário (opcional, para personalização)
-   * @returns Promise com array de vídeos do feed
+   * @returns Promise com vídeos do feed e indicador de mais conteúdo
    */
-  static async getFeedVideos(page: number = 1, limit: number = 10, userId?: string): Promise<any[]> {
+  static async getFeedVideos(page: number = 1, limit: number = 10, userId?: string): Promise<{ videos: any[]; hasMore: boolean }> {
     try {
       const offset = (page - 1) * limit;
 
@@ -321,59 +321,13 @@ export class VideoService {
       // Transformar dados para o formato do feed
       const realVideos = (data || []).map(video => this.transformVideoForFeed(video));
 
-      // Se não há vídeos reais, retornar dados mock para teste
-      if (realVideos.length === 0) {
-        // Dados mock para teste com dados de comunidade para verificar flair
-        const mockVideos = [
-          {
-            id: 'mock-video-1',
-            type: 'video' as const,
-            title: 'Vídeo de Teste - Tutorial React',
-            content: 'Este é um vídeo tutorial sobre React para testar a funcionalidade de redirecionamento.',
-            author: 'Usuário Teste',
-            authorUsername: 'testuser',
-            authorAvatar: '',
-            thumbnail: 'https://via.placeholder.com/640x360/4f46e5/ffffff?text=React+Tutorial',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-            views: 1250,
-            likes: 45,
-            timestamp: new Date().toISOString(),
-            duration: 596, // 9:56
-            resolution: '1280x720',
-            fileSize: 5242880, // 5MB
-            communityId: 'mock-community-1',
-            communityName: 'react',
-            communityDisplayName: 'React Brasil',
-            communityAvatar: 'https://via.placeholder.com/32x32/4f46e5/ffffff?text=R',
-            creatorId: 'test-user-id'
-          },
-          {
-            id: 'mock-video-2',
-            type: 'video' as const,
-            title: 'Vídeo de Teste - TypeScript Tips',
-            content: 'Dicas avançadas de TypeScript para desenvolvedores.',
-            author: 'Usuário Teste',
-            authorUsername: 'testuser',
-            authorAvatar: '',
-            thumbnail: 'https://via.placeholder.com/640x360/059669/ffffff?text=TypeScript+Tips',
-            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-            views: 890,
-            likes: 32,
-            timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 dia atrás
-            duration: 654, // 10:54
-            resolution: '1280x720',
-            fileSize: 7340032, // 7MB
-            communityId: 'mock-community-2',
-            communityName: 'typescript',
-            communityDisplayName: 'TypeScript PT',
-            communityAvatar: 'https://via.placeholder.com/32x32/059669/ffffff?text=TS',
-            creatorId: 'test-user-id'
-          }
-        ];
-        return mockVideos;
-      }
+      // Verificar se há mais vídeos disponíveis
+      const hasMore = data && data.length === limit;
 
-      return realVideos;
+      return {
+        videos: realVideos,
+        hasMore
+      };
 
     } catch (error) {
       console.error('Erro ao buscar vídeos do feed:', error);
@@ -413,6 +367,120 @@ export class VideoService {
       communityAvatar: videoData.communities?.avatar_url,
       creatorId: videoData.creator_id
     };
+  }
+
+  /**
+   * Busca vídeos do feed usando paginação por cursor
+   * @param cursor - Cursor para paginação (null para primeira página)
+   * @param limit - Número de vídeos por página
+   * @param userId - ID do usuário (opcional, para personalização)
+   * @returns Promise com vídeos do feed e metadados de paginação
+   */
+  static async getFeedVideosCursor(
+    cursor: string | null = null,
+    limit: number = 10,
+    userId?: string
+  ): Promise<{ videos: any[]; nextCursor?: string; hasMore: boolean }> {
+    try {
+      let query = supabase
+        .from('posts')
+        .select(`
+          id,
+          title,
+          content,
+          content_type,
+          media_urls,
+          community_id,
+          creator_id,
+          likes_count,
+          comments_count,
+          views_count,
+          published_at,
+          created_at,
+          username,
+          communities (
+            id,
+            name,
+            display_name,
+            avatar_url
+          ),
+          creators (
+            id,
+            display_name,
+            profile_image_url
+          )
+        `)
+        .eq('content_type', 'video')
+        .eq('is_published', true)
+        .order('published_at', { ascending: false })
+        .limit(limit);
+
+      // Aplicar cursor se fornecido
+      if (cursor) {
+        const { timestamp, id } = this.decodeCursor(cursor);
+        query = query.lt('published_at', timestamp).neq('id', id);
+      }
+
+      // Se usuário logado, pode adicionar filtros de comunidades seguidas
+      // Por enquanto, retorna todos os vídeos públicos
+      if (userId) {
+        // TODO: Implementar lógica de comunidades seguidas
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        throw new Error(`Erro ao buscar vídeos com cursor: ${error.message}`);
+      }
+
+      // Transformar dados para o formato do feed
+      const realVideos = (data || []).map(video => this.transformVideoForFeed(video));
+
+      const videos = data || [];
+      let nextCursor: string | undefined;
+      const hasMore = videos.length === limit;
+
+      if (hasMore && videos.length > 0) {
+        const lastVideo = videos[videos.length - 1];
+        nextCursor = this.encodeCursor(lastVideo.published_at, lastVideo.id);
+      }
+
+      return {
+        videos: realVideos,
+        nextCursor,
+        hasMore
+      };
+
+    } catch (error) {
+      console.error('Erro ao buscar vídeos do feed com cursor:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Codifica cursor baseado em timestamp e ID
+   * @param timestamp - Timestamp do item
+   * @param id - ID do item
+   * @returns Cursor codificado em base64
+   */
+  private static encodeCursor(timestamp: string, id: string): string {
+    const cursorData = JSON.stringify({ timestamp, id });
+    return btoa(cursorData); // Base64 encoding
+  }
+
+  /**
+   * Decodifica cursor para timestamp e ID
+   * @param cursor - Cursor codificado
+   * @returns Objeto com timestamp e id
+   */
+  private static decodeCursor(cursor: string): { timestamp: string; id: string } {
+    try {
+      const decoded = atob(cursor); // Base64 decoding
+      return JSON.parse(decoded);
+    } catch (error) {
+      console.error('Erro ao decodificar cursor:', error);
+      throw new Error('Cursor inválido');
+    }
   }
 
   /**

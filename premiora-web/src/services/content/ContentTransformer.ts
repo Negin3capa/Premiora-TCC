@@ -153,11 +153,12 @@ export class ContentTransformer {
       if ((startIndex + i + 1) % suggestionInterval === 0) {
         const lastItem = result[result.length - 1];
         if (lastItem && lastItem.type !== 'profile') {
-          const suggestionIndex = Math.floor((startIndex + i + 1) / suggestionInterval);
+          // Usar timestamp + índice para garantir IDs únicos
+          const uniqueId = `suggestion-${Date.now()}-${startIndex + i}`;
           result.push({
-            id: `suggestion-${suggestionIndex}`,
+            id: uniqueId,
             type: 'profile',
-            title: `Sugestões para você ${suggestionIndex}`,
+            title: 'Sugestões para você',
             author: '',
             authorAvatar: '',
             views: 0,
