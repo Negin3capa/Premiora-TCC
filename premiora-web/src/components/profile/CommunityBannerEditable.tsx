@@ -266,7 +266,7 @@ export const CommunityBannerEditable: React.FC<CommunityBannerEditableProps> = (
           title="Alterar banner"
           style={{
             position: 'fixed',
-            top: '84px', /* Header height (64px) + some padding */
+            top: '74px', /* Header height (64px) + 10px from banner top */
             right: '20px',
             width: '80px',
             height: '80px',
