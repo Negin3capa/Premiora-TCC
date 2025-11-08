@@ -292,6 +292,107 @@ export class FeedService {
   }
 
   /**
+   * Busca posts de uma comunidade específica com paginação por cursor
+   * @param communityName - Nome da comunidade
+   * @param cursor - Cursor para paginação (null para primeira página)
+   * @param limit - Número de posts por página
+   * @param userId - ID do usuário (para controle de acesso)
+   * @returns Promise com posts da comunidade e cursor
+   */
+  static async getCommunityPostsCursor(
+    communityName: string,
+    cursor: string | null = null,
+    limit: number = 10,
+    userId?: string
+  ): Promise<FeedResult> {
+    try {
+      // Primeiro, buscar o ID da comunidade pelo nome
+      const { data: communityData, error: communityError } = await supabase
+        .from('communities')
+        .select('id')
+        .eq('name', communityName)
+        .single();
+
+      if (communityError) {
+        if (communityError.code === 'PGRST116') {
+          // Comunidade não encontrada
+          return {
+            posts: [],
+            hasMore: false
+          };
+        }
+        throw new Error(`Erro ao buscar comunidade: ${communityError.message}`);
+      }
+
+      const communityId = communityData.id;
+
+      // Buscar posts da comunidade usando cursor
+      let dataQuery = supabase
+        .from('posts')
+        .select(`
+          *,
+          creator:creator_id (
+            id,
+            display_name,
+            profile_image_url
+          ),
+          community:community_id (
+            id,
+            name,
+            display_name,
+            avatar_url
+          ),
+          post_likes (
+            id,
+            user_id
+          )
+        `)
+        .eq('is_published', true)
+        .eq('community_id', communityId)
+        .order('published_at', { ascending: false })
+        .limit(limit);
+
+      // Aplicar filtros de acesso baseado no usuário
+      if (userId) {
+        dataQuery = dataQuery.or(`is_premium.eq.false,creator_id.eq.${userId}`);
+      } else {
+        // Usuário não logado vê apenas conteúdo público
+        dataQuery = dataQuery.eq('is_premium', false);
+      }
+
+      // Aplicar cursor se fornecido
+      if (cursor) {
+        const { timestamp, id } = this.decodeCursor(cursor);
+        dataQuery = dataQuery.lt('published_at', timestamp).neq('id', id);
+      }
+
+      const { data, error: dataError } = await dataQuery;
+
+      if (dataError) {
+        throw new Error(`Erro ao buscar posts da comunidade com cursor: ${dataError.message}`);
+      }
+
+      const posts = data || [];
+      let nextCursor: string | undefined;
+      const hasMore = posts.length === limit;
+
+      if (hasMore && posts.length > 0) {
+        const lastPost = posts[posts.length - 1];
+        nextCursor = this.encodeCursor(lastPost.published_at, lastPost.id);
+      }
+
+      return {
+        posts,
+        nextCursor,
+        hasMore
+      };
+    } catch (error) {
+      console.error('Erro geral ao buscar posts da comunidade com cursor:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Busca posts de uma comunidade específica
    * @param communityName - Nome da comunidade
    * @param page - Página atual

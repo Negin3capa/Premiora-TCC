@@ -68,7 +68,9 @@ const NotificationsPage: React.FC = () => {
     <div className="homepage">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header />
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
 
         <div className="feed">
           <div className="feed-content">

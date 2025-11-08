@@ -1,68 +1,65 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 /**
- * Hook personalizado para gerenciar scroll infinito
- * Utiliza Intersection Observer API para detectar quando carregar mais conteúdo
+ * Hook personalizado para gerenciar scroll infinito no estilo Twitter/X
+ * Utiliza Intersection Observer API com prefetch de 200px e loading lock
+ * Implementa cursor-based pagination sem debouncing
  *
  * @param hasMore - Indica se há mais conteúdo para carregar
  * @param loading - Indica se está carregando conteúdo
  * @param onLoadMore - Callback executado quando deve carregar mais
- * @param threshold - Threshold do Intersection Observer (0-1)
- * @returns Ref para o elemento trigger de carregamento
+ * @returns Objeto com ref para o elemento sentinel
  */
 export const useInfiniteScroll = (
   hasMore: boolean,
   loading: boolean,
-  onLoadMore: () => void,
-  threshold: number = 0.1
+  onLoadMore: () => void
 ) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [showLoadingRow, setShowLoadingRow] = useState(false);
 
-  const loadMoreCallback = useCallback(() => {
-    if (hasMore && !loading) {
+  /**
+   * Callback do Intersection Observer - Twitter style
+   * Trigger imediato quando sentinel entra na viewport
+   */
+  const handleIntersection = useCallback((entries: IntersectionObserverEntry[]) => {
+    const entry = entries[0];
+
+    if (entry.isIntersecting && hasMore && !loading) {
+      setShowLoadingRow(true);
       onLoadMore();
     }
   }, [hasMore, loading, onLoadMore]);
 
   useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect();
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMoreCallback();
-        }
-      },
-      { threshold }
-    );
-
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-
-      // Check if element is already visible after setting up observer
-      // Only trigger for short content (no scrolling needed) to avoid unnecessary loads
-      setTimeout(() => {
-        if (loadMoreRef.current && hasMore && !loading) {
-          const rect = loadMoreRef.current.getBoundingClientRect();
-          // Only trigger initial load if content is short (no scrolling needed)
-          // For long content, rely on scroll-triggered intersection
-          const contentIsShort = document.documentElement.scrollHeight <= window.innerHeight;
-          const elementIsVisible = rect.top <= window.innerHeight + 50 && rect.bottom >= -50;
-
-          if (contentIsShort && elementIsVisible) {
-            loadMoreCallback();
-          }
-        }
-      }, 100);
+    // Cleanup observer anterior
+    if (observerRef.current) {
+      observerRef.current.disconnect();
     }
 
+    // Criar novo observer com configurações Twitter/X
+    observerRef.current = new IntersectionObserver(handleIntersection, {
+      rootMargin: '200px', // Prefetch 200px antes do elemento ficar visível
+      threshold: 0 // Trigger quando qualquer parte entra na viewport
+    });
+
+    // Observar o sentinel element
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    // Cleanup quando hasMore se torna false (fim do feed)
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
     };
-  }, [loadMoreCallback, threshold, hasMore, loading]);
+  }, [handleIntersection, hasMore]); // Re-criar observer quando hasMore muda
 
-  return loadMoreRef;
+  return {
+    sentinelRef,
+    showLoadingRow,
+    setShowLoadingRow
+  };
 };

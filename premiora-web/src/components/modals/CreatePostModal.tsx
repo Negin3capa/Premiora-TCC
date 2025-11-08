@@ -3,6 +3,7 @@
  * Permite ao usuário criar posts na plataforma com opção de comunidade
  */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { ContentService } from '../../services/contentService';
 import { useFeed } from '../../hooks/useFeed';
@@ -43,6 +44,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   onClose,
   onPublish
 }) => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { addNewPost } = useFeed();
 
@@ -116,6 +118,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
       // Limpar formulário e fechar modal
       handleCancel();
+
+      // Redirecionar para a página de visualização do post
+      navigate(`/u/${newPost.username}/status/${newPost.id}`);
 
     } catch (error) {
       console.error('Erro ao publicar post:', error);

@@ -8,17 +8,28 @@ interface FeedProps {
   items: ContentItem[];
   loading: boolean;
   hasMore: boolean;
+  error?: string | null;
   onLoadMore: () => void;
+  onRetry?: () => void;
+  canRetry?: boolean;
 }
 
 /**
- * Componente Feed que exibe lista de conteúdo com scroll infinito
- * Gerencia renderização de diferentes tipos de conteúdo e carregamento lazy
+ * Componente Feed que exibe lista de conteúdo com scroll infinito no estilo Twitter/X
+ * Implementa cursor-based pagination com loading row e sentinel detection
+ * Remove carregamento manual - segue padrão Twitter sem botões manuais
  *
  * @component
  */
-const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, onLoadMore }) => {
-  const loadMoreRef = useInfiniteScroll(hasMore, loading, onLoadMore);
+const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore, onRetry, canRetry }) => {
+  const { sentinelRef, showLoadingRow, setShowLoadingRow } = useInfiniteScroll(hasMore, loading, onLoadMore);
+
+  // Reset loading row quando loading termina
+  React.useEffect(() => {
+    if (!loading && showLoadingRow) {
+      setShowLoadingRow(false);
+    }
+  }, [loading, showLoadingRow, setShowLoadingRow]);
 
   return (
     <main className="feed">
@@ -44,14 +55,33 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, onLoadMore }) => {
           </div>
         )}
 
-        {loading && (
-          <div className="loading-state">
-            <div className="loading-spinner"></div>
-            <p>Carregando mais conteúdo...</p>
+        {/* Loading row - Twitter style */}
+        {showLoadingRow && (
+          <div className="feed-loading-row">
+            <div className="spinner"></div>
           </div>
         )}
 
-        <div ref={loadMoreRef} className="load-more-trigger" />
+        {/* Estado de erro com opção de retry */}
+        {error && (
+          <div className="error-state">
+            <div className="error-message">
+              <p>Erro ao carregar conteúdo: {error}</p>
+              {canRetry && onRetry && (
+                <button
+                  onClick={onRetry}
+                  className="retry-button"
+                  aria-label="Tentar novamente"
+                >
+                  Tentar novamente
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Bottom sentinel for infinite scroll */}
+        <div ref={sentinelRef} className="bottom-sentinel" />
       </div>
     </main>
   );

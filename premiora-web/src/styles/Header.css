@@ -8,7 +8,7 @@
 .header {
   position: fixed;
   top: 0;
-  left: 80px; /* Account for sidebar width */
+  left: 220px; /* Match sidebar width: 220px */
   right: 0;
   height: 64px;
   background-color: #0D0D0D;
@@ -40,7 +40,7 @@
   border: none;
   background: none;
   border-radius: 8px;
-  display: flex;
+  display: none; /* Hidden by default on desktop */
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -254,7 +254,7 @@
 
 @media (max-width: 1024px) {
   .header {
-    left: 64px; /* Adjust for smaller sidebar */
+    left: 0; /* Sidebar is toggleable on tablets */
     padding: 0 20px;
   }
 
@@ -272,15 +272,15 @@
     height: 36px;
   }
 
-  /* Hide hamburger button on larger screens */
+  /* Show hamburger button on tablet */
   .header-hamburger-button {
-    display: none;
+    display: flex;
   }
 }
 
 @media (max-width: 768px) {
   .header {
-    left: 56px; /* Adjust for mobile sidebar */
+    left: 0; /* Sidebar is off-screen by default on mobile */
     padding: 0 16px;
     height: 56px;
   }

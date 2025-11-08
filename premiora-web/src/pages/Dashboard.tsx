@@ -32,7 +32,7 @@ const ComponentLoader: React.FC = () => (
  * @component
  */
 const Dashboard: React.FC = () => {
-  const { feedItems, loading, hasMore, loadMoreContent, refreshFeed } = useFeed();
+  const { feedItems, loading, hasMore, error, loadMoreContent, refreshFeed, retryLoadContent, canRetry } = useFeed();
   const { filteredItems } = useLocalSearch(feedItems);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFeedSidebarOpen, setIsFeedSidebarOpen] = useState(false);
@@ -97,7 +97,10 @@ const Dashboard: React.FC = () => {
             items={filteredItems}
             loading={loading}
             hasMore={hasMore}
+            error={error}
             onLoadMore={loadMoreContent}
+            onRetry={retryLoadContent}
+            canRetry={canRetry}
           />
         </Suspense>
       </div>

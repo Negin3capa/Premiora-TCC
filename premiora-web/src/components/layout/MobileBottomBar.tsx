@@ -21,7 +21,7 @@ const MobileBottomBar: React.FC<MobileBottomBarProps> = ({ className = '' }) => 
 
   // Itens de navegação para a barra móvel (apenas os essenciais)
   const mobileNavigationItems = [
-    { icon: <Home size={20} />, label: 'Home', route: '/home' },
+    { icon: <Home size={20} />, label: 'Home', route: '/dashboard' },
     { icon: <Bell size={20} />, label: 'Notificações', route: '/notifications' },
     { icon: <MessageCircle size={20} />, label: 'Mensagens', route: '/messages' },
     { icon: <Users size={20} />, label: 'Comunidades', route: '/communities' },
