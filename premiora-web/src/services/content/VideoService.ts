@@ -318,11 +318,12 @@ export class VideoService {
         throw new Error(`Erro ao buscar vídeos: ${error.message}`);
       }
 
-      // Se não há vídeos reais, retornar dados mock para teste
+      // Transformar dados para o formato do feed
       const realVideos = (data || []).map(video => this.transformVideoForFeed(video));
 
+      // Se não há vídeos reais, retornar dados mock para teste
       if (realVideos.length === 0) {
-        // Dados mock para teste
+        // Dados mock para teste com dados de comunidade para verificar flair
         const mockVideos = [
           {
             id: 'mock-video-1',
@@ -340,9 +341,10 @@ export class VideoService {
             duration: 596, // 9:56
             resolution: '1280x720',
             fileSize: 5242880, // 5MB
-            communityId: null,
-            communityName: null,
-            communityAvatar: null,
+            communityId: 'mock-community-1',
+            communityName: 'react',
+            communityDisplayName: 'React Brasil',
+            communityAvatar: 'https://via.placeholder.com/32x32/4f46e5/ffffff?text=R',
             creatorId: 'test-user-id'
           },
           {
@@ -361,16 +363,16 @@ export class VideoService {
             duration: 654, // 10:54
             resolution: '1280x720',
             fileSize: 7340032, // 7MB
-            communityId: null,
-            communityName: null,
-            communityAvatar: null,
+            communityId: 'mock-community-2',
+            communityName: 'typescript',
+            communityDisplayName: 'TypeScript PT',
+            communityAvatar: 'https://via.placeholder.com/32x32/059669/ffffff?text=TS',
             creatorId: 'test-user-id'
           }
         ];
         return mockVideos;
       }
 
-      // Transformar dados para o formato do feed
       return realVideos;
 
     } catch (error) {
@@ -406,7 +408,8 @@ export class VideoService {
       resolution: videoInfo.metadata ? `${videoInfo.metadata.width}x${videoInfo.metadata.height}` : undefined,
       fileSize: videoInfo.metadata?.fileSize,
       communityId: videoData.community_id,
-      communityName: videoData.communities?.display_name,
+      communityName: videoData.communities?.name,
+      communityDisplayName: videoData.communities?.display_name,
       communityAvatar: videoData.communities?.avatar_url,
       creatorId: videoData.creator_id
     };

@@ -3,14 +3,7 @@
  * Centraliza todas as funções relacionadas ao sistema de comunidades
  */
 import { supabase } from './supabaseClient';
-import type {
-  Community,
-  CommunityMember,
-  CommunityTier,
-  CommunityContent,
-  PostFlair,
-  CommunityTag
-} from '../types/community';
+import type { Community, CommunityMember } from '../types/community';
 
 /**
  * Busca todas as comunidades disponíveis
@@ -31,7 +24,7 @@ export async function getCommunities(): Promise<Community[]> {
     name: community.name,
     displayName: community.display_name,
     description: community.description,
-    bannerUrl: community.banner_url,
+    bannerUrl: community.cover_image_url,
     avatarUrl: community.avatar_url,
     creatorId: community.creator_id,
     isPrivate: community.is_private,
@@ -61,7 +54,7 @@ export async function getCommunityById(id: string): Promise<Community | null> {
     name: data.name,
     displayName: data.display_name,
     description: data.description,
-    bannerUrl: data.banner_url,
+    bannerUrl: data.cover_image_url,
     avatarUrl: data.avatar_url,
     creatorId: data.creator_id,
     isPrivate: data.is_private,
@@ -91,7 +84,7 @@ export async function getCommunityByName(name: string): Promise<Community | null
     name: data.name,
     displayName: data.display_name,
     description: data.description,
-    bannerUrl: data.banner_url,
+    bannerUrl: data.cover_image_url,
     avatarUrl: data.avatar_url,
     creatorId: data.creator_id,
     isPrivate: data.is_private,
@@ -104,14 +97,17 @@ export async function getCommunityByName(name: string): Promise<Community | null
 /**
  * Faz upload de uma imagem para o Supabase Storage
  */
-async function uploadCommunityImage(file: File, type: 'banner' | 'avatar', _communityName: string): Promise<string | null> {
+async function uploadCommunityImage(file: File, type: 'banner' | 'avatar', communityName: string): Promise<string | null> {
   try {
-    // For now, return a blob URL as fallback since storage bucket may not exist
-    // In production, this should upload to Supabase Storage
-    console.warn(`Storage upload not implemented yet. Using blob URL for ${type}.`);
-    return URL.createObjectURL(file);
+    // Importar FileUploadService dinamicamente para evitar dependências circulares
+    const { FileUploadService } = await import('../services/content/FileUploadService');
+
+    // Usar o FileUploadService existente para fazer upload
+    const uploadResult = await FileUploadService.uploadFile(file, 'posts', communityName);
+
+    return uploadResult.url;
   } catch (error) {
-    console.error(`Erro ao processar ${type}:`, error);
+    console.error(`Erro ao fazer upload da imagem ${type}:`, error);
     return null;
   }
 }
@@ -158,7 +154,7 @@ export async function createCommunity(communityData: {
       name: communityData.name,
       display_name: communityData.displayName,
       description: communityData.description,
-      banner_url: bannerUrl,
+      cover_image_url: bannerUrl,
       avatar_url: avatarUrl,
       creator_id: user.id,
       is_private: communityData.isPrivate
@@ -179,7 +175,7 @@ export async function createCommunity(communityData: {
     name: data.name,
     displayName: data.display_name,
     description: data.description,
-    bannerUrl: data.banner_url,
+    bannerUrl: data.cover_image_url,
     avatarUrl: data.avatar_url,
     creatorId: data.creator_id,
     isPrivate: data.is_private,
@@ -200,13 +196,11 @@ export async function joinCommunity(communityId: string): Promise<boolean> {
     return false;
   }
 
-  const { error } = await supabase
-    .from('community_members')
-    .insert({
-      community_id: communityId,
-      user_id: user.id,
-      role: 'member'
-    });
+  // Use a transaction to insert member and update count
+  const { error } = await supabase.rpc('join_community', {
+    p_community_id: communityId,
+    p_user_id: user.id
+  });
 
   if (error) {
     console.error('Erro ao juntar-se à comunidade:', error);
@@ -227,11 +221,11 @@ export async function leaveCommunity(communityId: string): Promise<boolean> {
     return false;
   }
 
-  const { error } = await supabase
-    .from('community_members')
-    .delete()
-    .eq('community_id', communityId)
-    .eq('user_id', user.id);
+  // Use a transaction to remove member and update count
+  const { error } = await supabase.rpc('leave_community', {
+    p_community_id: communityId,
+    p_user_id: user.id
+  });
 
   if (error) {
     console.error('Erro ao sair da comunidade:', error);
@@ -332,148 +326,6 @@ export async function getUserCommunities(userId?: string): Promise<Community[]> 
 }
 
 /**
- * Busca tiers de uma comunidade
- */
-export async function getCommunityTiers(communityId: string): Promise<CommunityTier[]> {
-  const { data, error } = await supabase
-    .from('community_tiers')
-    .select('*')
-    .eq('community_id', communityId)
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error('Erro ao buscar tiers da comunidade:', error);
-    return [];
-  }
-
-  return data.map(tier => ({
-    id: tier.id,
-    communityId: tier.community_id,
-    name: tier.name,
-    description: tier.description,
-    requiredCreatorTier: tier.required_creator_tier,
-    color: tier.color,
-    permissions: tier.permissions,
-    createdAt: tier.created_at
-  }));
-}
-
-/**
- * Busca flairs de posts de uma comunidade
- */
-export async function getCommunityPostFlairs(communityId: string): Promise<PostFlair[]> {
-  const { data, error } = await supabase
-    .from('post_flairs')
-    .select('*')
-    .eq('community_id', communityId)
-    .eq('is_active', true)
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error('Erro ao buscar flairs de posts:', error);
-    return [];
-  }
-
-  return data.map(flair => ({
-    id: flair.id,
-    communityId: flair.community_id,
-    name: flair.name,
-    text: flair.text,
-    color: flair.color,
-    backgroundColor: flair.background_color,
-    minTierId: flair.min_tier_id,
-    createdBy: flair.created_by,
-    isActive: flair.is_active,
-    createdAt: flair.created_at
-  }));
-}
-
-/**
- * Busca tags de uma comunidade
- */
-export async function getCommunityTags(communityId: string): Promise<CommunityTag[]> {
-  const { data, error } = await supabase
-    .from('community_tags')
-    .select('*')
-    .eq('community_id', communityId)
-    .order('usage_count', { ascending: false });
-
-  if (error) {
-    console.error('Erro ao buscar tags da comunidade:', error);
-    return [];
-  }
-
-  return data.map(tag => ({
-    id: tag.id,
-    communityId: tag.community_id,
-    name: tag.name,
-    description: tag.description,
-    color: tag.color,
-    isModeratorOnly: tag.is_moderator_only,
-    usageCount: tag.usage_count,
-    createdAt: tag.created_at
-  }));
-}
-
-/**
- * Publica conteúdo em uma comunidade
- */
-export async function publishToCommunity(
-  communityId: string,
-  contentId: string,
-  contentType: 'post' | 'video'
-): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    console.error('Usuário não autenticado');
-    return false;
-  }
-
-  const { error } = await supabase
-    .from('community_content')
-    .insert({
-      community_id: communityId,
-      content_id: contentId,
-      content_type: contentType,
-      author_id: user.id
-    });
-
-  if (error) {
-    console.error('Erro ao publicar conteúdo na comunidade:', error);
-    return false;
-  }
-
-  return true;
-}
-
-/**
- * Busca conteúdo de uma comunidade
- */
-export async function getCommunityContent(communityId: string): Promise<CommunityContent[]> {
-  const { data, error } = await supabase
-    .from('community_content')
-    .select('*')
-    .eq('community_id', communityId)
-    .order('published_at', { ascending: false });
-
-  if (error) {
-    console.error('Erro ao buscar conteúdo da comunidade:', error);
-    return [];
-  }
-
-  return data.map(content => ({
-    id: content.id,
-    communityId: content.community_id,
-    contentId: content.content_id,
-    contentType: content.content_type,
-    authorId: content.author_id,
-    publishedAt: content.published_at,
-    isPinned: content.is_pinned
-  }));
-}
-
-/**
  * Busca comunidades por termo de pesquisa
  */
 export async function searchCommunities(query: string, limit: number = 20): Promise<Community[]> {
@@ -499,7 +351,7 @@ export async function searchCommunities(query: string, limit: number = 20): Prom
     name: community.name,
     displayName: community.display_name,
     description: community.description,
-    bannerUrl: community.banner_url,
+    bannerUrl: community.cover_image_url,
     avatarUrl: community.avatar_url,
     creatorId: community.creator_id,
     isPrivate: community.is_private,

@@ -137,40 +137,28 @@ export class FeedService {
     userId?: string
   ): Promise<FeedResult> {
     try {
-      // Primeiro, obter o total de registros para evitar erros de range
-      let countQuery = supabase
-        .from('posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_published', true)
-        .eq('community.name', communityName);
+      // Primeiro, buscar o ID da comunidade pelo nome
+      const { data: communityData, error: communityError } = await supabase
+        .from('communities')
+        .select('id')
+        .eq('name', communityName)
+        .single();
 
-      // Aplicar filtros de acesso baseado no usuário
-      if (userId) {
-        countQuery = countQuery.or(`is_premium.eq.false,creator_id.eq.${userId}`);
-      } else {
-        // Usuário não logado vê apenas conteúdo público
-        countQuery = countQuery.eq('is_premium', false);
+      if (communityError) {
+        if (communityError.code === 'PGRST116') {
+          // Comunidade não encontrada
+          return {
+            posts: [],
+            hasMore: false
+          };
+        }
+        throw new Error(`Erro ao buscar comunidade: ${communityError.message}`);
       }
 
-      const { count, error: countError } = await countQuery;
+      const communityId = communityData.id;
 
-      if (countError) {
-        throw new Error(`Erro ao contar posts da comunidade: ${countError.message}`);
-      }
-
-      const totalPosts = count || 0;
+      // Agora buscar posts da comunidade usando o community_id
       const from = (page - 1) * limit;
-
-      // Se não há mais posts para carregar, retornar vazio
-      if (from >= totalPosts) {
-        return {
-          posts: [],
-          hasMore: false
-        };
-      }
-
-      // Ajustar o limite se estamos na última página
-      const actualLimit = Math.min(limit, totalPosts - from);
 
       let dataQuery = supabase
         .from('posts')
@@ -193,9 +181,9 @@ export class FeedService {
           )
         `)
         .eq('is_published', true)
-        .eq('community.name', communityName)
+        .eq('community_id', communityId)
         .order('published_at', { ascending: false })
-        .range(from, from + actualLimit - 1);
+        .range(from, from + limit - 1);
 
       // Aplicar filtros de acesso baseado no usuário
       if (userId) {
@@ -211,7 +199,8 @@ export class FeedService {
         throw new Error(`Erro ao buscar posts da comunidade: ${dataError.message}`);
       }
 
-      const hasMore = (from + actualLimit) < totalPosts;
+      // Verificar se há mais posts
+      const hasMore = data && data.length === limit;
 
       return {
         posts: data || [],

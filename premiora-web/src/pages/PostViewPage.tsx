@@ -112,6 +112,7 @@ const usePost = (postId: string, username: string) => {
           accessLevel: postData.is_premium ? 'premium' : 'public',
           communityId: postData.community_id,
           communityName: postData.community?.name,
+          communityDisplayName: postData.community?.name,
           communityAvatar: postData.community?.avatar_url,
           creatorId: postData.creator_id
         };
@@ -163,7 +164,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
  * Implementa layout responsivo com navegação e engajamento
  */
 const PostViewPage: React.FC = () => {
-  const { username, postId } = useParams<{ username: string; postId: string }>();
+  const { username, postId } = useParams<{ username: string; postId: string; communityName?: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { post, loading, error } = usePost(postId!, username!);
@@ -323,7 +324,7 @@ const PostViewPage: React.FC = () => {
                 {post.communityId && (
                   <>
                     <Link to={`/r/${post.communityName}`} className="breadcrumb-link">
-                      r/{post.communityName}
+                      r/{post.communityDisplayName || post.communityName}
                     </Link>
                     <span className="breadcrumb-separator">›</span>
                   </>
@@ -416,18 +417,18 @@ const PostViewPage: React.FC = () => {
                   )}
                 </div>
 
-                {/* Informações da comunidade */}
+                {/* Informações da comunidade - agora inline com o autor */}
                 {post.communityId && (
                   <div className="community-info">
                     <Link to={`/r/${post.communityName}`} className="community-link">
                       {post.communityAvatar && (
                         <img
                           src={post.communityAvatar}
-                          alt={post.communityName}
+                          alt={post.communityDisplayName || post.communityName}
                           className="community-avatar"
                         />
                       )}
-                      <span>r/{post.communityName}</span>
+                      <span>r/{post.communityDisplayName || post.communityName}</span>
                     </Link>
                   </div>
                 )}
