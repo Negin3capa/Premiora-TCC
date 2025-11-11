@@ -19,6 +19,11 @@
   padding: 0 24px;
 }
 
+/* Profile mode - adjust for compact sidebar */
+.header--profile-mode {
+  left: 60px; /* Match ProfileSidebar width: 60px */
+}
+
 .header-content {
   display: flex;
   align-items: center;
