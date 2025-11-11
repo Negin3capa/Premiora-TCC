@@ -45,7 +45,7 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore,
               if (item.type === 'profile') {
                 return (
                   <div key={item.id} className="user-suggestions-wrapper">
-                    <UserSuggestions suggestions={[]} />
+                    <UserSuggestions />
                   </div>
                 );
               }

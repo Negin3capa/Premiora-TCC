@@ -1,0 +1,261 @@
+/* Profile Sidebar - Compact Navigation Sidebar */
+
+.profile-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0; /* Extend to the very top like regular sidebar */
+  width: 60px;
+  height: 100vh;
+  background-color: #0D0D0D;
+  border-right: 1px solid #1A1A1A;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px var(--space-2);
+  box-shadow: var(--shadow-sm);
+}
+
+.profile-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  height: 100%;
+}
+
+/* Navigation */
+.profile-sidebar-nav {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-sidebar-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.profile-sidebar-nav-item {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-sidebar-nav-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.profile-sidebar-nav-button:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  transform: scale(1.05);
+}
+
+.profile-sidebar-nav-button:active {
+  transform: scale(0.95);
+}
+
+.profile-sidebar-nav-button.active {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.profile-sidebar-nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+/* Profile Actions */
+.profile-sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+/* Create Button */
+.profile-sidebar-create-section {
+  margin-top: auto;
+  margin-bottom: var(--space-2);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-sidebar-create-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #FF424D 0%, #FF6B75 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
+}
+
+.profile-sidebar-create-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(255, 66, 77, 0.4);
+}
+
+/* Base button styles */
+.profile-sidebar-button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-sidebar-button:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+  transform: scale(1.05);
+}
+
+.profile-sidebar-button:active {
+  transform: scale(0.95);
+}
+
+/* Follow button special styling */
+.follow-button {
+  background-color: var(--color-primary);
+  color: white;
+  margin-bottom: var(--space-2); /* Extra space after follow button */
+}
+
+.follow-button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.follow-button.following {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-light);
+}
+
+.follow-button.following:hover {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.follow-button .filled {
+  fill: currentColor;
+}
+
+/* Report button special styling */
+.report-button {
+  margin-top: auto; /* Push to bottom */
+  color: var(--color-text-muted);
+}
+
+.report-button:hover {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+}
+
+/* Tooltip styles */
+.profile-sidebar-button::after {
+  content: attr(title);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-fast);
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border-light);
+  z-index: 1000;
+  margin-left: var(--space-2);
+}
+
+.profile-sidebar-button:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .profile-sidebar {
+    width: 50px;
+    top: 56px; /* Adjust for mobile header */
+    height: calc(100vh - 56px);
+  }
+
+  .profile-sidebar-button {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-sidebar {
+    width: 48px;
+  }
+
+  .profile-sidebar-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .profile-sidebar-button::after {
+    display: none; /* Hide tooltips on very small screens */
+  }
+}
+
+/* Animation for follow state change */
+@keyframes followPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.follow-button:not(.following) {
+  animation: followPulse 0.3s ease-out;
+}

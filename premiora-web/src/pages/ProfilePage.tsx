@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ProfileBanner, FeaturedPost, RecentPosts } from '../components/profile';
-import { Sidebar, Header } from '../components/layout';
+import { Sidebar, Header, ProfileSidebar } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
@@ -43,6 +43,29 @@ const ProfilePage: React.FC = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false); // TODO: Implement follow state
+
+  // Verificar se é o próprio perfil do usuário
+  const isOwnProfile = userProfile?.username === username;
+
+  // Handlers para ações da sidebar minimalista
+  const handleFollowToggle = useCallback(() => {
+    setIsFollowing(prev => !prev);
+    // TODO: Implementar chamada para API de follow/unfollow
+    console.log(`${isFollowing ? 'Unfollowing' : 'Following'} ${username}`);
+  }, [isFollowing, username]);
+
+  const handleShare = useCallback(() => {
+    // TODO: Implementar compartilhamento do perfil
+    const profileUrl = `${window.location.origin}/u/${username}`;
+    navigator.clipboard.writeText(profileUrl);
+    console.log(`Sharing profile: ${profileUrl}`);
+  }, [username]);
+
+  const handleReport = useCallback(() => {
+    // TODO: Implementar denúncia do perfil
+    console.log(`Reporting profile: ${username}`);
+  }, [username]);
 
   // Se não há username na rota, redirecionar para o perfil do usuário atual
   useEffect(() => {
@@ -210,20 +233,21 @@ const ProfilePage: React.FC = () => {
 
   // Se ainda está carregando o perfil, mostrar skeleton
   if (profileLoading) {
-    return (
-      <div style={{
-        backgroundColor: '#0D0D0D',
-        minHeight: '100vh',
-        color: '#DADADA',
-        overflowX: 'hidden'
-      }}>
-        {/* Global Sidebar */}
-        <Sidebar />
+  return (
+    <div style={{
+      backgroundColor: '#0D0D0D',
+      minHeight: '100vh',
+      color: '#DADADA',
+      overflowX: 'hidden'
+    }}>
+      {/* Show default sidebar during loading to prevent flash */}
+      <Sidebar />
 
-        {/* Global Header */}
-        <Header
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+      {/* Global Header - default mode during loading */}
+      <Header
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        isProfileMode={false}
+      />
 
         {/* Profile Banner Skeleton */}
         <div style={{
@@ -250,7 +274,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Main content container */}
         <div style={{
-          marginLeft: '80px',
+          marginLeft: '80px', /* Consistent with default sidebar width */
           marginTop: '0',
           padding: '2rem 1rem',
           overflow: 'hidden',
@@ -316,12 +340,23 @@ const ProfilePage: React.FC = () => {
       color: '#DADADA',
       overflowX: 'hidden'
     }}>
-      {/* Global Sidebar */}
-      <Sidebar />
+      {/* Conditional Sidebar - Full sidebar for own profile, minimal for others */}
+      {isOwnProfile ? (
+        <Sidebar />
+      ) : (
+        <ProfileSidebar
+          username={username!}
+          isFollowing={isFollowing}
+          onFollowToggle={handleFollowToggle}
+          onShare={handleShare}
+          onReport={handleReport}
+        />
+      )}
 
       {/* Global Header */}
       <Header
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        isProfileMode={!isOwnProfile}
       />
 
       {/* Profile Banner - Full screen width */}
@@ -339,7 +374,7 @@ const ProfilePage: React.FC = () => {
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
-        marginLeft: '80px', /* Account for sidebar width */
+        marginLeft: isOwnProfile ? '80px' : '60px', /* Account for sidebar width */
         marginTop: '0', /* Banner now handles the top spacing */
         padding: '2rem 1rem',
         overflow: 'hidden',
