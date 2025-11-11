@@ -16,12 +16,14 @@ import { Search, Bell, X, LogOut, UserPlus, Menu } from 'lucide-react';
 interface HeaderProps {
   /** Callback para alternar estado da sidebar principal */
   onToggleSidebar?: () => void;
+  /** Se está em modo perfil (sidebar compacta) */
+  isProfileMode?: boolean;
 }
 
 /**
  * Header com funcionalidade de busca integrada
  */
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false }) => {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -181,7 +183,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   }, [isSearchOpen, isDropdownOpen]);
 
   return (
-    <header className="header">
+    <header className={`header ${isProfileMode ? 'header--profile-mode' : ''}`}>
       <div className="header-content">
         {/* Left side - Hamburger menu for mobile */}
         <div className="header-left">
