@@ -225,7 +225,7 @@ const FeedSidebar: React.FC<FeedSidebarProps> = ({ isOpen = false, onClose }) =>
 
           {/* Sugestões de Usuários */}
           <section className="feed-sidebar-section">
-            <UserSuggestions suggestions={[]} />
+            <UserSuggestions />
           </section>
 
           {/* O que está acontecendo */}

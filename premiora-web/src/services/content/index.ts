@@ -17,3 +17,6 @@ export type { FeedResult } from './FeedService';
 export { VideoService } from './VideoService';
 
 export { SearchService } from './SearchService';
+
+export { UserSuggestionsService } from './UserSuggestionsService';
+export type { UserSuggestion } from './UserSuggestionsService';
