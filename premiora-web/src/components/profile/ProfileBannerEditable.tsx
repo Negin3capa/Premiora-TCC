@@ -3,7 +3,7 @@
  * Permite edição interativa de avatar, banner, nome e descrição
  */
 import React, { useState, useRef } from 'react';
-import { Camera, RotateCcw } from 'lucide-react';
+import { Camera, RotateCcw, Trash2 } from 'lucide-react';
 import { ImageCropModal } from './ImageCropModal';
 import type { CreatorProfile } from '../../types/profile';
 import styles from './ProfileBanner.module.css';
@@ -24,6 +24,10 @@ interface ProfileBannerEditableProps {
   onUpdateAvatar: (file: File) => void;
   /** Callback para atualizar banner */
   onUpdateBanner: (file: File) => void;
+  /** Callback para remover avatar */
+  onRemoveAvatar?: () => void;
+  /** Callback para remover banner */
+  onRemoveBanner?: () => void;
 
   /** Callback para salvar mudanças */
   onSave: () => void;
@@ -45,6 +49,8 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
   onUpdateDescription,
   onUpdateAvatar,
   onUpdateBanner,
+  onRemoveAvatar,
+  onRemoveBanner,
   onSave,
   onCancel,
   hasChanges,
@@ -177,7 +183,7 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
       setCropModal({
         isOpen: true,
         image: imageDataUrl,
-        aspect: 16/9, // Aspect ratio 16:9 para banner
+        aspect: 3, // Aspect ratio 3:1 para banner (mais apropriado para banners horizontais)
         title: 'Editar Banner',
         onComplete: (croppedImage: string) => {
           // Converter base64 para File
@@ -222,42 +228,83 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
           backgroundRepeat: 'no-repeat'
         }}
       >
-        {/* Área clicável para banner - posicionada estrategicamente */}
-        <div
-          onClick={handleBannerClick}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '60px',
-            height: '60px',
-            background: 'rgba(0, 0, 0, 0.7)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: profile?.bannerImage ? 0.8 : 1,
-            transition: 'all 0.2s ease',
-            cursor: isUploading ? 'not-allowed' : 'pointer',
-            zIndex: 2,
-            pointerEvents: 'auto',
-            border: '2px solid rgba(255, 255, 255, 0.3)'
-          }}
-          onMouseEnter={(e) => {
-            if (!isUploading) {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isUploading) {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
-            }
-          }}
-          title={profile?.bannerImage ? 'Alterar banner' : 'Adicionar banner'}
-        >
-          <Camera size={20} color="white" />
+        {/* Controles do banner */}
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          display: 'flex',
+          gap: '10px',
+          zIndex: 2
+        }}>
+          {/* Botão para alterar/adicionar banner */}
+          <div
+            onClick={handleBannerClick}
+            style={{
+              width: '50px',
+              height: '50px',
+              background: 'rgba(0, 0, 0, 0.7)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: profile?.bannerImage ? 0.8 : 1,
+              transition: 'all 0.2s ease',
+              cursor: isUploading ? 'not-allowed' : 'pointer',
+              pointerEvents: 'auto',
+              border: '2px solid rgba(255, 255, 255, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (!isUploading) {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isUploading) {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
+              }
+            }}
+            title={profile?.bannerImage ? 'Alterar banner' : 'Adicionar banner'}
+          >
+            <Camera size={18} color="white" />
+          </div>
+
+          {/* Botão para remover banner (só aparece se há banner) */}
+          {profile?.bannerImage && (
+            <div
+              onClick={() => onRemoveBanner?.()}
+              style={{
+                width: '50px',
+                height: '50px',
+                background: 'rgba(220, 53, 69, 0.8)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+                cursor: isUploading ? 'not-allowed' : 'pointer',
+                pointerEvents: 'auto',
+                border: '2px solid rgba(255, 255, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                if (!isUploading) {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.background = 'rgba(220, 53, 69, 0.9)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isUploading) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.background = 'rgba(220, 53, 69, 0.8)';
+                }
+              }}
+              title="Remover banner"
+            >
+              <Trash2 size={18} color="white" />
+            </div>
+          )}
         </div>
 
         {/* Overlay sutil para toda área quando não há banner */}
@@ -462,6 +509,51 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
             </div>
           </div>
           <div className={styles.illustration}>
+            {/* Controles do avatar */}
+            {profile.avatar_url && (
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                display: 'flex',
+                gap: '5px',
+                zIndex: 3
+              }}>
+                {/* Botão para remover avatar */}
+                <div
+                  onClick={() => onRemoveAvatar?.()}
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    background: 'rgba(220, 53, 69, 0.8)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    cursor: isUploading ? 'not-allowed' : 'pointer',
+                    pointerEvents: 'auto',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isUploading) {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                      e.currentTarget.style.background = 'rgba(220, 53, 69, 0.9)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isUploading) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.background = 'rgba(220, 53, 69, 0.8)';
+                    }
+                  }}
+                  title="Remover avatar"
+                >
+                  <Trash2 size={14} color="white" />
+                </div>
+              </div>
+            )}
+
             {/* Avatar do usuário */}
             {profile.avatar_url ? (
               <img

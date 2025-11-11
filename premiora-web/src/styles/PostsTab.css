@@ -1,0 +1,236 @@
+/**
+ * Estilos para o componente PostsTab
+ * Aba de posts do perfil com filtros
+ */
+
+/* ==================== PostsTab ==================== */
+
+.posts-tab {
+  width: 100%;
+}
+
+/* ==================== Filtros ==================== */
+
+.posts-filters {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #1A1A1A;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #333;
+  border-radius: 20px;
+  background: none;
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+  border-color: #555;
+  color: #DADADA;
+}
+
+.filter-button.active {
+  border-color: #FF6B75;
+  color: #FF6B75;
+  background-color: rgba(255, 107, 117, 0.1);
+}
+
+/* ==================== Lista de Posts ==================== */
+
+.posts-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.post-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #0D0D0D;
+  border: 1px solid #1A1A1A;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.post-item:hover {
+  border-color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.post-thumbnail {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.post-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-locked-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FF6B75;
+}
+
+.post-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #DADADA;
+  margin: 0 0 0.5rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-description {
+  font-size: 14px;
+  color: #999;
+  margin: 0 0 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.post-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.post-date {
+  font-size: 12px;
+  color: #666;
+}
+
+/* ==================== Estados ==================== */
+
+.empty-posts {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.empty-posts p {
+  margin: 0.5rem 0;
+  font-size: 14px;
+}
+
+.loading-posts {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.loading-posts p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ==================== Load More ==================== */
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.load-more-button {
+  padding: 12px 24px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: none;
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-button:hover {
+  border-color: #555;
+  color: #DADADA;
+}
+
+/* ==================== Responsive ==================== */
+
+@media (max-width: 768px) {
+  .post-item {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .post-thumbnail {
+    width: 100%;
+    height: 150px;
+  }
+
+  .post-title {
+    font-size: 15px;
+  }
+
+  .post-description {
+    font-size: 13px;
+  }
+
+  .filter-buttons {
+    gap: 6px;
+  }
+
+  .filter-button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .posts-list {
+    gap: 1rem;
+  }
+
+  .post-item {
+    padding: 0.75rem;
+  }
+
+  .post-stats {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}

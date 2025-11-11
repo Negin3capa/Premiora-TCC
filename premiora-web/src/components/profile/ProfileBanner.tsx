@@ -45,7 +45,15 @@ export const ProfileBanner: React.FC<ProfileBannerProps> = ({ profile, userId })
   };
 
   return (
-    <div className={styles.banner}>
+    <div
+      className={styles.banner}
+      style={{
+        backgroundImage: profile.bannerImage ? `url(${profile.bannerImage})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       <div className={styles.bannerContent}>
         <div className={styles.creatorInfo}>
           <h1 className={styles.creatorName}>{profile.name}</h1>

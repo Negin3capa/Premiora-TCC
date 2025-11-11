@@ -261,7 +261,7 @@ export class ProfileService {
   static async updateUserProfile(userId: string, updateData: Partial<{
     name: string;
     username: string;
-    avatar_url: string;
+    avatar_url: string | null;
     profile_setup_completed: boolean;
   }>): Promise<any> {
     const { data, error } = await supabaseAdmin
@@ -276,8 +276,8 @@ export class ProfileService {
       throw error;
     }
 
-    // Se o avatar foi atualizado, sincronizar com a tabela creators
-    if (updateData.avatar_url !== undefined) {
+    // Se o avatar foi atualizado (incluindo remoção), sincronizar com a tabela creators
+    if (updateData.hasOwnProperty('avatar_url')) {
       console.log('🔄 Iniciando sincronização do avatar com tabela creators:', updateData.avatar_url);
 
       try {
@@ -330,10 +330,10 @@ export class ProfileService {
   /**
    * Atualiza o banner do perfil do usuário
    * @param userId - ID do usuário
-   * @param bannerImage - URL da imagem do banner
+   * @param bannerImage - URL da imagem do banner ou null para remover
    * @returns Promise com dados do perfil atualizado
    */
-  static async updateProfileBanner(userId: string, bannerImage: string): Promise<any> {
+  static async updateProfileBanner(userId: string, bannerImage: string | null): Promise<any> {
     try {
       console.log('🔄 Atualizando banner do perfil:', { userId, bannerImage });
 

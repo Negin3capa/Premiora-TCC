@@ -149,7 +149,7 @@ export const useProfileEdit = (initialProfile: CreatorProfile | null) => {
   }, [userProfile?.id, checkForChanges]);
 
   /**
-   * Faz upload e atualiza banner
+   * Atualiza o banner do perfil do usuário
    */
   const updateBanner = useCallback(async (imageFile: File) => {
     if (!userProfile?.id) return;
@@ -183,6 +183,80 @@ export const useProfileEdit = (initialProfile: CreatorProfile | null) => {
         ...prev,
         isUploading: false,
         error: 'Erro ao atualizar banner. Tente novamente.'
+      }));
+    }
+  }, [userProfile?.id, checkForChanges]);
+
+  /**
+   * Remove o avatar do perfil do usuário
+   */
+  const removeAvatar = useCallback(async () => {
+    if (!userProfile?.id) return;
+
+    setState(prev => ({ ...prev, isUploading: true, error: null }));
+
+    try {
+      // Atualizar perfil no banco (remover avatar)
+      await ProfileService.updateUserProfile(userProfile.id, {
+        avatar_url: null
+      });
+
+      // Atualizar estado local
+      setState(prev => {
+        if (!prev.currentProfile) return prev;
+
+        const updatedProfile = { ...prev.currentProfile, avatar_url: null };
+        const hasChanges = checkForChanges(prev.originalProfile, updatedProfile);
+
+        return {
+          ...prev,
+          currentProfile: updatedProfile,
+          hasChanges,
+          isUploading: false
+        };
+      });
+    } catch (error) {
+      console.error('Erro ao remover avatar:', error);
+      setState(prev => ({
+        ...prev,
+        isUploading: false,
+        error: 'Erro ao remover avatar. Tente novamente.'
+      }));
+    }
+  }, [userProfile?.id, checkForChanges]);
+
+  /**
+   * Remove o banner do perfil do usuário
+   */
+  const removeBanner = useCallback(async () => {
+    if (!userProfile?.id) return;
+
+    setState(prev => ({ ...prev, isUploading: true, error: null }));
+
+    try {
+      // Atualizar banner no creator (remover banner)
+      await ProfileService.updateProfileBanner(userProfile.id, null);
+
+      // Atualizar estado local
+      setState(prev => {
+        if (!prev.currentProfile) return prev;
+
+        const updatedProfile = { ...prev.currentProfile, bannerImage: null };
+        const hasChanges = checkForChanges(prev.originalProfile, updatedProfile);
+
+        return {
+          ...prev,
+          currentProfile: updatedProfile,
+          hasChanges,
+          isUploading: false
+        };
+      });
+    } catch (error) {
+      console.error('Erro ao remover banner:', error);
+      setState(prev => ({
+        ...prev,
+        isUploading: false,
+        error: 'Erro ao remover banner. Tente novamente.'
       }));
     }
   }, [userProfile?.id, checkForChanges]);
@@ -265,6 +339,8 @@ export const useProfileEdit = (initialProfile: CreatorProfile | null) => {
     updateDescription,
     updateAvatar,
     updateBanner,
+    removeAvatar,
+    removeBanner,
     saveChanges,
     cancelChanges,
     clearError

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ProfileBanner, FeaturedPost, RecentPosts } from '../components/profile';
+import { ProfileBanner, FeaturedPost, RecentPosts, PostsTab, CommunityTab, ShopTab } from '../components/profile';
 import { Sidebar, Header, ProfileSidebar } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
+import { useProfileTabs } from '../hooks/useProfileTabs';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
 import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
@@ -35,6 +36,7 @@ const ProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
   const { userProfile } = useAuth();
   const navigate = useNavigate();
+  const { activeTab, handleTabChange } = useProfileTabs();
 
   const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
   const [featuredPost, setFeaturedPost] = useState<Post | null>(null);
@@ -357,6 +359,9 @@ const ProfilePage: React.FC = () => {
       <Header
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         isProfileMode={!isOwnProfile}
+        showProfileTabs={true}
+        activeProfileTab={activeTab}
+        onProfileTabChange={handleTabChange}
       />
 
       {/* Profile Banner - Full screen width */}
@@ -385,22 +390,42 @@ const ProfilePage: React.FC = () => {
           margin: '0 auto',
           overflow: 'hidden',
         }}>
-          {/* Só renderizar FeaturedPost se há posts ou se já foi calculado */}
-          {(featuredPost || recentPosts.length > 0) && <FeaturedPost post={featuredPost} />}
+          {/* Renderizar aba ativa */}
+          {activeTab === 'home' && (
+            <>
+              {/* Só renderizar FeaturedPost se há posts ou se já foi calculado */}
+              {(featuredPost || recentPosts.length > 0) && <FeaturedPost post={featuredPost} />}
 
-          {/* Só renderizar RecentPosts se há posts */}
-          {recentPosts.length > 0 && <RecentPosts posts={recentPosts} />}
+              {/* Só renderizar RecentPosts se há posts */}
+              {recentPosts.length > 0 && <RecentPosts posts={recentPosts} />}
 
-          {/* Mostrar mensagem se não há posts ainda */}
-          {recentPosts.length === 0 && featuredPost === null && !postsLoading && (
-            <div style={{
-              textAlign: 'center',
-              padding: '3rem',
-              color: '#888',
-              fontSize: '1.1rem'
-            }}>
-              Nenhum post encontrado
-            </div>
+              {/* Mostrar mensagem se não há posts ainda */}
+              {recentPosts.length === 0 && featuredPost === null && !postsLoading && (
+                <div style={{
+                  textAlign: 'center',
+                  padding: '3rem',
+                  color: '#888',
+                  fontSize: '1.1rem'
+                }}>
+                  Nenhum post encontrado
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'posts' && creatorProfile && (
+            <PostsTab
+              creatorProfile={creatorProfile}
+              currentUserId={userProfile?.id}
+            />
+          )}
+
+          {activeTab === 'community' && creatorProfile && (
+            <CommunityTab creatorProfile={creatorProfile} />
+          )}
+
+          {activeTab === 'shop' && (
+            <ShopTab />
           )}
         </div>
       </div>

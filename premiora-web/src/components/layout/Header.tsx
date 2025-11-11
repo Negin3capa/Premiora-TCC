@@ -24,6 +24,12 @@ interface HeaderProps {
   activeTab?: 'forYou' | 'following';
   /** Handler para mudança de aba */
   onTabChange?: (tab: 'forYou' | 'following') => void;
+  /** Se deve mostrar abas de perfil */
+  showProfileTabs?: boolean;
+  /** Aba ativa do perfil */
+  activeProfileTab?: 'home' | 'posts' | 'community' | 'shop';
+  /** Handler para mudança de aba do perfil */
+  onProfileTabChange?: (tab: 'home' | 'posts' | 'community' | 'shop') => void;
 }
 
 /**
@@ -34,7 +40,10 @@ const Header: React.FC<HeaderProps> = ({
   isProfileMode = false,
   showTabs = false,
   activeTab = 'forYou',
-  onTabChange
+  onTabChange,
+  showProfileTabs = false,
+  activeProfileTab = 'home',
+  onProfileTabChange
 }) => {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -232,6 +241,40 @@ const Header: React.FC<HeaderProps> = ({
               aria-label="Posts dos usuários seguidos"
             >
               Following
+            </button>
+          </div>
+        )}
+
+        {/* Profile Tabs - Only shown on Profile pages */}
+        {showProfileTabs && (
+          <div className="header-tabs header-tabs--profile">
+            <button
+              className={`header-tab ${activeProfileTab === 'home' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('home')}
+              aria-label="Página inicial do perfil"
+            >
+              Página Inicial
+            </button>
+            <button
+              className={`header-tab ${activeProfileTab === 'posts' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('posts')}
+              aria-label="Posts do usuário"
+            >
+              Posts
+            </button>
+            <button
+              className={`header-tab ${activeProfileTab === 'community' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('community')}
+              aria-label="Comunidade do usuário"
+            >
+              Comunidade
+            </button>
+            <button
+              className={`header-tab ${activeProfileTab === 'shop' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('shop')}
+              aria-label="Loja do usuário"
+            >
+              Compras
             </button>
           </div>
         )}
