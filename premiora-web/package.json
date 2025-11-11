@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.14.0",
-    "@supabase/supabase-js": "^2.76.1",
+    "@supabase/supabase-js": "^2.81.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/react-router-dom": "^5.3.3",
