@@ -486,7 +486,7 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
               <button
                 type="button"
                 onClick={onCancel}
-                disabled={!hasChanges || isSaving}
+                disabled={isSaving}
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   color: '#DADADA',
@@ -495,8 +495,8 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
                   borderRadius: '8px',
                   fontSize: '1.125rem',
                   fontWeight: 600,
-                  cursor: (!hasChanges || isSaving) ? 'not-allowed' : 'pointer',
-                  opacity: (!hasChanges || isSaving) ? 0.6 : 1,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
