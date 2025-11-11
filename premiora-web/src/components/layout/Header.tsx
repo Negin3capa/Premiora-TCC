@@ -18,12 +18,24 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
   /** Se está em modo perfil (sidebar compacta) */
   isProfileMode?: boolean;
+  /** Se deve mostrar abas de navegação (apenas no Dashboard) */
+  showTabs?: boolean;
+  /** Aba ativa atual */
+  activeTab?: 'forYou' | 'following';
+  /** Handler para mudança de aba */
+  onTabChange?: (tab: 'forYou' | 'following') => void;
 }
 
 /**
  * Header com funcionalidade de busca integrada
  */
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false }) => {
+const Header: React.FC<HeaderProps> = ({
+  onToggleSidebar,
+  isProfileMode = false,
+  showTabs = false,
+  activeTab = 'forYou',
+  onTabChange
+}) => {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -203,6 +215,26 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false 
         <div className="header-center">
           <h1 className="header-title">Premiora</h1>
         </div>
+
+        {/* Feed Tabs - Only shown on Dashboard */}
+        {showTabs && (
+          <div className="header-tabs">
+            <button
+              className={`header-tab ${activeTab === 'forYou' ? 'active' : ''}`}
+              onClick={() => onTabChange?.('forYou')}
+              aria-label="Feed geral"
+            >
+              For You
+            </button>
+            <button
+              className={`header-tab ${activeTab === 'following' ? 'active' : ''}`}
+              onClick={() => onTabChange?.('following')}
+              aria-label="Posts dos usuários seguidos"
+            >
+              Following
+            </button>
+          </div>
+        )}
 
         {/* Center - Search */}
         {isSearchOpen && (

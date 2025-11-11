@@ -80,6 +80,48 @@
   font-family: inherit;
 }
 
+/* ==================== Feed Tabs ==================== */
+
+.header-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin: 0 24px;
+}
+
+.header-tab {
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.header-tab:hover {
+  color: #DADADA;
+}
+
+.header-tab.active {
+  color: #FF6B75;
+  font-weight: 600;
+}
+
+.header-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 2px;
+  background-color: #FF6B75;
+  border-radius: 1px;
+}
+
 /* Right side - Actions */
 .header-right {
   display: flex;
@@ -265,6 +307,15 @@
 
   .header-title {
     font-size: 20px;
+  }
+
+  .header-tabs {
+    margin: 0 16px;
+  }
+
+  .header-tab {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 
   .header-action-button {

@@ -12,6 +12,18 @@ export type CreatorProfile = {
   bannerImage?: string | null; // optional background
   avatar_url?: string | null; // avatar do usuário
   username?: string | null; // username do usuário
+  followersCount?: number; // número de seguidores
+  followingCount?: number; // número de usuários seguidos
+  isFollowing?: boolean; // se o usuário atual está seguindo este perfil
+  user?: {
+    id: string;
+    name: string;
+    username: string;
+    email: string;
+    avatar_url?: string | null;
+    tier?: string;
+    profile_setup_completed?: boolean;
+  }; // dados do usuário (opcional, incluído quando retornado pelo ProfileService)
 };
 
 /**

@@ -369,7 +369,7 @@ const ProfilePage: React.FC = () => {
         marginRight: '-50vw',
         marginTop: '64px', /* Account for header height */
       }}>
-        <ProfileBanner profile={creatorProfile} />
+        <ProfileBanner profile={creatorProfile} userId={creatorProfile.user?.id} />
       </div>
 
       {/* Main content container - adjusted for fixed sidebar and header */}

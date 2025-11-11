@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ContentCard from '../ContentCard';
 import UserSuggestions from './UserSuggestions';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
@@ -12,45 +12,99 @@ interface FeedProps {
   onLoadMore: () => void;
   onRetry?: () => void;
   canRetry?: boolean;
+  // Props para abas (controladas pelo header)
+  activeTab?: 'forYou' | 'following';
+  followingItems?: ContentItem[];
+  followingLoading?: boolean;
+  followingHasMore?: boolean;
+  followingError?: string | null;
+  onFollowingLoadMore?: () => void;
+  onFollowingRetry?: () => void;
+  followingCanRetry?: boolean;
 }
 
 /**
  * Componente Feed que exibe lista de conteúdo com scroll infinito no estilo Twitter/X
  * Implementa cursor-based pagination com loading row e sentinel detection
- * Remove carregamento manual - segue padrão Twitter sem botões manuais
+ * Suporte a abas "For You" e "Following" para feed personalizado
  *
  * @component
  */
-const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore, onRetry, canRetry }) => {
-  const { sentinelRef, showLoadingRow, setShowLoadingRow } = useInfiniteScroll(hasMore, loading, onLoadMore);
+const Feed: React.FC<FeedProps> = ({
+  items,
+  loading,
+  hasMore,
+  error,
+  onLoadMore,
+  onRetry,
+  canRetry,
+  activeTab = 'forYou',
+  followingItems = [],
+  followingLoading = false,
+  followingHasMore = false,
+  followingError,
+  onFollowingLoadMore,
+  onFollowingRetry,
+  followingCanRetry
+}) => {
+  // Estado para controlar qual aba está ativa
+  const [currentTab, setCurrentTab] = useState<'forYou' | 'following'>(activeTab);
+
+  // Hook de scroll infinito para a aba ativa
+  const currentItems = currentTab === 'forYou' ? items : followingItems;
+  const currentLoading = currentTab === 'forYou' ? loading : followingLoading;
+  const currentHasMore = currentTab === 'forYou' ? hasMore : followingHasMore;
+  const currentError = currentTab === 'forYou' ? error : followingError;
+  const currentOnLoadMore = currentTab === 'forYou' ? onLoadMore : onFollowingLoadMore;
+  const currentOnRetry = currentTab === 'forYou' ? onRetry : onFollowingRetry;
+  const currentCanRetry = currentTab === 'forYou' ? canRetry : followingCanRetry;
+
+  const { sentinelRef, showLoadingRow, setShowLoadingRow } = useInfiniteScroll(
+    currentHasMore,
+    currentLoading,
+    currentOnLoadMore || (() => {})
+  );
 
   // Reset loading row quando loading termina
   React.useEffect(() => {
-    if (!loading && showLoadingRow) {
+    if (!currentLoading && showLoadingRow) {
       setShowLoadingRow(false);
     }
-  }, [loading, showLoadingRow, setShowLoadingRow]);
+  }, [currentLoading, showLoadingRow, setShowLoadingRow]);
+
+  // Atualizar aba ativa quando prop muda
+  React.useEffect(() => {
+    setCurrentTab(activeTab);
+  }, [activeTab]);
 
   return (
     <main className="feed">
       <div className="feed-content">
-        {items.length === 0 && !loading ? (
+        {currentItems.length === 0 && !currentLoading ? (
           <div className="empty-state">
-            <p>Nenhum conteúdo encontrado</p>
+            <p>
+              {currentTab === 'following'
+                ? 'Nenhum post dos usuários seguidos encontrado. Comece seguindo alguns usuários!'
+                : 'Nenhum conteúdo encontrado'
+              }
+            </p>
           </div>
         ) : (
           <div className="content-grid">
-            {items.map((item) => {
+            {currentItems.map((item) => {
+              // Gerar chave única baseada na aba atual para evitar conflitos
+              const uniqueKey = `${currentTab}-${item.id}`;
+
               // Renderizar sugestões de usuário para itens do tipo profile
               if (item.type === 'profile') {
                 return (
-                  <div key={item.id} className="user-suggestions-wrapper">
+                  <div key={uniqueKey} className="user-suggestions-wrapper">
                     <UserSuggestions />
                   </div>
                 );
               }
               // Renderizar ContentCard para outros tipos
-              return <ContentCard key={item.id} item={item} />;
+              return <ContentCard key={uniqueKey} item={item} />;
             })}
           </div>
         )}
@@ -63,13 +117,13 @@ const Feed: React.FC<FeedProps> = ({ items, loading, hasMore, error, onLoadMore,
         )}
 
         {/* Estado de erro com opção de retry */}
-        {error && (
+        {currentError && (
           <div className="error-state">
             <div className="error-message">
-              <p>Erro ao carregar conteúdo: {error}</p>
-              {canRetry && onRetry && (
+              <p>Erro ao carregar conteúdo: {currentError}</p>
+              {currentCanRetry && currentOnRetry && (
                 <button
-                  onClick={onRetry}
+                  onClick={currentOnRetry}
                   className="retry-button"
                   aria-label="Tentar novamente"
                 >

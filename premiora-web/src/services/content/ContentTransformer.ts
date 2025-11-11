@@ -30,26 +30,32 @@ export class ContentTransformer {
    * @returns ContentItem formatado
    */
   static transformPostToContentItem(postData: any): ContentItem {
-    const likesCount = postData.post_likes?.length || 0;
+    const likesCount = postData.likes_count || postData.post_likes?.length || 0;
+
+    // Dados do usuário podem vir de diferentes estruturas dependendo da query
+    const userData = postData.users || postData.creator || {};
+    const authorName = userData.name || userData.display_name || postData.username || 'Usuário';
+    const authorAvatar = userData.avatar_url || userData.profile_image_url || '';
 
     return {
       id: postData.id,
       type: 'post',
       title: postData.title || '',
-      author: postData.creator?.display_name || 'Usuário',
+      author: authorName,
       authorUsername: postData.username, // Foreign key direta para users.username
-      authorAvatar: postData.creator?.profile_image_url || '',
+      authorAvatar: authorAvatar,
       thumbnail: postData.media_urls?.[0] || undefined,
       content: postData.content,
       views: postData.views_count || 0,
       likes: likesCount,
-      timestamp: this.formatTimestamp(postData.published_at),
+      timestamp: this.formatTimestamp(postData.created_at || postData.published_at),
       accessLevel: postData.is_premium ? 'premium' : 'public',
       isLocked: postData.is_premium,
       communityId: postData.community?.id,
       communityName: postData.community?.name,
       communityDisplayName: postData.community?.name,
-      communityAvatar: postData.community?.avatar_url
+      communityAvatar: postData.community?.avatar_url,
+      creatorId: postData.creator_id
     };
   }
 
