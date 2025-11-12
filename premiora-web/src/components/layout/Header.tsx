@@ -9,6 +9,61 @@ import '../../styles/Header.css';
 import { Bell, LogOut, UserPlus, Menu } from 'lucide-react';
 
 /**
+ * Hook personalizado para detectar scroll e controlar visibilidade do header
+ */
+const useScrollVisibility = () => {
+  const [isHidden, setIsHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    // Only apply scroll behavior on mobile devices
+    if (window.innerWidth > 768) return;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollThreshold = 50; // Minimum scroll distance to trigger hide/show
+
+      // Determine scroll direction and distance
+      const isScrollingDown = currentScrollY > lastScrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      // Only trigger if scrolled enough
+      if (scrollDifference > scrollThreshold) {
+        if (isScrollingDown && currentScrollY > 100) {
+          // Scrolling down - hide header
+          setIsHidden(true);
+        } else if (!isScrollingDown) {
+          // Scrolling up - show header
+          setIsHidden(false);
+        }
+
+        setLastScrollY(currentScrollY);
+      }
+    };
+
+    // Throttle scroll events for better performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', throttledHandleScroll);
+    };
+  }, [lastScrollY]);
+
+  return isHidden;
+};
+
+/**
  * Props do componente Header
  */
 interface HeaderProps {
@@ -32,6 +87,8 @@ interface HeaderProps {
   showSearchBar?: boolean;
   /** Componente de barra de pesquisa customizada */
   searchBarComponent?: React.ReactNode;
+  /** Classe CSS adicional para o header */
+  className?: string;
 }
 
 /**
@@ -47,13 +104,15 @@ const Header: React.FC<HeaderProps> = ({
   activeProfileTab = 'home',
   onProfileTabChange,
   showSearchBar = false,
-  searchBarComponent
+  searchBarComponent,
+  className = ''
 }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, userProfile, signOut } = useAuth();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const isHeaderHidden = useScrollVisibility();
 
   // Nome de exibição (usado no header) - prioriza o name do banco
   const displayName = userProfile?.name ||
@@ -164,7 +223,7 @@ const Header: React.FC<HeaderProps> = ({
   }, [isDropdownOpen]);
 
   return (
-    <header className={`header ${isProfileMode ? 'header--profile-mode' : ''}`}>
+    <header className={`header ${isProfileMode ? 'header--profile-mode' : ''} ${isHeaderHidden ? 'header--hidden' : ''} ${className}`}>
       <div className="header-content">
         {/* Left side - Hamburger menu for mobile */}
         <div className="header-left">

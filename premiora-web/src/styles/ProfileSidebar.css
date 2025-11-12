@@ -227,26 +227,28 @@
     width: 50px;
     top: 56px; /* Adjust for mobile header */
     height: calc(100vh - 56px);
+    z-index: 90; /* Lower than mobile sidebar */
   }
 
   .profile-sidebar-button {
     width: 40px;
     height: 40px;
   }
+
+  .profile-sidebar-button::after {
+    display: none; /* Hide tooltips on tablets */
+  }
 }
 
 @media (max-width: 480px) {
   .profile-sidebar {
     width: 48px;
+    display: none; /* Hide profile sidebar on mobile - use hamburger menu instead */
   }
 
   .profile-sidebar-button {
     width: 36px;
     height: 36px;
-  }
-
-  .profile-sidebar-button::after {
-    display: none; /* Hide tooltips on very small screens */
   }
 }
 

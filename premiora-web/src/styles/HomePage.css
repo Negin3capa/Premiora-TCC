@@ -6,28 +6,27 @@
 /* ==================== Layout Principal ==================== */
 
 .dashboard-page {
-  display: flex;
+  display: grid;
+  grid-template-columns: 220px 1fr; /* Sidebar + Main content */
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
   width: 100%;
   overflow-x: hidden;
 }
 
+/* Sidebar area - will be controlled by Sidebar component */
+.dashboard-sidebar {
+  grid-column: 1;
+}
 
-
-/* ==================== Área de Conteúdo Principal ==================== */
-
+/* Main content area */
 .dashboard-main-content {
-  flex: 1;
-  margin-left: 420px;
-  margin-right: 0; /* Removido para centralizar o feed */
+  grid-column: 2;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: calc(100vw - 280px); /* Ajustado para ocupar espaço sem sidebar direita */
-  max-width: calc(100vw - 280px); /* Ajustado para ocupar espaço sem sidebar direita */
   overflow-x: hidden;
-  padding-top: 80px; /* Account for fixed header on desktop */
+  padding-top: 80px; /* Account for fixed header */
 }
 
 
@@ -38,6 +37,8 @@
   flex: 1;
   padding: var(--space-6);
   background-color: var(--color-bg-secondary);
+  display: flex;
+  justify-content: center;
 }
 
 .feed-layout {
@@ -211,55 +212,103 @@
 
 /* ==================== Responsive Design ==================== */
 
-@media (max-width: 1200px) {
-  .dashboard-main-content {
-    margin-right: 280px;
-    width: calc(100vw - 280px - 280px);
-    max-width: calc(100vw - 280px - 280px);
+/* Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+  .dashboard-page {
+    grid-template-columns: 220px 1fr;
   }
 
   .feed-layout {
-    grid-template-columns: 1fr 280px;
-    gap: var(--space-6);
+    max-width: 1600px;
+    grid-template-columns: 1fr 360px;
+    gap: var(--space-10);
+  }
+
+  .feed-content {
+    max-width: 720px;
   }
 
   .feed-sidebar {
-    width: 280px;
-    top: 104px; /* Account for fixed header + content padding */
-    height: calc(100vh - 104px);
+    width: 360px;
   }
 }
 
-@media (max-width: 1024px) {
-  .dashboard-main-content {
-    margin-right: 240px;
-    width: calc(100vw - 280px - 240px);
-    max-width: calc(100vw - 280px - 240px);
+/* Desktop (1280px - 1439px) */
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .dashboard-page {
+    grid-template-columns: 220px 1fr;
   }
 
   .feed-layout {
-    grid-template-columns: 1fr 240px;
-    gap: var(--space-5);
+    max-width: 1400px;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-8);
+  }
+
+  .feed-content {
+    max-width: 680px;
   }
 
   .feed-sidebar {
-    width: 240px;
-    top: 104px; /* Account for fixed header + content padding */
-    height: calc(100vh - 104px);
-    padding-right: var(--space-4);
+    width: 320px;
+  }
+}
+
+/* Standard Desktop (1025px - 1279px) */
+@media (min-width: 1025px) and (max-width: 1279px) {
+  .dashboard-page {
+    grid-template-columns: 220px 1fr;
+  }
+
+  .feed-layout {
+    max-width: 1200px;
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-6);
   }
 
   .feed-content {
     max-width: 640px;
   }
+
+  .feed-sidebar {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-page {
+    grid-template-columns: 1fr; /* Sidebar becomes overlay on tablets */
+  }
+
+  .dashboard-main-content {
+    grid-column: 1;
+  }
+
+  .feed-layout {
+    grid-template-columns: 1fr 240px;
+    gap: var(--space-5);
+    max-width: 1000px;
+  }
+
+  .feed-content {
+    max-width: 640px;
+  }
+
+  .feed-sidebar {
+    width: 240px;
+    top: 104px;
+    height: calc(100vh - 104px);
+    padding-right: var(--space-4);
+  }
 }
 
 @media (max-width: 768px) {
+  .dashboard-page {
+    grid-template-columns: 1fr; /* Single column layout on mobile */
+  }
+
   .dashboard-main-content {
-    margin-left: 0;
-    margin-right: 0;
-    width: 100%;
-    max-width: 100%;
+    grid-column: 1;
     padding-top: 70px; /* Reduced header height on mobile */
   }
 
@@ -373,6 +422,12 @@
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: var(--z-sticky);
   backdrop-filter: blur(10px);
+  transition: transform 0.3s ease;
+}
+
+/* Hidden state for mobile scroll */
+.mobile-bottom-bar--hidden {
+  transform: translateY(100%);
 }
 
 .mobile-bottom-bar-content {

@@ -45,17 +45,9 @@ const ProfilePage: React.FC = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false); // TODO: Implement follow state
 
   // Verificar se é o próprio perfil do usuário
   const isOwnProfile = userProfile?.username === username;
-
-  // Handlers para ações da sidebar minimalista
-  const handleFollowToggle = useCallback(() => {
-    setIsFollowing(prev => !prev);
-    // TODO: Implementar chamada para API de follow/unfollow
-    console.log(`${isFollowing ? 'Unfollowing' : 'Following'} ${username}`);
-  }, [isFollowing, username]);
 
   const handleShare = useCallback(() => {
     // TODO: Implementar compartilhamento do perfil
@@ -354,8 +346,6 @@ const ProfilePage: React.FC = () => {
       ) : (
         <ProfileSidebar
           username={username!}
-          isFollowing={isFollowing}
-          onFollowToggle={handleFollowToggle}
           onShare={handleShare}
           onReport={handleReport}
         />
@@ -387,9 +377,10 @@ const ProfilePage: React.FC = () => {
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
-        marginLeft: isSidebarOpen ? '0' : (isOwnProfile ? '80px' : '60px'), /* Account for sidebar width, hide when mobile sidebar is open */
+        marginLeft: isSidebarOpen ? '0' : (window.innerWidth <= 768 ? '0' : (isOwnProfile ? '80px' : '60px')), /* Account for sidebar width, hide on mobile */
         marginTop: ['posts', 'community', 'shop'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
-        padding: '2rem 1rem',
+        padding: window.innerWidth <= 768 ? '1rem 0.5rem' : '2rem 1rem', /* Reduce padding on mobile */
+        paddingBottom: window.innerWidth <= 480 ? '80px' : undefined, /* Add padding for mobile bottom bar */
         overflow: 'hidden',
       }}>
         {/* Content container */}
