@@ -364,23 +364,25 @@ const ProfilePage: React.FC = () => {
         onProfileTabChange={handleTabChange}
       />
 
-      {/* Profile Banner - Full screen width */}
-      <div style={{
-        position: 'relative',
-        width: '100vw',
-        left: '50%',
-        right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        marginTop: '64px', /* Account for header height */
-      }}>
-        <ProfileBanner profile={creatorProfile} userId={creatorProfile.user?.id} />
-      </div>
+      {/* Profile Banner - Full screen width - Only show when not on posts, community, or shop tabs */}
+      {!['posts', 'community', 'shop'].includes(activeTab) && (
+        <div style={{
+          position: 'relative',
+          width: '100vw',
+          left: '50%',
+          right: '50%',
+          marginLeft: '-50vw',
+          marginRight: '-50vw',
+          marginTop: '64px', /* Account for header height */
+        }}>
+          <ProfileBanner profile={creatorProfile} userId={creatorProfile.user?.id} />
+        </div>
+      )}
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
         marginLeft: isOwnProfile ? '80px' : '60px', /* Account for sidebar width */
-        marginTop: '0', /* Banner now handles the top spacing */
+        marginTop: ['posts', 'community', 'shop'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
         padding: '2rem 1rem',
         overflow: 'hidden',
       }}>

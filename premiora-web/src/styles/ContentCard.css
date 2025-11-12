@@ -369,12 +369,14 @@
 }
 
 .post-image {
-  width: 100%;
-  height: 400px;
-  object-fit: cover;
+  width: 100% !important;
+  height: 400px !important;
+  object-fit: cover !important;
   border-radius: var(--radius-md);
   margin-bottom: var(--space-3);
 }
+
+
 
 .post-body {
   color: var(--color-text-primary);

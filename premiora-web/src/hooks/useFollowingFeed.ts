@@ -193,7 +193,16 @@ export const useFollowingFeed = () => {
 
       const newContentItem = ContentService.transformPostToContentItem(newPost);
 
-      setFeedItems(prev => [newContentItem, ...prev]);
+      setFeedItems(prev => {
+        // Verificar se o post já existe no feed para evitar duplicatas
+        const postExists = prev.some(item => item.id === newContentItem.id);
+        if (postExists) {
+          console.log('Post já existe no feed dos seguidos, ignorando duplicata:', newContentItem.id);
+          return prev; // Retornar estado atual sem modificações
+        }
+
+        return [newContentItem, ...prev];
+      });
     } catch (error) {
       console.error('Erro ao verificar se usuário segue o criador:', error);
     }
