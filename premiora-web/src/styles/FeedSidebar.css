@@ -189,6 +189,7 @@
 .search-bar-container {
   margin-bottom: var(--space-6);
   width: 100%;
+  position: relative;
 }
 
 .search-bar {
@@ -213,6 +214,15 @@
   align-items: center;
   gap: var(--space-2);
   flex: 1;
+}
+
+.search-input-container.clickable {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.search-input-container.clickable:hover {
+  background-color: var(--color-bg-hover);
 }
 
 .search-icon {

@@ -13,10 +13,14 @@
 
 .messages-main-content {
   flex: 1;
+  margin-left: 220px; /* Account for fixed sidebar width */
+  padding-top: 64px; /* Account for fixed header height */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--color-bg-primary);
+  width: calc(100vw - 220px); /* Ensure content doesn't overflow */
+  max-width: calc(100vw - 220px);
 }
 
 .messages-layout {
@@ -385,6 +389,13 @@
 /* ==================== Mobile responsive adjustments for messages ==================== */
 
 @media (max-width: 768px) {
+  .messages-main-content {
+    margin-left: 0; /* Remove sidebar margin on mobile */
+    padding-top: 70px; /* Account for mobile header height */
+    width: 100%;
+    max-width: 100%;
+  }
+
   .messages-layout {
     height: calc(100vh - 140px); /* Account for header and bottom bar */
     position: relative;

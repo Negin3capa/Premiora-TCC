@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PopularContentService, type PopularProduct, type PopularPost } from '../../services/content/PopularContentService';
 import { Sparkles, Flame, UserPlus } from 'lucide-react';
 import SearchBar from '../common/SearchBar';
+import SearchModal from '../modals/SearchModal';
+import { useModal } from '../../hooks/useModal';
 import '../../styles/FeedSidebar.css';
 
 /**
@@ -16,6 +18,7 @@ const SidebarFeed: React.FC = () => {
   const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
   const [sidebarLoading, setSidebarLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { isModalOpen } = useModal();
 
   /**
    * Formata número de visualizações
@@ -61,11 +64,23 @@ const SidebarFeed: React.FC = () => {
   return (
     <aside className="feed-sidebar">
       {/* Barra de Pesquisa */}
-      <SearchBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        placeholder="Buscar no feed"
-      />
+      <div className="search-bar-container">
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          placeholder="Buscar no feed"
+          openSearchModal={true}
+        />
+
+        {/* Search Dropdown */}
+        {isModalOpen('search') && searchQuery.trim() && (
+          <SearchModal
+            isOpen={true}
+            onClose={() => {}} // Handled by the modal itself
+            searchQuery={searchQuery}
+          />
+        )}
+      </div>
 
       {/* Seja um criador */}
       <div className="feed-sidebar-section gift-section">

@@ -82,18 +82,8 @@ const Dashboard: React.FC = () => {
     };
   }, [handleVisibilityChange, handleNavigation]);
 
-  // Refresh inicial apenas uma vez - apenas se não houver conteúdo carregado
-  useEffect(() => {
-    if (!hasInitialRefreshedRef.current && feedItems.length === 0) {
-      hasInitialRefreshedRef.current = true;
-      // Pequeno delay para garantir que o componente está totalmente montado
-      const timer = setTimeout(() => {
-        refreshFeed();
-      }, 100);
-
-      return () => clearTimeout(timer);
-    }
-  }, [feedItems.length]); // Adicionada dependência para verificar se conteúdo foi carregado
+  // REMOVED: Refresh inicial que estava causando conflitos com infinite scroll
+  // O useFeed hook já carrega o conteúdo inicial adequadamente
 
   return (
     <div className="dashboard-page">

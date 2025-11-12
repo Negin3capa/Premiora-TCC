@@ -244,12 +244,13 @@ const CommunityPage: React.FC = () => {
                   <p>Seja o primeiro a publicar algo!</p>
                 </div>
               ) : (
-                <Feed
-                  items={filteredItems}
-                  loading={loading}
-                  hasMore={hasMore}
-                  onLoadMore={loadMoreContent}
-                />
+              <Feed
+                items={filteredItems}
+                loading={loading}
+                hasMore={hasMore}
+                onLoadMore={loadMoreContent}
+                showSidebar={false}
+              />
               )}
             </div>
           </div>

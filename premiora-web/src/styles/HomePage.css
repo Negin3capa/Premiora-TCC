@@ -49,6 +49,11 @@
   margin: 0 auto;
 }
 
+.feed-layout--full-width {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
 .feed-main {
   min-width: 0;
 }
@@ -56,6 +61,11 @@
 .feed-content {
   max-width: 680px;
   margin: 0 auto;
+}
+
+.feed-content--full-width {
+  max-width: none;
+  width: 100%;
 }
 
 .feed-sidebar {

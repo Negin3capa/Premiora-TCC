@@ -11,7 +11,8 @@ export type ModalType =
   | 'createCommunity'
   | 'postView'
   | 'videoView'
-  | 'createContent';
+  | 'createContent'
+  | 'search';
 
 /**
  * Estado de um modal individual
