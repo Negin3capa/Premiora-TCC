@@ -1,28 +1,25 @@
 /**
- * Página de listagem de comunidades
- * Exibe todas as comunidades disponíveis com filtros e ordenação
+ * Página de comunidades - Design limpo e profissional
+ * Lista comunidades de forma organizada e minimalista
  */
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Community } from '../types/community';
-import type { ContentItem } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { Search, Flame, Users, Sparkles, Eye, Heart, Video, FileText, Calendar } from 'lucide-react';
+import { Search, Users, TrendingUp, Clock } from 'lucide-react';
 import { getCommunities, searchCommunities } from '../utils/communityUtils';
 import '../styles/CommunitiesPage.css';
 
 /**
- * Página de comunidades que lista todas as comunidades disponíveis
- * Permite ordenação por relevância, tendência, popularidade, etc.
+ * Página de comunidades com design limpo e profissional
+ * Foco na descoberta e navegação intuitiva
  */
 const CommunitiesPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'relevance' | 'trending' | 'popular' | 'new'>('popular');
+  const [sortBy, setSortBy] = useState<'popular' | 'trending' | 'new'>('popular');
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
-  const [communityContent, setCommunityContent] = useState<ContentItem[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Mock data generator for communities
@@ -161,54 +158,7 @@ const CommunitiesPage: React.FC = () => {
     return mockCommunities;
   };
 
-  // Mock data generator for community showcase content
-  const generateCommunityShowcaseContent = (community: Community): ContentItem[] => {
-    // Array de avatares para membros da comunidade
-    const memberAvatars = [
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format',
-      'https://images.unsplash.com/photo-1494790108755-2616b60d0de9?w=40&h=40&fit=crop&crop=face&auto=format',
-      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face&auto=format',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=40&h=40&fit=crop&crop=face&auto=format',
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=40&h=40&fit=crop&crop=face&auto=format'
-    ];
 
-    // Array de thumbnails para vídeos da comunidade
-    const videoThumbnails = [
-      'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=200&fit=crop&auto=format',
-      'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=300&h=200&fit=crop&auto=format',
-      'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=300&h=200&fit=crop&auto=format',
-      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=200&fit=crop&auto=format',
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=200&fit=crop&auto=format',
-      'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=300&h=200&fit=crop&auto=format'
-    ];
-
-    const showcaseItems: ContentItem[] = [];
-    const contentCount = Math.floor(Math.random() * 3) + 2; // 2-4 items per community
-
-    for (let i = 0; i < contentCount; i++) {
-      const isVideo = Math.random() > 0.5;
-      showcaseItems.push({
-        id: `showcase-${community.id}-${i}`,
-        type: isVideo ? 'video' : 'post',
-        title: isVideo
-          ? `Vídeo incrível da comunidade ${community.displayName}`
-          : `Post interessante sobre ${community.displayName}`,
-        author: `Membro ${i + 1}`,
-        authorAvatar: memberAvatars[Math.floor(Math.random() * memberAvatars.length)],
-        thumbnail: isVideo ? videoThumbnails[Math.floor(Math.random() * videoThumbnails.length)] : undefined,
-        content: isVideo ? undefined : `Conteúdo de exemplo da comunidade ${community.displayName}. Este é um preview do que você pode encontrar nesta comunidade incrível!`,
-        views: Math.floor(Math.random() * 5000) + 100,
-        likes: Math.floor(Math.random() * 500) + 10,
-        timestamp: `${Math.floor(Math.random() * 24)}h atrás`,
-        communityId: community.id,
-        communityName: community.name,
-        communityAvatar: community.avatarUrl
-      });
-    }
-
-    return showcaseItems;
-  };
 
   // Load communities on component mount
   useEffect(() => {
@@ -268,14 +218,6 @@ const CommunitiesPage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Load showcase content when a community is selected
-  useEffect(() => {
-    if (selectedCommunity) {
-      const showcaseContent = generateCommunityShowcaseContent(selectedCommunity);
-      setCommunityContent(showcaseContent);
-    }
-  }, [selectedCommunity]);
-
   // Sort communities
   const sortedCommunities = useMemo(() => {
     // Add mock trending/popularity scores for sorting
@@ -283,7 +225,6 @@ const CommunitiesPage: React.FC = () => {
       ...community,
       trendingScore: Math.random() * 100, // Mock trending score
       popularityScore: community.memberCount + Math.random() * 1000, // Based on member count + random
-      relevanceScore: Math.random() * 100 // Mock relevance score
     }));
 
     switch (sortBy) {
@@ -295,18 +236,13 @@ const CommunitiesPage: React.FC = () => {
         return communitiesWithScores.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-      case 'relevance':
       default:
-        return communitiesWithScores.sort((a, b) => b.relevanceScore - a.relevanceScore);
+        return communitiesWithScores;
     }
   }, [communities, sortBy]);
 
   const handleCommunityClick = (community: Community) => {
     navigate(`/r/${community.name}`);
-  };
-
-  const handleShowcaseClick = (community: Community) => {
-    setSelectedCommunity(selectedCommunity?.id === community.id ? null : community);
   };
 
   if (loading) {
@@ -325,9 +261,7 @@ const CommunitiesPage: React.FC = () => {
     <div className="communities-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
-        <Header
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
+        <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
         <div className="communities-container">
           {/* Header Section */}
@@ -338,56 +272,51 @@ const CommunitiesPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Search Bar */}
-          <div className="search-bar">
-            <div className="search-input-container">
-              <Search size={20} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Buscar comunidades..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input"
-              />
-              {searchQuery && (
-                <button
-                  className="clear-search"
-                  onClick={() => setSearchQuery('')}
-                  title="Limpar busca"
-                >
-                  ×
-                </button>
-              )}
+          {/* Search and Filter Bar */}
+          <div className="controls-section">
+            <div className="search-bar">
+              <div className="search-input-container">
+                <Search size={20} className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Buscar comunidades..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-input"
+                />
+                {searchQuery && (
+                  <button
+                    className="clear-search"
+                    onClick={() => setSearchQuery('')}
+                    title="Limpar busca"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Sort Controls */}
-          <div className="sort-controls">
-            <span className="sort-label">Ordenar por:</span>
-            <div className="sort-buttons">
+            <div className="filter-buttons">
               <button
-                className={`sort-button ${sortBy === 'relevance' ? 'active' : ''}`}
-                onClick={() => setSortBy('relevance')}
-              >
-                <Search size={16} /> Relevância
-              </button>
-              <button
-                className={`sort-button ${sortBy === 'trending' ? 'active' : ''}`}
-                onClick={() => setSortBy('trending')}
-              >
-                <Flame size={16} /> Tendência
-              </button>
-              <button
-                className={`sort-button ${sortBy === 'popular' ? 'active' : ''}`}
+                className={`filter-button ${sortBy === 'popular' ? 'active' : ''}`}
                 onClick={() => setSortBy('popular')}
               >
-                <Users size={16} /> Popular
+                <Users size={16} />
+                Popular
               </button>
               <button
-                className={`sort-button ${sortBy === 'new' ? 'active' : ''}`}
+                className={`filter-button ${sortBy === 'trending' ? 'active' : ''}`}
+                onClick={() => setSortBy('trending')}
+              >
+                <TrendingUp size={16} />
+                Tendência
+              </button>
+              <button
+                className={`filter-button ${sortBy === 'new' ? 'active' : ''}`}
                 onClick={() => setSortBy('new')}
               >
-                <Sparkles size={16} /> Novo
+                <Clock size={16} />
+                Recente
               </button>
             </div>
           </div>
@@ -395,95 +324,33 @@ const CommunitiesPage: React.FC = () => {
           {/* Communities Grid */}
           <div className="communities-grid">
             {sortedCommunities.map((community: Community) => (
-              <div key={community.id} className="community-card">
-                {/* Community Banner */}
-                <div className="community-banner">
+              <div key={community.id} className="community-card" onClick={() => handleCommunityClick(community)}>
+                <div className="community-header">
                   <img
-                    src={community.bannerUrl}
+                    src={community.avatarUrl}
                     alt={community.displayName}
-                    className="banner-image"
+                    className="community-avatar"
                   />
-                  <div className="banner-overlay">
-                    <img
-                      src={community.avatarUrl}
-                      alt={community.displayName}
-                      className="community-avatar"
-                    />
+                  <div className="community-basic-info">
+                    <h3 className="community-name">{community.displayName}</h3>
+                    <span className="community-tag">r/{community.name}</span>
                   </div>
                 </div>
 
-                {/* Community Info */}
-                <div className="community-info">
-                  <h3 className="community-name">{community.displayName}</h3>
-                  <p className="community-tag">r/{community.name}</p>
-                  <p className="community-description">{community.description}</p>
+                <p className="community-description">{community.description}</p>
 
-                  <div className="community-stats">
-                    <span className="stat">
-                      <Users size={14} /> {community.memberCount.toLocaleString()} membros
-                    </span>
-                    <span className="stat">
-                      <Calendar size={14} /> Criada em {new Date(community.createdAt).toLocaleDateString('pt-BR')}
-                    </span>
-                  </div>
+                <div className="community-footer">
+                  <span className="member-count">
+                    <Users size={14} />
+                    {community.memberCount.toLocaleString()} membros
+                  </span>
                 </div>
-
-                {/* Community Actions */}
-                <div className="community-actions">
-                  <button
-                    className="action-button primary"
-                    onClick={() => handleCommunityClick(community)}
-                  >
-                    Visitar Comunidade
-                  </button>
-                  <button
-                    className="action-button secondary"
-                    onClick={() => handleShowcaseClick(community)}
-                  >
-                    {selectedCommunity?.id === community.id ? 'Ocultar' : 'Ver Destaques'}
-                  </button>
-                </div>
-
-                {/* Showcase Content */}
-                {selectedCommunity?.id === community.id && (
-                  <div className="community-showcase">
-                    <h4 className="showcase-title">Conteúdo em Destaque</h4>
-                    <div className="showcase-content">
-                      {communityContent.map((item) => (
-                        <div key={item.id} className="showcase-item">
-                          <div className="showcase-item-header">
-                            <img
-                              src={item.authorAvatar}
-                              alt={item.author}
-                              className="showcase-author-avatar"
-                            />
-                            <div className="showcase-item-info">
-                              <span className="showcase-author">{item.author}</span>
-                              <span className="showcase-timestamp">{item.timestamp}</span>
-                            </div>
-                            <span className="showcase-type">
-                              {item.type === 'video' ? <Video size={14} /> : <FileText size={14} />}
-                            </span>
-                          </div>
-                          <h5 className="showcase-item-title">{item.title}</h5>
-                          {item.content && (
-                            <p className="showcase-item-preview">{item.content}</p>
-                          )}
-                          <div className="showcase-item-stats">
-                            <span><Eye size={14} /> {item.views}</span>
-                            <span><Heart size={14} /> {item.likes}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
 
           {sortedCommunities.length === 0 && (
-            <div className="no-communities">
+            <div className="no-results">
               <p>Nenhuma comunidade encontrada para "{searchQuery}"</p>
               <button
                 className="clear-search-button"

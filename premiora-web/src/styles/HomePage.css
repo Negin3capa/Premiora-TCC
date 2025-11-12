@@ -5,7 +5,7 @@
 
 /* ==================== Layout Principal ==================== */
 
-.homepage {
+.dashboard-page {
   display: flex;
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
@@ -19,13 +19,13 @@
 
 .main-content {
   flex: 1;
-  margin-left: 280px;
-  margin-right: 320px;
+  margin-left: 420px;
+  margin-right: 0; /* Removido para centralizar o feed */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: calc(100vw - 280px - 320px);
-  max-width: calc(100vw - 280px - 320px);
+  width: calc(100vw - 280px); /* Ajustado para ocupar espaço sem sidebar direita */
+  max-width: calc(100vw - 280px); /* Ajustado para ocupar espaço sem sidebar direita */
   overflow-x: hidden;
   padding-top: 80px; /* Account for fixed header on desktop */
 }
@@ -40,9 +40,35 @@
   background-color: var(--color-bg-secondary);
 }
 
+.feed-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: var(--space-8);
+  align-items: start;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.feed-main {
+  min-width: 0;
+}
+
 .feed-content {
   max-width: 680px;
   margin: 0 auto;
+}
+
+.feed-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  position: fixed;
+  top: 104px; /* Account for fixed header + content padding */
+  right: 0;
+  width: 320px;
+  height: calc(100vh - 104px);
+  overflow-y: auto;
+  padding-right: var(--space-6);
 }
 
 /* ==================== Feed Tabs ==================== */
@@ -181,6 +207,17 @@
     width: calc(100vw - 280px - 280px);
     max-width: calc(100vw - 280px - 280px);
   }
+
+  .feed-layout {
+    grid-template-columns: 1fr 280px;
+    gap: var(--space-6);
+  }
+
+  .feed-sidebar {
+    width: 280px;
+    top: 104px; /* Account for fixed header + content padding */
+    height: calc(100vh - 104px);
+  }
 }
 
 @media (max-width: 1024px) {
@@ -188,6 +225,17 @@
     margin-right: 260px;
     width: calc(100vw - 280px - 260px);
     max-width: calc(100vw - 280px - 260px);
+  }
+
+  .feed-layout {
+    grid-template-columns: 1fr 260px;
+    gap: var(--space-6);
+  }
+
+  .feed-sidebar {
+    width: 260px;
+    top: 104px; /* Account for fixed header + content padding */
+    height: calc(100vh - 104px);
   }
 }
 
@@ -198,6 +246,16 @@
     width: 100%;
     max-width: 100%;
     padding-top: 70px; /* Reduced header height on mobile */
+  }
+
+  .feed-sidebar {
+    position: static;
+    top: auto;
+    right: auto;
+    width: 100%;
+    height: auto;
+    overflow-y: visible;
+    padding-right: 0;
   }
 
   .feed {

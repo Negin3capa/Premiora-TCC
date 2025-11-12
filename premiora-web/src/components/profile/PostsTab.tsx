@@ -256,7 +256,7 @@ const PostsTabEnhanced: React.FC<PostsTabEnhancedProps> = ({ creatorProfile, cur
         <h2 className="posts-title">Posts recentes</h2>
         <div className="posts-controls">
           <div className="posts-search-container">
-            <Search size={16} className="search-icon" />
+            <Search size={16} className="posts-search-icon" />
             <input
               type="text"
               placeholder="Buscar posts"
