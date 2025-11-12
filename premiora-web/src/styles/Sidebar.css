@@ -18,6 +18,7 @@
   flex-direction: column;
   align-items: flex-start;
   padding: 22px 16px 20px 16px;
+  /* Default: visible on desktop, controlled by grid layout */
 }
 
 .sidebar-content {

@@ -8,7 +8,7 @@
 .header {
   position: fixed;
   top: 0;
-  left: 220px; /* Match sidebar width: 220px */
+  left: 0; /* Start from left edge, adjust with margins/padding */
   right: 0;
   height: 64px;
   background-color: #0D0D0D;
@@ -17,7 +17,8 @@
   display: flex;
   align-items: center;
   padding: 0 24px;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
+  /* Default: no left offset, hamburger hidden */
 }
 
 /* Hidden state for mobile scroll */
@@ -254,6 +255,54 @@
 
 
 /* ==================== Responsive Design ==================== */
+
+/* Large Desktop (1440px+) - Sidebar always visible */
+@media (min-width: 1440px) {
+  .header {
+    padding: 0 32px;
+  }
+
+  .header-tabs {
+    margin: 0 32px;
+  }
+
+  .header-tab {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Desktop (1280px - 1439px) - Sidebar always visible */
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .header {
+    padding: 0 28px;
+  }
+
+  .header-tabs {
+    margin: 0 28px;
+  }
+
+  .header-tab {
+    padding: 12px 18px;
+    font-size: 14px;
+  }
+}
+
+/* Standard Desktop (1025px - 1279px) - Sidebar always visible */
+@media (min-width: 1025px) and (max-width: 1279px) {
+  .header {
+    padding: 0 24px;
+  }
+
+  .header-tabs {
+    margin: 0 24px;
+  }
+
+  .header-tab {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
 
 @media (max-width: 1024px) {
   .header {

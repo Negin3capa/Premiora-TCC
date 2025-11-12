@@ -8,6 +8,7 @@ import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal,
 import { useAuth } from '../hooks/useAuth';
 import { PostService } from '../services/content/PostService';
 import { Sidebar, MobileBottomBar } from '../components/layout';
+import SidebarFeed from '../components/content/SidebarFeed';
 import type { ContentItem, ContentType } from '../types/content';
 import '../styles/PostViewPage.css';
 
@@ -174,6 +175,7 @@ const PostViewPage: React.FC = () => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Atualizar estado local quando o post for carregado
   useEffect(() => {
@@ -248,6 +250,39 @@ const PostViewPage: React.FC = () => {
   };
 
   /**
+   * Handler para editar post
+   */
+  const handleEdit = () => {
+    // TODO: Implementar navegação para página de edição
+    console.log('Editar post:', postId);
+  };
+
+  /**
+   * Handler para excluir post
+   */
+  const handleDelete = () => {
+    // TODO: Implementar modal de confirmação e API de exclusão
+    console.log('Excluir post:', postId);
+  };
+
+  /**
+   * Handler para clique no menu
+   */
+  const handleMenuClick = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  /**
+   * Handler para fechar menu quando clicar fora
+   */
+  const handleMenuClose = () => {
+    setIsMenuOpen(false);
+  };
+
+  // Verificar se o usuário atual é o autor do post
+  const isAuthor = user?.id === post?.creatorId;
+
+  /**
    * Renderiza estado de loading
    */
   if (loading) {
@@ -313,182 +348,277 @@ const PostViewPage: React.FC = () => {
           />
         </Suspense>
         <div className="post-view-page">
-          <div className="post-view-page-container">
-            {/* Header com navegação */}
-            <header className="post-view-header">
-              <div className="breadcrumb">
-                <ArrowLeft size={16} className="breadcrumb-arrow" onClick={handleBack} />
-                <Link to="/dashboard" className="breadcrumb-link" onClick={handleBack}>Início</Link>
-                <span className="breadcrumb-separator">›</span>
-                {post.communityId && (
-                  <>
-                    <Link to={`/r/${post.communityName}`} className="breadcrumb-link">
-                      r/{post.communityDisplayName || post.communityName}
+          <div className="post-view-layout">
+            {/* Conteúdo principal do post */}
+            <div className="post-view-main">
+              <div className="post-view-page-container">
+                {/* Header com navegação */}
+                <header className="post-view-header">
+                  <div className="breadcrumb">
+                    <ArrowLeft size={16} className="breadcrumb-arrow" onClick={handleBack} />
+                    <Link to="/dashboard" className="breadcrumb-link" onClick={handleBack}>Início</Link>
+                    <span className="breadcrumb-separator">›</span>
+                    {post.communityId && (
+                      <>
+                        <Link to={`/r/${post.communityName}`} className="breadcrumb-link">
+                          r/{post.communityDisplayName || post.communityName}
+                        </Link>
+                        <span className="breadcrumb-separator">›</span>
+                      </>
+                    )}
+                    <Link to={`/u/${username}`} className="breadcrumb-link">
+                      u/{username}
                     </Link>
                     <span className="breadcrumb-separator">›</span>
-                  </>
-                )}
-                <Link to={`/u/${username}`} className="breadcrumb-link">
-                  u/{username}
-                </Link>
-                <span className="breadcrumb-separator">›</span>
-                <span className="breadcrumb-current">Post</span>
-              </div>
-            </header>
-
-            {/* Conteúdo principal do post */}
-            <main className="post-view-content">
-              <article className="post-article">
-                {/* Header do post */}
-                <header className="post-header">
-                  <div className="author-info">
-                    <img
-                      src={post.authorAvatar || '/default-avatar.png'}
-                      alt={post.author}
-                      className="author-avatar"
-                      loading="lazy"
-                    />
-                    <div className="author-details">
-                      <Link to={`/u/${username}`} className="author-name">
-                        {post.author}
-                      </Link>
-                      <span className="post-timestamp">{post.timestamp}</span>
-                    </div>
-                  </div>
-
-                  {/* Menu de opções */}
-                  <div className="post-menu">
-                    <button className="post-view-menu-button" aria-label="Mais opções">
-                      <MoreHorizontal size={20} />
-                    </button>
+                    <span className="breadcrumb-current">Post</span>
                   </div>
                 </header>
 
-                {/* Título e conteúdo */}
-                <div className="post-view-body">
-                  {/* Para vídeos: mostrar player primeiro, depois título e descrição */}
-                  {post.type === 'video' && post.videoUrl ? (
-                    <>
-                      <VideoPlayer
-                        src={post.videoUrl}
-                        poster={post.thumbnail}
-                      />
+                {/* Conteúdo principal do post */}
+                <main className="post-view-content">
+                  <article className="post-article">
+                    {/* Header do post */}
+                    <header className="post-header">
+                      <div className="author-info">
+                        <img
+                          src={post.authorAvatar || '/default-avatar.png'}
+                          alt={post.author}
+                          className="author-avatar"
+                          loading="lazy"
+                        />
+                        <div className="author-details">
+                          <Link to={`/u/${username}`} className="author-name">
+                            {post.author}
+                          </Link>
+                          <span className="post-timestamp">{post.timestamp}</span>
+                        </div>
+                      </div>
 
-                      <div className="video-info-section">
-                        <h1 className="post-title">{post.title}</h1>
+                      {/* Menu de opções */}
+                      <div className="post-menu">
+                        <div className="post-menu-container">
+                          <button
+                            className="post-view-menu-button"
+                            onClick={handleMenuClick}
+                            aria-label="Mais opções"
+                            aria-expanded={isMenuOpen}
+                          >
+                            <MoreHorizontal size={20} />
+                          </button>
 
-                        {post.content && (
-                          <div className="post-text">
-                            {post.content.split('\n').map((paragraph, index) => (
-                              <p key={index}>{paragraph}</p>
-                            ))}
-                          </div>
+                          {/* Dropdown Menu */}
+                          {isMenuOpen && (
+                            <div className="post-menu-dropdown">
+                              <button
+                                className="post-menu-item"
+                                onClick={() => {
+                                  handleShare();
+                                  handleMenuClose();
+                                }}
+                              >
+                                <Share size={16} />
+                                <span>Compartilhar</span>
+                              </button>
+
+                              <button
+                                className="post-menu-item"
+                                onClick={() => {
+                                  handleBookmark();
+                                  handleMenuClose();
+                                }}
+                              >
+                                <Bookmark size={16} />
+                                <span>{isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}</span>
+                              </button>
+
+                              {isAuthor && (
+                                <>
+                                  <button
+                                    className="post-menu-item"
+                                    onClick={() => {
+                                      handleEdit();
+                                      handleMenuClose();
+                                    }}
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                    <span>Editar</span>
+                                  </button>
+
+                                  <button
+                                    className="post-menu-item delete-item"
+                                    onClick={() => {
+                                      handleDelete();
+                                      handleMenuClose();
+                                    }}
+                                  >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                      <path d="M3 6h18"/>
+                                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                      <line x1="10" y1="11" x2="10" y2="17"/>
+                                      <line x1="14" y1="11" x2="14" y2="17"/>
+                                    </svg>
+                                    <span>Excluir</span>
+                                  </button>
+                                </>
+                              )}
+
+                              <button
+                                className="post-menu-item report-item"
+                                onClick={() => {
+                                  handleReport();
+                                  handleMenuClose();
+                                }}
+                              >
+                                <Flag size={16} />
+                                <span>Denunciar</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Overlay para fechar menu ao clicar fora */}
+                        {isMenuOpen && (
+                          <div
+                            className="post-menu-overlay"
+                            onClick={handleMenuClose}
+                          />
                         )}
                       </div>
-                    </>
-                  ) : (
-                    /* Para posts não-vídeos: manter estrutura original */
-                    <>
-                      <h1 className="post-title">{post.title}</h1>
+                    </header>
 
-                      {post.content && (
-                        <div className="post-text">
-                          {post.content.split('\n').map((paragraph, index) => (
-                            <p key={index}>{paragraph}</p>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Mídia do post - imagem */}
-                      {post.thumbnail ? (
-                        <div className="post-image-container">
-                          <img
-                            src={post.thumbnail}
-                            alt={post.title}
-                            className="post-image clickable-image"
-                            loading="lazy"
-                            onClick={() => setIsImageModalOpen(true)}
-                            style={{ cursor: 'pointer' }}
+                    {/* Título e conteúdo */}
+                    <div className="post-view-body">
+                      {/* Para vídeos: mostrar player primeiro, depois título e descrição */}
+                      {post.type === 'video' && post.videoUrl ? (
+                        <>
+                          <VideoPlayer
+                            src={post.videoUrl}
+                            poster={post.thumbnail}
                           />
-                        </div>
-                      ) : null}
-                    </>
-                  )}
-                </div>
 
-                {/* Informações da comunidade - agora inline com o autor */}
-                {post.communityId && (
-                  <div className="community-info">
-                    <Link to={`/r/${post.communityName}`} className="community-link">
-                      {post.communityAvatar && (
-                        <img
-                          src={post.communityAvatar}
-                          alt={post.communityDisplayName || post.communityName}
-                          className="community-avatar"
-                        />
+                          <div className="video-info-section">
+                            <h1 className="post-title">{post.title}</h1>
+
+                            {post.content && (
+                              <div className="post-text">
+                                {post.content.split('\n').map((paragraph, index) => (
+                                  <p key={index}>{paragraph}</p>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        /* Para posts não-vídeos: manter estrutura original */
+                        <>
+                          <h1 className="post-title">{post.title}</h1>
+
+                          {post.content && (
+                            <div className="post-text">
+                              {post.content.split('\n').map((paragraph, index) => (
+                                <p key={index}>{paragraph}</p>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Mídia do post - imagem */}
+                          {post.thumbnail ? (
+                            <div className="post-image-container">
+                              <img
+                                src={post.thumbnail}
+                                alt={post.title}
+                                className="post-image clickable-image"
+                                loading="lazy"
+                                onClick={() => setIsImageModalOpen(true)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            </div>
+                          ) : null}
+                        </>
                       )}
-                      <span>r/{post.communityDisplayName || post.communityName}</span>
-                    </Link>
-                  </div>
-                )}
+                    </div>
 
-                {/* Ações do post */}
-                <footer className="post-actions">
-                  <div className="action-buttons">
-                    <button
-                      onClick={handleLike}
-                      className={`post-view-action-button like-button ${isLiked ? 'liked' : ''}`}
-                      aria-label={isLiked ? 'Descurtir' : 'Curtir'}
-                    >
-                      <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                      <span className="action-count">{likesCount}</span>
-                    </button>
+                    {/* Informações da comunidade - agora inline com o autor */}
+                    {post.communityId && (
+                      <div className="post-view-community-info">
+                        <Link to={`/r/${post.communityName}`} className="community-link">
+                          {post.communityAvatar && (
+                            <img
+                              src={post.communityAvatar}
+                              alt={post.communityDisplayName || post.communityName}
+                              className="community-avatar"
+                            />
+                          )}
+                          <span>r/{post.communityDisplayName || post.communityName}</span>
+                        </Link>
+                      </div>
+                    )}
 
-                    <button className="post-view-action-button comment-button" aria-label="Comentar">
-                      <MessageCircle size={18} />
-                      <span className="action-count">0</span>
-                    </button>
+                    {/* Ações do post */}
+                    <footer className="post-actions">
+                      <div className="action-buttons">
+                        <button
+                          onClick={handleLike}
+                          className={`post-view-action-button like-button ${isLiked ? 'liked' : ''}`}
+                          aria-label={isLiked ? 'Descurtir' : 'Curtir'}
+                        >
+                          <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
+                          <span className="action-count">{likesCount}</span>
+                        </button>
 
-                    <button
-                      onClick={handleShare}
-                      className="post-view-action-button share-button"
-                      aria-label="Compartilhar"
-                    >
-                      <Share size={18} />
-                    </button>
+                        <button className="post-view-action-button comment-button" aria-label="Comentar">
+                          <MessageCircle size={18} />
+                          <span className="action-count">0</span>
+                        </button>
 
-                    <button
-                      onClick={handleBookmark}
-                      className={`post-view-action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
-                      aria-label={isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
-                    >
-                      <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
-                    </button>
+                        <button
+                          onClick={handleShare}
+                          className="post-view-action-button share-button"
+                          aria-label="Compartilhar"
+                        >
+                          <Share size={18} />
+                        </button>
 
-                    <button
-                      onClick={handleReport}
-                      className="post-view-action-button report-button"
-                      aria-label="Denunciar"
-                    >
-                      <Flag size={18} />
-                    </button>
-                  </div>
+                        <button
+                          onClick={handleBookmark}
+                          className={`post-view-action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
+                          aria-label={isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+                        >
+                          <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
+                        </button>
 
-                  {/* Estatísticas */}
-                  <div className="post-stats">
-                    <span className="views-count">{post.views?.toLocaleString('pt-BR')} visualizações</span>
-                  </div>
-                </footer>
-              </article>
+                        <button
+                          onClick={handleReport}
+                          className="post-view-action-button report-button"
+                          aria-label="Denunciar"
+                        >
+                          <Flag size={18} />
+                        </button>
+                      </div>
 
-              {/* Seção de comentários (placeholder) */}
-              <section className="comments-section">
-                <h3>Comentários</h3>
-                <div className="comments-placeholder">
-                  <p>Comentários serão implementados em breve.</p>
-                </div>
-              </section>
-            </main>
+                      {/* Estatísticas */}
+                      <div className="post-stats">
+                        <span className="views-count">{post.views?.toLocaleString('pt-BR')} visualizações</span>
+                      </div>
+                    </footer>
+                  </article>
+
+                  {/* Seção de comentários (placeholder) */}
+                  <section className="comments-section">
+                    <h3>Comentários</h3>
+                    <div className="comments-placeholder">
+                      <p>Comentários serão implementados em breve.</p>
+                    </div>
+                  </section>
+                </main>
+              </div>
+            </div>
+
+            {/* Sidebar do feed */}
+            <SidebarFeed />
           </div>
         </div>
       </div>

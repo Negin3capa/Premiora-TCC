@@ -45,17 +45,9 @@ const ProfilePage: React.FC = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isFollowing, setIsFollowing] = useState(false); // TODO: Implement follow state
 
   // Verificar se é o próprio perfil do usuário
   const isOwnProfile = userProfile?.username === username;
-
-  // Handlers para ações da sidebar minimalista
-  const handleFollowToggle = useCallback(() => {
-    setIsFollowing(prev => !prev);
-    // TODO: Implementar chamada para API de follow/unfollow
-    console.log(`${isFollowing ? 'Unfollowing' : 'Following'} ${username}`);
-  }, [isFollowing, username]);
 
   const handleShare = useCallback(() => {
     // TODO: Implementar compartilhamento do perfil
@@ -354,8 +346,6 @@ const ProfilePage: React.FC = () => {
       ) : (
         <ProfileSidebar
           username={username!}
-          isFollowing={isFollowing}
-          onFollowToggle={handleFollowToggle}
           onShare={handleShare}
           onReport={handleReport}
         />

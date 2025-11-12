@@ -6,7 +6,7 @@ import React, { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home, Compass, Bell, MessageCircle, Users, Building2, Settings,
-  Heart, Share2, Flag, PenTool
+  Share2, Flag, PenTool
 } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { CreateContentModal, CreatePostModal, CreateVideoModal } from '../modals';
@@ -16,10 +16,6 @@ import '../../styles/ProfileSidebar.css';
 interface ProfileSidebarProps {
   /** Username do perfil sendo visualizado */
   username: string;
-  /** Se o usuário atual está seguindo este perfil */
-  isFollowing?: boolean;
-  /** Callback para seguir/deixar de seguir */
-  onFollowToggle?: () => void;
   /** Callback para compartilhar */
   onShare?: () => void;
   /** Callback para denunciar */
@@ -32,8 +28,6 @@ interface ProfileSidebarProps {
  */
 const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   username,
-  isFollowing = false,
-  onFollowToggle,
   onShare,
   onReport
 }) => {
@@ -103,19 +97,6 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 
           {/* Profile Actions */}
           <div className="profile-sidebar-actions">
-            {/* Botão Seguir/Deixar de Seguir */}
-            <button
-              className={`profile-sidebar-button follow-button ${isFollowing ? 'following' : ''}`}
-              onClick={onFollowToggle}
-              aria-label={isFollowing ? `Deixar de seguir ${username}` : `Seguir ${username}`}
-              title={isFollowing ? `Deixar de seguir ${username}` : `Seguir ${username}`}
-            >
-              <Heart
-                size={20}
-                className={isFollowing ? 'filled' : ''}
-              />
-            </button>
-
             {/* Botão Compartilhar */}
             <button
               className="profile-sidebar-button share-button"
