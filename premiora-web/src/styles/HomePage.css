@@ -232,20 +232,25 @@
 
 @media (max-width: 1024px) {
   .dashboard-main-content {
-    margin-right: 260px;
-    width: calc(100vw - 280px - 260px);
-    max-width: calc(100vw - 280px - 260px);
+    margin-right: 240px;
+    width: calc(100vw - 280px - 240px);
+    max-width: calc(100vw - 280px - 240px);
   }
 
   .feed-layout {
-    grid-template-columns: 1fr 260px;
-    gap: var(--space-6);
+    grid-template-columns: 1fr 240px;
+    gap: var(--space-5);
   }
 
   .feed-sidebar {
-    width: 260px;
+    width: 240px;
     top: 104px; /* Account for fixed header + content padding */
     height: calc(100vh - 104px);
+    padding-right: var(--space-4);
+  }
+
+  .feed-content {
+    max-width: 640px;
   }
 }
 
@@ -258,24 +263,23 @@
     padding-top: 70px; /* Reduced header height on mobile */
   }
 
+  .feed-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
   .feed-sidebar {
-    position: static;
-    top: auto;
-    right: auto;
-    width: 100%;
-    height: auto;
-    overflow-y: visible;
-    padding-right: 0;
+    display: none; /* Hide sidebar completely on mobile */
   }
 
   .feed {
-    padding: var(--space-4) var(--space-3);
+    padding: var(--space-3) var(--space-2);
   }
 
   .feed-content {
     max-width: 100%;
     margin: 0;
-    padding: 0 var(--space-2);
+    padding: 0 var(--space-1);
   }
 
   .feed-tabs {
@@ -294,9 +298,45 @@
   }
 }
 
+@media (max-width: 640px) {
+  .feed-layout {
+    gap: var(--space-3);
+  }
+
+  .feed {
+    padding: var(--space-2) var(--space-1);
+  }
+
+  .feed-content {
+    padding: 0;
+  }
+
+  .feed-tabs {
+    margin-bottom: var(--space-2);
+  }
+
+  .feed-tab {
+    padding: var(--space-2) var(--space-2);
+    font-size: var(--font-size-xs);
+  }
+
+  .content-grid {
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .empty-state {
+    padding: var(--space-6) var(--space-3);
+  }
+
+  .loading-state {
+    padding: var(--space-4) var(--space-3);
+  }
+}
+
 @media (max-width: 480px) {
   .feed {
-    padding: var(--space-2);
+    padding: var(--space-1);
   }
 
   .feed-content {
@@ -304,15 +344,19 @@
   }
 
   .content-grid {
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
 
   .empty-state {
-    padding: var(--space-8) var(--space-4);
+    padding: var(--space-4) var(--space-2);
   }
 
   .loading-state {
-    padding: var(--space-6) var(--space-4);
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .feed-tabs {
+    margin-bottom: var(--space-1);
   }
 }
 
@@ -346,14 +390,14 @@
   gap: var(--space-1);
   background: none;
   border: none;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2);
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-fast);
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
-  min-width: 60px;
+  min-width: 50px;
   text-align: center;
 }
 

@@ -343,7 +343,13 @@ const ProfilePage: React.FC = () => {
       overflowX: 'hidden'
     }}>
       {/* Conditional Sidebar - Full sidebar for own profile, minimal for others */}
-      {isOwnProfile ? (
+      {/* On mobile, hamburger menu opens the full sidebar */}
+      {isSidebarOpen ? (
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      ) : isOwnProfile ? (
         <Sidebar />
       ) : (
         <ProfileSidebar
@@ -381,7 +387,7 @@ const ProfilePage: React.FC = () => {
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
-        marginLeft: isOwnProfile ? '80px' : '60px', /* Account for sidebar width */
+        marginLeft: isSidebarOpen ? '0' : (isOwnProfile ? '80px' : '60px'), /* Account for sidebar width, hide when mobile sidebar is open */
         marginTop: ['posts', 'community', 'shop'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
         padding: '2rem 1rem',
         overflow: 'hidden',

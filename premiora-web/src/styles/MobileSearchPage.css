@@ -1,0 +1,202 @@
+/**
+ * Estilos para a página de busca móvel
+ * Página dedicada para dispositivos móveis com conteúdo da sidebar
+ */
+
+/* ==================== Container Principal ==================== */
+
+.mobile-search-page {
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+  display: flex;
+  flex-direction: column;
+  padding-top: 64px; /* Account for fixed header height */
+}
+
+/* ==================== Conteúdo Principal ==================== */
+
+.mobile-search-content {
+  flex: 1;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* ==================== Seções ==================== */
+
+.mobile-search-section {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-light);
+}
+
+.mobile-search-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.mobile-search-section-content p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.mobile-search-cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #FF6B75 100%);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.mobile-search-cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
+}
+
+/* ==================== Itens da Lista ==================== */
+
+.mobile-search-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mobile-search-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  background-color: var(--color-bg-secondary);
+}
+
+.mobile-search-item:hover {
+  background-color: var(--color-bg-hover);
+  transform: translateX(2px);
+}
+
+.mobile-search-item-thumbnail {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.mobile-search-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.mobile-search-item-date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.mobile-search-item-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mobile-search-item-price {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.mobile-search-item-views {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ==================== Estados ==================== */
+
+.mobile-search-loading {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.mobile-search-empty {
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* ==================== Responsividade ==================== */
+
+@media (max-width: 768px) {
+  .mobile-search-page {
+    padding-top: 56px; /* Mobile header height */
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-search-page {
+    padding-top: 56px; /* Mobile header height */
+  }
+
+  .mobile-search-content {
+    padding: var(--space-3);
+    gap: var(--space-4);
+  }
+
+  .mobile-search-section {
+    padding: var(--space-3);
+  }
+
+  .mobile-search-section-title {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--space-3);
+  }
+
+  .mobile-search-item {
+    padding: var(--space-2);
+    gap: var(--space-2);
+  }
+
+  .mobile-search-item-thumbnail {
+    width: 50px;
+    height: 50px;
+  }
+
+  .mobile-search-item-title {
+    font-size: var(--font-size-xs);
+  }
+
+  .mobile-search-item-price,
+  .mobile-search-item-views {
+    font-size: var(--font-size-xs);
+  }
+}
