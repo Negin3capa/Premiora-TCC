@@ -7,7 +7,7 @@ import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { CommunityBannerEditable } from '../components/profile/CommunityBannerEditable';
 import { CommunityRulesEditable } from '../components/profile/CommunityRulesEditable';
 import { useCommunityCreate } from '../hooks/useCommunityCreate';
-import '../styles/CommunityPage.css';
+import '../styles/CreateCommunityPage.css';
 
 /**
  * Página de criação de comunidades
@@ -41,9 +41,9 @@ const CreateCommunityPage: React.FC = () => {
 
 
   return (
-    <div className="community-page">
+    <div className="create-community-page">
       <Sidebar />
-      <div className="main-content">
+      <div className="create-community-main-content">
         <Header
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />

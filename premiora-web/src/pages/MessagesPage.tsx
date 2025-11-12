@@ -84,9 +84,9 @@ const MessagesPage: React.FC = () => {
   const selectedConversationData = mockConversations.find(conv => conv.id === selectedConversation);
 
   return (
-    <div className="homepage">
+    <div className="messages-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="messages-main-content">
         <Header
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />

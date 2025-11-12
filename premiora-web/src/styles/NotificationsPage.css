@@ -5,12 +5,26 @@
 
 /* ==================== Notifications Page ==================== */
 
+.notifications-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.notifications-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
 .notifications-header {
   margin-bottom: var(--space-6);
   text-align: center;
 }
 
-.notifications-container {
+.notifications-page-container {
   max-width: 600px;
   margin: 0 auto;
 }

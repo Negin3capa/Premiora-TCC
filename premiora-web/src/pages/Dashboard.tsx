@@ -98,7 +98,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="dashboard-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}

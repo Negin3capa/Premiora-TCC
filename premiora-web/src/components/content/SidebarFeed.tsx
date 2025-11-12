@@ -68,8 +68,8 @@ const SidebarFeed: React.FC = () => {
       />
 
       {/* Seja um criador */}
-      <div className="sidebar-section gift-section">
-        <h3 className="sidebar-title">
+      <div className="feed-sidebar-section gift-section">
+        <h3 className="feed-sidebar-title">
           <Sparkles size={20} />
           Seja um criador
         </h3>
@@ -83,13 +83,13 @@ const SidebarFeed: React.FC = () => {
       </div>
 
       {/* Assuntos do Momento */}
-      <div className="sidebar-section products-section">
-        <h3 className="sidebar-title">
+      <div className="feed-sidebar-section products-section">
+        <h3 className="feed-sidebar-title">
           <Flame size={20} />
           Assuntos do Momento
         </h3>
         {sidebarLoading ? (
-          <div className="sidebar-loading">Carregando assuntos...</div>
+          <div className="feed-sidebar-loading">Carregando assuntos...</div>
         ) : (
           <div className="products-list">
             {popularProducts.length > 0 ? (
@@ -111,20 +111,20 @@ const SidebarFeed: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="sidebar-empty">Nenhum assunto encontrado</div>
+              <div className="feed-sidebar-empty">Nenhum assunto encontrado</div>
             )}
           </div>
         )}
       </div>
 
       {/* Quem Seguir */}
-      <div className="sidebar-section popular-posts-section">
-        <h3 className="sidebar-title">
+      <div className="feed-sidebar-section popular-posts-section">
+        <h3 className="feed-sidebar-title">
           <UserPlus size={20} />
           Quem Seguir
         </h3>
         {sidebarLoading ? (
-          <div className="sidebar-loading">Carregando sugestões...</div>
+          <div className="feed-sidebar-loading">Carregando sugestões...</div>
         ) : (
           <div className="popular-posts-list">
             {popularPosts.length > 0 ? (
@@ -145,7 +145,7 @@ const SidebarFeed: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="sidebar-empty">Nenhuma sugestão encontrada</div>
+              <div className="feed-sidebar-empty">Nenhuma sugestão encontrada</div>
             )}
           </div>
         )}

@@ -249,8 +249,8 @@ const CommunitiesPage: React.FC = () => {
     return (
       <div className="communities-page">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="main-content">
-          <div className="loading">Carregando comunidades...</div>
+      <div className="communities-main-content">
+          <div className="communities-loading">Carregando comunidades...</div>
         </div>
         <MobileBottomBar />
       </div>
@@ -260,10 +260,10 @@ const CommunitiesPage: React.FC = () => {
   return (
     <div className="communities-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="communities-main-content">
         <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="communities-container">
+        <div className="communities-page-container">
           {/* Header Section */}
           <div className="communities-header">
             <h1 className="page-title">Comunidades</h1>
@@ -274,19 +274,19 @@ const CommunitiesPage: React.FC = () => {
 
           {/* Search and Filter Bar */}
           <div className="controls-section">
-            <div className="search-bar">
-              <div className="search-input-container">
-                <Search size={20} className="search-icon" />
+            <div className="communities-search-bar">
+              <div className="communities-search-input-container">
+                <Search size={20} className="communities-search-icon" />
                 <input
                   type="text"
                   placeholder="Buscar comunidades..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-input"
+                  className="communities-search-input"
                 />
                 {searchQuery && (
                   <button
-                    className="clear-search"
+                    className="communities-clear-search"
                     onClick={() => setSearchQuery('')}
                     title="Limpar busca"
                   >

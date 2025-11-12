@@ -122,7 +122,7 @@ const Feed: React.FC<FeedProps> = ({
 
             {/* Estado de erro com opção de retry */}
             {currentError && (
-              <div className="error-state">
+              <div className="feed-error-state">
                 <div className="error-message">
                   <p>Erro ao carregar conteúdo: {currentError}</p>
                   {currentCanRetry && currentOnRetry && (

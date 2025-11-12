@@ -87,7 +87,7 @@ const Signup: React.FC = () => {
 
   return (
     <div className="login-page">
-      <div className="login-container">
+      <div className="signup-page-container">
         {/* Premium Branding Header */}
         <div className="login-brand">
           <div className="brand-logo">

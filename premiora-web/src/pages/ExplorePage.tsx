@@ -62,10 +62,10 @@ const ExplorePage: React.FC = () => {
     return (
       <div className="explore-page">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="main-content">
+      <div className="explore-main-content">
           <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-          <div className="explore-container">
-            <div className="loading-state">
+          <div className="explore-page-container">
+            <div className="explore-loading-state">
               <Compass size={48} className="loading-icon" />
               <h2>Carregando Explore...</h2>
               <p>Descobrindo conteúdo incrível para você</p>
@@ -81,10 +81,10 @@ const ExplorePage: React.FC = () => {
     return (
       <div className="explore-page">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="main-content">
+        <div className="explore-main-content">
           <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-          <div className="explore-container">
-            <div className="error-state">
+          <div className="explore-page-container">
+            <div className="explore-error-state">
               <h2>Erro ao carregar Explore</h2>
               <p>{error}</p>
               <button onClick={refresh} className="retry-button">
@@ -101,10 +101,10 @@ const ExplorePage: React.FC = () => {
   return (
     <div className="explore-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="explore-main-content">
         <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="explore-container">
+        <div className="explore-page-container">
           {/* Category Filter Bar */}
           <section className="category-filter-section">
             <div className="category-scroll-container">

@@ -9,7 +9,21 @@
   max-width: 100%;
 }
 
-.post-view-container {
+/* Área de conteúdo principal para PostViewPage */
+.post-view-main-content {
+  flex: 1;
+  margin-left: 420px;
+  margin-right: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: calc(100vw - 280px);
+  max-width: calc(100vw - 280px);
+  overflow-x: hidden;
+  padding-top: 80px; /* Account for fixed header on desktop */
+}
+
+.post-view-page-container {
   max-width: 800px;
   margin: 0 auto;
 }
@@ -512,7 +526,7 @@
   margin-bottom: var(--space-3);
 }
 
-.post-view-page .action-button {
+.post-view-page .post-view-action-button {
   display: flex;
   align-items: center;
   gap: var(--space-1-5);
@@ -527,23 +541,23 @@
   transition: all var(--transition-fast);
 }
 
-.post-view-page .action-button:hover {
+.post-view-page .post-view-action-button:hover {
   background-color: var(--color-bg-hover);
 }
 
-.post-view-page .action-button.liked {
+.post-view-page .post-view-action-button.liked {
   color: var(--color-like);
 }
 
-.post-view-page .action-button.liked:hover {
+.post-view-page .post-view-action-button.liked:hover {
   background-color: var(--color-bg-hover);
 }
 
-.post-view-page .action-button.bookmarked {
+.post-view-page .post-view-action-button.bookmarked {
   color: var(--color-warning);
 }
 
-.post-view-page .action-button.bookmarked:hover {
+.post-view-page .post-view-action-button.bookmarked:hover {
   background-color: var(--color-bg-hover);
 }
 
@@ -584,8 +598,8 @@
 }
 
 /* Estados de loading e erro */
-.post-view-page .loading-state,
-.post-view-page .error-state {
+.post-view-page .post-view-loading-state,
+.post-view-page .post-view-error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -609,14 +623,14 @@
   100% { transform: rotate(360deg); }
 }
 
-.post-view-page .error-state h2 {
+.post-view-page .post-view-error-state h2 {
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0 0 var(--space-2) 0;
 }
 
-.post-view-page .error-state p {
+.post-view-page .post-view-error-state p {
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-6) 0;
   max-width: 400px;
@@ -702,7 +716,7 @@
     gap: 4px;
   }
 
-  .post-view-page .action-button {
+  .post-view-page .post-view-action-button {
     padding: 6px 10px;
     font-size: 13px;
   }
@@ -760,7 +774,7 @@
     flex-wrap: wrap;
   }
 
-  .post-view-page .action-button {
+  .post-view-page .post-view-action-button {
     padding: 6px 8px;
     font-size: 12px;
   }
@@ -850,27 +864,27 @@
     border-color: var(--color-border-dark);
   }
 
-  .post-view-page .action-button {
+  .post-view-page .post-view-action-button {
     color: var(--color-text-secondary-dark);
   }
 
-  .post-view-page .action-button:hover {
+  .post-view-page .post-view-action-button:hover {
     background-color: var(--color-bg-hover-dark);
   }
 
-  .post-view-page .action-button.liked {
+  .post-view-page .post-view-action-button.liked {
     color: var(--color-error-dark);
   }
 
-  .post-view-page .action-button.liked:hover {
+  .post-view-page .post-view-action-button.liked:hover {
     background-color: var(--color-bg-hover-dark);
   }
 
-  .post-view-page .action-button.bookmarked {
+  .post-view-page .post-view-action-button.bookmarked {
     color: var(--color-warning-dark);
   }
 
-  .post-view-page .action-button.bookmarked:hover {
+  .post-view-page .post-view-action-button.bookmarked:hover {
     background-color: var(--color-bg-hover-dark);
   }
 
@@ -893,11 +907,11 @@
     color: var(--color-text-secondary-dark);
   }
 
-  .post-view-page .error-state h2 {
+  .post-view-page .post-view-error-state h2 {
     color: var(--color-text-primary-dark);
   }
 
-  .post-view-page .error-state p {
+  .post-view-page .post-view-error-state p {
     color: var(--color-text-secondary-dark);
   }
 
@@ -966,16 +980,16 @@
 }
 
 /* Foco e acessibilidade */
-.post-view-page .action-button:focus,
-.post-view-page .menu-button:focus,
-.post-view-page .back-button:focus,
+.post-view-page .post-view-action-button:focus,
+.post-view-page .post-view-menu-button:focus,
+.post-view-page .post-view-back-button:focus,
 .image-modal-close:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
 /* Animações */
-.post-view-page .action-button {
+.post-view-page .post-view-action-button {
   transition: all 0.2s ease;
 }
 

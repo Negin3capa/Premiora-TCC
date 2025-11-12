@@ -5,6 +5,20 @@
 
 /* ==================== Messages Page ==================== */
 
+.messages-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.messages-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
 .messages-layout {
   display: flex;
   flex: 1; /* Fill the available height in main-content */

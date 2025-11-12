@@ -5,7 +5,7 @@
 
 /* ==================== Feed Sidebar ==================== */
 
-.sidebar-section {
+.feed-sidebar-section {
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);
@@ -13,11 +13,11 @@
   transition: all var(--transition-fast);
 }
 
-.sidebar-section:hover {
+.feed-sidebar-section:hover {
   border-color: var(--color-primary);
 }
 
-.sidebar-title {
+.feed-sidebar-title {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -170,14 +170,14 @@
 
 /* ==================== Estados da Sidebar ==================== */
 
-.sidebar-loading {
+.feed-sidebar-loading {
   text-align: center;
   padding: var(--space-4);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
-.sidebar-empty {
+.feed-sidebar-empty {
   text-align: center;
   padding: var(--space-4);
   color: var(--color-text-secondary);
@@ -269,7 +269,7 @@
 /* ==================== Responsive Sidebar ==================== */
 
 @media (max-width: 1024px) {
-  .sidebar-section {
+  .feed-sidebar-section {
     padding: var(--space-4);
   }
 
@@ -279,7 +279,7 @@
 }
 
 @media (max-width: 768px) {
-  .sidebar-section {
+  .feed-sidebar-section {
     padding: var(--space-3);
   }
 
@@ -310,7 +310,7 @@
 }
 
 @media (max-width: 480px) {
-  .sidebar-section {
+  .feed-sidebar-section {
     padding: var(--space-2);
   }
 
