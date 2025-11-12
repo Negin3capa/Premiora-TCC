@@ -5,6 +5,7 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute, ProfileSetupGuard } from './components/auth';
+import { MobileBottomBar } from './components/layout';
 import NotificationContainer from './components/common/NotificationContainer';
 
 // Lazy loading dos componentes de página para otimização de bundle
@@ -43,6 +44,17 @@ const PageLoader: React.FC = () => (
   }}>
     Carregando...
   </div>
+);
+
+/**
+ * Layout para rotas protegidas que inclui a barra de navegação móvel
+ * Garante que todas as páginas móveis tenham acesso à navegação inferior
+ */
+const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <>
+    {children}
+    <MobileBottomBar />
+  </>
 );
 
 /**
@@ -114,7 +126,9 @@ const App: React.FC = () => {
           path="/setup"
           element={
             <ProtectedRoute>
-              <ProfileSetup />
+              <ProtectedLayout>
+                <ProfileSetup />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -125,7 +139,9 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ProfileSetupGuard>
-                <Dashboard />
+                <ProtectedLayout>
+                  <Dashboard />
+                </ProtectedLayout>
               </ProfileSetupGuard>
             </ProtectedRoute>
           }
@@ -142,7 +158,9 @@ const App: React.FC = () => {
           path="/communities"
           element={
             <ProtectedRoute>
-              <CommunitiesPage />
+              <ProtectedLayout>
+                <CommunitiesPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -152,7 +170,9 @@ const App: React.FC = () => {
           path="/explore"
           element={
             <ProtectedRoute>
-              <ExplorePage />
+              <ProtectedLayout>
+                <ExplorePage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -162,7 +182,9 @@ const App: React.FC = () => {
           path="/search"
           element={
             <ProtectedRoute>
-              <MobileSearchPage />
+              <ProtectedLayout>
+                <MobileSearchPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -172,7 +194,9 @@ const App: React.FC = () => {
           path="/create-community"
           element={(
             <ProtectedRoute>
-              <CreateCommunityPage />
+              <ProtectedLayout>
+                <CreateCommunityPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           )}
         />
@@ -182,7 +206,9 @@ const App: React.FC = () => {
           path="/r/:communityName"
           element={
             <ProtectedRoute>
-              <CommunityPage />
+              <ProtectedLayout>
+                <CommunityPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -192,7 +218,9 @@ const App: React.FC = () => {
           path="/settings"
           element={
             <ProtectedRoute>
-              <SettingsPage />
+              <ProtectedLayout>
+                <SettingsPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -202,7 +230,9 @@ const App: React.FC = () => {
           path="/notifications"
           element={
             <ProtectedRoute>
-              <NotificationsPage />
+              <ProtectedLayout>
+                <NotificationsPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -212,7 +242,9 @@ const App: React.FC = () => {
           path="/messages"
           element={
             <ProtectedRoute>
-              <MessagesPage />
+              <ProtectedLayout>
+                <MessagesPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -222,7 +254,9 @@ const App: React.FC = () => {
           path="/u/:username/status/:postId"
           element={
             <ProtectedRoute>
-              <PostViewPage />
+              <ProtectedLayout>
+                <PostViewPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -232,7 +266,9 @@ const App: React.FC = () => {
           path="/r/:communityName/u/:username/status/:postId"
           element={
             <ProtectedRoute>
-              <PostViewPage />
+              <ProtectedLayout>
+                <PostViewPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -242,7 +278,9 @@ const App: React.FC = () => {
           path="/u/:username/edit"
           element={
             <ProtectedRoute>
-              <ProfileEditPage />
+              <ProtectedLayout>
+                <ProfileEditPage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -252,7 +290,9 @@ const App: React.FC = () => {
           path="/u/:username"
           element={
             <ProtectedRoute>
-              <ProfilePage />
+              <ProtectedLayout>
+                <ProfilePage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />
@@ -262,7 +302,9 @@ const App: React.FC = () => {
           path="/profile"
           element={
             <ProtectedRoute>
-              <ProfilePage />
+              <ProtectedLayout>
+                <ProfilePage />
+              </ProtectedLayout>
             </ProtectedRoute>
           }
         />

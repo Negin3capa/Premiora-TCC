@@ -373,6 +373,12 @@
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: var(--z-sticky);
   backdrop-filter: blur(10px);
+  transition: transform 0.3s ease;
+}
+
+/* Hidden state for mobile scroll */
+.mobile-bottom-bar--hidden {
+  transform: translateY(100%);
 }
 
 .mobile-bottom-bar-content {

@@ -17,6 +17,12 @@
   display: flex;
   align-items: center;
   padding: 0 24px;
+  transition: transform 0.3s ease;
+}
+
+/* Hidden state for mobile scroll */
+.header--hidden {
+  transform: translateY(-100%);
 }
 
 /* Profile mode - adjust for compact sidebar */
@@ -129,12 +135,15 @@
 
 .header-tabs--profile {
   margin: 0 16px;
+  flex: 1; /* Allow tabs to take available space */
+  min-width: 0; /* Allow shrinking */
 }
 
 .header-tabs--profile .header-tab {
   padding: 10px 14px;
   font-size: 13px;
   font-weight: 500;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 /* Right side - Actions */
@@ -252,6 +261,10 @@
     padding: 0 20px;
   }
 
+  .header--profile-mode {
+    left: 0; /* Profile sidebar is hidden on tablets */
+  }
+
   .header-title {
     font-size: 20px;
   }
@@ -288,8 +301,33 @@
     height: 56px;
   }
 
+  .header--profile-mode {
+    left: 0; /* Profile sidebar is hidden on mobile */
+  }
+
+  .header-content {
+    gap: 8px; /* Reduce gap between elements */
+  }
+
   .header-title {
     font-size: 18px;
+  }
+
+  .header-tabs--profile {
+    margin: 0 8px;
+    overflow-x: auto; /* Allow horizontal scrolling */
+    scrollbar-width: none; /* Hide scrollbar on Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
+  }
+
+  .header-tabs--profile::-webkit-scrollbar {
+    display: none; /* Hide scrollbar on Webkit browsers */
+  }
+
+  .header-tabs--profile .header-tab {
+    padding: 8px 10px;
+    font-size: 12px;
+    flex-shrink: 0; /* Prevent tabs from shrinking */
   }
 
   .header-action-button {
@@ -300,31 +338,65 @@
   .header-avatar-container {
     width: 32px;
     height: 32px;
+    flex-shrink: 0; /* Prevent avatar from shrinking */
   }
 
   /* Show hamburger button on mobile (logo remains hidden) */
   .header-hamburger-button {
     display: flex;
+    flex-shrink: 0; /* Prevent hamburger from shrinking */
   }
 }
 
 @media (max-width: 480px) {
   .header {
     left: 0; /* Hide sidebar on very small screens */
-    padding: 0 12px;
+    padding: 0 8px;
+  }
+
+  .header--profile-mode {
+    left: 0; /* Profile sidebar is hidden on mobile */
+  }
+
+  .header-content {
+    gap: 4px; /* Reduce gap further on very small screens */
   }
 
   .header-title {
     font-size: 16px;
   }
 
-  .header-avatar-container {
+  .header-tabs--profile {
+    margin: 0 4px;
+    overflow-x: auto; /* Allow horizontal scrolling */
+    scrollbar-width: none; /* Hide scrollbar on Firefox */
+    -ms-overflow-style: none; /* Hide scrollbar on IE/Edge */
+  }
+
+  .header-tabs--profile::-webkit-scrollbar {
+    display: none; /* Hide scrollbar on Webkit browsers */
+  }
+
+  .header-tabs--profile .header-tab {
+    padding: 6px 8px;
+    font-size: 11px;
+    flex-shrink: 0; /* Prevent tabs from shrinking */
+  }
+
+  .header-action-button {
     width: 28px;
     height: 28px;
   }
 
+  .header-avatar-container {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0; /* Prevent avatar from shrinking */
+  }
+
   .header-hamburger-button {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0; /* Prevent hamburger from shrinking */
   }
 }
