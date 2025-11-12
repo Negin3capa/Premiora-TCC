@@ -220,7 +220,8 @@
   transform: translateY(-50%) translateX(4px);
 }
 
-/* Responsive adjustments */
+/* ==================== Responsive Design ==================== */
+
 @media (max-width: 768px) {
   .profile-sidebar {
     width: 50px;

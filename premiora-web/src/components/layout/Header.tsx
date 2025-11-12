@@ -28,6 +28,10 @@ interface HeaderProps {
   activeProfileTab?: 'home' | 'posts' | 'community' | 'shop';
   /** Handler para mudança de aba do perfil */
   onProfileTabChange?: (tab: 'home' | 'posts' | 'community' | 'shop') => void;
+  /** Se deve mostrar barra de pesquisa no centro (substitui o logo) */
+  showSearchBar?: boolean;
+  /** Componente de barra de pesquisa customizada */
+  searchBarComponent?: React.ReactNode;
 }
 
 /**
@@ -41,7 +45,9 @@ const Header: React.FC<HeaderProps> = ({
   onTabChange,
   showProfileTabs = false,
   activeProfileTab = 'home',
-  onProfileTabChange
+  onProfileTabChange,
+  showSearchBar = false,
+  searchBarComponent
 }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -174,10 +180,12 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Center - Logo */}
-        <div className="header-center">
-          <h1 className="header-title">Premiora</h1>
-        </div>
+        {/* Center - Search Bar Only */}
+        {showSearchBar && searchBarComponent && (
+          <div className="header-center">
+            {searchBarComponent}
+          </div>
+        )}
 
         {/* Feed Tabs - Only shown on Dashboard */}
         {showTabs && (

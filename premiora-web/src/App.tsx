@@ -25,6 +25,7 @@ const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
 const ProfileEditPage = React.lazy(() => import('./pages/ProfileEditPage'));
 const CreateCommunityPage = React.lazy(() => import('./pages/CreateCommunityPage'));
 const ExplorePage = React.lazy(() => import('./pages/ExplorePage'));
+const MobileSearchPage = React.lazy(() => import('./pages/MobileSearchPage'));
 const PostViewPage = React.lazy(() => import('./pages/PostViewPage'));
 
 /**
@@ -152,6 +153,16 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <ExplorePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Busca Móvel (apenas para autenticados) */}
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <MobileSearchPage />
             </ProtectedRoute>
           }
         />

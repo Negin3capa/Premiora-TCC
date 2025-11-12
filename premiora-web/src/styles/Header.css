@@ -63,13 +63,16 @@
   transform: scale(0.95);
 }
 
-/* Center - Logo (only on mobile) */
+/* Center - Logo or Search Bar */
 .header-center {
-  display: none;
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  top: 70%;
+  transform: translate(-50%, -50%);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .header-title {
@@ -299,13 +302,9 @@
     height: 32px;
   }
 
-  /* Show hamburger button and center logo on mobile */
+  /* Show hamburger button on mobile (logo remains hidden) */
   .header-hamburger-button {
     display: flex;
-  }
-
-  .header-center {
-    display: block;
   }
 }
 
