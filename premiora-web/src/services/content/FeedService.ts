@@ -58,8 +58,9 @@ export class FeedService {
         prevCursor = this.encodeCursor(firstItem.published_at || firstItem.timestamp, firstItem.id);
       }
 
-      // Verificar se há mais conteúdo
-      const hasMore = allContent.length === limit;
+      // Verificar se há mais conteúdo baseado nos resultados individuais
+      // hasMore é true se posts OU vídeos têm mais dados disponíveis
+      const hasMore = postsResult.hasMore || videosResult.hasMore;
 
       // Garantir que não há duplicatas por ID
       const uniqueContent = allContent.filter((item, index, self) =>

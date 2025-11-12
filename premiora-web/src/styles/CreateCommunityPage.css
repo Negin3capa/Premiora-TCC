@@ -1,0 +1,20 @@
+/**
+ * Estilos da página de Criação de Comunidades
+ * Contém estilos específicos para a página de criação de comunidades
+ */
+
+/* ==================== Create Community Page ==================== */
+
+.create-community-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.create-community-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}

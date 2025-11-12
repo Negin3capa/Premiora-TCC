@@ -22,6 +22,8 @@ interface FeedProps {
   onFollowingLoadMore?: () => void;
   onFollowingRetry?: () => void;
   followingCanRetry?: boolean;
+  // Controla se deve mostrar a sidebar do feed
+  showSidebar?: boolean;
 }
 
 /**
@@ -46,7 +48,8 @@ const Feed: React.FC<FeedProps> = ({
   followingError,
   onFollowingLoadMore,
   onFollowingRetry,
-  followingCanRetry
+  followingCanRetry,
+  showSidebar = true
 }) => {
   // Estado para controlar qual aba está ativa
   const [currentTab, setCurrentTab] = useState<'forYou' | 'following'>(activeTab);
@@ -59,6 +62,16 @@ const Feed: React.FC<FeedProps> = ({
   const currentOnLoadMore = currentTab === 'forYou' ? onLoadMore : onFollowingLoadMore;
   const currentOnRetry = currentTab === 'forYou' ? onRetry : onFollowingRetry;
   const currentCanRetry = currentTab === 'forYou' ? canRetry : followingCanRetry;
+
+  console.log('📊 [Feed] Current tab state:', {
+    currentTab,
+    currentItemsCount: currentItems.length,
+    currentLoading,
+    currentHasMore,
+    currentError: !!currentError,
+    hasOnLoadMore: !!currentOnLoadMore,
+    timestamp: new Date().toISOString()
+  });
 
   const { sentinelRef, showLoadingRow, setShowLoadingRow } = useInfiniteScroll(
     currentHasMore,
@@ -80,10 +93,10 @@ const Feed: React.FC<FeedProps> = ({
 
   return (
     <main className="feed">
-      <div className="feed-layout">
+      <div className={`feed-layout ${!showSidebar ? 'feed-layout--full-width' : ''}`}>
         {/* Conteúdo principal */}
         <div className="feed-main">
-          <div className="feed-content">
+          <div className={`feed-content ${!showSidebar ? 'feed-content--full-width' : ''}`}>
             {currentItems.length === 0 && !currentLoading ? (
               <div className="empty-state">
                 <p>
@@ -122,7 +135,7 @@ const Feed: React.FC<FeedProps> = ({
 
             {/* Estado de erro com opção de retry */}
             {currentError && (
-              <div className="error-state">
+              <div className="feed-error-state">
                 <div className="error-message">
                   <p>Erro ao carregar conteúdo: {currentError}</p>
                   {currentCanRetry && currentOnRetry && (
@@ -143,8 +156,8 @@ const Feed: React.FC<FeedProps> = ({
           </div>
         </div>
 
-        {/* Sidebar */}
-        <SidebarFeed />
+        {/* Sidebar - conditionally rendered */}
+        {showSidebar && <SidebarFeed />}
       </div>
     </main>
   );

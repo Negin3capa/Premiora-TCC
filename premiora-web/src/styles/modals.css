@@ -393,6 +393,17 @@
   }
 }
 
+@keyframes dropdownSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -676,6 +687,28 @@ body.modal-open {
   object-fit: contain;
   border-radius: var(--radius-lg);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* ==================== Search Dropdown ==================== */
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-dropdown);
+  max-height: 400px;
+  overflow: hidden;
+  animation: dropdownSlideDown var(--transition-fast);
+}
+
+.search-dropdown-results {
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 /* ==================== Video View Modal ==================== */

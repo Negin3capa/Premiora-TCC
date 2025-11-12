@@ -45,7 +45,7 @@ const EmailConfirmationSuccess: React.FC = () => {
         <p className="brand-tagline">A plataforma brasileira para monetização de conteúdo criativo</p>
       </div>
 
-      <div className="login-container">
+      <div className="email-confirmation-success-container">
         <div className="login-header">
           <h1>Email Confirmado!</h1>
           <p>Sua conta foi ativada com sucesso. Bem-vindo à Premiora!</p>

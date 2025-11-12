@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PopularContentService, type PopularProduct, type PopularPost } from '../../services/content/PopularContentService';
 import { Sparkles, Flame, UserPlus } from 'lucide-react';
 import SearchBar from '../common/SearchBar';
+import SearchModal from '../modals/SearchModal';
+import { useModal } from '../../hooks/useModal';
 import '../../styles/FeedSidebar.css';
 
 /**
@@ -16,6 +18,7 @@ const SidebarFeed: React.FC = () => {
   const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
   const [sidebarLoading, setSidebarLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { isModalOpen } = useModal();
 
   /**
    * Formata número de visualizações
@@ -61,15 +64,27 @@ const SidebarFeed: React.FC = () => {
   return (
     <aside className="feed-sidebar">
       {/* Barra de Pesquisa */}
-      <SearchBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        placeholder="Buscar no feed"
-      />
+      <div className="search-bar-container">
+        <SearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          placeholder="Buscar no feed"
+          openSearchModal={true}
+        />
+
+        {/* Search Dropdown */}
+        {isModalOpen('search') && searchQuery.trim() && (
+          <SearchModal
+            isOpen={true}
+            onClose={() => {}} // Handled by the modal itself
+            searchQuery={searchQuery}
+          />
+        )}
+      </div>
 
       {/* Seja um criador */}
-      <div className="sidebar-section gift-section">
-        <h3 className="sidebar-title">
+      <div className="feed-sidebar-section gift-section">
+        <h3 className="feed-sidebar-title">
           <Sparkles size={20} />
           Seja um criador
         </h3>
@@ -83,13 +98,13 @@ const SidebarFeed: React.FC = () => {
       </div>
 
       {/* Assuntos do Momento */}
-      <div className="sidebar-section products-section">
-        <h3 className="sidebar-title">
+      <div className="feed-sidebar-section products-section">
+        <h3 className="feed-sidebar-title">
           <Flame size={20} />
           Assuntos do Momento
         </h3>
         {sidebarLoading ? (
-          <div className="sidebar-loading">Carregando assuntos...</div>
+          <div className="feed-sidebar-loading">Carregando assuntos...</div>
         ) : (
           <div className="products-list">
             {popularProducts.length > 0 ? (
@@ -111,20 +126,20 @@ const SidebarFeed: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="sidebar-empty">Nenhum assunto encontrado</div>
+              <div className="feed-sidebar-empty">Nenhum assunto encontrado</div>
             )}
           </div>
         )}
       </div>
 
       {/* Quem Seguir */}
-      <div className="sidebar-section popular-posts-section">
-        <h3 className="sidebar-title">
+      <div className="feed-sidebar-section popular-posts-section">
+        <h3 className="feed-sidebar-title">
           <UserPlus size={20} />
           Quem Seguir
         </h3>
         {sidebarLoading ? (
-          <div className="sidebar-loading">Carregando sugestões...</div>
+          <div className="feed-sidebar-loading">Carregando sugestões...</div>
         ) : (
           <div className="popular-posts-list">
             {popularPosts.length > 0 ? (
@@ -145,7 +160,7 @@ const SidebarFeed: React.FC = () => {
                 </div>
               ))
             ) : (
-              <div className="sidebar-empty">Nenhuma sugestão encontrada</div>
+              <div className="feed-sidebar-empty">Nenhuma sugestão encontrada</div>
             )}
           </div>
         )}

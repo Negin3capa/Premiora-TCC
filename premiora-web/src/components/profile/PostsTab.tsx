@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FeedService } from '../../services/content/FeedService';
 import { PopularContentService, type PopularProduct, type PopularPost } from '../../services/content/PopularContentService';
 import { extractThumbnailUrl } from '../../utils/mediaUtils';
+import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import type { ContentItem } from '../../types/content';
 import type { CreatorProfile } from '../../types/profile';
 import { Filter, Search, Lock, Heart, MessageCircle, Share2, Gift, TrendingUp } from 'lucide-react';
@@ -239,6 +240,20 @@ const PostsTabEnhanced: React.FC<PostsTabEnhancedProps> = ({ creatorProfile, cur
     }
   }, [creatorProfile.user?.id, currentUserId]);
 
+  // Hook de scroll infinito
+  const { sentinelRef, showLoadingRow, setShowLoadingRow } = useInfiniteScroll(
+    hasMore,
+    loading,
+    loadMorePosts
+  );
+
+  // Reset loading row quando loading termina
+  React.useEffect(() => {
+    if (!loading && showLoadingRow) {
+      setShowLoadingRow(false);
+    }
+  }, [loading, showLoadingRow, setShowLoadingRow]);
+
   // Buscar posts iniciais
   useEffect(() => {
     fetchPosts(null, activeFilter);
@@ -382,24 +397,15 @@ const PostsTabEnhanced: React.FC<PostsTabEnhancedProps> = ({ creatorProfile, cur
                   </article>
                 ))}
 
-                {/* Loading indicator */}
-                {loading && (
-                  <div className="loading-posts">
-                    <p>Carregando posts...</p>
+                {/* Loading row - Twitter style */}
+                {showLoadingRow && (
+                  <div className="posts-tab-loading-row">
+                    <div className="spinner"></div>
                   </div>
                 )}
 
-                {/* Load more button */}
-                {hasMore && !loading && (
-                  <div className="load-more-container">
-                    <button
-                      className="load-more-button"
-                      onClick={loadMorePosts}
-                    >
-                      Carregar mais posts
-                    </button>
-                  </div>
-                )}
+                {/* Bottom sentinel for infinite scroll */}
+                <div ref={sentinelRef} className="posts-tab-sentinel" />
               </>
             )}
           </div>

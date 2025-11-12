@@ -29,12 +29,12 @@ export const useFeed = () => {
   const { user } = useAuth();
   const [feedItems, setFeedItems] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(true); // Start with true to enable infinite scroll initially
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const hasMoreRef = useRef(true); // Ref to track current hasMore state
+  const hasMoreRef = useRef(true); // Ref to track current hasMore state - start with true
   const loadingRef = useRef(false); // Loading lock to prevent duplicate fetches
 
   /**
@@ -60,12 +60,39 @@ export const useFeed = () => {
       // Verificar se há dados em cache para a primeira página
       if (!cursor && !append) {
         const cachedFeed = window.ProfilePrefetchCache?.getInstance().getCachedFeed();
+        console.log('🔍 Cache check:', { hasCache: !!cachedFeed, cacheLength: cachedFeed?.length });
         if (cachedFeed && cachedFeed.length > 0) {
+          console.log('📦 Using cached feed:', { cachedItems: cachedFeed.length });
           setFeedItems(cachedFeed);
-          setHasMore(true); // Assumir que há mais conteúdo se temos cache
-          setNextCursor(null); // Reset cursor for cache
-          setError(null); // Limpar qualquer erro anterior
+          // Cache provides initial content, but we still need to check if more content is available
+          // Load from database to determine hasMore status
+          try {
+            console.log('🔍 Checking database for hasMore status...');
+            const { posts, nextCursor, hasMore: moreAvailable } = await FeedService.getFeedPostsCursor(cursor, 10, userId);
+            console.log('✅ Database check result:', { postsCount: posts.length, hasMore: moreAvailable });
+            if (posts.length > cachedFeed.length) {
+              // There are more items available, merge them
+              const additionalItems = posts.slice(cachedFeed.length);
+              const contentItems = additionalItems.map(post => ContentService.transformToContentItem(post));
+              const contentWithSuggestions = ContentService.insertUserSuggestions(contentItems, cachedFeed.length);
+
+              setFeedItems(prev => [...prev, ...contentWithSuggestions]);
+            }
+            // Only update hasMore if we successfully got database results
+            // If cache exists, assume there might be more content unless database explicitly says no
+            console.log('🔄 Setting hasMore from database:', moreAvailable);
+            setHasMore(moreAvailable);
+            setNextCursor(nextCursor || null);
+          } catch (error) {
+            // If database load fails but we have cache, assume there might be more content
+            // Don't set hasMore to false - keep the initial true state to enable infinite scroll
+            console.warn('❌ Database check failed, keeping optimistic hasMore state for infinite scroll:', error);
+            setNextCursor(null);
+          }
+          setError(null);
           return;
+        } else {
+          console.log('📭 No cache available, proceeding with normal database load');
         }
       }
 
@@ -93,6 +120,8 @@ export const useFeed = () => {
         );
         setFeedItems(contentWithSuggestions);
       }
+
+
 
       setHasMore(moreAvailable);
       setNextCursor(nextCursor || null);
@@ -128,8 +157,20 @@ export const useFeed = () => {
    * Inclui proteção contra race conditions e tratamento de erros
    */
   const loadMoreContent = useCallback(async () => {
+    console.log('🔄 [useFeed] loadMoreContent called:', {
+      loadingRef: loadingRef.current,
+      hasMoreRef: hasMoreRef.current,
+      nextCursor,
+      feedItemsCount: feedItems.length,
+      timestamp: new Date().toISOString()
+    });
+
     // Proteção contra múltiplas chamadas simultâneas usando ref para hasMore
     if (loadingRef.current || !hasMoreRef.current) {
+      console.log('🚫 [useFeed] loadMoreContent blocked:', {
+        loadingRef: loadingRef.current,
+        hasMoreRef: hasMoreRef.current
+      });
       return;
     }
 
@@ -144,7 +185,7 @@ export const useFeed = () => {
     } finally {
       setLoading(false);
     }
-  }, [nextCursor, loadFeedContent]);
+  }, [nextCursor, loadFeedContent, feedItems.length]);
 
   /**
    * Tenta recarregar o conteúdo em caso de erro
@@ -192,8 +233,10 @@ export const useFeed = () => {
 
   // Carrega conteúdo inicial
   useEffect(() => {
+    console.log('🚀 [useFeed] Initial load effect triggered');
     setLoading(true);
     loadFeedContent(null, false).finally(() => {
+      console.log('✅ [useFeed] Initial load completed');
       setLoading(false);
     });
   }, [loadFeedContent]);

@@ -5,6 +5,18 @@
   background-color: var(--color-bg-primary);
 }
 
+.settings-main-content {
+  flex: 1;
+  margin-left: 220px; /* Account for fixed sidebar width */
+  padding-top: 80px; /* Account for fixed header height */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+  width: calc(100vw - 220px); /* Ensure content doesn't overflow */
+  max-width: calc(100vw - 220px);
+}
+
 .settings-container {
   display: flex;
   flex: 1;
@@ -361,6 +373,13 @@
 }
 
 @media (max-width: 768px) {
+  .settings-main-content {
+    margin-left: 0; /* Remove sidebar margin on mobile */
+    padding-top: 70px; /* Account for mobile header height */
+    width: 100%;
+    max-width: 100%;
+  }
+
   .settings-container {
     padding: var(--space-4);
   }

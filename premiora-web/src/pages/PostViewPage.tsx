@@ -253,8 +253,8 @@ const PostViewPage: React.FC = () => {
   if (loading) {
     return (
       <div className="post-view-page">
-        <div className="post-view-container">
-          <div className="loading-state">
+        <div className="post-view-page-container">
+          <div className="post-view-loading-state">
             <div className="loading-spinner"></div>
             <p>Carregando post...</p>
           </div>
@@ -269,11 +269,11 @@ const PostViewPage: React.FC = () => {
   if (error) {
     return (
       <div className="post-view-page">
-        <div className="post-view-container">
-          <div className="error-state">
+        <div className="post-view-page-container">
+          <div className="post-view-error-state">
             <h2>Post não encontrado</h2>
             <p>{error}</p>
-            <button onClick={handleBack} className="back-button">
+            <button onClick={handleBack} className="post-view-back-button">
               <ArrowLeft size={16} />
               Voltar
             </button>
@@ -289,11 +289,11 @@ const PostViewPage: React.FC = () => {
   if (!post) {
     return (
       <div className="post-view-page">
-        <div className="post-view-container">
-          <div className="error-state">
+        <div className="post-view-page-container">
+          <div className="post-view-error-state">
             <h2>Post não encontrado</h2>
             <p>O post que você está procurando não existe ou foi removido.</p>
-            <button onClick={handleBack} className="back-button">
+            <button onClick={handleBack} className="post-view-back-button">
               <ArrowLeft size={16} />
               Voltar
             </button>
@@ -306,14 +306,14 @@ const PostViewPage: React.FC = () => {
   return (
     <div className="post-view-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="post-view-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         </Suspense>
         <div className="post-view-page">
-          <div className="post-view-container">
+          <div className="post-view-page-container">
             {/* Header com navegação */}
             <header className="post-view-header">
               <div className="breadcrumb">
@@ -358,7 +358,7 @@ const PostViewPage: React.FC = () => {
 
                   {/* Menu de opções */}
                   <div className="post-menu">
-                    <button className="menu-button" aria-label="Mais opções">
+                    <button className="post-view-menu-button" aria-label="Mais opções">
                       <MoreHorizontal size={20} />
                     </button>
                   </div>
@@ -437,21 +437,21 @@ const PostViewPage: React.FC = () => {
                   <div className="action-buttons">
                     <button
                       onClick={handleLike}
-                      className={`action-button like-button ${isLiked ? 'liked' : ''}`}
+                      className={`post-view-action-button like-button ${isLiked ? 'liked' : ''}`}
                       aria-label={isLiked ? 'Descurtir' : 'Curtir'}
                     >
                       <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
                       <span className="action-count">{likesCount}</span>
                     </button>
 
-                    <button className="action-button comment-button" aria-label="Comentar">
+                    <button className="post-view-action-button comment-button" aria-label="Comentar">
                       <MessageCircle size={18} />
                       <span className="action-count">0</span>
                     </button>
 
                     <button
                       onClick={handleShare}
-                      className="action-button share-button"
+                      className="post-view-action-button share-button"
                       aria-label="Compartilhar"
                     >
                       <Share size={18} />
@@ -459,7 +459,7 @@ const PostViewPage: React.FC = () => {
 
                     <button
                       onClick={handleBookmark}
-                      className={`action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
+                      className={`post-view-action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
                       aria-label={isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
                     >
                       <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
@@ -467,7 +467,7 @@ const PostViewPage: React.FC = () => {
 
                     <button
                       onClick={handleReport}
-                      className="action-button report-button"
+                      className="post-view-action-button report-button"
                       aria-label="Denunciar"
                     >
                       <Flag size={18} />

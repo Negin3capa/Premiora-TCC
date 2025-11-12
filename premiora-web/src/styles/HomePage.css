@@ -17,7 +17,7 @@
 
 /* ==================== Área de Conteúdo Principal ==================== */
 
-.main-content {
+.dashboard-main-content {
   flex: 1;
   margin-left: 420px;
   margin-right: 0; /* Removido para centralizar o feed */
@@ -49,6 +49,11 @@
   margin: 0 auto;
 }
 
+.feed-layout--full-width {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
 .feed-main {
   min-width: 0;
 }
@@ -56,6 +61,11 @@
 .feed-content {
   max-width: 680px;
   margin: 0 auto;
+}
+
+.feed-content--full-width {
+  max-width: none;
+  width: 100%;
 }
 
 .feed-sidebar {
@@ -202,7 +212,7 @@
 /* ==================== Responsive Design ==================== */
 
 @media (max-width: 1200px) {
-  .main-content {
+  .dashboard-main-content {
     margin-right: 280px;
     width: calc(100vw - 280px - 280px);
     max-width: calc(100vw - 280px - 280px);
@@ -221,7 +231,7 @@
 }
 
 @media (max-width: 1024px) {
-  .main-content {
+  .dashboard-main-content {
     margin-right: 260px;
     width: calc(100vw - 280px - 260px);
     max-width: calc(100vw - 280px - 260px);
@@ -240,7 +250,7 @@
 }
 
 @media (max-width: 768px) {
-  .main-content {
+  .dashboard-main-content {
     margin-left: 0;
     margin-right: 0;
     width: 100%;
@@ -415,7 +425,7 @@
   }
 
   /* Add padding to main content to account for bottom bar */
-  .main-content {
+  .dashboard-main-content {
     padding-bottom: 80px; /* Space for the bottom bar */
   }
 }

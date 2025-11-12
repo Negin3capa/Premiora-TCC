@@ -5,12 +5,30 @@
 
 /* ==================== Notifications Page ==================== */
 
+.notifications-page {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+.notifications-main-content {
+  flex: 1;
+  margin-left: 220px; /* Account for fixed sidebar width */
+  padding-top: 64px; /* Account for fixed header height */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+  width: calc(100vw - 220px); /* Ensure content doesn't overflow */
+  max-width: calc(100vw - 220px);
+}
+
 .notifications-header {
   margin-bottom: var(--space-6);
   text-align: center;
 }
 
-.notifications-container {
+.notifications-page-container {
   max-width: 600px;
   margin: 0 auto;
 }
@@ -129,6 +147,13 @@
 /* ==================== Responsive Design ==================== */
 
 @media (max-width: 768px) {
+  .notifications-main-content {
+    margin-left: 0; /* Remove sidebar margin on mobile */
+    padding-top: 70px; /* Account for mobile header height */
+    width: 100%;
+    max-width: 100%;
+  }
+
   .notifications-header {
     margin-bottom: var(--space-4);
     padding: 0 var(--space-4);

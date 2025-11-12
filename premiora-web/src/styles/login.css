@@ -43,7 +43,10 @@
   letter-spacing: -0.02em;
 }
 
-.login-container {
+.login-page-container,
+.signup-page-container,
+.email-confirmation-container,
+.email-confirmation-success-container {
   background: var(--color-bg-primary);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);

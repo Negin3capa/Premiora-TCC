@@ -65,9 +65,9 @@ const NotificationsPage: React.FC = () => {
   };
 
   return (
-    <div className="homepage">
+    <div className="notifications-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="notifications-main-content">
         <Header
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
@@ -81,7 +81,7 @@ const NotificationsPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="notifications-container">
+            <div className="notifications-page-container">
               {mockNotifications.length === 0 ? (
                 <div className="empty-state">
                   <div className="empty-icon"><Bell size={48} /></div>

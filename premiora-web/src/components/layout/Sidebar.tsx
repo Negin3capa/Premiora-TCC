@@ -473,6 +473,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         onClose={() => closeModal('createCommunity')}
         onCreate={handleCommunityCreate}
       />
+
+
     </aside>
     </>
   );

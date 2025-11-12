@@ -17,6 +17,7 @@ const initialModalState: Record<ModalType, ModalState> = {
   postView: { isOpen: false },
   videoView: { isOpen: false },
   createContent: { isOpen: false },
+  search: { isOpen: false },
 };
 
 /**

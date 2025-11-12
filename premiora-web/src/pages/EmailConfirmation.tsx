@@ -82,7 +82,7 @@ const EmailConfirmation: React.FC = () => {
         <p className="brand-tagline">A plataforma brasileira para monetização de conteúdo criativo</p>
       </div>
 
-      <div className="login-container">
+      <div className="email-confirmation-container">
         <div className="login-header">
           <h1>Confirme seu email</h1>
           <p>Enviamos um link de confirmação para seu email. Clique no link para ativar sua conta.</p>

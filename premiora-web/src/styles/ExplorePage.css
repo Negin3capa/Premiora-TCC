@@ -9,7 +9,7 @@
   background-color: var(--color-bg-primary);
 }
 
-.explore-page .main-content {
+.explore-main-content {
   flex: 1;
   margin-left: 280px;
   display: flex;
@@ -23,7 +23,7 @@
 
 /* ==================== Container Principal ==================== */
 
-.explore-container {
+.explore-page-container {
   padding: var(--space-6);
   max-width: 1200px;
   margin: 0 auto;
@@ -498,8 +498,8 @@
 
 /* ==================== Loading and Error States ==================== */
 
-.loading-state,
-.error-state {
+.explore-loading-state,
+.explore-error-state {
   display: flex;
   flex-direction: column;
   align-items: center;

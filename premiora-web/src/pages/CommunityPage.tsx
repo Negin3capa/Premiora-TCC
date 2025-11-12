@@ -149,8 +149,8 @@ const CommunityPage: React.FC = () => {
     return (
       <div className="community-page">
         <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-        <div className="main-content">
-          <div className="loading">Carregando comunidade...</div>
+      <div className="community-main-content">
+          <div className="community-loading">Carregando comunidade...</div>
         </div>
         <MobileBottomBar />
       </div>
@@ -160,7 +160,7 @@ const CommunityPage: React.FC = () => {
   return (
     <div className="community-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="community-page-main-content">
         <Header
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
@@ -244,12 +244,13 @@ const CommunityPage: React.FC = () => {
                   <p>Seja o primeiro a publicar algo!</p>
                 </div>
               ) : (
-                <Feed
-                  items={filteredItems}
-                  loading={loading}
-                  hasMore={hasMore}
-                  onLoadMore={loadMoreContent}
-                />
+              <Feed
+                items={filteredItems}
+                loading={loading}
+                hasMore={hasMore}
+                onLoadMore={loadMoreContent}
+                showSidebar={false}
+              />
               )}
             </div>
           </div>

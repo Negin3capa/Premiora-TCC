@@ -135,7 +135,7 @@ const SettingsPage: React.FC = () => {
   return (
     <div className="settings-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="main-content">
+      <div className="settings-main-content">
         <Header
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         />
