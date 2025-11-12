@@ -1,0 +1,128 @@
+/**
+ * Estilos para o componente ShopTab
+ * Aba de compras do perfil (placeholder)
+ */
+
+/* ==================== ShopTab ==================== */
+
+.shop-tab {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* ==================== Coming Soon ==================== */
+
+.coming-soon {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #666;
+}
+
+.coming-soon-icon {
+  margin-bottom: 2rem;
+  opacity: 0.6;
+}
+
+.coming-soon h2 {
+  color: #DADADA;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+}
+
+.coming-soon p {
+  font-size: 16px;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+/* ==================== Features List ==================== */
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #0D0D0D;
+  border: 1px solid #1A1A1A;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.feature-item span:last-child {
+  color: #DADADA;
+  font-size: 14px;
+  flex: 1;
+}
+
+/* ==================== Coming Soon Notice ==================== */
+
+.coming-soon-notice {
+  padding: 1.5rem;
+  background-color: #0D0D0D;
+  border: 1px solid #1A1A1A;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.coming-soon-notice p {
+  color: #999;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ==================== Responsive ==================== */
+
+@media (max-width: 768px) {
+  .coming-soon {
+    padding: 3rem 1rem;
+  }
+
+  .coming-soon h2 {
+    font-size: 20px;
+  }
+
+  .coming-soon p {
+    font-size: 15px;
+  }
+
+  .features-list {
+    gap: 0.75rem;
+  }
+
+  .feature-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .coming-soon-notice {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .coming-soon-icon {
+    margin-bottom: 1.5rem;
+  }
+
+  .coming-soon h2 {
+    font-size: 18px;
+  }
+
+  .features-list {
+    max-width: 100%;
+  }
+}

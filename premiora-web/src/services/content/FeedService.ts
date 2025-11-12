@@ -109,6 +109,9 @@ export class FeedService {
           post_likes (
             id,
             user_id
+          ),
+          comments (
+            id
           )
         `)
         .eq('is_published', true)
@@ -257,6 +260,9 @@ export class FeedService {
           post_likes (
             id,
             user_id
+          ),
+          comments (
+            id
           )
         `)
         .eq('is_published', true)
@@ -345,6 +351,9 @@ export class FeedService {
           post_likes (
             id,
             user_id
+          ),
+          comments (
+            id
           )
         `)
         .eq('is_published', true)
@@ -448,6 +457,9 @@ export class FeedService {
           post_likes (
             id,
             user_id
+          ),
+          comments (
+            id
           )
         `)
         .eq('is_published', true)
@@ -550,6 +562,9 @@ export class FeedService {
           post_likes (
             id,
             user_id
+          ),
+          comments (
+            id
           )
         `)
         .eq('is_published', true)

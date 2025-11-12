@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
-import { useFeed } from '../hooks/useFeed';
+import { useTabbedFeed } from '../hooks/useTabbedFeed';
 import { useLocalSearch } from '../hooks/useSearch';
 import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
 import '../styles/HomePage.css';
@@ -27,12 +27,25 @@ const ComponentLoader: React.FC = () => (
 
 /**
  * Dashboard da aplicação Premiora
- * Página principal após login, exibe feed de conteúdo e informações do usuário
+ * Página principal após login, exibe feed de conteúdo com abas "For You" e "Following"
  *
  * @component
  */
 const Dashboard: React.FC = () => {
-  const { feedItems, loading, hasMore, error, loadMoreContent, refreshFeed, retryLoadContent, canRetry } = useFeed();
+  const {
+    activeTab,
+    feedItems,
+    loading,
+    hasMore,
+    error,
+    loadMoreContent,
+    refreshFeed,
+    retryLoadContent,
+    canRetry,
+    followingFeed,
+    handleTabChange
+  } = useTabbedFeed();
+
   const { filteredItems } = useLocalSearch(feedItems);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isFeedSidebarOpen, setIsFeedSidebarOpen] = useState(false);
@@ -90,10 +103,14 @@ const Dashboard: React.FC = () => {
         <Suspense fallback={<ComponentLoader />}>
           <Header
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            showTabs={true}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
           />
         </Suspense>
         <Suspense fallback={<ComponentLoader />}>
           <Feed
+            // Props da aba ativa
             items={filteredItems}
             loading={loading}
             hasMore={hasMore}
@@ -101,6 +118,16 @@ const Dashboard: React.FC = () => {
             onLoadMore={loadMoreContent}
             onRetry={retryLoadContent}
             canRetry={canRetry}
+            // Props das abas (controladas pelo header)
+            activeTab={activeTab}
+            // Props do feed "Following"
+            followingItems={followingFeed.feedItems}
+            followingLoading={followingFeed.loading}
+            followingHasMore={followingFeed.hasMore}
+            followingError={followingFeed.error}
+            onFollowingLoadMore={followingFeed.loadMoreContent}
+            onFollowingRetry={followingFeed.retryLoadContent}
+            followingCanRetry={followingFeed.canRetry}
           />
         </Suspense>
       </div>

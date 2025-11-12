@@ -338,7 +338,7 @@ const PostViewPage: React.FC = () => {
             </header>
 
             {/* Conteúdo principal do post */}
-            <main className="post-content">
+            <main className="post-view-content">
               <article className="post-article">
                 {/* Header do post */}
                 <header className="post-header">

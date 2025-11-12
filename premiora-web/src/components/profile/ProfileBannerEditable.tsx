@@ -3,7 +3,7 @@
  * Permite edição interativa de avatar, banner, nome e descrição
  */
 import React, { useState, useRef } from 'react';
-import { Camera, Edit3, X, Save, RotateCcw } from 'lucide-react';
+import { Camera, RotateCcw, Trash2 } from 'lucide-react';
 import { ImageCropModal } from './ImageCropModal';
 import type { CreatorProfile } from '../../types/profile';
 import styles from './ProfileBanner.module.css';
@@ -24,6 +24,10 @@ interface ProfileBannerEditableProps {
   onUpdateAvatar: (file: File) => void;
   /** Callback para atualizar banner */
   onUpdateBanner: (file: File) => void;
+  /** Callback para remover avatar */
+  onRemoveAvatar?: () => void;
+  /** Callback para remover banner */
+  onRemoveBanner?: () => void;
 
   /** Callback para salvar mudanças */
   onSave: () => void;
@@ -45,6 +49,8 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
   onUpdateDescription,
   onUpdateAvatar,
   onUpdateBanner,
+  onRemoveAvatar,
+  onRemoveBanner,
   onSave,
   onCancel,
   hasChanges,
@@ -70,45 +76,10 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
     description: ''
   });
 
+  const nameRef = useRef<HTMLHeadingElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
-
-  /**
-   * Handler para iniciar edição de campo de texto
-   */
-  const handleStartEditing = (field: 'name' | 'description') => {
-    setEditingField(field);
-    setTempValues({
-      name: profile?.name || '',
-      description: profile?.description || ''
-    });
-  };
-
-  /**
-   * Handler para confirmar edição de campo de texto
-   */
-  const handleConfirmEdit = () => {
-    if (editingField === 'name') {
-      onUpdateName(tempValues.name);
-    } else if (editingField === 'description') {
-      onUpdateDescription(tempValues.description);
-    }
-    setEditingField(null);
-  };
-
-  /**
-   * Handler para cancelar edição de campo de texto
-   */
-  const handleCancelEdit = () => {
-    setEditingField(null);
-  };
-
-  /**
-   * Handler para mudança de valor temporário
-   */
-  const handleTempValueChange = (field: 'name' | 'description', value: string) => {
-    setTempValues(prev => ({ ...prev, [field]: value }));
-  };
 
   /**
    * Handler para abrir modal de crop do avatar
@@ -212,7 +183,7 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
       setCropModal({
         isOpen: true,
         image: imageDataUrl,
-        aspect: 16/9, // Aspect ratio 16:9 para banner
+        aspect: 3, // Aspect ratio 3:1 para banner (mais apropriado para banners horizontais)
         title: 'Editar Banner',
         onComplete: (croppedImage: string) => {
           // Converter base64 para File
@@ -257,42 +228,83 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
           backgroundRepeat: 'no-repeat'
         }}
       >
-        {/* Área clicável para banner - posicionada estrategicamente */}
-        <div
-          onClick={handleBannerClick}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            width: '60px',
-            height: '60px',
-            background: 'rgba(0, 0, 0, 0.7)',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            opacity: profile?.bannerImage ? 0.8 : 1,
-            transition: 'all 0.2s ease',
-            cursor: isUploading ? 'not-allowed' : 'pointer',
-            zIndex: 2,
-            pointerEvents: 'auto',
-            border: '2px solid rgba(255, 255, 255, 0.3)'
-          }}
-          onMouseEnter={(e) => {
-            if (!isUploading) {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isUploading) {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
-            }
-          }}
-          title={profile?.bannerImage ? 'Alterar banner' : 'Adicionar banner'}
-        >
-          <Camera size={20} color="white" />
+        {/* Controles do banner */}
+        <div style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          display: 'flex',
+          gap: '10px',
+          zIndex: 2
+        }}>
+          {/* Botão para alterar/adicionar banner */}
+          <div
+            onClick={handleBannerClick}
+            style={{
+              width: '50px',
+              height: '50px',
+              background: 'rgba(0, 0, 0, 0.7)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: profile?.bannerImage ? 0.8 : 1,
+              transition: 'all 0.2s ease',
+              cursor: isUploading ? 'not-allowed' : 'pointer',
+              pointerEvents: 'auto',
+              border: '2px solid rgba(255, 255, 255, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (!isUploading) {
+                e.currentTarget.style.transform = 'scale(1.1)';
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isUploading) {
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
+              }
+            }}
+            title={profile?.bannerImage ? 'Alterar banner' : 'Adicionar banner'}
+          >
+            <Camera size={18} color="white" />
+          </div>
+
+          {/* Botão para remover banner (só aparece se há banner) */}
+          {profile?.bannerImage && (
+            <div
+              onClick={() => onRemoveBanner?.()}
+              style={{
+                width: '50px',
+                height: '50px',
+                background: 'rgba(220, 53, 69, 0.8)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s ease',
+                cursor: isUploading ? 'not-allowed' : 'pointer',
+                pointerEvents: 'auto',
+                border: '2px solid rgba(255, 255, 255, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                if (!isUploading) {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.background = 'rgba(220, 53, 69, 0.9)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isUploading) {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.background = 'rgba(220, 53, 69, 0.8)';
+                }
+              }}
+              title="Remover banner"
+            >
+              <Trash2 size={18} color="white" />
+            </div>
+          )}
         </div>
 
         {/* Overlay sutil para toda área quando não há banner */}
@@ -335,154 +347,123 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
           <div className={styles.creatorInfo}>
 
             {/* Name com edição inline */}
-            {editingField === 'name' ? (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
+            <div style={{
+              position: 'relative',
+              display: 'inline-block',
+              minWidth: '200px'
+            }}>
+              {!editingField || editingField !== 'name' ? (
+                <h1
+                  ref={nameRef}
+                  onClick={() => {
+                    setEditingField('name');
+                    setTempValues(prev => ({ ...prev, name: profile?.name || '' }));
+                  }}
+                  className={styles.creatorName}
+                  style={{
+                    cursor: 'pointer',
+                    opacity: profile?.name ? 1 : 0.6
+                  }}
+                  title="Clique para editar o nome"
+                >
+                  {profile.name || 'Nome do perfil'}
+                </h1>
+              ) : (
                 <input
                   type="text"
                   value={tempValues.name}
-                  onChange={(e) => handleTempValueChange('name', e.target.value)}
+                  onChange={(e) => {
+                    setTempValues(prev => ({ ...prev, name: e.target.value }));
+                  }}
+                  onBlur={() => {
+                    onUpdateName(tempValues.name);
+                    setEditingField(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      onUpdateName(tempValues.name);
+                      setEditingField(null);
+                    } else if (e.key === 'Escape') {
+                      setEditingField(null);
+                    }
+                  }}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '6px',
+                    fontSize: '2rem',
+                    fontWeight: 'bold',
+                    background: 'transparent',
                     color: '#FFFFFF',
-                    fontSize: '1rem',
-                    padding: '0.75rem',
+                    border: 'none',
+                    padding: '0',
+                    minWidth: '200px',
+                    outline: 'none',
                     fontFamily: 'inherit'
                   }}
-                  placeholder="Nome de exibição"
                   autoFocus
                 />
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  justifyContent: 'flex-end'
-                }}>
-                  <button
-                    type="button"
-                    onClick={handleConfirmEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid #FF424D',
-                      color: '#FF424D',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Save size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: '#DADADA',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <h1
-                className={styles.creatorName}
-                onClick={() => handleStartEditing('name')}
-                style={{ cursor: 'pointer' }}
-              >
-                {profile.name}
-                <Edit3 size={16} style={{ marginLeft: '8px', opacity: 0.6 }} />
-              </h1>
-            )}
+              )}
+            </div>
 
             <p className={styles.postCount}>{profile.totalPosts} posts</p>
 
             {/* Description com edição inline */}
-            {editingField === 'description' ? (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.05)',
-                padding: '1rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.1)'
-              }}>
+            <div style={{
+              position: 'relative',
+              display: 'inline-block',
+              minWidth: '200px'
+            }}>
+              {!editingField || editingField !== 'description' ? (
+                <p
+                  ref={descriptionRef}
+                  onClick={() => {
+                    setEditingField('description');
+                    setTempValues(prev => ({ ...prev, description: profile?.description || '' }));
+                  }}
+                  className={styles.description}
+                  style={{
+                    cursor: 'pointer',
+                    opacity: profile?.description ? 1 : 0.6
+                  }}
+                  title="Clique para editar a descrição"
+                >
+                  {profile.description || 'Descrição do perfil'}
+                </p>
+              ) : (
                 <textarea
                   value={tempValues.description}
-                  onChange={(e) => handleTempValueChange('description', e.target.value)}
+                  onChange={(e) => {
+                    setTempValues(prev => ({ ...prev, description: e.target.value }));
+                  }}
+                  onBlur={() => {
+                    onUpdateDescription(tempValues.description);
+                    setEditingField(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      onUpdateDescription(tempValues.description);
+                      setEditingField(null);
+                    } else if (e.key === 'Escape') {
+                      setEditingField(null);
+                    }
+                  }}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '6px',
+                    width: '100%',
+                    minWidth: '200px',
+                    background: 'transparent',
                     color: '#FFFFFF',
-                    fontSize: '1rem',
-                    padding: '0.75rem',
+                    border: 'none',
+                    padding: '0',
+                    fontSize: '0.9rem',
                     fontFamily: 'inherit',
-                    resize: 'vertical',
-                    minHeight: '80px'
+                    outline: 'none',
+                    resize: 'none',
+                    minHeight: '20px'
                   }}
                   placeholder="Descrição do perfil"
-                  rows={3}
                   autoFocus
+                  rows={1}
                 />
-                <div style={{
-                  display: 'flex',
-                  gap: '0.5rem',
-                  justifyContent: 'flex-end'
-                }}>
-                  <button
-                    type="button"
-                    onClick={handleConfirmEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid #FF424D',
-                      color: '#FF424D',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <Save size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    style={{
-                      background: 'none',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      color: '#DADADA',
-                      padding: '0.5rem',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <p
-                className={styles.description}
-                onClick={() => handleStartEditing('description')}
-                style={{ cursor: 'pointer' }}
-              >
-                {profile.description || 'Clique para adicionar descrição'}
-                <Edit3 size={14} style={{ marginLeft: '8px', opacity: 0.6 }} />
-              </p>
-            )}
+              )}
+            </div>
 
             {/* Botão de ação - Salvar/Cancelar em vez de "Editar Perfil" */}
             <div style={{
@@ -505,7 +486,7 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
               <button
                 type="button"
                 onClick={onCancel}
-                disabled={!hasChanges || isSaving}
+                disabled={isSaving}
                 style={{
                   background: 'rgba(255, 255, 255, 0.1)',
                   color: '#DADADA',
@@ -514,8 +495,8 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
                   borderRadius: '8px',
                   fontSize: '1.125rem',
                   fontWeight: 600,
-                  cursor: (!hasChanges || isSaving) ? 'not-allowed' : 'pointer',
-                  opacity: (!hasChanges || isSaving) ? 0.6 : 1,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.6 : 1,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -528,6 +509,51 @@ export const ProfileBannerEditable: React.FC<ProfileBannerEditableProps> = ({
             </div>
           </div>
           <div className={styles.illustration}>
+            {/* Controles do avatar */}
+            {profile.avatar_url && (
+              <div style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                display: 'flex',
+                gap: '5px',
+                zIndex: 3
+              }}>
+                {/* Botão para remover avatar */}
+                <div
+                  onClick={() => onRemoveAvatar?.()}
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    background: 'rgba(220, 53, 69, 0.8)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.2s ease',
+                    cursor: isUploading ? 'not-allowed' : 'pointer',
+                    pointerEvents: 'auto',
+                    border: '1px solid rgba(255, 255, 255, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isUploading) {
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                      e.currentTarget.style.background = 'rgba(220, 53, 69, 0.9)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isUploading) {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.background = 'rgba(220, 53, 69, 0.8)';
+                    }
+                  }}
+                  title="Remover avatar"
+                >
+                  <Trash2 size={14} color="white" />
+                </div>
+              </div>
+            )}
+
             {/* Avatar do usuário */}
             {profile.avatar_url ? (
               <img

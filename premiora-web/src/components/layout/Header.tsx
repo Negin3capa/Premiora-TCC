@@ -1,14 +1,12 @@
 /**
- * Componente Header - Versão com Busca
- * Header com funcionalidade de busca global integrada
+ * Componente Header
+ * Header principal da aplicação
  */
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSearch } from '../../hooks/useSearch';
 import { useAuth } from '../../hooks/useAuth';
-import SearchResults from '../common/SearchResults';
 import '../../styles/Header.css';
-import { Search, Bell, X, LogOut, UserPlus, Menu } from 'lucide-react';
+import { Bell, LogOut, UserPlus, Menu } from 'lucide-react';
 
 /**
  * Props do componente Header
@@ -18,30 +16,38 @@ interface HeaderProps {
   onToggleSidebar?: () => void;
   /** Se está em modo perfil (sidebar compacta) */
   isProfileMode?: boolean;
+  /** Se deve mostrar abas de navegação (apenas no Dashboard) */
+  showTabs?: boolean;
+  /** Aba ativa atual */
+  activeTab?: 'forYou' | 'following';
+  /** Handler para mudança de aba */
+  onTabChange?: (tab: 'forYou' | 'following') => void;
+  /** Se deve mostrar abas de perfil */
+  showProfileTabs?: boolean;
+  /** Aba ativa do perfil */
+  activeProfileTab?: 'home' | 'posts' | 'community' | 'shop';
+  /** Handler para mudança de aba do perfil */
+  onProfileTabChange?: (tab: 'home' | 'posts' | 'community' | 'shop') => void;
 }
 
 /**
- * Header com funcionalidade de busca integrada
+ * Header principal da aplicação
  */
-const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false }) => {
+const Header: React.FC<HeaderProps> = ({
+  onToggleSidebar,
+  isProfileMode = false,
+  showTabs = false,
+  activeTab = 'forYou',
+  onTabChange,
+  showProfileTabs = false,
+  activeProfileTab = 'home',
+  onProfileTabChange
+}) => {
   const navigate = useNavigate();
-  const searchRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, userProfile, signOut } = useAuth();
 
-  // Estado da busca
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const {
-    searchQuery,
-    users,
-    communities,
-    content,
-    loading,
-    setSearchQuery,
-    clearSearch
-  } = useSearch();
 
   // Nome de exibição (usado no header) - prioriza o name do banco
   const displayName = userProfile?.name ||
@@ -93,39 +99,11 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false 
    */
   const handleAction = (action: string) => {
     switch (action) {
-      case 'search':
-        setIsSearchOpen(true);
-        setTimeout(() => inputRef.current?.focus(), 100);
-        break;
       case 'notifications':
         navigate('/notifications');
         break;
       default:
         console.log(`Unknown action: ${action}`);
-    }
-  };
-
-  /**
-   * Fecha a busca
-   */
-  const closeSearch = () => {
-    setIsSearchOpen(false);
-    clearSearch();
-  };
-
-  /**
-   * Handler para mudança no input de busca
-   */
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  /**
-   * Handler para tecla Enter no input
-   */
-  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') {
-      closeSearch();
     }
   };
 
@@ -161,26 +139,23 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false 
   };
 
   /**
-   * Fecha busca ao clicar fora
+   * Fecha dropdown ao clicar fora
    */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        closeSearch();
-      }
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsDropdownOpen(false);
       }
     };
 
-    if (isSearchOpen || isDropdownOpen) {
+    if (isDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isSearchOpen, isDropdownOpen]);
+  }, [isDropdownOpen]);
 
   return (
     <header className={`header ${isProfileMode ? 'header--profile-mode' : ''}`}>
@@ -204,57 +179,62 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isProfileMode = false 
           <h1 className="header-title">Premiora</h1>
         </div>
 
-        {/* Center - Search */}
-        {isSearchOpen && (
-          <div className="header-search" ref={searchRef}>
-            <div className="search-input-container">
-              <Search size={18} className="search-icon" />
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Buscar usuários, comunidades e conteúdo..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onKeyDown={handleSearchKeyDown}
-                className="search-input"
-                autoComplete="off"
-              />
-              {searchQuery && (
-                <button
-                  className="search-clear-button"
-                  onClick={clearSearch}
-                  aria-label="Limpar busca"
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
+        {/* Feed Tabs - Only shown on Dashboard */}
+        {showTabs && (
+          <div className="header-tabs">
+            <button
+              className={`header-tab ${activeTab === 'forYou' ? 'active' : ''}`}
+              onClick={() => onTabChange?.('forYou')}
+              aria-label="Feed geral"
+            >
+              For You
+            </button>
+            <button
+              className={`header-tab ${activeTab === 'following' ? 'active' : ''}`}
+              onClick={() => onTabChange?.('following')}
+              aria-label="Posts dos usuários seguidos"
+            >
+              Following
+            </button>
+          </div>
+        )}
 
-            {/* Resultados da busca */}
-            <SearchResults
-              query={searchQuery}
-              users={users}
-              communities={communities}
-              content={content}
-              loading={loading}
-              onClose={closeSearch}
-            />
+        {/* Profile Tabs - Only shown on Profile pages */}
+        {showProfileTabs && (
+          <div className="header-tabs header-tabs--profile">
+            <button
+              className={`header-tab ${activeProfileTab === 'home' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('home')}
+              aria-label="Página inicial do perfil"
+            >
+              Página Inicial
+            </button>
+            <button
+              className={`header-tab ${activeProfileTab === 'posts' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('posts')}
+              aria-label="Posts do usuário"
+            >
+              Posts
+            </button>
+            <button
+              className={`header-tab ${activeProfileTab === 'community' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('community')}
+              aria-label="Comunidade do usuário"
+            >
+              Comunidade
+            </button>
+            <button
+              className={`header-tab ${activeProfileTab === 'shop' ? 'active' : ''}`}
+              onClick={() => onProfileTabChange?.('shop')}
+              aria-label="Loja do usuário"
+            >
+              Compras
+            </button>
           </div>
         )}
 
         {/* Right side - Actions */}
         <div className="header-right">
-          {!isSearchOpen && (
-            <button
-              className="header-action-button"
-              aria-label="Buscar"
-              title="Buscar"
-              onClick={() => handleAction('search')}
-            >
-              <Search size={20} />
-            </button>
-          )}
-
           <button
             className="header-action-button"
             aria-label="Notificações"

@@ -26,6 +26,7 @@ export interface ContentItem {
   content?: string;
   views?: number;
   likes?: number;
+  comments?: number;
   timestamp: string;
   // Propriedades para controle de acesso Patreon-like
   accessLevel?: AccessLevel;

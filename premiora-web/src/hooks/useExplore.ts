@@ -91,8 +91,7 @@ export const useExplore = (): UseExploreReturn => {
           )
         `)
         .not('creators', 'is', null)
-        .order('creators.total_subscribers', { ascending: false })
-        .limit(6);
+        .limit(20); // Buscar mais para ordenar no cliente
 
       if (error) {
         console.error('Erro ao buscar criadores recomendados:', error);
@@ -146,7 +145,10 @@ export const useExplore = (): UseExploreReturn => {
         })
       );
 
-      return creators.slice(0, 4); // Retornar apenas os 4 primeiros
+      // Ordenar por número de seguidores (total_subscribers) em ordem decrescente
+      const sortedCreators = creators.sort((a, b) => b.followerCount - a.followerCount);
+
+      return sortedCreators.slice(0, 4); // Retornar apenas os 4 primeiros
     } catch (err) {
       console.error('Erro ao buscar criadores recomendados:', err);
       return [];

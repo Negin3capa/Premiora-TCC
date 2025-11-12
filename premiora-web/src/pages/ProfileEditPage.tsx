@@ -43,6 +43,8 @@ const ProfileEditPage: React.FC = () => {
     updateDescription,
     updateAvatar,
     updateBanner,
+    removeAvatar,
+    removeBanner,
     saveChanges,
     cancelChanges,
     clearError
@@ -324,6 +326,8 @@ const ProfileEditPage: React.FC = () => {
           onUpdateDescription={updateDescription}
           onUpdateAvatar={updateAvatar}
           onUpdateBanner={updateBanner}
+          onRemoveAvatar={removeAvatar}
+          onRemoveBanner={removeBanner}
           onSave={handleSaveChanges}
           onCancel={handleCancelChanges}
           hasChanges={hasChanges}

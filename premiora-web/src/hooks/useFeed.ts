@@ -174,6 +174,13 @@ export const useFeed = () => {
     const newContentItem = ContentService.transformPostToContentItem(newPost);
 
     setFeedItems(prev => {
+      // Verificar se o post já existe no feed para evitar duplicatas
+      const postExists = prev.some(item => item.id === newContentItem.id);
+      if (postExists) {
+        console.log('Post já existe no feed, ignorando duplicata:', newContentItem.id);
+        return prev; // Retornar estado atual sem modificações
+      }
+
       // Remover sugestões e inserir o novo post no início
       const filteredItems = prev.filter(item => item.type !== 'profile');
       const itemsWithNewPost = [newContentItem, ...filteredItems];
