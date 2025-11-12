@@ -1,6 +1,6 @@
 /**
- * Estilos para a página de comunidades
- * Layout responsivo com cards de comunidade e showcase de conteúdo
+ * Página de Comunidades - Design Limpo e Profissional
+ * Layout minimalista focado na descoberta de comunidades
  */
 
 .communities-page {
@@ -11,9 +11,10 @@
 
 .communities-page .main-content {
   flex: 1;
-  margin-left: 280px; /* Largura da sidebar */
+  margin-left: 280px;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
 .communities-container {
@@ -23,7 +24,8 @@
   width: 100%;
 }
 
-/* Header Section */
+/* ==================== Header Section ==================== */
+
 .communities-header {
   text-align: center;
   margin-bottom: var(--space-8);
@@ -44,113 +46,157 @@
   line-height: 1.6;
 }
 
-/* Sort Controls */
-.sort-controls {
+/* ==================== Controls Section ==================== */
+
+.controls-section {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-  padding: var(--space-4);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
-}
-
-.sort-label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  white-space: nowrap;
-}
-
-.sort-buttons {
-  display: flex;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
   flex-wrap: wrap;
 }
 
-.sort-button {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-md);
-  background-color: var(--color-bg-primary);
+.search-bar {
+  flex: 1;
+  min-width: 300px;
+  max-width: 500px;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: var(--space-4);
+  color: var(--color-text-secondary);
+  z-index: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  transition: all var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.clear-search {
+  position: absolute;
+  right: var(--space-4);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.clear-search:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.filter-buttons {
+  display: flex;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.filter-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  white-space: nowrap;
 }
 
-.sort-button:hover {
+.filter-button:hover {
   background-color: var(--color-bg-hover);
   border-color: var(--color-primary);
   color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
-.sort-button.active {
+.filter-button.active {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   color: var(--color-text-white);
+  box-shadow: var(--shadow-sm);
 }
 
-/* Communities Grid */
+/* ==================== Communities Grid ==================== */
+
 .communities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--space-6);
   margin-bottom: var(--space-8);
 }
 
-/* Community Card */
+/* ==================== Community Card ==================== */
+
 .community-card {
   background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
-  overflow: hidden;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .community-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
-/* Community Banner */
-.community-banner {
-  position: relative;
-  height: 120px;
-  overflow: hidden;
-}
-
-.banner-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.banner-overlay {
-  position: absolute;
-  bottom: 0;
-  left: var(--space-4);
-  transform: translateY(50%);
+/* Community Header */
+.community-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .community-avatar {
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: var(--radius-full);
-  border: 3px solid var(--color-bg-secondary);
   object-fit: cover;
+  border: 2px solid var(--color-border-light);
 }
 
-/* Community Info */
-.community-info {
-  padding: var(--space-4) var(--space-4) var(--space-3);
+.community-basic-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .community-name {
@@ -158,186 +204,54 @@
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
   margin-bottom: var(--space-1);
-  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .community-tag {
   font-size: var(--font-size-sm);
   color: var(--color-primary);
   font-weight: var(--font-weight-medium);
-  margin-bottom: var(--space-3);
-  display: block;
 }
 
+/* Community Description */
 .community-description {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1.5;
-  margin-bottom: var(--space-3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2;
-  overflow: hidden;
-}
-
-.community-stats {
-  display: flex;
-  gap: var(--space-4);
   margin-bottom: var(--space-4);
-}
-
-.stat {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.stat-icon {
-  font-size: var(--font-size-sm);
-}
-
-/* Community Actions */
-.community-actions {
-  padding: 0 var(--space-4) var(--space-4);
-  display: flex;
-  gap: var(--space-2);
-}
-
-.action-button {
-  flex: 1;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  border: 1px solid;
-  text-align: center;
-}
-
-.action-button.primary {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-white);
-}
-
-.action-button.primary:hover {
-  background-color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-}
-
-.action-button.secondary {
-  background-color: transparent;
-  border-color: var(--color-border-light);
-  color: var(--color-text-secondary);
-}
-
-.action-button.secondary:hover {
-  background-color: var(--color-bg-hover);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-/* Community Showcase */
-.community-showcase {
-  border-top: 1px solid var(--color-border-light);
-  padding: var(--space-4);
-  background-color: var(--color-bg-primary);
-}
-
-.showcase-title {
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-3);
-}
-
-.showcase-content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.showcase-item {
-  padding: var(--space-3);
-  background-color: var(--color-bg-secondary);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
-}
-
-.showcase-item-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-2);
-}
-
-.showcase-author-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
-}
-
-.showcase-item-info {
-  flex: 1;
-}
-
-.showcase-author {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  display: block;
-}
-
-.showcase-timestamp {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-}
-
-.showcase-type {
-  font-size: var(--font-size-sm);
-}
-
-.showcase-item-title {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-  margin-bottom: var(--space-2);
-  display: block;
-}
-
-.showcase-item-preview {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.4;
-  margin-bottom: var(--space-2);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
-  line-clamp: 2;
   overflow: hidden;
 }
 
-.showcase-item-stats {
+/* Community Footer */
+.community-footer {
   display: flex;
-  gap: var(--space-4);
-  font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* No Communities State */
-.no-communities {
+.member-count {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ==================== No Results ==================== */
+
+.no-results {
   text-align: center;
-  padding: var(--space-12) var(--space-6);
+  padding: var(--space-16) var(--space-6);
   color: var(--color-text-secondary);
 }
 
-.no-communities p {
+.no-results p {
   font-size: var(--font-size-lg);
   margin-bottom: var(--space-4);
 }
@@ -347,59 +261,67 @@
   background-color: var(--color-primary);
   color: var(--color-text-white);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .clear-search-button:hover {
   background-color: var(--color-primary-hover);
   transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
-/* Loading State */
+/* ==================== Loading State ==================== */
+
 .communities-page .loading {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 300px;
   font-size: var(--font-size-lg);
   color: var(--color-text-secondary);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 1024px) {
   .communities-page .main-content {
     margin-left: 0;
   }
 
+  .controls-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .search-bar {
+    min-width: auto;
+    max-width: none;
+  }
+
+  .filter-buttons {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .communities-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 768px) {
   .communities-container {
     padding: var(--space-4);
   }
 
-  .communities-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-
-  .sort-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
-  }
-
-  .sort-buttons {
-    justify-content: center;
-  }
-
-  .community-actions {
-    flex-direction: column;
-  }
-
-  .action-button {
-    width: 100%;
+  .communities-header {
+    margin-bottom: var(--space-6);
   }
 
   .page-title {
@@ -409,6 +331,55 @@
   .page-subtitle {
     font-size: var(--font-size-base);
   }
+
+  .controls-section {
+    gap: var(--space-3);
+  }
+
+  .search-input {
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-10);
+  }
+
+  .search-icon {
+    left: var(--space-3);
+  }
+
+  .clear-search {
+    right: var(--space-3);
+  }
+
+  .filter-button {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-xs);
+  }
+
+  .communities-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .community-card {
+    padding: var(--space-4);
+  }
+
+  .community-header {
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+
+  .community-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .community-name {
+    font-size: var(--font-size-base);
+  }
+
+  .community-description {
+    font-size: var(--font-size-xs);
+    margin-bottom: var(--space-3);
+  }
 }
 
 @media (max-width: 480px) {
@@ -416,42 +387,60 @@
     padding: var(--space-3);
   }
 
-  .community-info {
-    padding: var(--space-3) var(--space-3) var(--space-2);
+  .communities-header {
+    margin-bottom: var(--space-4);
   }
 
-  .community-actions {
-    padding: 0 var(--space-3) var(--space-3);
+  .page-title {
+    font-size: var(--font-size-xl);
   }
 
-  .community-showcase {
+  .controls-section {
+    gap: var(--space-2);
+  }
+
+  .filter-buttons {
+    gap: var(--space-2);
+  }
+
+  .filter-button {
+    padding: var(--space-2) var(--space-3);
+    gap: var(--space-1);
+  }
+
+  .community-card {
     padding: var(--space-3);
   }
 
-  .showcase-item {
-    padding: var(--space-2);
+  .community-header {
+    gap: var(--space-2);
   }
 
-  .sort-button {
-    padding: var(--space-2) var(--space-3);
+  .community-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .community-name {
+    font-size: var(--font-size-sm);
+  }
+
+  .community-tag {
+    font-size: var(--font-size-xs);
+  }
+
+  .community-description {
+    font-size: var(--font-size-xs);
+    -webkit-line-clamp: 2;
+  }
+
+  .member-count {
     font-size: var(--font-size-xs);
   }
 }
 
-/* Dark mode adjustments (if needed) */
-@media (prefers-color-scheme: dark) {
-  .community-card {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border-light);
-  }
+/* ==================== Animations ==================== */
 
-  .sort-controls {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border-light);
-  }
-}
-
-/* Animation for community cards */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -464,12 +453,44 @@
 }
 
 .community-card {
-  animation: fadeInUp 0.3s ease-out;
+  animation: fadeInUp 0.4s ease-out;
 }
 
-.community-card:nth-child(1) { animation-delay: 0.1s; }
-.community-card:nth-child(2) { animation-delay: 0.2s; }
-.community-card:nth-child(3) { animation-delay: 0.3s; }
-.community-card:nth-child(4) { animation-delay: 0.4s; }
-.community-card:nth-child(5) { animation-delay: 0.5s; }
-.community-card:nth-child(6) { animation-delay: 0.6s; }
+.community-card:nth-child(1) { animation-delay: 0.05s; }
+.community-card:nth-child(2) { animation-delay: 0.1s; }
+.community-card:nth-child(3) { animation-delay: 0.15s; }
+.community-card:nth-child(4) { animation-delay: 0.2s; }
+.community-card:nth-child(5) { animation-delay: 0.25s; }
+.community-card:nth-child(6) { animation-delay: 0.3s; }
+.community-card:nth-child(7) { animation-delay: 0.35s; }
+.community-card:nth-child(8) { animation-delay: 0.4s; }
+
+/* ==================== Focus States ==================== */
+
+.community-card:focus,
+.filter-button:focus,
+.search-input:focus,
+.clear-search:focus,
+.clear-search-button:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ==================== Dark Mode Support ==================== */
+
+@media (prefers-color-scheme: dark) {
+  .community-card {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border-light);
+  }
+
+  .search-input {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border-light);
+  }
+
+  .filter-button {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border-light);
+  }
+}

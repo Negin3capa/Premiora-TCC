@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ContentCard from '../ContentCard';
 import UserSuggestions from './UserSuggestions';
+import SidebarFeed from './SidebarFeed';
 import { useInfiniteScroll } from '../../hooks/useInfiniteScroll';
 import type { ContentItem } from '../../types/content';
 
@@ -79,63 +80,71 @@ const Feed: React.FC<FeedProps> = ({
 
   return (
     <main className="feed">
-      <div className="feed-content">
-        {currentItems.length === 0 && !currentLoading ? (
-          <div className="empty-state">
-            <p>
-              {currentTab === 'following'
-                ? 'Nenhum post dos usuários seguidos encontrado. Comece seguindo alguns usuários!'
-                : 'Nenhum conteúdo encontrado'
-              }
-            </p>
-          </div>
-        ) : (
-          <div className="content-grid">
-            {currentItems.map((item) => {
-              // Gerar chave única baseada na aba atual para evitar conflitos
-              const uniqueKey = `${currentTab}-${item.id}`;
+      <div className="feed-layout">
+        {/* Conteúdo principal */}
+        <div className="feed-main">
+          <div className="feed-content">
+            {currentItems.length === 0 && !currentLoading ? (
+              <div className="empty-state">
+                <p>
+                  {currentTab === 'following'
+                    ? 'Nenhum post dos usuários seguidos encontrado. Comece seguindo alguns usuários!'
+                    : 'Nenhum conteúdo encontrado'
+                  }
+                </p>
+              </div>
+            ) : (
+              <div className="content-grid">
+                {currentItems.map((item) => {
+                  // Gerar chave única baseada na aba atual para evitar conflitos
+                  const uniqueKey = `${currentTab}-${item.id}`;
 
-              // Renderizar sugestões de usuário para itens do tipo profile
-              if (item.type === 'profile') {
-                return (
-                  <div key={uniqueKey} className="user-suggestions-wrapper">
-                    <UserSuggestions />
-                  </div>
-                );
-              }
-              // Renderizar ContentCard para outros tipos
-              return <ContentCard key={uniqueKey} item={item} />;
-            })}
-          </div>
-        )}
+                  // Renderizar sugestões de usuário para itens do tipo profile
+                  if (item.type === 'profile') {
+                    return (
+                      <div key={uniqueKey} className="user-suggestions-wrapper">
+                        <UserSuggestions />
+                      </div>
+                    );
+                  }
+                  // Renderizar ContentCard para outros tipos
+                  return <ContentCard key={uniqueKey} item={item} />;
+                })}
+              </div>
+            )}
 
-        {/* Loading row - Twitter style */}
-        {showLoadingRow && (
-          <div className="feed-loading-row">
-            <div className="spinner"></div>
-          </div>
-        )}
+            {/* Loading row - Twitter style */}
+            {showLoadingRow && (
+              <div className="feed-loading-row">
+                <div className="spinner"></div>
+              </div>
+            )}
 
-        {/* Estado de erro com opção de retry */}
-        {currentError && (
-          <div className="error-state">
-            <div className="error-message">
-              <p>Erro ao carregar conteúdo: {currentError}</p>
-              {currentCanRetry && currentOnRetry && (
-                <button
-                  onClick={currentOnRetry}
-                  className="retry-button"
-                  aria-label="Tentar novamente"
-                >
-                  Tentar novamente
-                </button>
-              )}
-            </div>
-          </div>
-        )}
+            {/* Estado de erro com opção de retry */}
+            {currentError && (
+              <div className="error-state">
+                <div className="error-message">
+                  <p>Erro ao carregar conteúdo: {currentError}</p>
+                  {currentCanRetry && currentOnRetry && (
+                    <button
+                      onClick={currentOnRetry}
+                      className="retry-button"
+                      aria-label="Tentar novamente"
+                    >
+                      Tentar novamente
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
-        {/* Bottom sentinel for infinite scroll */}
-        <div ref={sentinelRef} className="bottom-sentinel" />
+            {/* Bottom sentinel for infinite scroll */}
+            <div ref={sentinelRef} className="bottom-sentinel" />
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <SidebarFeed />
       </div>
     </main>
   );

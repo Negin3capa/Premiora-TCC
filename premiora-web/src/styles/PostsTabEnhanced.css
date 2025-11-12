@@ -63,7 +63,7 @@
   color: var(--color-text-secondary);
 }
 
-.search-icon {
+.posts-search-icon {
   position: absolute;
   left: var(--space-3);
   color: var(--color-text-secondary);

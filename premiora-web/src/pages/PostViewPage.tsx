@@ -7,7 +7,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { PostService } from '../services/content/PostService';
-import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
+import { Sidebar, MobileBottomBar } from '../components/layout';
 import type { ContentItem, ContentType } from '../types/content';
 import '../styles/PostViewPage.css';
 
@@ -173,7 +173,6 @@ const PostViewPage: React.FC = () => {
   const [likesCount, setLikesCount] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isFeedSidebarOpen, setIsFeedSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   // Atualizar estado local quando o post for carregado
@@ -305,7 +304,7 @@ const PostViewPage: React.FC = () => {
   }
 
   return (
-    <div className="homepage">
+    <div className="post-view-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Suspense fallback={<ComponentLoader />}>
@@ -493,10 +492,6 @@ const PostViewPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <FeedSidebar
-        isOpen={isFeedSidebarOpen}
-        onClose={() => setIsFeedSidebarOpen(false)}
-      />
       <MobileBottomBar />
 
       {/* Modal de imagem ampliada */}

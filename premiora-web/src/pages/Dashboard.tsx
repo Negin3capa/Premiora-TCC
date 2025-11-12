@@ -1,7 +1,7 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { useTabbedFeed } from '../hooks/useTabbedFeed';
 import { useLocalSearch } from '../hooks/useSearch';
-import { Sidebar, MobileBottomBar, FeedSidebar } from '../components/layout';
+import { Sidebar, MobileBottomBar } from '../components/layout';
 import '../styles/HomePage.css';
 
 // Lazy loading dos componentes para otimização
@@ -48,7 +48,6 @@ const Dashboard: React.FC = () => {
 
   const { filteredItems } = useLocalSearch(feedItems);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isFeedSidebarOpen, setIsFeedSidebarOpen] = useState(false);
 
   // Controlar se já fizemos o refresh inicial
   const hasInitialRefreshedRef = useRef(false);
@@ -97,7 +96,7 @@ const Dashboard: React.FC = () => {
   }, [feedItems.length]); // Adicionada dependência para verificar se conteúdo foi carregado
 
   return (
-    <div className="homepage">
+    <div className="dashboard-page">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       <div className="main-content">
         <Suspense fallback={<ComponentLoader />}>
@@ -131,10 +130,6 @@ const Dashboard: React.FC = () => {
           />
         </Suspense>
       </div>
-      <FeedSidebar
-        isOpen={isFeedSidebarOpen}
-        onClose={() => setIsFeedSidebarOpen(false)}
-      />
       <MobileBottomBar />
     </div>
   );
