@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Post } from '../../types/profile';
-import styles from './FeaturedPost.module.css';
+import styles from '../../styles/FeaturedPost.module.css';
 
 /**
  * Componente do post em destaque

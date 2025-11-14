@@ -6,7 +6,7 @@ import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { X, RotateCcw } from 'lucide-react';
 import type { Area, Point } from 'react-easy-crop';
-import styles from './ImageCropModal.module.css';
+import styles from '../../styles/ImageCropModal.module.css';
 
 /**
  * Props do modal de crop

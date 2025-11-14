@@ -4,7 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useFollow } from '../../hooks/useFollow';
 import { useNavigate } from 'react-router-dom';
 import type { CreatorProfile } from '../../types/profile';
-import styles from './ProfileBanner.module.css';
+import styles from '../../styles/ProfileBanner.module.css';
 
 /**
  * Componente do banner do perfil do criador
