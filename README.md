@@ -289,6 +289,7 @@ docs: atualizar documentação do README
 - Node.js 18 ou superior
 - npm ou yarn
 - Conta no Supabase (para configuração da autenticação)
+- Commitizen (para commits convencionais): `npm install -g commitizen`
 
 ### Instalação
 
@@ -476,6 +477,83 @@ O projeto utiliza **Husky** para executar hooks de git automaticamente:
 2. Execute em modo desenvolvimento: `npm run dev`
 3. Para commits, use: `npm run commit` (abre interface interativa)
 4. Para build: `npm run build`
+
+#### Como Usar o Comando de Commit
+
+O projeto utiliza **Commitizen** para criar commits padronizados seguindo Conventional Commits.
+
+##### Fluxo Completo de Commit
+
+```bash
+# 1. Fazer mudanças no código
+# 2. Adicionar arquivos ao stage
+git add .
+
+# 3. Criar commit interativo
+npm run commit
+
+# 4. Seguir as instruções na tela:
+#    - Selecionar tipo de commit
+#    - Adicionar escopo (opcional)
+#    - Descrição curta
+#    - Descrição longa (opcional)
+#    - Marcar breaking changes (se aplicável)
+
+# 5. Verificar se o commit foi criado
+git log --oneline -1
+
+# 6. Enviar para repositório remoto
+git push origin <nome-da-branch>
+```
+
+##### Tipos de Commit Disponíveis
+
+| Tipo | Descrição | Exemplo |
+|------|-----------|---------|
+| `feat` | Nova funcionalidade | `feat: adicionar login com Google` |
+| `fix` | Correção de bug | `fix: corrigir upload de imagens` |
+| `docs` | Documentação | `docs: atualizar README` |
+| `style` | Formatação | `style: formatar código` |
+| `refactor` | Refatoração | `refactor: reorganizar componentes` |
+| `perf` | Performance | `perf: otimizar queries` |
+| `test` | Testes | `test: adicionar testes unitários` |
+| `chore` | Ferramentas | `chore: atualizar dependências` |
+
+##### Validação Automática
+
+- **Git Hooks**: Commits são validados automaticamente pelo Husky
+- **Commitlint**: Garante formato correto dos commits
+- **Rejeição**: Commits fora do padrão são rejeitados
+
+##### Troubleshooting
+
+**Se aparecer "nothing to commit, working tree clean":**
+```bash
+# Verifique se há arquivos modificados
+git status
+
+# Adicione arquivos ao stage
+git add .
+
+# Tente novamente
+npm run commit
+```
+
+**Se o commitizen não abrir a interface interativa:**
+```bash
+# Verifique se o commitizen está instalado
+npm list cz-conventional-changelog
+
+# Reinstale se necessário
+npm install cz-conventional-changelog
+```
+
+**Se os git hooks não funcionarem:**
+```bash
+# Execute manualmente para testar
+npx lint-staged
+npx commitlint --edit .git/COMMIT_EDITMSG
+```
 
 ## Licença
 

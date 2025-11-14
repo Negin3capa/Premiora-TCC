@@ -5,5 +5,8 @@
   },
   "dependencies": {
     "@types/react": "^19.2.2"
+  },
+  "scripts": {
+    "prepare": "husky"
   }
 }
