@@ -11,7 +11,6 @@ import NotificationContainer from './components/common/NotificationContainer';
 // Lazy loading dos componentes de página para otimização de bundle
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Login = React.lazy(() => import('./pages/Login'));
-const Signup = React.lazy(() => import('./pages/Signup'));
 const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
 const EmailConfirmation = React.lazy(() => import('./pages/EmailConfirmation'));
 const EmailConfirmationSuccess = React.lazy(() => import('./pages/EmailConfirmationSuccess'));
@@ -93,14 +92,10 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Rota de Signup (apenas para não autenticados) */}
+        {/* Rota de Signup - redireciona para login (fluxo unificado) */}
         <Route
           path="/signup"
-          element={
-            <PublicRoute>
-              <Signup />
-            </PublicRoute>
-          }
+          element={<Navigate to="/login" replace />}
         />
 
         {/* Rota de Callback OAuth (acessível para todos) */}
