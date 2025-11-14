@@ -17,6 +17,7 @@
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@vitejs/plugin-react": "^5.1.0",
+    "cz-conventional-changelog": "^3.3.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
     "typescript": "~5.9.3",
@@ -39,5 +40,10 @@
       "npm run build"
     ],
     "*.{json,css,md}": []
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
   }
 }
