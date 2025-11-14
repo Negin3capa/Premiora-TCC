@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import type { Post } from '../../types/profile';
 import { PostCard } from './PostCard';
-import styles from './RecentPosts.module.css';
+import styles from '../../styles/RecentPosts.module.css';
 
 /**
  * Componente de posts recentes com scroll horizontal

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { Post } from '../../types/profile';
-import styles from './PostCard.module.css';
+import styles from '../../styles/PostCard.module.css';
 
 /**
  * Componente de cartão de post
