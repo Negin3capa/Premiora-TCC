@@ -289,6 +289,7 @@ docs: atualizar documentação do README
 - Node.js 18 ou superior
 - npm ou yarn
 - Conta no Supabase (para configuração da autenticação)
+- Commitizen (para commits convencionais): `npm install -g commitizen`
 
 ### Instalação
 
