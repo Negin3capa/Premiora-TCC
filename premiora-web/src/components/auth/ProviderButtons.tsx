@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signInWithProvider } from '../../lib/supabaseAuth';
+import { OAuthService } from '../../services/auth/OAuthService';
 import type { OAuthProvider } from '../../lib/supabaseAuth';
 
 /**
@@ -16,6 +17,8 @@ interface ProviderButtonsProps {
   showOnlyFacebook?: boolean;
   /** Provedores customizados a mostrar */
   providers?: OAuthProvider[];
+  /** Email para verificar conflitos de provedores */
+  email?: string;
   /** Classe CSS adicional */
   className?: string;
 }
@@ -23,6 +26,7 @@ interface ProviderButtonsProps {
 /**
  * Componente para botões de login com provedores OAuth
  * Suporta Google e Facebook com tratamento de erros e loading states
+ * Bloqueia Facebook se o usuário já tiver Google com o mesmo email
  *
  * @component
  */
@@ -32,14 +36,41 @@ const ProviderButtons: React.FC<ProviderButtonsProps> = ({
   showOnlyGoogle = false,
   showOnlyFacebook = false,
   providers = ['google', 'facebook'],
+  email,
   className = ''
 }) => {
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
+  const [blockedProviders, setBlockedProviders] = useState<Set<OAuthProvider>>(new Set());
 
-  // Filtrar provedores baseado nas props
+  // Verificar provedores conflitantes quando email é fornecido
+  useEffect(() => {
+    const checkProviders = async () => {
+      if (email) {
+        try {
+          const { shouldBlockFacebook } = await OAuthService.checkConflictingProviders(email);
+          if (shouldBlockFacebook) {
+            setBlockedProviders(new Set(['facebook']));
+            console.log('🚫 Facebook bloqueado devido a conflito com Google para o email:', email);
+          } else {
+            setBlockedProviders(new Set());
+          }
+        } catch (error) {
+          console.error('❌ Erro ao verificar provedores conflitantes:', error);
+          setBlockedProviders(new Set());
+        }
+      } else {
+        setBlockedProviders(new Set());
+      }
+    };
+
+    checkProviders();
+  }, [email]);
+
+  // Filtrar provedores baseado nas props e conflitos
   const displayProviders = providers.filter(provider => {
     if (showOnlyGoogle && provider !== 'google') return false;
     if (showOnlyFacebook && provider !== 'facebook') return false;
+    if (blockedProviders.has(provider)) return false;
     return true;
   });
 

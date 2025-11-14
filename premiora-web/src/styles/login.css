@@ -66,6 +66,10 @@
   font-weight: var(--font-weight-bold);
 }
 
+.login-header h1.centered-title {
+  text-align: center;
+}
+
 .login-header p {
   font-size: var(--font-size-lg);
   color: var(--color-text-secondary);
