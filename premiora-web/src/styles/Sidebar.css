@@ -13,12 +13,17 @@
   width: 220px;
   background-color: #0D0D0D;
   border-right: 1px solid #1A1A1A;
-  z-index: 100;
+  z-index: 2000; /* Higher z-index to overlay everything */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   padding: 22px 16px 20px 16px;
   /* Default: visible on desktop, controlled by grid layout */
+}
+
+/* Torna a sidebar mais clara quando aberta em dispositivos móveis */
+.sidebar.mobile-open {
+  background-color: #2A2A2A;
 }
 
 .sidebar-content {
@@ -231,8 +236,9 @@
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1999; /* Just below sidebar z-index */
+  z-index: 1998; /* Below sidebar z-index */
   display: block;
+  pointer-events: none; /* Allow clicks to pass through to sidebar */
 }
 
 @media (max-width: 768px) {

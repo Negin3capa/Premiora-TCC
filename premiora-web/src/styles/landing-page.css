@@ -35,7 +35,11 @@
   padding: var(--space-4) 0;
 }
 
+/* Posiciona a logo no canto superior esquerdo da página */
 .logo {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-6);
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -87,6 +91,9 @@
 }
 
 .auth-buttons {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-6);
   display: flex;
   gap: var(--space-4);
   align-items: center;
@@ -513,7 +520,7 @@
   color: var(--color-primary);
   position: absolute;
   top: -20px;
-  left: -20px;
+  left: -30px;
   font-family: serif;
 }
 
