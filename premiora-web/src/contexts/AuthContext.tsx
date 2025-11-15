@@ -3,8 +3,10 @@ import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AuthService } from '../services/authService';
 import { signOut } from '../lib/supabaseAuth';
-import { clearSetupLock, clearExpiredSetupLocks } from '../utils/profileUtils';
+import { clearSetupLock, clearExpiredSetupLocks, setSetupLock } from '../utils/profileUtils';
+import { OAuthService } from '../services/auth/OAuthService';
 import type { UserProfile, AuthContextType } from '../types/auth';
+import type { OAuthProvider } from '../lib/supabaseAuth';
 
 // Criar contexto
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,6 +17,8 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
  *
  * @component
  */
+
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -22,6 +26,170 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const currentUserIdRef = useRef<string | null>(null);
+  const [isProcessingOAuth, setIsProcessingOAuth] = useState(false);
+
+  /**
+   * Processa OAuth callback diretamente no contexto, evitando a página intermediária
+   * Redireciona usuários com perfis incompletos usando um mecanismo que respeita o React Router
+   * Contém toda a lógica que estava no AuthCallback.tsx
+   */
+  const processOAuthCallback = useCallback(async (authUser: User) => {
+    // Evitar processamento duplicado
+    if (isProcessingOAuth) {
+      console.log('🔄 Processamento OAuth já em andamento, ignorando...');
+      return;
+    }
+
+    setIsProcessingOAuth(true);
+    console.log('🔄 Processando OAuth callback diretamente no contexto para usuário:', authUser.id);
+
+    try {
+      // 🔒 VERIFICAÇÃO DE PROTEÇÃO DE IDENTIDADE PATREON-LIKE
+      console.log('🔍 Verificando proteção de identidade Patreon-like...');
+
+      // Determinar qual provider foi usado neste login
+      const provider = authUser.app_metadata?.provider as OAuthProvider;
+      console.log('📋 Provider usado neste login:', provider);
+
+      if (provider && (provider === 'google' || provider === 'facebook')) {
+        // Extrair dados da identidade OAuth do usuário para validação
+        const identityData = {
+          email: authUser.email || '',
+          sub: authUser.id, // ID único da identidade OAuth
+          // Outros dados da identidade podem estar em user.user_metadata
+          ...authUser.user_metadata
+        };
+
+        console.log('🔍 Extraindo dados da identidade OAuth para validação:', {
+          email: identityData.email,
+          sub: identityData.sub?.substring(0, 10) + '...',
+          provider: provider
+        });
+
+        // Verificar proteção de identidade
+        const protectionCheck = await OAuthService.checkIdentityProtection(identityData, provider);
+
+        console.log('🔒 Resultado da proteção de identidade:', {
+          blocked: protectionCheck.blocked,
+          reason: protectionCheck.blockedReason,
+          accountType: protectionCheck.accountType,
+          canLinkAccount: protectionCheck.canLinkAccount
+        });
+
+        // 🚫 SE ESTIVER BLOQUEADO: REJEITAR LOGIN
+        if (protectionCheck.blocked) {
+          console.error('🚫 LOGIN BLOQUEADO:', protectionCheck.blockedReason);
+
+          // LIMPAR DADOS DO GOOGLE ONE TAP PARA PRIOR ACCES O (já que login foi bloqueado)
+          if (provider === 'google') {
+            try {
+              localStorage.removeItem('lastGoogleAccount');
+              localStorage.removeItem('hasGoogleLoginHistory');
+              console.log('🗑️ Dados do Google One Tap limpos devido ao bloqueio');
+            } catch (error) {
+              console.warn('⚠️ Erro ao limpar dados do Google One Tap:', error);
+            }
+          }
+
+          // Logout automático para limpar sessão
+          await signOut();
+          return;
+        }
+
+        // ✅ SE PERMITIDO: Continuar com processamento normal
+        console.log('✅ Proteção de identidade aprovada, continuando processamento...');
+
+        // SALVAR INFORMAÇÕES DO LOGIN GOOGLE PARA ONE TAP (se for Google)
+        if (provider === 'google' && authUser.email) {
+          try {
+            console.log('💾 Salvando dados do login Google para One Tap futuro');
+
+            // Salvar marcação de que o usuário já logou com Google ao menos uma vez
+            localStorage.setItem('hasGoogleLoginHistory', 'true');
+
+            // Salvar dados da conta Google para personalização futura
+            const googleAccountData = {
+              email: authUser.email,
+              name: authUser.user_metadata?.full_name || authUser.user_metadata?.name,
+              picture: authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture,
+              savedAt: Date.now()
+            };
+
+            localStorage.setItem('lastGoogleAccount', JSON.stringify(googleAccountData));
+            console.log('✅ Dados do login Google salvos para One Tap');
+          } catch (error) {
+            console.warn('⚠️ Erro ao salvar dados do login Google:', error);
+            // Não falhar o login por causa disso
+          }
+        }
+      } else {
+        console.warn('⚠️ Provider não identificado ou não suportado:', provider);
+      }
+
+      // Criar/atualizar perfil do usuário no banco de dados
+      console.log('👤 Criando/atualizando perfil do usuário OAuth...');
+      await AuthService.upsertUserProfile(authUser);
+
+      // Aguardar um pouco para garantir que o perfil foi criado
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Verificar se o perfil já está completo
+      console.log('🔍 Verificando se perfil está completo...');
+      const userProfile = await AuthService.fetchUserProfile(authUser.id);
+
+      console.log('📋 Dados do perfil obtido:', {
+        id: userProfile?.id,
+        name: userProfile?.name,
+        username: userProfile?.username,
+        profile_setup_completed: userProfile?.profile_setup_completed,
+        email: userProfile?.email
+      });
+
+      if (!userProfile) {
+        console.error('❌ Perfil não foi criado corretamente - será redirectado pelo PublicRoute');
+
+        // Bloquear setup para este usuário
+        setSetupLock(authUser.id, true);
+        console.log('🔒 Setup bloqueado para novo usuário OAuth (sem perfil)');
+
+        // O PublicRoute detectará o perfil incompleto e redirecionará automaticamente
+        return;
+      }
+
+      // Para usuários OAuth, considerar novo usuário se:
+      // - Não tem profile_setup_completed como true, OU
+      // - Não tem name/username
+      const isProfileComplete = userProfile.name &&
+                               userProfile.username &&
+                               userProfile.profile_setup_completed === true;
+
+      console.log('🎯 Análise de completude do perfil:', {
+        hasName: !!userProfile.name,
+        hasUsername: !!userProfile.username,
+        hasCompletedSetup: userProfile.profile_setup_completed === true,
+        isProfileComplete
+      });
+
+      if (isProfileComplete) {
+        console.log('✅ Perfil já está completo, PublicRoute irá redirecionar para dashboard');
+      } else {
+        console.log('⚠️ Perfil incompleto OU é novo usuário OAuth - PublicRoute irá redirecionar para setup');
+
+        // Bloquear setup para este usuário
+        setSetupLock(authUser.id, true);
+        console.log('🔒 Setup bloqueado para novo usuário OAuth');
+      }
+
+      console.log('✅ Processamento OAuth concluído com sucesso');
+
+    } catch (error) {
+      console.error('💥 Erro geral no processamento OAuth:', error);
+      // Em caso de erro, fazer logout
+      await signOut();
+    } finally {
+      setIsProcessingOAuth(false);
+    }
+  }, [isProcessingOAuth]);
 
   /**
    * Busca e atualiza o perfil do usuário no estado local
@@ -71,32 +239,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const signInWithEmail = useCallback(async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      await AuthService.signInWithEmail(email, password);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      throw err;
-    }
-  }, []);
-
-  const signUpWithEmail = useCallback(async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const result = await AuthService.signUpWithEmail(email, password);
-      setLoading(false);
-      return result;
-    } catch (err) {
-      setLoading(false);
-      throw err;
-    }
-  }, []);
-
   const handleSignOut = useCallback(async () => {
     setLoading(true);
     try {
+      // Salvar última conta Google antes do logout para One Tap
+      if (user?.app_metadata?.provider === 'google') {
+        const lastGoogleAccount = {
+          email: user.email,
+          picture: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+          name: user.user_metadata?.full_name || user.user_metadata?.name,
+          savedAt: Date.now()
+        };
+        localStorage.setItem('lastGoogleAccount', JSON.stringify(lastGoogleAccount));
+        console.log('💾 Última conta Google salva para One Tap:', lastGoogleAccount);
+      }
+
       // Limpar bloqueio do setup antes do logout
       if (user?.id) {
         clearSetupLock(user.id);
@@ -119,7 +276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.app_metadata, user?.email, user?.user_metadata]);
 
   // Escutar mudanças na sessão e gerenciar estado
   useEffect(() => {
@@ -157,15 +314,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Buscar perfil diretamente para evitar stale closure
             AuthService.fetchUserProfile(session.user.id).then(profile => {
               if (isMounted) {
-                // Se perfil é null, significa que o usuário foi deletado do banco
-                // mas ainda tem sessão ativa - fazer logout automático
+                // Se perfil é null, pode ser que seja um usuário OAuth novo cuja conta está sendo criada
+                // Não fazer logout automático durante INITIAL_SESSION, apenas definir profile como null
                 if (profile === null) {
-                  console.log('🚨 Usuário autenticado mas perfil não encontrado - conta deletada, fazendo logout automático');
-                  // Não definir userProfile como null para evitar loop
-                  // Em vez disso, fazer logout silencioso
-                  supabase.auth.signOut().catch(err => {
-                    console.error('Erro no logout automático:', err);
-                  });
+                  console.log('⚠️ Perfil não encontrado durante inicialização - pode ser criação de conta OAuth em andamento');
+                  // Definir profile como null para permitir que rotas funcionem corretamente
+                  userProfileRef.current = null;
+                  setUserProfile(null);
                   return;
                 }
 
@@ -177,12 +332,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             }).catch(err => {
               console.error('Profile fetch failed:', err);
-              // Em caso de erro, assumir que perfil não existe e fazer logout
+              // Durante INITIAL_SESSION, ser mais tolerante com erros para evitar logout desnecessário
+              // O PublicRoute e ProfileSetupGuard irão redirecionar adequadamente baseado no estado atual
               if (isMounted) {
-                console.log('🚨 Erro ao buscar perfil - fazendo logout automático');
-                supabase.auth.signOut().catch(logoutErr => {
-                  console.error('Erro no logout automático:', logoutErr);
-                });
+                console.log('⚠️ Erro ao buscar perfil durante inicialização - definindo perfil como null');
+                userProfileRef.current = null;
+                setUserProfile(null);
               }
             });
           }, 1000); // Aguardar 1 segundo para dar tempo ao callback
@@ -224,7 +379,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setLoading(false); // Finalizar loading imediatamente
         }
 
-        // Buscar perfil em background (não bloqueia a UI)
+        // Processar OAuth callback quando usuário faz SIGNED_IN via provedor OAuth
+        if (event === 'SIGNED_IN' && session?.user) {
+          const provider = session.user.app_metadata?.provider as OAuthProvider;
+          const isOAuthLogin = provider === 'google' || provider === 'facebook';
+
+          if (isOAuthLogin) {
+            console.log('🔄 OAuth login detectado, processando callback diretamente no contexto...');
+            // Processar OAuth callback sem redirecionamento intermediário
+            await processOAuthCallback(session.user);
+            return; // Evitar processamento duplicado do perfil
+          }
+        }
+
+        // Buscar perfil em background (não bloqueia a UI) para logins não-OAuth
         if (session?.user) {
           console.log('👤 Auth state change - usuário autenticado, buscando perfil em background...');
 
@@ -232,14 +400,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const forceFresh = event === 'SIGNED_IN';
           AuthService.fetchUserProfile(session.user.id, forceFresh).then(profile => {
             if (isMounted) {
-              // Se perfil é null, significa que o usuário foi deletado do banco
-              // mas ainda tem sessão ativa - fazer logout automático
+              // Se perfil é null, pode ser que seja um usuário OAuth novo cuja conta ainda não foi criada
+              // Não fazer logout automático, apenas definir profile como null
               if (profile === null) {
-                console.log('🚨 Auth state change - usuário autenticado mas perfil não encontrado - conta deletada, fazendo logout automático');
-                // Fazer logout silencioso
-                supabase.auth.signOut().catch(err => {
-                  console.error('Erro no logout automático:', err);
-                });
+                console.log('⚠️ Auth state change - perfil não encontrado, definindo como null (pode ser conta OAuth em criação)');
+                userProfileRef.current = null;
+                setUserProfile(null);
                 return;
               }
 
@@ -252,12 +418,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
           }).catch(err => {
             console.error('Profile fetch failed:', err);
-            // Em caso de erro, assumir que perfil não existe e fazer logout
+            // Durante auth state changes, ser mais tolerante com erros temporários
+            // O PublicRoute e ProfileSetupGuard irão redirecionar adequadamente baseado no estado atual
             if (isMounted) {
-              console.log('🚨 Auth state change - erro ao buscar perfil - fazendo logout automático');
-              supabase.auth.signOut().catch(logoutErr => {
-                console.error('Erro no logout automático:', logoutErr);
-              });
+              console.log('⚠️ Auth state change - erro ao buscar perfil - definindo perfil como null');
+              userProfileRef.current = null;
+              setUserProfile(null);
             }
           });
         } else {
@@ -281,8 +447,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     signInWithGoogle,
     signInWithFacebook,
-    signInWithEmail,
-    signUpWithEmail,
     signOut: handleSignOut,
     loading,
     refreshUserProfile,

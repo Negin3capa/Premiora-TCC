@@ -1,9 +1,9 @@
 /**
- * Serviço legado de autenticação
+ * Serviço legado de autenticação - apenas OAuth
  * @deprecated Use os serviços especializados em services/auth/ em vez deste
  * Este arquivo será removido após migração completa dos imports
  */
-import { RedirectService, OAuthService, EmailAuthService, ProfileService } from './auth';
+import { RedirectService, OAuthService, ProfileService } from './auth';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -33,30 +33,6 @@ export class AuthService {
    */
   static async signInWithFacebook(): Promise<void> {
     return OAuthService.signInWithFacebook();
-  }
-
-  /**
-   * Realiza login com email e senha
-   * @deprecated Use EmailAuthService.signInWithEmail
-   */
-  static async signInWithEmail(email: string, password: string): Promise<void> {
-    return EmailAuthService.signInWithEmail(email, password);
-  }
-
-  /**
-   * Realiza registro com email e senha
-   * @deprecated Use EmailAuthService.signUpWithEmail
-   */
-  static async signUpWithEmail(email: string, password: string): Promise<any> {
-    return EmailAuthService.signUpWithEmail(email, password);
-  }
-
-  /**
-   * Realiza logout do usuário
-   * @deprecated Use EmailAuthService.signOut
-   */
-  static async signOut(): Promise<void> {
-    return EmailAuthService.signOut();
   }
 
   /**

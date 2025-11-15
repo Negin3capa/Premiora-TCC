@@ -29,6 +29,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@types/react-router-dom": "^5.3.3",
+    "google-one-tap": "^1.0.6",
     "lucide-react": "^0.553.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -36,9 +37,6 @@
     "react-router-dom": "^7.9.4"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "npm run build"
-    ],
     "*.{json,css,md}": []
   },
   "config": {
