@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithProvider } from '../../lib/supabaseAuth';
-import { OAuthService } from '../../services/auth/OAuthService';
 import { useGoogleOneTap } from '../../hooks/useGoogleOneTap';
 import type { OAuthProvider } from '../../lib/supabaseAuth';
 
@@ -46,20 +45,33 @@ const ProviderButtons: React.FC<ProviderButtonsProps> = ({
   // Hook para gerenciar Google One Tap
   const { hasRecentAccount, lastGoogleAccount } = useGoogleOneTap();
 
-  // Verificar provedores conflitantes quando email é fornecido
+  // Verificar se o usuário já fez login com Google alguma vez
+  const hasGoogleLoginHistory = localStorage.getItem('hasGoogleLoginHistory') === 'true';
+
+  // Google One Tap só deve ser mostrado se:
+  // 1. O usuário já logou com Google ao menos uma vez
+  // 2. Há dados recentes da conta salvos
+  const shouldShowGoogleOneTap = hasGoogleLoginHistory && hasRecentAccount && !!lastGoogleAccount;
+
+  // 🔒 VERIFICAR PROTEÇÃO DE IDENTIDADE PATREON-LIKE
   useEffect(() => {
     const checkProviders = async () => {
       if (email) {
         try {
-          const { shouldBlockFacebook } = await OAuthService.checkConflictingProviders(email);
-          if (shouldBlockFacebook) {
-            setBlockedProviders(new Set(['facebook']));
-            console.log('🚫 Facebook bloqueado devido a conflito com Google para o email:', email);
-          } else {
-            setBlockedProviders(new Set());
-          }
+          console.log('🔍 Verificando proteção de identidade para UI dos botões OAuth...');
+
+          // Para verificações na UI, não temos dados de identidade reais
+          // Apenas verificamos se haveria bloqueios baseado no email
+          console.log('⚠️ Verificação preemptiva de conflitos desabilitada para UI - será feita no callback');
+
+          // Por enquanto, não bloqueamos providers na UI
+          // A proteção real acontece no AuthCallback após completar OAuth
+          setBlockedProviders(new Set());
+
+
+
         } catch (error) {
-          console.error('❌ Erro ao verificar provedores conflitantes:', error);
+          console.error('❌ Erro ao verificar proteção de identidade:', error);
           setBlockedProviders(new Set());
         }
       } else {
@@ -129,8 +141,8 @@ const ProviderButtons: React.FC<ProviderButtonsProps> = ({
         const config = providerConfig[provider];
         const isLoading = loadingProvider === provider;
 
-        // Botão especial para Google com conta recente - Estilo Patreon
-        if (provider === 'google' && hasRecentAccount && lastGoogleAccount) {
+        // Botão especial para Google com conta recente - Estilo Patreon (apenas se usuário já logou com Google antes)
+        if (provider === 'google' && shouldShowGoogleOneTap) {
           return (
             <button
               key={provider}
