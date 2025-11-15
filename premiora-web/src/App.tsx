@@ -12,8 +12,6 @@ import NotificationContainer from './components/common/NotificationContainer';
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Login = React.lazy(() => import('./pages/Login'));
 const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
-const EmailConfirmation = React.lazy(() => import('./pages/EmailConfirmation'));
-const EmailConfirmationSuccess = React.lazy(() => import('./pages/EmailConfirmationSuccess'));
 const ProfileSetup = React.lazy(() => import('./pages/ProfileSetup'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
@@ -102,18 +100,6 @@ const App: React.FC = () => {
         <Route
           path="/auth/callback"
           element={<AuthCallback />}
-        />
-
-        {/* Rota de Confirmação de Email (acessível para todos os estados de autenticação) */}
-        <Route
-          path="/email-confirmation"
-          element={<EmailConfirmation />}
-        />
-
-        {/* Rota de Sucesso da Confirmação de Email (acessível para todos os estados de autenticação) */}
-        <Route
-          path="/email-confirmation-success"
-          element={<EmailConfirmationSuccess />}
         />
 
         {/* Rota de Setup de Perfil (apenas para autenticados) */}

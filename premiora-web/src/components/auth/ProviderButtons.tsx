@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithProvider } from '../../lib/supabaseAuth';
 import { OAuthService } from '../../services/auth/OAuthService';
+import { useGoogleOneTap } from '../../hooks/useGoogleOneTap';
 import type { OAuthProvider } from '../../lib/supabaseAuth';
 
 /**
@@ -41,6 +42,9 @@ const ProviderButtons: React.FC<ProviderButtonsProps> = ({
 }) => {
   const [loadingProvider, setLoadingProvider] = useState<OAuthProvider | null>(null);
   const [blockedProviders, setBlockedProviders] = useState<Set<OAuthProvider>>(new Set());
+
+  // Hook para gerenciar Google One Tap
+  const { hasRecentAccount, lastGoogleAccount } = useGoogleOneTap();
 
   // Verificar provedores conflitantes quando email é fornecido
   useEffect(() => {
@@ -125,6 +129,68 @@ const ProviderButtons: React.FC<ProviderButtonsProps> = ({
         const config = providerConfig[provider];
         const isLoading = loadingProvider === provider;
 
+        // Botão especial para Google com conta recente - Estilo Patreon
+        if (provider === 'google' && hasRecentAccount && lastGoogleAccount) {
+          return (
+            <button
+              key={provider}
+              onClick={() => handleProviderLogin(provider)}
+              disabled={isLoading || loadingProvider !== null}
+              className={`${config.className} google-recent-account`}
+              type="button"
+            >
+              {/* Avatar da conta */}
+              {lastGoogleAccount.picture ? (
+                <img
+                  src={lastGoogleAccount.picture}
+                  alt={`Avatar de ${lastGoogleAccount.name || lastGoogleAccount.email}`}
+                  className="google-recent-account-avatar"
+                  style={{
+                    opacity: isLoading ? 0.5 : 1
+                  }}
+                />
+              ) : (
+                <div
+                  className="google-recent-account-avatar"
+                  style={{
+                    background: '#dadce0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <span style={{ fontSize: '16px', color: '#666' }}>
+                    {(lastGoogleAccount.email?.charAt(0) || 'U').toUpperCase()}
+                  </span>
+                </div>
+              )}
+
+              {/* Área de texto */}
+              <div className="google-recent-account-meta">
+                <div className="continue-text">
+                  {isLoading ? `Conectando...` : `Continuar como ${lastGoogleAccount.name || lastGoogleAccount.email.split('@')[0]}`}
+                </div>
+                <div className="account-email">
+                  {lastGoogleAccount.email}
+                  {/* Caret dropdown */}
+                  <span className="google-recent-account-caret"></span>
+                </div>
+              </div>
+
+              {/* Ícone do Google */}
+              <img
+                src={config.icon}
+                alt={config.alt}
+                className={`${provider}-icon google-recent-account-provider`}
+                style={{
+                  opacity: isLoading ? 0.5 : 1
+                }}
+              />
+            </button>
+          );
+        }
+
+        // Botão padrão para outros provedores
         return (
           <button
             key={provider}

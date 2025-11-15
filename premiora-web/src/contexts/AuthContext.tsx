@@ -71,32 +71,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const signInWithEmail = useCallback(async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      await AuthService.signInWithEmail(email, password);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      throw err;
-    }
-  }, []);
-
-  const signUpWithEmail = useCallback(async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const result = await AuthService.signUpWithEmail(email, password);
-      setLoading(false);
-      return result;
-    } catch (err) {
-      setLoading(false);
-      throw err;
-    }
-  }, []);
-
   const handleSignOut = useCallback(async () => {
     setLoading(true);
     try {
+      // Salvar última conta Google antes do logout para One Tap
+      if (user?.app_metadata?.provider === 'google') {
+        const lastGoogleAccount = {
+          email: user.email,
+          picture: user.user_metadata?.avatar_url || user.user_metadata?.picture,
+          name: user.user_metadata?.full_name || user.user_metadata?.name,
+          savedAt: Date.now()
+        };
+        localStorage.setItem('lastGoogleAccount', JSON.stringify(lastGoogleAccount));
+        console.log('💾 Última conta Google salva para One Tap:', lastGoogleAccount);
+      }
+
       // Limpar bloqueio do setup antes do logout
       if (user?.id) {
         clearSetupLock(user.id);
@@ -119,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.app_metadata, user?.email, user?.user_metadata]);
 
   // Escutar mudanças na sessão e gerenciar estado
   useEffect(() => {
@@ -281,8 +270,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     signInWithGoogle,
     signInWithFacebook,
-    signInWithEmail,
-    signUpWithEmail,
     signOut: handleSignOut,
     loading,
     refreshUserProfile,

@@ -23,8 +23,6 @@ export interface AuthContextType {
   session: import('@supabase/supabase-js').Session | null;
   signInWithGoogle: () => Promise<void>;
   signInWithFacebook: () => Promise<void>;
-  signInWithEmail: (email: string, password: string) => Promise<void>;
-  signUpWithEmail: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   loading: boolean;
   refreshUserProfile: (forceFresh?: boolean) => Promise<void>;
