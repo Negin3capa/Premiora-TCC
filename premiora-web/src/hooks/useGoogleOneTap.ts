@@ -29,6 +29,8 @@ interface OneTapConfig {
   ux_mode?: 'popup' | 'redirect';
   allowed_parent_origin?: string | string[];
   intermediate_iframe_close_callback?: () => void;
+  // FedCM migration: Opt-in to FedCM to prepare for when it becomes mandatory
+  use_fedcm_for_prompt?: boolean;
 }
 
 // Hook principal
@@ -156,14 +158,16 @@ export const useGoogleOneTap = () => {
         return;
       }
 
-      // Configuração padrão do One Tap
+      // Configuração padrão do One Tap com FedCM habilitado
       const defaultConfig: OneTapConfig = {
         client_id: clientId,
         callback: handleCredentialResponse,
         auto_select: !!lastGoogleAccount, // Auto-select se temos conta recente
         cancel_on_tap_outside: true,
         context: 'signin',
-        ux_mode: 'popup'
+        ux_mode: 'popup',
+        // FedCM migration: Opt-in to FedCM to prepare for when it becomes mandatory
+        use_fedcm_for_prompt: true
       };
 
       // Mesclar com configuração passada
@@ -172,7 +176,8 @@ export const useGoogleOneTap = () => {
       console.log('🚀 Inicializando Google One Tap:', {
         hasLastAccount: !!lastGoogleAccount,
         auto_select: finalConfig.auto_select,
-        context: finalConfig.context
+        context: finalConfig.context,
+        use_fedcm_for_prompt: finalConfig.use_fedcm_for_prompt
       });
 
       // Inicializar One Tap
@@ -202,7 +207,20 @@ export const useGoogleOneTap = () => {
     try {
       if (window.google?.accounts?.id) {
         window.google.accounts.id.prompt((notification: google.accounts.id.PromptMomentNotification) => {
-          console.log('🔔 Notificação One Tap:', notification);
+          // FedCM migration: Quando FedCM estiver habilitado, os métodos getSkippedReason(),
+          // getDismissedReason(), e getNotDisplayedReason() não estarão disponíveis.
+          // O código atual já trata estes métodos como opcionais nas interfaces globais.
+
+          console.log('🔔 Notificação One Tap:', {
+            isDisplayed: notification.isDisplayed,
+            isHidden: notification.isHidden,
+            isSkipped: notification.isSkipped,
+            isDismissed: notification.isDismissed,
+            // FedCM migration: Não chame estes métodos quando usar_fedcm_for_prompt estiver true
+            // dismissedReason: notification.getDismissedReason?.(),
+            // notDisplayedReason: notification.getNotDisplayedReason?.(),
+            // skippedReason: notification.getSkippedReason?.(),
+          });
         });
       }
 
@@ -274,6 +292,8 @@ declare global {
           ux_mode?: 'popup' | 'redirect';
           allowed_parent_origin?: string | string[];
           intermediate_iframe_close_callback?: () => void;
+          // FedCM migration: Opt-in to FedCM to prepare for when it becomes mandatory
+          use_fedcm_for_prompt?: boolean;
         }
 
         interface PromptMomentNotification {

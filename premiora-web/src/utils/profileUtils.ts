@@ -195,3 +195,50 @@ export function clearExpiredSetupLocks(): void {
     console.error('Erro ao limpar bloqueios expirados:', error);
   }
 }
+
+/**
+ * Gera uma chave única para rastrear processamento OAuth callback na sessão
+ * @param userId - ID do usuário
+ * @returns Chave para sessionStorage
+ */
+export function getOAuthCallbackKey(userId: string): string {
+  return `premiora_oauth_callback_processed_${userId}`;
+}
+
+/**
+ * Verifica se o callback OAuth já foi processado para este usuário na sessão atual
+ * @param userId - ID do usuário
+ * @returns true se já foi processado, false caso contrário
+ */
+export function isOAuthCallbackProcessed(userId: string): boolean {
+  if (!userId) return false;
+
+  try {
+    const callbackKey = getOAuthCallbackKey(userId);
+    const processed = sessionStorage.getItem(callbackKey);
+    return processed === 'true';
+  } catch (error) {
+    console.error('Erro ao verificar processamento OAuth callback:', error);
+    return false;
+  }
+}
+
+/**
+ * Marca que o callback OAuth foi processado para este usuário na sessão atual
+ * @param userId - ID do usuário
+ * @param processed - true para marcar como processado, false para desmarcar
+ */
+export function setOAuthCallbackProcessed(userId: string, processed: boolean): void {
+  if (!userId) return;
+
+  try {
+    const callbackKey = getOAuthCallbackKey(userId);
+    if (processed) {
+      sessionStorage.setItem(callbackKey, 'true');
+    } else {
+      sessionStorage.removeItem(callbackKey);
+    }
+  } catch (error) {
+    console.error('Erro ao marcar processamento OAuth callback:', error);
+  }
+}
