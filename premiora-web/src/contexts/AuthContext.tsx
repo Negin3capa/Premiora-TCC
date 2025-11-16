@@ -3,7 +3,7 @@ import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../utils/supabaseClient';
 import { AuthService } from '../services/authService';
 import { signOut } from '../lib/supabaseAuth';
-import { clearSetupLock, clearExpiredSetupLocks, setSetupLock } from '../utils/profileUtils';
+import { clearSetupLock, clearExpiredSetupLocks, setSetupLock, isOAuthCallbackProcessed, setOAuthCallbackProcessed } from '../utils/profileUtils';
 import { OAuthService } from '../services/auth/OAuthService';
 import type { UserProfile, AuthContextType } from '../types/auth';
 import type { OAuthProvider } from '../lib/supabaseAuth';
@@ -364,10 +364,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           clearExpiredSetupLocks();
         }
 
-        // Se usuário fez logout, limpar setup locks usando o ref
+        // Se usuário fez logout, limpar setup locks e rastreamento OAuth usando o ref
         if (event === 'SIGNED_OUT' && currentUserIdRef.current) {
           clearSetupLock(currentUserIdRef.current);
-          console.log('🔓 Setup lock removido no sign out para usuário:', currentUserIdRef.current);
+          setOAuthCallbackProcessed(currentUserIdRef.current, false); // Limpar rastreamento OAuth
+          console.log('🔓 Setup lock e rastreamento OAuth removidos no sign out para usuário:', currentUserIdRef.current);
           currentUserIdRef.current = null;
         }
 
@@ -385,10 +386,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const isOAuthLogin = provider === 'google' || provider === 'facebook';
 
           if (isOAuthLogin) {
-            console.log('🔄 OAuth login detectado, processando callback diretamente no contexto...');
-            // Processar OAuth callback sem redirecionamento intermediário
-            await processOAuthCallback(session.user);
-            return; // Evitar processamento duplicado do perfil
+            // Verificar se já processamos o callback OAuth para este usuário nesta sessão
+            const alreadyProcessed = isOAuthCallbackProcessed(session.user.id);
+
+            console.log('🔍 Verificação OAuth callback:', {
+              userId: session.user.id,
+              alreadyProcessed,
+              provider,
+              isOAuthLogin
+            });
+
+            if (alreadyProcessed) {
+              console.log('🔄 OAuth callback já foi processado para este usuário nesta sessão, pulando processamento OAuth e continuando com busca normal...');
+              // Já processado, continuar com busca normal de perfil (não retorna, deixa cair para a busca abaixo)
+            } else {
+              console.log('🔄 OAuth login detectado (primeira vez nesta sessão), processando callback...');
+              // Marcar como processado ANTES de processar para evitar re-execuções
+              setOAuthCallbackProcessed(session.user.id, true);
+              console.log('✅ OAuth callback marcado como processado antecipadamente para usuário:', session.user.id);
+
+              // Processar OAuth callback sem redirecionamento intermediário
+              await processOAuthCallback(session.user);
+              console.log('✅ OAuth callback processamento concluído para usuário:', session.user.id);
+              return; // Evitar processamento duplicado do perfil
+            }
           }
         }
 

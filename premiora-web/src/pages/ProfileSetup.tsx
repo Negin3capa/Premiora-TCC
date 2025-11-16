@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, AtSign, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { useProfileSetup } from '../hooks/useProfileSetup';
@@ -23,6 +23,9 @@ const ProfileSetup: React.FC = () => {
     usernameValidation,
     saveProfile,
   } = useProfileSetup();
+
+  // Rastrear se o usuário já editou manualmente o nome
+  const [hasUserEditedName, setHasUserEditedName] = useState(false);
 
   /**
    * Handler para prevenir fechamento da aba/janela durante setup incompleto
@@ -72,9 +75,9 @@ const ProfileSetup: React.FC = () => {
     }
   }, [user, authLoading, userProfile, navigate]);
 
-  // Preencher automaticamente dados do OAuth se disponível
+  // Preencher automaticamente dados do OAuth se disponível (apenas se usuário não editou ainda)
   useEffect(() => {
-    if (user && !name && user.user_metadata) {
+    if (user && !name && !hasUserEditedName && user.user_metadata) {
       const oauthName = user.user_metadata.full_name ||
                        user.user_metadata.name ||
                        user.user_metadata.preferred_username ||
@@ -85,7 +88,7 @@ const ProfileSetup: React.FC = () => {
         setName(oauthName);
       }
     }
-  }, [user, name, setName]);
+  }, [user, name, hasUserEditedName, setName]);
 
   // Redirecionar após sucesso
   useEffect(() => {
@@ -225,7 +228,7 @@ const ProfileSetup: React.FC = () => {
               color: 'var(--color-text-primary)',
               marginBottom: '8px',
             }}>
-              Nome de exibição
+              Nome de exibição <span style={{ color: '#dc2626' }}>*</span>
             </label>
             <div style={{ position: 'relative' }}>
               <User
@@ -242,7 +245,15 @@ const ProfileSetup: React.FC = () => {
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  // Limitar a 30 caracteres
+                  if (newValue.length <= 30) {
+                    setHasUserEditedName(true);
+                    setName(newValue);
+                  }
+                  // Não permitir mais de 30 caracteres (trunca automaticamente)
+                }}
                 placeholder="Seu nome completo"
                 style={{
                   width: '100%',
@@ -267,7 +278,7 @@ const ProfileSetup: React.FC = () => {
               color: 'var(--color-text-secondary)',
               margin: '4px 0 0 0',
             }}>
-              Mínimo 2 caracteres
+              Mínimo 2 caracteres, máximo 30
             </p>
           </div>
 
