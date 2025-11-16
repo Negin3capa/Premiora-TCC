@@ -5,6 +5,19 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 16/11/25
+
+### Corrigido
+
+- Sistema de rastreamento de processamento OAuth callback para prevenir duplicações
+- Melhoria no fluxo de autenticação OAuth para evitar problemas de refresh e sessão
+- Gerenciamento aprimorado de estado de sessão no contexto de autenticação
+
+### Alterado
+
+- Funções utilitárias adicionadas para rastreamento de callbacks OAuth
+- Melhorias na documentação com formatação aprimorada das tabelas
+
 ## [0.3.0] - 14/11/25
 
 ### Adicionado
