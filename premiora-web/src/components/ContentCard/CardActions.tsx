@@ -3,7 +3,7 @@
  * Ações compartilhadas para todos os tipos de cards
  */
 import React from 'react';
-import { Heart, MessageCircle, Send } from 'lucide-react';
+import { Heart, MessageCircle, Send, Eye } from 'lucide-react';
 import type { ContentItem } from '../../types/content';
 
 interface CardActionsProps {
@@ -11,29 +11,45 @@ interface CardActionsProps {
   onLike?: () => void;
   onComment?: () => void;
   onShare?: () => void;
+  liked?: boolean;
+  isLoading?: boolean;
 }
 
 /**
  * Ações compartilhadas para cards de conteúdo
- * Like, comentário e compartilhamento
+ * Like, comentário, compartilhamento e visualizações
  */
 const CardActions: React.FC<CardActionsProps> = ({
   item,
   onLike,
   onComment,
-  onShare
+  onShare,
+  liked = false,
+  isLoading = false
 }) => {
   return (
     <div className="card-actions">
       <button
-        className="action-btn like-btn"
+        className={`action-btn like-btn ${liked ? 'liked' : ''} ${isLoading ? 'loading' : ''}`}
         onClick={onLike}
-        aria-label="Curtir"
-        title="Curtir"
+        disabled={isLoading}
+        aria-label={liked ? "Remover curtida" : "Curtir"}
+        title={liked ? "Remover curtida" : "Curtir"}
       >
-        <span className="action-icon"><Heart size={16} /></span>
-        <span className="action-count">{item.likes?.toLocaleString('pt-BR')}</span>
+        <span className="action-icon">
+          <Heart size={16} fill={liked ? "currentColor" : "none"} />
+        </span>
+        <span className="action-count">{item.likes?.toLocaleString('pt-BR') || 0}</span>
       </button>
+
+      {/* Exibir visualizações para posts com views */}
+      {item.views !== undefined && item.views > 0 && (
+        <div className="action-btn view-display">
+          <span className="action-icon"><Eye size={16} /></span>
+          <span className="action-count">{item.views.toLocaleString('pt-BR')}</span>
+        </div>
+      )}
+
       <button
         className="action-btn comment-btn"
         onClick={onComment}
@@ -41,8 +57,9 @@ const CardActions: React.FC<CardActionsProps> = ({
         title="Comentar"
       >
         <span className="action-icon"><MessageCircle size={16} /></span>
-        <span className="action-count">{Math.floor((item.likes || 0) / 5)}</span>
+        <span className="action-count">{item.comments?.toLocaleString('pt-BR') || 0}</span>
       </button>
+
       <button
         className="action-btn share-btn"
         onClick={onShare}
