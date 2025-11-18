@@ -43,6 +43,22 @@ CREATE POLICY "Users can view likes on public posts" ON post_likes
 CREATE POLICY "Users can manage their own likes" ON post_likes
   FOR ALL USING (user_id = auth.uid());
 
+-- Função para incrementar visualizações atomicamente
+CREATE OR REPLACE FUNCTION increment_post_view(post_id UUID)
+RETURNS INTEGER AS $$
+DECLARE
+  new_view_count INTEGER;
+BEGIN
+  UPDATE posts
+  SET view_count = view_count + 1
+  WHERE id = post_id
+  RETURNING view_count INTO new_view_count;
+
+  -- Retornar o novo contador de visualizações
+  RETURN new_view_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Função para atualizar contador de likes automaticamente
 CREATE OR REPLACE FUNCTION update_post_like_count()
 RETURNS TRIGGER AS $$

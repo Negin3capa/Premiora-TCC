@@ -957,6 +957,142 @@
   animation: fadeIn 0.3s ease-out;
 }
 
+/* Container do botão de like para posicionamento das partículas */
+.post-view-page .like-btn-container-post-view {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Efeito de partículas para likes na página de visualização */
+.post-view-page .like-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+}
+
+.post-view-page .like-particle {
+  position: absolute;
+  font-size: 16px;
+  animation: particleFloat 1s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+  opacity: 0;
+}
+
+/* Animações do botão de like na página de visualização */
+.post-view-page .like-button:hover {
+  color: var(--color-like);
+  transform: scale(1.05);
+}
+
+.post-view-page .like-button.liked {
+  color: var(--color-like);
+  animation: likePulsePostView 0.6s ease-out;
+}
+
+.post-view-page .like-button.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Efeito de "pop" no contador quando incrementa */
+.post-view-page .like-button .action-count {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.post-view-page .like-button:not(.loading) .action-count {
+  animation: countUpdatePostView 0.4s ease-out;
+}
+
+/* Ícone do coração com animação mais dinâmica */
+.post-view-page .like-button .action-icon {
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+}
+
+.post-view-page .like-button:hover .action-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.post-view-page .like-button.liked .action-icon {
+  animation: heartBeatPostView 0.8s ease-in-out;
+}
+
+/* Animações para a página de visualização de posts */
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(var(--x), calc(var(--y) - 20px)) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), calc(var(--y) - 40px)) scale(0.3);
+  }
+}
+
+@keyframes likePulsePostView {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(-3deg);
+  }
+  75% {
+    transform: scale(1.15) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes countUpdatePostView {
+  0% {
+    transform: scale(1) translateY(0);
+    color: inherit;
+  }
+  50% {
+    transform: scale(1.2) translateY(-2px);
+    color: var(--color-like);
+    font-weight: var(--font-weight-bold);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    color: inherit;
+  }
+}
+
+@keyframes heartBeatPostView {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.15) rotate(-10deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(0deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(10deg);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -966,4 +1102,14 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Melhorias de acessibilidade para a página de visualização */
+.post-view-page .like-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.post-view-page .like-button:active {
+  transform: scale(0.98);
 }

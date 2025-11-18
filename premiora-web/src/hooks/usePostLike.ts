@@ -10,6 +10,7 @@ interface UsePostLikeProps {
   postId: string;
   initialLiked?: boolean;
   initialLikeCount?: number;
+  currentLikeCount?: number; // Para sincronização com dados externos
 }
 
 interface UsePostLikeReturn {
@@ -29,13 +30,23 @@ interface UsePostLikeReturn {
 export const usePostLike = ({
   postId,
   initialLiked = false,
-  initialLikeCount = 0
+  initialLikeCount = 0,
+  currentLikeCount
 }: UsePostLikeProps): UsePostLikeReturn => {
   const { user } = useAuth();
   const [liked, setLiked] = useState(initialLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Sincronizar contagem de likes com dados externos quando disponível
+   */
+  useEffect(() => {
+    if (currentLikeCount !== undefined && !isLoading) {
+      setLikeCount(currentLikeCount);
+    }
+  }, [currentLikeCount, isLoading]);
 
   /**
    * Atualiza o estado do like baseado no usuário atual
@@ -57,7 +68,7 @@ export const usePostLike = ({
   }, [user?.id, postId]);
 
   /**
-   * Toggle (dar/remover) like no post
+   * Toggle (dar/remover) like no post com feedback otimizista instantâneo
    */
   const toggleLike = useCallback(async () => {
     if (!user?.id) {
@@ -70,20 +81,36 @@ export const usePostLike = ({
       return;
     }
 
-    setIsLoading(true);
     setError(null);
+
+    // Feedback otimizista instantâneo - atualiza UI imediatamente
+    const wasLiked = liked;
+    const newLikedState = !wasLiked;
+    const newLikeCount = wasLiked ? Math.max(0, likeCount - 1) : likeCount + 1;
+
+    setLiked(newLikedState);
+    setLikeCount(newLikeCount);
+    setIsLoading(true);
 
     try {
       const result = await LikeService.toggleLike(postId, user.id);
-      setLiked(result.liked);
-      setLikeCount(result.likeCount);
+
+      // Se o servidor retornou um estado diferente, corrige o estado otimizista
+      if (result.liked !== newLikedState || result.likeCount !== newLikeCount) {
+        setLiked(result.liked);
+        setLikeCount(result.likeCount);
+      }
     } catch (err) {
       console.error('Erro ao alterar like:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
+
+      // Reverte o estado otimizista em caso de erro
+      setLiked(wasLiked);
+      setLikeCount(wasLiked ? likeCount : Math.max(0, likeCount - 1));
     } finally {
       setIsLoading(false);
     }
-  }, [user?.id, postId]);
+  }, [user?.id, postId, liked, likeCount]);
 
   /**
    * Atualizar status inicial quando o hook é montado ou dependências mudam
@@ -102,26 +129,51 @@ export const usePostLike = ({
   };
 };
 
+interface UsePostViewsProps {
+  initialViews?: number;
+  currentViews?: number;
+}
+
+interface UsePostViewsReturn {
+  viewCount: number;
+  incrementView: (postId: string) => Promise<void>;
+}
+
 /**
- * Hook para gerenciamento de visualizações de posts
+ * Hook para gerenciamento de visualizações de posts com estado local
  */
-export const usePostViews = () => {
+export const usePostViews = ({
+  initialViews = 0,
+  currentViews
+}: UsePostViewsProps = {}): UsePostViewsReturn => {
+  const [viewCount, setViewCount] = useState(initialViews);
+
+  // Sincronizar contagem de visualizações com dados externos quando disponível
+  useEffect(() => {
+    if (currentViews !== undefined) {
+      setViewCount(currentViews);
+    }
+  }, [currentViews]);
+
   const incrementView = useCallback(async (postId: string): Promise<void> => {
     if (!postId) {
       console.warn('ID do post não fornecido para incrementar visualização');
       return;
     }
 
+    // Atualizar estado local imediatamente (otimizista)
+    setViewCount(prev => prev + 1);
+
     try {
       // Incrementar visualização de forma assíncrona
       // Não precisamos esperar pelo resultado para não bloquear a UI
-      LikeService.incrementViewCount(postId).catch(err => {
-        console.error('Erro ao incrementar visualização:', err);
-      });
+      await LikeService.incrementViewCount(postId);
     } catch (err) {
-      console.error('Erro ao preparar incremento de visualização:', err);
+      console.error('Erro ao incrementar visualização:', err);
+      // Em caso de erro, reverter a atualização otimista
+      setViewCount(prev => Math.max(0, prev - 1));
     }
   }, []);
 
-  return { incrementView };
+  return { viewCount, incrementView };
 };

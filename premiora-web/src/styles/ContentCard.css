@@ -444,15 +444,170 @@
 
 .like-btn:hover {
   color: var(--color-like);
+  transform: scale(1.05);
 }
 
 .like-btn.liked {
   color: var(--color-like);
+  animation: likePulse 0.6s ease-out;
 }
 
 .like-btn.loading {
   opacity: 0.7;
   pointer-events: none;
+}
+
+/* Animações do botão de like */
+@keyframes likePulse {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(-3deg);
+  }
+  75% {
+    transform: scale(1.15) rotate(2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Efeito de concorrência animada no contador de likes */
+.action-count {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+/* Efeito de "pop" no contador quando incrementa */
+.like-btn:not(.loading) .action-count {
+  animation: countUpdate 0.4s ease-out;
+}
+
+@keyframes countUpdate {
+  0% {
+    transform: scale(1) translateY(0);
+    color: inherit;
+  }
+  50% {
+    transform: scale(1.2) translateY(-2px);
+    color: var(--color-like);
+    font-weight: var(--font-weight-bold);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    color: inherit;
+  }
+}
+
+/* Efeito ripple para feedback tátil */
+.like-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease-out, height 0.3s ease-out, opacity 0.3s ease-out;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.like-btn:active::before {
+  width: 40px;
+  height: 40px;
+  opacity: 1;
+}
+
+/* Ícone do coração com animação mais dinâmica */
+.like-btn .action-icon {
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+}
+
+.like-btn:hover .action-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.like-btn.liked .action-icon {
+  animation: heartBeat 0.8s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.15) rotate(-10deg);
+  }
+  50% {
+    transform: scale(1.2) rotate(0deg);
+  }
+  75% {
+    transform: scale(1.1) rotate(10deg);
+  }
+}
+
+/* Container do botão de like para posicionamento das partículas */
+.like-btn-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Efeito de partículas para likes */
+.like-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+}
+
+.like-particle {
+  position: absolute;
+  font-size: 14px;
+  animation: particleFloat 1s ease-out forwards;
+  animation-delay: var(--delay, 0s);
+  opacity: 0;
+}
+
+/* Adicionar melhorias de acessibilidade */
+.like-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.like-btn:active {
+  transform: scale(0.98);
+}
+
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(var(--x), var(--y)) scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(var(--x), calc(var(--y) - 20px)) scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--x), calc(var(--y) - 40px)) scale(0.3);
+  }
 }
 
 .comment-btn:hover {

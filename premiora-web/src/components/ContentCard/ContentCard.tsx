@@ -143,7 +143,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
     postId: item.id,
     initialLiked: false,
-    initialLikeCount: item.likes || 0
+    initialLikeCount: item.likes || 0,
+    currentLikeCount: item.likes
   });
 
   const { incrementView } = usePostViews();
