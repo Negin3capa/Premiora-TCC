@@ -7,6 +7,7 @@ import { NotificationProvider } from './contexts/NotificationContext.tsx';
 import { UIProvider } from './contexts/UIContext.tsx';
 import App from './App.tsx';
 import './styles/globals.css';
+import './styles/Comments.css';
 
 // Renderiza o componente React App no elemento com id 'app' com roteamento e provedores de contexto
 ReactDOM.createRoot(document.getElementById('app')!).render(
