@@ -11,6 +11,7 @@ import { PostService } from '../services/content/PostService';
 import { Sidebar } from '../components/layout';
 import SidebarFeed from '../components/content/SidebarFeed';
 import CommunityPostSidebar from '../components/content/CommunityPostSidebar';
+import { CommentList } from '../components/content/CommentList';
 import type { ContentItem, ContentType } from '../types/content';
 import { LikeParticles } from '../components/ContentCard/CardActions';
 import '../styles/PostViewPage.css';
@@ -621,13 +622,8 @@ const PostViewPage: React.FC = () => {
                     </footer>
                   </article>
 
-                  {/* Seção de comentários (placeholder) */}
-                  <section className="comments-section">
-                    <h3>Comentários</h3>
-                    <div className="comments-placeholder">
-                      <p>Comentários serão implementados em breve.</p>
-                    </div>
-                  </section>
+                  {/* Seção de comentários */}
+                  <CommentList postId={postId!} />
                 </main>
               </div>
             </div>

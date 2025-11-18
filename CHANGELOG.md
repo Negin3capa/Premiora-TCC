@@ -5,6 +5,17 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 18/11/25
+
+### Adicionado
+
+- Sistema completo de comentários para posts com interface React integrada
+- Componentes de comentários: formulário, lista, itens individuais e estilos dedicados
+- Serviço de comentários com operações CRUD para gerenciamento de comentários
+- Hook customizado para gerenciamento de estado de comentários
+- Migração de banco de dados para estrutura de comentários (004_add_comments_system.sql)
+- Integração do sistema de comentários na página de visualização de posts
+
 ## [0.3.3] - 18/11/25
 
 ### Alterado
