@@ -164,7 +164,11 @@ export async function createCommunity(communityData: {
 
   if (error) {
     console.error('Erro ao criar comunidade:', error);
-    return null;
+    // Verificar se é erro de violação de unicidade (nome já existe)
+    if (error.code === '23505') {
+      throw new Error('Uma comunidade com este nome já existe. Escolha um nome diferente.');
+    }
+    throw new Error('Falha ao criar comunidade. Tente novamente.');
   }
 
   // Adicionar o criador como membro
