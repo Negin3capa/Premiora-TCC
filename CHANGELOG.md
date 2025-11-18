@@ -5,6 +5,13 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 18/11/25
+
+### Alterado
+
+- Convenção de commits padrão agora é opcional (warnings em vez de erros), facilitando contribuições sem rigidez excessiva
+- Configuração do Commitlint ajustada para permitir maior flexibilidade no desenvolvimento
+
 ## [0.3.2] - 18/11/25
 
 ### Adicionado
