@@ -267,10 +267,7 @@
   font-size: var(--font-size-base);
 }
 
-/* Container da lista */
-.comment-items {
-  /* Espaçamento será gerenciado pelos itens individuais */
-}
+/* Container da lista - espaçamento gerenciado pelos itens individuais */
 
 /* ========================================
    COMMENT ITEM
