@@ -20,7 +20,7 @@ export class FileUploadService {
   /**
    * Faz upload de arquivo para o Supabase Storage
    * @param file - Arquivo a ser enviado
-   * @param bucket - Bucket de destino (posts, videos, etc.)
+   * @param bucket - Bucket de destino (posts, videos, avatars, etc.)
    * @param userId - ID do usuário para organização
    * @returns Promise com resultado do upload
    */
@@ -53,5 +53,18 @@ export class FileUploadService {
       path: filePath,
       fileName
     };
+  }
+
+  /**
+   * Faz upload de avatar do usuário
+   * @param file - Arquivo de imagem do avatar
+   * @param userId - ID do usuário
+   * @returns Promise com resultado do upload
+   */
+  static async uploadAvatar(
+    file: File,
+    userId: string
+  ): Promise<UploadResult> {
+    return this.uploadFile(file, 'avatars', userId);
   }
 }

@@ -7,8 +7,9 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { PostService } from '../services/content/PostService';
-import { Sidebar, MobileBottomBar } from '../components/layout';
+import { Sidebar } from '../components/layout';
 import SidebarFeed from '../components/content/SidebarFeed';
+import CommunityPostSidebar from '../components/content/CommunityPostSidebar';
 import type { ContentItem, ContentType } from '../types/content';
 import '../styles/PostViewPage.css';
 
@@ -617,12 +618,16 @@ const PostViewPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Sidebar do feed */}
-            <SidebarFeed />
+            {/* Sidebar condicional baseada no tipo de post */}
+            {post.communityId ? (
+              <CommunityPostSidebar communityName={post.communityName || ''} />
+            ) : (
+              <SidebarFeed />
+            )}
           </div>
         </div>
       </div>
-      <MobileBottomBar />
+
 
       {/* Modal de imagem ampliada */}
       {isImageModalOpen && post.thumbnail && (

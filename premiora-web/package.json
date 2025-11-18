@@ -11,7 +11,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prepare": "husky",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "migrate:oauth-avatars": "node -e \"import('./src/utils/avatar-migration.ts').then(m => m.runAvatarMigration())\""
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",

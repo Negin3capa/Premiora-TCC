@@ -4,10 +4,34 @@
  *
  * @component
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar, Header, MobileBottomBar } from './index';
 import '../../styles/RootLayout.css';
+
+/**
+ * Hook para detectar se está em dispositivo móvel
+ */
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check on client-side mount
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth <= 768);
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+};
 
 /**
  * Layout raiz que mantém a sidebar persistente entre navegações
@@ -15,6 +39,7 @@ import '../../styles/RootLayout.css';
  */
 const RootLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <div className="root-layout">
@@ -32,8 +57,8 @@ const RootLayout: React.FC = () => {
         </div>
       </div>
 
-      {/* Barra inferior móvel */}
-      <MobileBottomBar />
+      {/* Barra inferior móvel - apenas para dispositivos móveis */}
+      {isMobile && <MobileBottomBar />}
     </div>
   );
 };

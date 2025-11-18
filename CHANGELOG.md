@@ -5,6 +5,27 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3] - 18/11/25
+
+### Alterado
+
+- Convenção de commits padrão agora é opcional (warnings em vez de erros), facilitando contribuições sem rigidez excessiva
+- Configuração do Commitlint ajustada para permitir maior flexibilidade no desenvolvimento
+
+## [0.3.2] - 18/11/25
+
+### Adicionado
+
+- Novo componente `CommunityPostSidebar` para páginas de posts de comunidade com informações da comunidade, funcionalidades de participar/sair, estatísticas e regras
+- Detecção responsiva automática na barra de navegação móvel (apenas em dispositivos móveis)
+- Pré-seleção automática de comunidade ao criar vídeos (quando o usuário está em uma página de comunidade)
+
+### Alterado
+
+- Aprimoramentos na interface da barra lateral do perfil com melhor experiência de criação de conteúdo
+- Melhorias visuais no layout do feed, página inicial, visualização de posts e estilos da sidebar
+- Refatoração do componente RootLayout com melhorias de performance
+
 ## [0.3.1] - 16/11/25
 
 ### Corrigido

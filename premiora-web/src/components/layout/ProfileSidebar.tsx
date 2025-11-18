@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { CreateContentModal, CreatePostModal, CreateVideoModal } from '../modals';
+import { getCurrentCommunityContext } from '../../utils/communityUtils';
 import type { ContentType } from '../modals/CreateContentModal';
 import '../../styles/ProfileSidebar.css';
 
@@ -38,14 +39,30 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   /**
    * Handler para seleção de tipo de conteúdo no modal principal
    */
-  const handleContentTypeSelect = (type: ContentType) => {
+  const handleContentTypeSelect = async (type: ContentType) => {
     closeModal('createContent');
     switch (type) {
       case 'post':
-        openModal('createPost');
+        // Verificar se estamos em uma página de comunidade e usuário é membro
+        const communityContext = await getCurrentCommunityContext();
+        if (communityContext.community && communityContext.isMember) {
+          // Abrir modal de post com comunidade pré-selecionada
+          openModal('createPost', { preselectedCommunity: communityContext.community });
+        } else {
+          // Abrir modal normalmente
+          openModal('createPost');
+        }
         break;
       case 'video':
-        openModal('createVideo');
+        // Verificar se estamos em uma página de comunidade e usuário é membro
+        const videoCommunityContext = await getCurrentCommunityContext();
+        if (videoCommunityContext.community && videoCommunityContext.isMember) {
+          // Abrir modal de vídeo com comunidade pré-selecionada
+          openModal('createVideo', { preselectedCommunity: videoCommunityContext.community });
+        } else {
+          // Abrir modal normalmente
+          openModal('createVideo');
+        }
         break;
       default:
         console.warn(`Tipo de conteúdo não suportado: ${type}`);

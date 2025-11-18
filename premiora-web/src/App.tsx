@@ -2,11 +2,32 @@
  * Componente principal App
  * Gerencia roteamento da aplicação com proteção de rotas e code splitting
  */
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute, ProfileSetupGuard } from './components/auth';
 import { MobileBottomBar } from './components/layout';
 import NotificationContainer from './components/common/NotificationContainer';
+
+/**
+ * Hook para detectar se está em dispositivo móvel
+ */
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth <= 768);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+};
 
 // Lazy loading dos componentes de página para otimização de bundle
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
@@ -46,12 +67,16 @@ const PageLoader: React.FC = () => (
  * Layout para rotas protegidas que inclui a barra de navegação móvel
  * Garante que todas as páginas móveis tenham acesso à navegação inferior
  */
-const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <>
-    {children}
-    <MobileBottomBar />
-  </>
-);
+const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <>
+      {children}
+      {isMobile && <MobileBottomBar />}
+    </>
+  );
+};
 
 /**
  * Componente principal da aplicação com roteamento protegido
