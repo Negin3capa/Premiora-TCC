@@ -116,8 +116,8 @@ export const useProfileEdit = (initialProfile: CreatorProfile | null) => {
     setState(prev => ({ ...prev, isUploading: true, error: null }));
 
     try {
-      // Upload da imagem
-      const uploadResult = await FileUploadService.uploadFile(imageFile, 'posts', userProfile.id);
+      // Upload da imagem para bucket 'avatars'
+      const uploadResult = await FileUploadService.uploadAvatar(imageFile, userProfile.id);
 
       // Atualizar perfil no banco
       await ProfileService.updateUserProfile(userProfile.id, {

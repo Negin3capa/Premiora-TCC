@@ -199,7 +199,19 @@ export const useCommunityCreate = () => {
       }
     } catch (err) {
       console.error('Erro ao criar comunidade:', err);
-      setError(err instanceof Error ? err.message : 'Erro desconhecido ao criar comunidade');
+
+      // Tratar erros específicos
+      if (err instanceof Error) {
+        if (err.message.includes('duplicate') || err.message.includes('already exists') || err.message.includes('23505')) {
+          setError('Nome da comunidade já está em uso. Escolha um nome diferente.');
+        } else if (err.message.includes('network') || err.message.includes('fetch')) {
+          setError('Erro de conexão. Verifique sua internet e tente novamente.');
+        } else {
+          setError(err.message || 'Erro desconhecido ao criar comunidade');
+        }
+      } else {
+        setError('Erro desconhecido ao criar comunidade');
+      }
     } finally {
       setIsCreating(false);
       setIsUploading(false);

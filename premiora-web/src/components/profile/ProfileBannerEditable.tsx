@@ -6,7 +6,7 @@ import React, { useState, useRef } from 'react';
 import { Camera, RotateCcw, Trash2 } from 'lucide-react';
 import { ImageCropModal } from './ImageCropModal';
 import type { CreatorProfile } from '../../types/profile';
-import styles from './ProfileBanner.module.css';
+import styles from '../../styles/ProfileBanner.module.css';
 
 /**
  * Props do componente ProfileBannerEditable

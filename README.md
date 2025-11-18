@@ -507,16 +507,16 @@ git push origin <nome-da-branch>
 
 ##### Tipos de Commit Disponíveis
 
-| Tipo | Descrição | Exemplo |
-|------|-----------|---------|
-| `feat` | Nova funcionalidade | `feat: adicionar login com Google` |
-| `fix` | Correção de bug | `fix: corrigir upload de imagens` |
-| `docs` | Documentação | `docs: atualizar README` |
-| `style` | Formatação | `style: formatar código` |
-| `refactor` | Refatoração | `refactor: reorganizar componentes` |
-| `perf` | Performance | `perf: otimizar queries` |
-| `test` | Testes | `test: adicionar testes unitários` |
-| `chore` | Ferramentas | `chore: atualizar dependências` |
+| Tipo       | Descrição           | Exemplo                             |
+| ---------- | ------------------- | ----------------------------------- |
+| `feat`     | Nova funcionalidade | `feat: adicionar login com Google`  |
+| `fix`      | Correção de bug     | `fix: corrigir upload de imagens`   |
+| `docs`     | Documentação        | `docs: atualizar README`            |
+| `style`    | Formatação          | `style: formatar código`            |
+| `refactor` | Refatoração         | `refactor: reorganizar componentes` |
+| `perf`     | Performance         | `perf: otimizar queries`            |
+| `test`     | Testes              | `test: adicionar testes unitários`  |
+| `chore`    | Ferramentas         | `chore: atualizar dependências`     |
 
 ##### Validação Automática
 
@@ -527,6 +527,7 @@ git push origin <nome-da-branch>
 ##### Troubleshooting
 
 **Se aparecer "nothing to commit, working tree clean":**
+
 ```bash
 # Verifique se há arquivos modificados
 git status
@@ -539,6 +540,7 @@ npm run commit
 ```
 
 **Se o commitizen não abrir a interface interativa:**
+
 ```bash
 # Verifique se o commitizen está instalado
 npm list cz-conventional-changelog
@@ -548,6 +550,7 @@ npm install cz-conventional-changelog
 ```
 
 **Se os git hooks não funcionarem:**
+
 ```bash
 # Execute manualmente para testar
 npx lint-staged

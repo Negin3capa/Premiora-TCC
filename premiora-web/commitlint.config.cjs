@@ -2,7 +2,7 @@ module.exports = {
   extends: ['@commitlint/config-conventional'],
   rules: {
     'type-enum': [
-      2,
+      1, // Changed from 2 (error) to 1 (warning) - conventional commits are now recommended but optional
       'always',
       [
         'feat',     // Nova funcionalidade
@@ -17,13 +17,13 @@ module.exports = {
         'build',    // Mudanças no sistema de build
       ],
     ],
-    'type-case': [2, 'always', 'lower-case'],
-    'type-empty': [2, 'never'],
-    'scope-case': [2, 'always', 'lower-case'],
-    'subject-case': [2, 'always', 'lower-case'],
-    'subject-empty': [2, 'never'],
-    'subject-full-stop': [2, 'never', '.'],
-    'header-max-length': [2, 'always', 72],
-    'body-max-line-length': [2, 'always', 72],
+    'type-case': [1, 'always', 'lower-case'], // Changed from 2 to 1
+    'type-empty': [1, 'never'], // Changed from 2 to 1
+    'scope-case': [1, 'always', 'lower-case'], // Changed from 2 to 1
+    'subject-case': [1, 'always', 'lower-case'], // Changed from 2 to 1
+    'subject-empty': [1, 'never'], // Changed from 2 to 1
+    'subject-full-stop': [1, 'never', '.'], // Changed from 2 to 1
+    'header-max-length': [1, 'always', 72], // Changed from 2 to 1
+    'body-max-line-length': [1, 'always', 72], // Changed from 2 to 1
   },
 };

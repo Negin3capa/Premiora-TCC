@@ -29,9 +29,9 @@
 }
 
 .navbar-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
   padding: var(--space-4) 0;
 }
 
@@ -59,6 +59,7 @@
   display: flex;
   gap: var(--space-8);
   align-items: center;
+  justify-content: center;
 }
 
 .nav-links a {
@@ -887,6 +888,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar-content {
+    display: flex;
     flex-direction: column;
     gap: var(--space-4);
   }

@@ -8,6 +8,4 @@ export { RedirectService } from './RedirectService';
 
 export { OAuthService } from './OAuthService';
 
-export { EmailAuthService } from './EmailAuthService';
-
 export { ProfileService } from './ProfileService';

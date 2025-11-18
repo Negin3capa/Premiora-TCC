@@ -19,6 +19,7 @@
 
 .communities-page-container {
   padding: var(--space-6);
+  padding-top: 84px; /* Add space for fixed header (64px height + extra margin) */
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
@@ -316,8 +317,9 @@
 }
 
 @media (max-width: 768px) {
-  .communities-container {
+  .communities-page-container {
     padding: var(--space-4);
+    padding-top: 72px; /* Adjusted for mobile header height (56px + extra margin) */
   }
 
   .communities-header {
@@ -383,8 +385,9 @@
 }
 
 @media (max-width: 480px) {
-  .communities-container {
+  .communities-page-container {
     padding: var(--space-3);
+    padding-top: 72px; /* Adjusted for mobile header height (56px + extra margin) */
   }
 
   .communities-header {

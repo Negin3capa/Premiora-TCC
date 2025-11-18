@@ -71,3 +71,65 @@ export interface VideoFormData {
   video?: File | null;
   thumbnail?: File | null;
 }
+
+/**
+ * Interface para um comentário de post
+ */
+export interface Comment {
+  id: string;
+  postId: string;
+  userId: string;
+  parentCommentId?: string | null; // Para comentários aninhados
+  content: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+  // Dados expandidos do usuário (preenchidos por query)
+  author: {
+    username: string;
+    name?: string;
+    avatarUrl?: string;
+  };
+  // Para comentários aninhados
+  replies?: Comment[];
+  // Metadados para UI
+  depth?: number; // Profundidade na árvore de comentários
+  isAuthor?: boolean; // Se o usuário atual é o autor do comentário
+}
+
+/**
+ * Dados para criação de um novo comentário
+ */
+export interface CreateCommentData {
+  postId: string;
+  content: string;
+  parentCommentId?: string; // Para respostas a comentários
+}
+
+/**
+ * Dados para atualização de comentário
+ */
+export interface UpdateCommentData {
+  content: string;
+}
+
+/**
+ * Filtros para busca de comentários
+ */
+export interface CommentFilters {
+  postId: string;
+  parentCommentId?: string | null; // null para comentários raiz, string para respostas
+  limit?: number;
+  offset?: number;
+  sortBy?: 'created_at' | 'updated_at';
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Estatísticas de comentários para um post
+ */
+export interface CommentStats {
+  totalComments: number;
+  topLevelComments: number; // Comentários raiz (não respostas)
+  lastCommentAt?: string;
+}

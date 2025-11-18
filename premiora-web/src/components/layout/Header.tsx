@@ -6,7 +6,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import '../../styles/Header.css';
-import { Bell, LogOut, UserPlus, Menu } from 'lucide-react';
+import { Sun, LogOut, UserPlus, Menu } from 'lucide-react';
 
 /**
  * Hook personalizado para detectar scroll e controlar visibilidade do header
@@ -113,6 +113,9 @@ const Header: React.FC<HeaderProps> = ({
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isHeaderHidden = useScrollVisibility();
+
+  // Define o ícone de notificações (Sun)
+  const NotificationIcon = Sun;
 
   // Nome de exibição (usado no header) - prioriza o name do banco
   const displayName = userProfile?.name ||
@@ -308,7 +311,7 @@ const Header: React.FC<HeaderProps> = ({
             title="Notificações"
             onClick={() => handleAction('notifications')}
           >
-            <Bell size={20} />
+            <NotificationIcon size={20} />
           </button>
 
           <div className="header-avatar-dropdown" ref={dropdownRef}>

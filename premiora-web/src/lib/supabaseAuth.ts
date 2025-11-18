@@ -3,7 +3,6 @@
  * Gerencia todas as operações de autenticação da aplicação Premiora
  */
 import { supabase } from '../utils/supabaseClient';
-import { generateUniqueUsername } from '../utils/generateUniqueUsername';
 import type { User, AuthError } from '@supabase/supabase-js';
 
 /**
@@ -37,121 +36,26 @@ export function initializeSupabaseAuth() {
   return supabase;
 }
 
-/**
- * Registra um novo usuário com email, senha e username
- * @param email - Email do usuário
- * @param password - Senha do usuário
- * @param username - Username único (opcional, será gerado se não fornecido)
- * @returns Promise com resultado do registro
- */
-export async function signUpWithEmail(
-  email: string,
-  password: string,
-  username?: string
-): Promise<SignUpResult> {
-  try {
-    console.log('🔄 Iniciando registro de usuário:', { email, hasUsername: !!username });
 
-    // Se não foi fornecido username, gerar um único baseado no email
-    let finalUsername = username;
-    if (!finalUsername) {
-      const emailBase = email.split('@')[0];
-      finalUsername = await generateUniqueUsername(emailBase);
-      console.log('📝 Username gerado automaticamente:', finalUsername);
-    } else {
-      // Validar se o username fornecido é único
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('id')
-        .eq('username', finalUsername)
-        .single();
-
-      if (existingUser) {
-        throw new Error('Este username já está em uso. Escolha outro.');
-      }
-    }
-
-    // Registrar usuário no Supabase Auth
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          username: finalUsername,
-          email_confirm: true,
-        },
-      },
-    });
-
-    if (error) {
-      console.error('❌ Erro no registro Supabase:', error);
-      throw error;
-    }
-
-    console.log('✅ Registro realizado com sucesso:', {
-      userId: data.user?.id,
-      username: finalUsername,
-      email: data.user?.email
-    });
-
-    return {
-      user: data.user,
-      error: null,
-      username: finalUsername,
-    };
-  } catch (error) {
-    console.error('💥 Erro geral no registro:', error);
-    return {
-      user: null,
-      error: error as AuthError,
-    };
-  }
-}
 
 /**
- * Faz login com email e senha
- * @param email - Email do usuário
- * @param password - Senha do usuário
- * @returns Promise que resolve quando o login é realizado
- */
-export async function signInWithEmail(email: string, password: string): Promise<{ error: AuthError | null }> {
-  try {
-    console.log('🔄 Iniciando login com email:', email);
-
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      console.error('❌ Erro no login:', error);
-      throw error;
-    }
-
-    console.log('✅ Login realizado com sucesso');
-    return { error: null };
-  } catch (error) {
-    console.error('💥 Erro geral no login:', error);
-    return { error: error as AuthError };
-  }
-}
-
-/**
- * Faz login com provedor OAuth (Google ou Facebook)
+ * Faz login com provedor OAuth (Google ou Facebook) com proteção de identidade Patreon-like
+ * Valida conflitos antes de iniciar o fluxo OAuth
  * @param provider - Provedor OAuth
  * @returns Promise que resolve quando o login é iniciado
  */
 export async function signInWithProvider(provider: OAuthProvider): Promise<{ error: AuthError | null }> {
   try {
-    console.log('🔄 Iniciando login OAuth:', provider);
+    console.log('🔄 Iniciando login OAuth com proteção de identidade:', provider);
 
-    // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = getRedirectUrl('/auth/callback');
+    // ⚠️ NOTA: A validação de identidade Patreon-like não pode ser feita AQUI
+    // porque ainda não temos os dados da identidade OAuth do usuário.
+    // A validação real acontece NO AuthCallback após o usuário completar o OAuth.
 
+    // OAuth é processado diretamente no contexto de autenticação, sem redirecionamento
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo,
         scopes: provider === 'google' ? 'openid email profile' : 'email',
         queryParams: provider === 'google' ? {
           access_type: 'offline',
@@ -202,7 +106,7 @@ export async function signOut(): Promise<{ error: AuthError | null }> {
  */
 export async function getCurrentUser(): Promise<CurrentUserResult> {
   try {
-    console.log('🔍 Buscando usuário atual');
+    console.log('� Buscando usuário atual');
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -281,54 +185,4 @@ export async function handleOAuthCallback(): Promise<{ user: User | null; error:
     console.error('💥 Erro geral no processamento OAuth:', error);
     return { user: null, error: error as AuthError };
   }
-}
-
-/**
- * Determina a URL de redirecionamento apropriada baseada no ambiente
- * @param path - Caminho relativo para redirecionamento
- * @returns URL completa de redirecionamento
- */
-function getRedirectUrl(path: string): string {
-  // Verificar se estamos rodando localmente
-  const isLocalDev = !import.meta.env.VERCEL && window.location.hostname === 'localhost';
-  const isLocalDevAlt = import.meta.env.DEV && !import.meta.env.VERCEL_ENV;
-
-  console.log('🔍 Verificando ambiente para redirect:', {
-    DEV: import.meta.env.DEV,
-    VERCEL: import.meta.env.VERCEL,
-    VERCEL_ENV: import.meta.env.VERCEL_ENV,
-    hostname: window.location.hostname,
-    isLocalDev,
-    isLocalDevAlt
-  });
-
-  // Em desenvolvimento local, usar a origem atual
-  if (isLocalDev || isLocalDevAlt) {
-    console.log('✅ Ambiente de desenvolvimento local detectado');
-    return `${window.location.origin}${path}`;
-  }
-
-  // Para produção/Vercel, usar VERCEL_URL se disponível
-  const vercelUrl = import.meta.env.VITE_VERCEL_URL || import.meta.env.VERCEL_URL;
-
-  if (vercelUrl) {
-    try {
-      console.log('🔄 Usando VERCEL_URL:', vercelUrl);
-      const url = new URL(vercelUrl);
-      return `${url.origin}${path}`;
-    } catch (error) {
-      console.warn('VERCEL_URL inválida, usando fallback:', vercelUrl);
-    }
-  }
-
-  // Fallback: determinar dinamicamente baseada no ambiente atual
-  const origin = window.location.origin;
-  console.log('🔄 Usando origin atual:', origin);
-
-  // Para ambientes de preview do Vercel, garantir que usamos HTTPS
-  if (origin.includes('vercel-preview') || origin.includes('vercel.app')) {
-    return `https://${window.location.host}${path}`;
-  }
-
-  return `${origin}${path}`;
 }

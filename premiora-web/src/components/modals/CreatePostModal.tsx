@@ -2,14 +2,16 @@
  * Modal de criação de posts
  * Permite ao usuário criar posts na plataforma com opção de comunidade
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { ContentService } from '../../services/contentService';
 import { useFeed } from '../../hooks/useFeed';
+import { useModal } from '../../hooks/useModal';
 import '../../styles/modals.css';
 import { CommunityDropdown, FileUpload } from '../common';
 import { Loader } from 'lucide-react';
+import type { Community } from '../../types/community';
 
 /**
  * Props do componente CreatePostModal
@@ -47,6 +49,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addNewPost } = useFeed();
+  const { getModalData } = useModal();
 
   // Estado do formulário
   const [formData, setFormData] = useState<PostFormData>({
@@ -58,6 +61,20 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
   // Estados de interface
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Configurar comunidade pré-selecionada quando modal abre
+  useEffect(() => {
+    if (isOpen) {
+      const modalData = getModalData('createPost');
+      if (modalData?.preselectedCommunity) {
+        const preselectedCommunity = modalData.preselectedCommunity as Community;
+        setFormData(prev => ({ ...prev, communityId: preselectedCommunity.id }));
+      } else {
+        // Reset para vazio se não houver comunidade pré-selecionada
+        setFormData(prev => ({ ...prev, communityId: '' }));
+      }
+    }
+  }, [isOpen, getModalData]);
 
   /**
    * Handler para mudanças nos inputs de texto

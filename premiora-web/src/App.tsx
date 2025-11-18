@@ -2,19 +2,36 @@
  * Componente principal App
  * Gerencia roteamento da aplicação com proteção de rotas e code splitting
  */
-import React, { Suspense } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute, ProfileSetupGuard } from './components/auth';
 import { MobileBottomBar } from './components/layout';
 import NotificationContainer from './components/common/NotificationContainer';
 
+/**
+ * Hook para detectar se está em dispositivo móvel
+ */
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined') {
+        setIsMobile(window.innerWidth <= 768);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+};
+
 // Lazy loading dos componentes de página para otimização de bundle
 const LandingPage = React.lazy(() => import('./pages/LandingPage'));
 const Login = React.lazy(() => import('./pages/Login'));
-const Signup = React.lazy(() => import('./pages/Signup'));
-const AuthCallback = React.lazy(() => import('./pages/AuthCallback'));
-const EmailConfirmation = React.lazy(() => import('./pages/EmailConfirmation'));
-const EmailConfirmationSuccess = React.lazy(() => import('./pages/EmailConfirmationSuccess'));
 const ProfileSetup = React.lazy(() => import('./pages/ProfileSetup'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const CommunityPage = React.lazy(() => import('./pages/CommunityPage'));
@@ -50,12 +67,16 @@ const PageLoader: React.FC = () => (
  * Layout para rotas protegidas que inclui a barra de navegação móvel
  * Garante que todas as páginas móveis tenham acesso à navegação inferior
  */
-const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <>
-    {children}
-    <MobileBottomBar />
-  </>
-);
+const ProtectedLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isMobile = useIsMobile();
+
+  return (
+    <>
+      {children}
+      {isMobile && <MobileBottomBar />}
+    </>
+  );
+};
 
 /**
  * Componente principal da aplicação com roteamento protegido
@@ -93,32 +114,10 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Rota de Signup (apenas para não autenticados) */}
+        {/* Rota de Signup - redireciona para login (fluxo unificado) */}
         <Route
           path="/signup"
-          element={
-            <PublicRoute>
-              <Signup />
-            </PublicRoute>
-          }
-        />
-
-        {/* Rota de Callback OAuth (acessível para todos) */}
-        <Route
-          path="/auth/callback"
-          element={<AuthCallback />}
-        />
-
-        {/* Rota de Confirmação de Email (acessível para todos os estados de autenticação) */}
-        <Route
-          path="/email-confirmation"
-          element={<EmailConfirmation />}
-        />
-
-        {/* Rota de Sucesso da Confirmação de Email (acessível para todos os estados de autenticação) */}
-        <Route
-          path="/email-confirmation-success"
-          element={<EmailConfirmationSuccess />}
+          element={<Navigate to="/login" replace />}
         />
 
         {/* Rota de Setup de Perfil (apenas para autenticados) */}

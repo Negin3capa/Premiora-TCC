@@ -6,10 +6,14 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { usePostLike, usePostViews } from '../hooks/usePostLike';
 import { PostService } from '../services/content/PostService';
-import { Sidebar, MobileBottomBar } from '../components/layout';
+import { Sidebar } from '../components/layout';
 import SidebarFeed from '../components/content/SidebarFeed';
+import CommunityPostSidebar from '../components/content/CommunityPostSidebar';
+import { CommentList } from '../components/content/CommentList';
 import type { ContentItem, ContentType } from '../types/content';
+import { LikeParticles } from '../components/ContentCard/CardActions';
 import '../styles/PostViewPage.css';
 
 // Lazy loading dos componentes para otimização
@@ -170,22 +174,32 @@ const PostViewPage: React.FC = () => {
   const { user } = useAuth();
   const { post, loading, error } = usePost(postId!, username!);
 
-  const [isLiked, setIsLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showParticles, setShowParticles] = useState(false);
 
-  // Atualizar estado local quando o post for carregado
+  // Hooks para likes e visualizações
+  const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
+    postId: postId || '',
+    initialLiked: false,
+    initialLikeCount: post?.likes || 0,
+    currentLikeCount: post?.likes
+  });
+
+  const { viewCount, incrementView } = usePostViews({
+    initialViews: post?.views || 0,
+    currentViews: post?.views
+  });
+
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  // Incrementar visualização quando o post é carregado (apenas na primeira vez)
   useEffect(() => {
-    if (post) {
-      // Verificar se o usuário atual curtiu o post baseado nos dados retornados
-      const userLiked = (post.likes || 0) > 0; // Simplificação - em produção, verificar na API
-      setIsLiked(userLiked);
-      setLikesCount(post.likes || 0);
+    if (post && postId && !loading) {
+      incrementView(postId);
     }
-  }, [post]);
+  }, [post, postId, incrementView, loading]);
 
   /**
    * Handler para voltar à página anterior
@@ -199,20 +213,18 @@ const PostViewPage: React.FC = () => {
   };
 
   /**
-   * Handler para curtir/descurtir o post
+   * Handler personalizado para like que inclui efeito de partículas
    */
-  const handleLike = async () => {
-    if (!user || !post) return;
+  const handleLike = () => {
+    const wasLiked = liked;
 
-    try {
-      // TODO: Implementar API de like
-      const newLikedState = !isLiked;
-      setIsLiked(newLikedState);
-      // Atualizar contador de likes
-      setLikesCount(prev => prev + (newLikedState ? 1 : -1));
-    } catch (err) {
-      console.error('Erro ao curtir post:', err);
+    // Disparar efeito de particulas apenas quando está dando like (não removendo)
+    if (!wasLiked && !likeLoading) {
+      setShowParticles(true);
     }
+
+    // Chamar handler original
+    toggleLike();
   };
 
   /**
@@ -560,14 +572,18 @@ const PostViewPage: React.FC = () => {
                     {/* Ações do post */}
                     <footer className="post-actions">
                       <div className="action-buttons">
-                        <button
-                          onClick={handleLike}
-                          className={`post-view-action-button like-button ${isLiked ? 'liked' : ''}`}
-                          aria-label={isLiked ? 'Descurtir' : 'Curtir'}
-                        >
-                          <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} />
-                          <span className="action-count">{likesCount}</span>
-                        </button>
+                        <div className="like-btn-container-post-view">
+                          <LikeParticles show={showParticles} />
+                          <button
+                            onClick={handleLike}
+                            className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
+                            disabled={likeLoading}
+                            aria-label={liked ? 'Descurtir' : 'Curtir'}
+                          >
+                            <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+                            <span className="action-count">{likeCount}</span>
+                          </button>
+                        </div>
 
                         <button className="post-view-action-button comment-button" aria-label="Comentar">
                           <MessageCircle size={18} />
@@ -601,28 +617,27 @@ const PostViewPage: React.FC = () => {
 
                       {/* Estatísticas */}
                       <div className="post-stats">
-                        <span className="views-count">{post.views?.toLocaleString('pt-BR')} visualizações</span>
+                        <span className="views-count">{viewCount?.toLocaleString('pt-BR')} visualizações</span>
                       </div>
                     </footer>
                   </article>
 
-                  {/* Seção de comentários (placeholder) */}
-                  <section className="comments-section">
-                    <h3>Comentários</h3>
-                    <div className="comments-placeholder">
-                      <p>Comentários serão implementados em breve.</p>
-                    </div>
-                  </section>
+                  {/* Seção de comentários */}
+                  <CommentList postId={postId!} />
                 </main>
               </div>
             </div>
 
-            {/* Sidebar do feed */}
-            <SidebarFeed />
+            {/* Sidebar condicional baseada no tipo de post */}
+            {post.communityId ? (
+              <CommunityPostSidebar communityName={post.communityName || ''} />
+            ) : (
+              <SidebarFeed />
+            )}
           </div>
         </div>
       </div>
-      <MobileBottomBar />
+
 
       {/* Modal de imagem ampliada */}
       {isImageModalOpen && post.thumbnail && (

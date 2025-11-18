@@ -6,6 +6,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import '../../styles/ContentCard.css';
 import { useAuth } from '../../hooks/useAuth';
+import { usePostLike, usePostViews } from '../../hooks/usePostLike';
 import { PostService } from '../../services/content/PostService';
 import type { ContentItem } from '../../types/content';
 import { VideoViewModal } from '../modals';
@@ -138,11 +139,30 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { prefetchPost, cancelPrefetch } = usePostPrefetch();
 
+  // Hooks para likes e visualizações
+  const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
+    postId: item.id,
+    initialLiked: false,
+    initialLikeCount: item.likes || 0,
+    currentLikeCount: item.likes
+  });
+
+  const { incrementView } = usePostViews();
+
+  // Criar item atualizado com os valores mais recentes
+  const updatedItem = {
+    ...item,
+    likes: likeCount
+  };
+
   /**
    * Handler para visualizar post detalhado - navega para página dedicada
    */
   const handleViewPost = () => {
-    if (item.type === 'post' && item.id) {
+    if ((item.type === 'post' || item.type === 'video') && item.id) {
+      // Incrementar visualização
+      incrementView(item.id);
+
       // Usar authorUsername se disponível, senão tentar usar author como fallback
       const username = item.authorUsername || item.author?.toLowerCase().replace(/\s+/g, '') || 'usuario';
 
@@ -175,9 +195,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   /**
    * Handler para curtir conteúdo
    */
-  const handleLike = () => {
-    console.log(`Liked ${item.title}`);
-    // TODO: Implementar lógica de like com API
+  const handleLike = async () => {
+    if (item.type === 'post' || item.type === 'video') {
+      await toggleLike();
+    }
   };
 
   /**
@@ -315,10 +336,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         </div>
 
         <CardActions
-          item={item}
+          item={updatedItem}
           onLike={handleLike}
           onComment={handleComment}
           onShare={handleShare}
+          liked={liked}
+          isLoading={likeLoading}
         />
       </article>
 

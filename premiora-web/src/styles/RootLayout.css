@@ -40,6 +40,12 @@
   overflow-x: hidden;
 }
 
+/* ==================== Mobile Bottom Bar ==================== */
+
+.mobile-bottom-bar {
+  display: none; /* Hidden by default on larger screens */
+}
+
 /* ==================== Responsive Design ==================== */
 
 @media (max-width: 768px) {
@@ -53,6 +59,10 @@
 
   .root-layout .page-content {
     min-height: calc(100vh - 70px); /* Reduced header height on mobile */
+  }
+
+  .mobile-bottom-bar {
+    display: block; /* Show mobile bottom bar on small screens via JavaScript */
   }
 }
 
