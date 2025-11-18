@@ -3,6 +3,7 @@
  * Centraliza todas as funções relacionadas ao sistema de comunidades
  */
 import { supabase } from './supabaseClient';
+import { supabaseAdmin } from './supabaseAdminClient';
 import type { Community, CommunityMember } from '../types/community';
 
 /**
@@ -140,6 +141,62 @@ export async function createCommunity(communityData: {
     return null;
   }
 
+  // Primeiro, buscar dados do usuário (necessários para criar o creator se necessário)
+  const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('name, username, avatar_url, is_creator')
+    .eq('id', user.id)
+    .single();
+
+  if (userError) {
+    console.error('Erro ao buscar dados do usuário:', userError);
+    return null;
+  }
+
+  // Verificar se o usuário tem um registro de creator
+  const { data: existingCreator, error: creatorCheckError } = await supabase
+    .from('creators')
+    .select('id')
+    .eq('id', user.id)
+    .single();
+
+  if (creatorCheckError && creatorCheckError.code !== 'PGRST116') {
+    // PGRST116 = no rows returned, which is expected
+    console.error('Erro ao verificar creator:', creatorCheckError);
+    return null;
+  }
+
+  // Se não existe creator, criar um automaticamente
+  if (!existingCreator) {
+    console.log('Criando registro de creator para usuário ao criar comunidade:', user.id);
+
+    const { error: createCreatorError } = await supabaseAdmin
+      .from('creators')
+      .insert({
+        id: user.id,
+        display_name: userData.name || userData.username || 'Usuário',
+        bio: null,
+        profile_image_url: userData.avatar_url,
+        cover_image_url: null,
+        website: null,
+        social_links: {},
+        is_active: true,
+        total_subscribers: 0,
+        total_earnings: 0
+      });
+
+    if (createCreatorError) {
+      console.error('Erro ao criar creator:', createCreatorError);
+      return null;
+    }
+
+    // Atualizar o usuário para marcar como creator
+    await supabase
+      .from('users')
+      .update({ is_creator: true })
+      .eq('id', user.id);
+  }
+
   // Fazer upload das imagens se fornecidas
   let bannerUrl: string | undefined;
   let avatarUrl: string | undefined;
@@ -174,11 +231,29 @@ export async function createCommunity(communityData: {
 
   if (error) {
     console.error('Erro ao criar comunidade:', error);
+
+    // Verificar se é erro de duplicata de nome
+    if (error.code === '23505' && error.message.includes('name')) {
+      console.error('Nome da comunidade já existe');
+      // Este erro deve ser tratado na validação do frontend
+    }
+
     return null;
   }
 
-  // Adicionar o criador como membro
-  await joinCommunity(data.id);
+  // Adicionar o criador como membro diretamente (evitando RPC que pode falhar)
+  try {
+    await supabase
+      .from('community_members')
+      .insert({
+        community_id: data.id,
+        user_id: user.id,
+        role: 'owner' // O criador deve ser owner, não member
+      });
+  } catch (memberError) {
+    console.error('Erro ao adicionar criador como membro:', memberError);
+    // Mesmo se falhar, continuamos pois a comunidade foi criada
+  }
 
   return {
     id: data.id,

@@ -280,7 +280,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         }
         break;
       case 'video':
-        openModal('createVideo');
+        // Verificar se estamos em uma página de comunidade e usuário é membro
+        const videoCommunityContext = await getCurrentCommunityContext();
+        if (videoCommunityContext.community && videoCommunityContext.isMember) {
+          // Abrir modal de vídeo com comunidade pré-selecionada
+          openModal('createVideo', { preselectedCommunity: videoCommunityContext.community });
+        } else {
+          // Abrir modal normalmente
+          openModal('createVideo');
+        }
         break;
       case 'community':
         // Navegar para página de criação de comunidade

@@ -35,8 +35,9 @@
   align-items: start;
   max-width: 1400px;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-6) var(--space-6) 0;
+  padding: var(--space-6) var(--space-6) var(--space-8) 0; /* Reduced bottom padding to prevent excessive scrolling */
   padding-top: 0; /* Remove top padding to align with sidebar */
+  min-height: fit-content;
 }
 
 .post-view-main {

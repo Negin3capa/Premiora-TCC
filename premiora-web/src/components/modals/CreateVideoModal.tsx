@@ -2,15 +2,17 @@
  * Modal de criação de vídeos
  * Permite ao usuário publicar vídeos na plataforma
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNotification } from '../../hooks/useNotification';
+import { useModal } from '../../hooks/useModal';
 import { VideoService } from '../../services/content/VideoService';
 import type { VideoFormData } from '../../types/content';
 import { UPLOAD_CONFIG } from '../../utils/constants';
 import { CommunityDropdown, FileUpload } from '../common';
 import { Loader } from 'lucide-react';
 import '../../styles/modals.css';
+import type { Community } from '../../types/community';
 
 /**
  * Props do componente CreateVideoModal
@@ -35,6 +37,7 @@ const CreateVideoModal: React.FC<CreateVideoModalProps> = ({
 }) => {
   const { user } = useAuth();
   const { showSuccess, showError } = useNotification();
+  const { getModalData } = useModal();
 
   // Estado do formulário
   const [formData, setFormData] = useState<VideoFormData>({
@@ -47,6 +50,20 @@ const CreateVideoModal: React.FC<CreateVideoModalProps> = ({
 
   // Estados de interface
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Configurar comunidade pré-selecionada quando modal abre
+  useEffect(() => {
+    if (isOpen) {
+      const modalData = getModalData('createVideo');
+      if (modalData?.preselectedCommunity) {
+        const preselectedCommunity = modalData.preselectedCommunity as Community;
+        setFormData(prev => ({ ...prev, communityId: preselectedCommunity.id }));
+      } else {
+        // Reset para vazio se não houver comunidade pré-selecionada
+        setFormData(prev => ({ ...prev, communityId: '' }));
+      }
+    }
+  }, [isOpen, getModalData]);
 
   /**
    * Handler para mudanças nos inputs de texto
