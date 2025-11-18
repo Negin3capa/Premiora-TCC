@@ -6,6 +6,16 @@ import { supabase } from './supabaseClient';
 import type { Community, CommunityMember } from '../types/community';
 
 /**
+ * Contexto da comunidade atual
+ * Usado para detectar comunidade ativa e verificar membership
+ */
+export interface CurrentCommunityContext {
+  community: Community | null;
+  isMember: boolean;
+  isLoading: boolean;
+}
+
+/**
  * Busca todas as comunidades disponíveis
  */
 export async function getCommunities(): Promise<Community[]> {
@@ -359,4 +369,37 @@ export async function searchCommunities(query: string, limit: number = 20): Prom
     createdAt: community.created_at,
     updatedAt: community.updated_at
   }));
+}
+
+/**
+ * Obtém o contexto da comunidade atual baseada na URL
+ * Usado para detectar automaticamente a comunidade ao abrir modais de criação
+ */
+export async function getCurrentCommunityContext(pathname?: string): Promise<CurrentCommunityContext> {
+  // Se não foi fornecido pathname, usar o atual
+  const currentPath = pathname || window.location.pathname;
+
+  // Verificar se estamos em uma página de comunidade (padrão: /r/:communityName)
+  const communityMatch = currentPath.match(/^\/r\/([^/]+)/);
+  if (!communityMatch) {
+    return { community: null, isMember: false, isLoading: false };
+  }
+
+  const communityName = communityMatch[1];
+  if (!communityName) {
+    return { community: null, isMember: false, isLoading: false };
+  }
+
+  const community = await getCommunityByName(communityName);
+  if (!community) {
+    return { community: null, isMember: false, isLoading: false };
+  }
+
+  const isMember = await isCommunityMember(community.id);
+
+  return {
+    community,
+    isMember,
+    isLoading: false
+  };
 }
