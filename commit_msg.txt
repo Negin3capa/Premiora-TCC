@@ -1,0 +1,1 @@
+feat: implement complete trending content system with z-score burst detection, TrendingService, Supabase Edge Function, database migrations, and GitHub Actions workflow
