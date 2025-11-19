@@ -5,6 +5,23 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 18/11/25
+
+### Adicionado
+
+- Sistema completo de tendências de conteúdos com detecção de tópicos trending ([#XX](https://github.com/Negin3capa/Premiora-TCC/pull/XX))
+- Serviço TrendCelebrity (TrendingService) para cliente React com busca e filtros de tópicos
+- Edge Function do Supabase para processamento de sinais de tendência executada periodicamente a cada 5 minutos
+- Algoritmo de detecção de burst baseado em z-score com cálculo de estatísticas de baseline
+- Sistema de pontuação composto com análise de múltiplas janelas (1h, 4h, 1dia) e pesos dinâmicos
+- Github Actions workflow para automação do processamento de sinais de tendência
+- Migração de banco de dados completa do sistema de tendências (005_create_trending_system.sql)
+- Tabelas de dados principais: trending_topics, topic_signals, hashtag_mentions
+- Materialized views para otimização de performance de consultas de tendências
+- Indexação avançada e políticas RLS para segurança dos dados de tendências
+- Métricas de engajamento incluindo likes, comentários e visualizações nos cálculos de trending
+- Sistema de análise de velocidade de crescimento de tópicos para detecção de tendências emergentes
+
 ## [0.4.0] - 18/11/25
 
 ### Adicionado
