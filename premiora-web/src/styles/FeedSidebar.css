@@ -237,7 +237,6 @@
   outline: none;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  placeholder-color: var(--color-text-secondary);
 }
 
 .search-input:focus {

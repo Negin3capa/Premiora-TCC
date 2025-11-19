@@ -1,0 +1,91 @@
+name: Process Trending Signals
+
+on:
+  # Run every 5 minutes
+  schedule:
+    - cron: '*/5 * * * *'
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      log_level:
+        description: 'Log level'
+        required: false
+        default: 'info'
+
+jobs:
+  process-signals:
+    runs-on: ubuntu-latest
+    name: Update Trending Signals
+    env:
+      SUPABASE_URL: https://mibwqfvuilpwpuenobru.supabase.co
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Log workflow start
+        run: echo "🚀 Starting trending signals processing at $(date)"
+
+      - name: Trigger trending function
+        id: trigger
+        continue-on-error: true
+        run: |
+          echo "🔄 Triggering trending signals processing..."
+          response=$(curl -s -w "%{http_code}" \
+            -X POST "${SUPABASE_URL}/functions/v1/process-trending-signals" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            -H "Content-Type: application/json")
+
+          # Extract status code and body
+          http_code=$(echo "$response" | tail -c 3)
+          body=$(echo "$response" | sed '$ s/...$//')
+
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+
+          # Set output for next steps
+          echo "status_code=$http_code" >> $GITHUB_OUTPUT
+          echo "response_body=$body" >> $GITHUB_OUTPUT
+
+          # Check if successful (2xx status codes)
+          if [[ $http_code -ge 200 && $http_code -lt 300 ]]; then
+            echo "✅ Trending signals processed successfully"
+            exit 0
+          else
+            echo "❌ Trending signals processing failed with status $http_code"
+            echo "❌ Response body: $body"
+            exit 1
+          fi
+
+      - name: Process results
+        if: steps.trigger.outcome == 'success'
+        run: |
+          echo "📊 Processing results..."
+          status=${{ steps.trigger.outputs.status_code }}
+          response=${{ steps.trigger.outputs.response_body }}
+
+          # Log the results for monitoring
+          echo "🔍 Trend Processing Results:"
+          echo "- Status Code: $status"
+          echo "- Response: $response"
+
+      - name: Send notification on failure
+        if: failure()
+        run: |
+          echo "⚠️ Trending signals processing failed"
+          echo "📧 Consider checking Supabase function logs"
+
+      - name: Success notification
+        if: success()
+        run: |
+          echo "✅ Trending signals processing completed successfully"
+          echo "🎯 System is up to date at $(date)"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { PopularContentService, type PopularProduct, type PopularPost } from '../../services/content/PopularContentService';
-import { Sparkles, Flame, UserPlus } from 'lucide-react';
+import { TrendingService, type TrendingTopic, type TrendingStats } from '../../services/content/TrendingService';
+import { useAuth } from '../../hooks/useAuth';
+import { Sparkles, TrendingUp, BarChart3, Hash } from 'lucide-react';
 import SearchBar from '../common/SearchBar';
 import SearchModal from '../modals/SearchModal';
 import { useModal } from '../../hooks/useModal';
@@ -8,49 +9,40 @@ import '../../styles/FeedSidebar.css';
 
 /**
  * Componente SidebarFeed - Sidebar para o feed do dashboard
- * Contém seções de "Seja um criador", "Assuntos do Momento" e "Quem Seguir"
- * Baseado na sidebar do PostsTabEnhanced, adaptado para o contexto do feed
+ * Contém seções de "Seja um criador", "O que está acontecendo" e estatísticas
+ * Atualizado para usar o sistema de tendências em tempo real
  *
  * @component
  */
 const SidebarFeed: React.FC = () => {
-  const [popularProducts, setPopularProducts] = useState<PopularProduct[]>([]);
-  const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
+  const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
+  const [trendingStats, setTrendingStats] = useState<TrendingStats | null>(null);
   const [sidebarLoading, setSidebarLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { user } = useAuth();
   const { isModalOpen } = useModal();
 
   /**
-   * Formata número de visualizações
-   */
-  const formatViews = (views: number): string => {
-    if (views >= 1000000) {
-      return `${(views / 1000000).toFixed(1)}M visualizações`;
-    } else if (views >= 1000) {
-      return `${(views / 1000).toFixed(0)}K visualizações`;
-    } else {
-      return `${views} visualizações`;
-    }
-  };
-
-  /**
-   * Carrega dados da sidebar (produtos e posts populares)
+   * Carrega dados da sidebar (tendências e estatísticas)
    */
   const loadSidebarData = async () => {
     try {
       setSidebarLoading(true);
-      const [products, posts] = await Promise.all([
-        PopularContentService.getPopularProducts(5), // Produtos populares globais
-        PopularContentService.getPopularPosts(5) // Posts populares globais
-      ]);
 
-      setPopularProducts(products);
-      setPopularPosts(posts);
+      // Carregar tendências personalizadas ou globais
+      const trendingResult = user?.id
+        ? await TrendingService.getPersonalizedTrending(user.id, { limit: 5 })
+        : await TrendingService.getTrendingTopics({ limit: 5 });
+
+      const stats = await TrendingService.getTrendingStats();
+
+      setTrendingTopics(trendingResult.topics);
+      setTrendingStats(stats);
     } catch (error) {
       console.error('Erro ao carregar dados da sidebar:', error);
-      // Em caso de erro, manter dados vazios ou fallback
-      setPopularProducts([]);
-      setPopularPosts([]);
+      // Em caso de erro, manter dados vazios
+      setTrendingTopics([]);
+      setTrendingStats(null);
     } finally {
       setSidebarLoading(false);
     }
@@ -59,7 +51,7 @@ const SidebarFeed: React.FC = () => {
   // Carregar dados da sidebar ao montar o componente
   useEffect(() => {
     loadSidebarData();
-  }, []);
+  }, [user?.id]); // Recarregar quando usuário mudar
 
   return (
     <aside className="feed-sidebar">
@@ -97,74 +89,70 @@ const SidebarFeed: React.FC = () => {
         </div>
       </div>
 
-      {/* Assuntos do Momento */}
-      <div className="feed-sidebar-section products-section">
+      {/* O que está acontecendo */}
+      <div className="feed-sidebar-section trending-section">
         <h3 className="feed-sidebar-title">
-          <Flame size={20} />
-          Assuntos do Momento
+          <TrendingUp size={20} />
+          O que está acontecendo
         </h3>
         {sidebarLoading ? (
-          <div className="feed-sidebar-loading">Carregando assuntos...</div>
+          <div className="feed-sidebar-loading">Carregando tendências...</div>
         ) : (
-          <div className="products-list">
-            {popularProducts.length > 0 ? (
-              popularProducts.map((product) => (
-                <div key={product.id} className="product-item">
-                  <img
-                    src={product.thumbnail}
-                    alt={product.title}
-                    className="product-thumbnail"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://placehold.co/60x60/1F2937/FFFFFF?text=PROD';
-                    }}
-                  />
-                  <div className="product-info">
-                    <div className="product-date">{product.date}</div>
-                    <div className="product-title">{product.title}</div>
-                    <div className="product-price">$ {product.price}</div>
+          <div className="trending-list">
+            {trendingTopics.length > 0 ? (
+              trendingTopics.map((topic) => (
+                <div key={topic.id} className="trending-item">
+                  <div className="trending-header">
+                    <Hash size={14} className="trending-hash" />
+                    <span className="trending-reason">
+                      {topic.trendReason === 'personalized' && 'Para você'}
+                      {topic.trendReason === 'burst' && 'Em alta'}
+                      {topic.trendReason === 'growing' && 'Crescendo'}
+                      {topic.trendReason === 'high_engagement' && 'Popular'}
+                    </span>
+                  </div>
+                  <div className="trending-content">
+                    <div className="trending-title">{topic.title}</div>
+                    <div className="trending-category">{topic.category}</div>
+                    <div className="trending-stats">
+                      <span className="trending-mentions">{topic.totalMentions} menções</span>
+                      {topic.zScore && topic.zScore > 2 && (
+                        <span className="trending-burst">🔥</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="feed-sidebar-empty">Nenhum assunto encontrado</div>
+              <div className="feed-sidebar-empty">Nenhuma tendência encontrada</div>
             )}
           </div>
         )}
       </div>
 
-      {/* Quem Seguir */}
-      <div className="feed-sidebar-section popular-posts-section">
-        <h3 className="feed-sidebar-title">
-          <UserPlus size={20} />
-          Quem Seguir
-        </h3>
-        {sidebarLoading ? (
-          <div className="feed-sidebar-loading">Carregando sugestões...</div>
-        ) : (
-          <div className="popular-posts-list">
-            {popularPosts.length > 0 ? (
-              popularPosts.map((post) => (
-                <div key={post.id} className="popular-post-item">
-                  <img
-                    src={post.thumbnail}
-                    alt={post.title}
-                    className="popular-post-thumbnail"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://placehold.co/60x40/1F2937/FFFFFF?text=POST';
-                    }}
-                  />
-                  <div className="popular-post-info">
-                    <div className="popular-post-title">{post.title}</div>
-                    <div className="popular-post-views">{formatViews(post.views)}</div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="feed-sidebar-empty">Nenhuma sugestão encontrada</div>
-            )}
+      {/* Estatísticas do Sistema */}
+      {trendingStats && (
+        <div className="feed-sidebar-section stats-section">
+          <h3 className="feed-sidebar-title">
+            <BarChart3 size={20} />
+            Sistema
+          </h3>
+          <div className="stats-content">
+            <div className="stat-item">
+              <span className="stat-label">Tópicos ativos:</span>
+              <span className="stat-value">{trendingStats.activeTopics}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Em tendência:</span>
+              <span className="stat-value">{trendingStats.trendingTopics}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Score médio:</span>
+              <span className="stat-value">{trendingStats.avgScore}</span>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 };
