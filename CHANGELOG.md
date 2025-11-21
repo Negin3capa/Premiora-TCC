@@ -5,6 +5,26 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 21/11/25
+
+### Corrigido
+
+- Problemas de política RLS (Row Level Security) no Creator Channel causando erros 403 Forbidden ao salvar configurações de canal
+- Violações de restrição de chave estrangeira (23503) ao inserir benefícios de assinatura
+- Implementação adequada de `supabaseAdmin` para operações de escrita para contornar políticas RLS em `CreatorChannelService.ts`
+- Criação sequencial de tiers e benefícios para prevenir violações de restrição de chave estrangeira
+
+### Adicionado
+
+- Integração de autenticação Google One Tap para experiência de login aprimorada
+- Sistema de tendências de conteúdo aprimorado com algoritmos de detecção melhorados
+
+### Alterado
+
+- `CreatorChannelService.saveCreatorChannel()` agora usa `supabaseAdmin` para todas as operações de escrita
+- Tratamento de erros e logging aprimorados nas operações de canal de criador
+- Processamento sequencial de tiers de assinatura e benefícios para garantir integridade referencial
+
 ## [0.5.0] - 18/11/25
 
 ### Adicionado
