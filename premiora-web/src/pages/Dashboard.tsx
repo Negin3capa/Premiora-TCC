@@ -2,6 +2,7 @@ import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react
 import { useTabbedFeed } from '../hooks/useTabbedFeed';
 import { useLocalSearch } from '../hooks/useSearch';
 import { Sidebar, MobileBottomBar } from '../components/layout';
+import RightSidebar from '../components/dashboard/RightSidebar';
 import '../styles/HomePage.css';
 
 // Lazy loading dos componentes para otimização
@@ -99,28 +100,35 @@ const Dashboard: React.FC = () => {
             onTabChange={handleTabChange}
           />
         </Suspense>
-        <Suspense fallback={<ComponentLoader />}>
-          <Feed
-            // Props da aba ativa
-            items={filteredItems}
-            loading={loading}
-            hasMore={hasMore}
-            error={error}
-            onLoadMore={loadMoreContent}
-            onRetry={retryLoadContent}
-            canRetry={canRetry}
-            // Props das abas (controladas pelo header)
-            activeTab={activeTab}
-            // Props do feed "Following"
-            followingItems={followingFeed.feedItems}
-            followingLoading={followingFeed.loading}
-            followingHasMore={followingFeed.hasMore}
-            followingError={followingFeed.error}
-            onFollowingLoadMore={followingFeed.loadMoreContent}
-            onFollowingRetry={followingFeed.retryLoadContent}
-            followingCanRetry={followingFeed.canRetry}
-          />
-        </Suspense>
+        
+        <div className="dashboard-layout">
+          <div className="dashboard-feed-container">
+            <Suspense fallback={<ComponentLoader />}>
+              <Feed
+                items={filteredItems}
+                loading={loading}
+                hasMore={hasMore}
+                error={error}
+                onLoadMore={loadMoreContent}
+                onRetry={retryLoadContent}
+                canRetry={canRetry}
+                activeTab={activeTab}
+                followingItems={followingFeed.feedItems}
+                followingLoading={followingFeed.loading}
+                followingHasMore={followingFeed.hasMore}
+                followingError={followingFeed.error}
+                onFollowingLoadMore={followingFeed.loadMoreContent}
+                onFollowingRetry={followingFeed.retryLoadContent}
+                followingCanRetry={followingFeed.canRetry}
+                showSidebar={false}
+              />
+            </Suspense>
+          </div>
+          
+          <div className="dashboard-right-sidebar-container">
+            <RightSidebar />
+          </div>
+        </div>
       </div>
       <MobileBottomBar />
     </div>

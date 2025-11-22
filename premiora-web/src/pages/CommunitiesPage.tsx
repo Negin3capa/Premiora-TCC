@@ -8,6 +8,7 @@ import type { Community } from '../types/community';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { Search, Users, TrendingUp, Clock } from 'lucide-react';
 import { getCommunities, searchCommunities } from '../utils/communityUtils';
+import TrendingSection from '../components/dashboard/TrendingSection';
 import '../styles/CommunitiesPage.css';
 
 /**
@@ -259,107 +260,140 @@ const CommunitiesPage: React.FC = () => {
 
   return (
     <div className="communities-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <div className="dashboard-sidebar">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
       <div className="communities-main-content">
         <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="communities-page-container">
-          {/* Header Section */}
-          <div className="communities-header">
-            <h1 className="page-title">Comunidades</h1>
-            <p className="page-subtitle">
-              Descubra comunidades incríveis e conecte-se com pessoas que compartilham seus interesses
-            </p>
-          </div>
+        <div className="communities-layout">
+          <div className="communities-content-container">
+            {/* Header Section */}
+            <div className="communities-header">
+              <h1 className="page-title">Comunidades</h1>
+              <p className="page-subtitle">
+                Descubra comunidades incríveis e conecte-se com pessoas que compartilham seus interesses
+              </p>
+            </div>
 
-          {/* Search and Filter Bar */}
-          <div className="controls-section">
-            <div className="communities-search-bar">
-              <div className="communities-search-input-container">
-                <Search size={20} className="communities-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Buscar comunidades..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="communities-search-input"
-                />
-                {searchQuery && (
-                  <button
-                    className="communities-clear-search"
-                    onClick={() => setSearchQuery('')}
-                    title="Limpar busca"
-                  >
-                    ×
-                  </button>
-                )}
+            {/* Search and Filter Bar */}
+            <div className="controls-section">
+              <div className="communities-search-bar">
+                <div className="communities-search-input-container">
+                  <Search size={20} className="communities-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Buscar comunidades..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="communities-search-input"
+                  />
+                  {searchQuery && (
+                    <button
+                      className="communities-clear-search"
+                      onClick={() => setSearchQuery('')}
+                      title="Limpar busca"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="filter-buttons">
+                <button
+                  className={`filter-button ${sortBy === 'popular' ? 'active' : ''}`}
+                  onClick={() => setSortBy('popular')}
+                >
+                  <Users size={16} />
+                  Popular
+                </button>
+                <button
+                  className={`filter-button ${sortBy === 'trending' ? 'active' : ''}`}
+                  onClick={() => setSortBy('trending')}
+                >
+                  <TrendingUp size={16} />
+                  Tendência
+                </button>
+                <button
+                  className={`filter-button ${sortBy === 'new' ? 'active' : ''}`}
+                  onClick={() => setSortBy('new')}
+                >
+                  <Clock size={16} />
+                  Recente
+                </button>
               </div>
             </div>
 
-            <div className="filter-buttons">
-              <button
-                className={`filter-button ${sortBy === 'popular' ? 'active' : ''}`}
-                onClick={() => setSortBy('popular')}
-              >
-                <Users size={16} />
-                Popular
-              </button>
-              <button
-                className={`filter-button ${sortBy === 'trending' ? 'active' : ''}`}
-                onClick={() => setSortBy('trending')}
-              >
-                <TrendingUp size={16} />
-                Tendência
-              </button>
-              <button
-                className={`filter-button ${sortBy === 'new' ? 'active' : ''}`}
-                onClick={() => setSortBy('new')}
-              >
-                <Clock size={16} />
-                Recente
-              </button>
-            </div>
-          </div>
+            {/* Communities Grid */}
+            <div className="communities-grid">
+              {sortedCommunities.map((community: Community) => (
+                <div key={community.id} className="community-card" onClick={() => handleCommunityClick(community)}>
+                  <div className="community-header">
+                    <img
+                      src={community.avatarUrl}
+                      alt={community.displayName}
+                      className="community-avatar"
+                    />
+                    <div className="community-basic-info">
+                      <h3 className="community-name">{community.displayName}</h3>
+                      <span className="community-tag">r/{community.name}</span>
+                    </div>
+                  </div>
 
-          {/* Communities Grid */}
-          <div className="communities-grid">
-            {sortedCommunities.map((community: Community) => (
-              <div key={community.id} className="community-card" onClick={() => handleCommunityClick(community)}>
-                <div className="community-header">
-                  <img
-                    src={community.avatarUrl}
-                    alt={community.displayName}
-                    className="community-avatar"
-                  />
-                  <div className="community-basic-info">
-                    <h3 className="community-name">{community.displayName}</h3>
-                    <span className="community-tag">r/{community.name}</span>
+                  <p className="community-description">{community.description}</p>
+
+                  <div className="community-footer">
+                    <span className="member-count">
+                      <Users size={14} />
+                      {community.memberCount.toLocaleString()} membros
+                    </span>
+                    <button className="btn-secondary" style={{ padding: '4px 12px', fontSize: '12px' }}>
+                      Ver Comunidade
+                    </button>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                <p className="community-description">{community.description}</p>
-
-                <div className="community-footer">
-                  <span className="member-count">
-                    <Users size={14} />
-                    {community.memberCount.toLocaleString()} membros
-                  </span>
-                </div>
+            {sortedCommunities.length === 0 && (
+              <div className="no-results">
+                <p>Nenhuma comunidade encontrada para "{searchQuery}"</p>
+                <button
+                  className="clear-search-button"
+                  onClick={() => setSearchQuery('')}
+                >
+                  Limpar busca
+                </button>
               </div>
-            ))}
+            )}
           </div>
 
-          {sortedCommunities.length === 0 && (
-            <div className="no-results">
-              <p>Nenhuma comunidade encontrada para "{searchQuery}"</p>
-              <button
-                className="clear-search-button"
-                onClick={() => setSearchQuery('')}
-              >
-                Limpar busca
-              </button>
+          {/* Right Sidebar */}
+          <div className="communities-right-sidebar">
+            {/* Top Communities Widget */}
+            <div className="top-communities-widget">
+              <h3 className="widget-title">Top Comunidades</h3>
+              {communities.slice(0, 5).map((community, index) => (
+                <div key={`top-${community.id}`} className="top-community-item">
+                  <span className="rank-number">{index + 1}</span>
+                  <img 
+                    src={community.avatarUrl} 
+                    alt={community.displayName} 
+                    className="community-avatar" 
+                    style={{ width: '32px', height: '32px' }}
+                  />
+                  <div className="top-community-info">
+                    <span className="top-community-name">r/{community.name}</span>
+                    <span className="top-community-members">{community.memberCount.toLocaleString()} membros</span>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+            
+            {/* Reuse Trending Section from Dashboard */}
+            <TrendingSection />
+          </div>
         </div>
       </div>
       <MobileBottomBar />

@@ -29,6 +29,58 @@
   padding-top: 80px; /* Account for fixed header */
 }
 
+/* ==================== Dashboard Layout (New) ==================== */
+.dashboard-layout {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-6) var(--space-6);
+  width: 100%;
+}
+
+.dashboard-feed-container {
+  flex: 1;
+  max-width: 600px;
+  min-width: 0;
+}
+
+.dashboard-right-sidebar-container {
+  width: 350px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 100px;
+  height: calc(100vh - 100px);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-right-sidebar-container {
+    display: none;
+  }
+  
+  .dashboard-feed-container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* Override Feed styles when inside dashboard layout */
+.dashboard-feed-container .feed {
+  padding: 0;
+  background: transparent;
+}
+
+.dashboard-feed-container .feed-layout {
+  max-width: none;
+  gap: 0;
+}
+
+.dashboard-feed-container .feed-content {
+  max-width: none;
+  margin: 0;
+}
+
 
 
 /* ==================== Feed ==================== */
