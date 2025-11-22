@@ -305,7 +305,6 @@ cd premiora-tcc
 ```bash
 cd premiora-web
 npm install
-
 # Ferramentas de desenvolvimento (no diretório raiz)
 cd ..
 npm install
