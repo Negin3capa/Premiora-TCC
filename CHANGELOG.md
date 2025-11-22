@@ -5,6 +5,37 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 22/11/25
+
+### Adicionado
+
+- **Redesign Completo da Landing Page**
+  - Nova estética premium inspirada no Patreon com tema escuro e acentos vibrantes
+  - Layouts modernos: Timeline (Como Funciona), Masonry (Depoimentos), Bento Grid (Funcionalidades), Accordion (FAQ)
+  - Animações de scroll (`fade-up`, `scale-in`) e interações refinadas
+  - Seção Hero redesenhada com tipografia de impacto e mockup 3D
+
+- **Melhorias de UX/UI**
+  - **Header**: Layout em Grid para alinhamento preciso (Logo à esquerda, Nav ao centro, Botões à direita)
+  - **Navegação**: Scroll suave (`scroll-behavior: smooth`) e links funcionais para todas as seções
+  - **Pricing**: Alinhamento corrigido (Premium ao lado do Pro) e destaque visual para o plano Pro
+  - **Features**: Bento Grid otimizado (layout 4x2 compacto sem espaços vazios)
+  - **CTA**: Nova seção de chamada para ação com gradientes e botões de alto contraste
+  - **Polimento Visual**: Glow centralizado nos botões e correção de visibilidade de texto em hover nos botões vermelhos
+
+### Alterado
+
+- **Estilos Globais**
+  - Variáveis de cor e espaçamento padronizadas em `landing-page.css`
+  - Tipografia atualizada para família Inter com novos pesos e tracking
+  - Remoção de restrições de largura (`max-width`) na Navbar para layout fluido
+
+### Corrigido
+
+- Bug visual onde o texto dos botões vermelhos (Login, CTA, Pro Plan) desaparecia no hover
+- Desalinhamento do efeito de "glow" nos botões CTA
+- Links de navegação do header quebrados (seções sem ID correspondente)
+
 ## [0.7.0] - 22/11/25
 
 ### Adicionado
