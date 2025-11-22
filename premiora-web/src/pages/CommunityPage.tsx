@@ -4,23 +4,27 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import type { Community } from '../types/community';
-import type { ContentItem } from '../types/content';
+import type { Community, UserFlair } from '../types/community';
+import type { ContentItem, SortOption, TimeRange } from '../types/content';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import Feed from '../components/content/Feed';
-import { getCommunityByName, isCommunityMember, joinCommunity, leaveCommunity } from '../utils/communityUtils';
+import { getCommunityByName, isCommunityMember, joinCommunity, leaveCommunity, getPinnedPosts, getUserCommunityFlair } from '../utils/communityUtils';
+import EditUserFlairModal from '../components/modals/EditUserFlairModal';
 import { FeedService } from '../services/content/FeedService';
 import { ContentTransformer } from '../services/content/ContentTransformer';
+import { CommunityMetricsService, type CommunityMetrics } from '../services/community/CommunityMetricsService';
+import { supabase } from '../utils/supabaseClient';
+import ContentCard from '../components/ContentCard';
 import {
   Bell,
   Pin,
   Flame,
   Sparkles,
   TrendingUp,
-  MessageCircle,
   Users,
   Calendar,
-  Tag
+  Tag,
+  MessageSquare
 } from 'lucide-react';
 import '../styles/CommunityPage.css';
 
@@ -38,6 +42,19 @@ const CommunityPage: React.FC = () => {
   const [community, setCommunity] = useState<Community | null>(null);
   const [isJoined, setIsJoined] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [pinnedPosts, setPinnedPosts] = useState<ContentItem[]>([]);
+  const [isHighlightsExpanded, setIsHighlightsExpanded] = useState(true);
+  const [sortBy, setSortBy] = useState<SortOption>('hot');
+  const [timeRange, setTimeRange] = useState<TimeRange>('all');
+  const [metrics, setMetrics] = useState<CommunityMetrics>({
+    onlineCount: 0,
+    activeToday: 0,
+    activeWeek: 0,
+    totalPosts: 0,
+    newMembersWeek: 0
+  });
+  const [isFlairModalOpen, setIsFlairModalOpen] = useState(false);
+  const [currentUserFlair, setCurrentUserFlair] = useState<UserFlair | null>(null);
 
 
 
@@ -69,7 +86,14 @@ const CommunityPage: React.FC = () => {
 
       setLoading(true);
       try {
-        const result = await FeedService.getCommunityPostsCursor(communityName, null, 10);
+        const result = await FeedService.getCommunityPostsCursor(
+          communityName, 
+          null, 
+          10, 
+          undefined, 
+          sortBy, 
+          timeRange
+        );
         const transformedItems = result.posts.map(post =>
           ContentTransformer.transformToContentItem(post)
         );
@@ -87,7 +111,75 @@ const CommunityPage: React.FC = () => {
     };
 
     loadInitialContent();
-  }, [community, communityName]);
+  }, [community, communityName, sortBy, timeRange]);
+
+  // Load pinned posts
+  useEffect(() => {
+    const loadPinnedPosts = async () => {
+      if (!communityName) return;
+      
+      try {
+        const posts = await getPinnedPosts(communityName);
+        const transformedPosts = posts.map(post => 
+          ContentTransformer.transformToContentItem(post)
+        );
+        setPinnedPosts(transformedPosts);
+      } catch (error) {
+        console.error('Erro ao carregar posts fixados:', error);
+      }
+    };
+
+    loadPinnedPosts();
+  }, [communityName]);
+
+  // Track activity and load metrics
+  useEffect(() => {
+    if (!community?.id) return;
+
+    const trackAndLoadMetrics = async () => {
+      // Track activity if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await CommunityMetricsService.trackActivity(community.id, user.id);
+      }
+
+      // Load metrics
+      const newMetrics = await CommunityMetricsService.getMetrics(community.id);
+      setMetrics(newMetrics);
+    };
+
+    trackAndLoadMetrics();
+    
+    // Refresh metrics every minute
+    const interval = setInterval(trackAndLoadMetrics, 60000);
+    return () => clearInterval(interval);
+  }, [community?.id]);
+
+  // Load user flair
+  useEffect(() => {
+    const loadUserFlair = async () => {
+      if (community?.id && isJoined) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const flair = await getUserCommunityFlair(community.id, user.id);
+          setCurrentUserFlair(flair);
+        }
+      } else {
+        setCurrentUserFlair(null);
+      }
+    };
+    loadUserFlair();
+  }, [community?.id, isJoined]);
+
+  const handleFlairUpdated = async () => {
+    if (community?.id) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const flair = await getUserCommunityFlair(community.id, user.id);
+        setCurrentUserFlair(flair);
+      }
+    }
+  };
 
   // Load more content for infinite scroll
   const loadMoreContent = useCallback(async () => {
@@ -95,7 +187,14 @@ const CommunityPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await FeedService.getCommunityPostsCursor(communityName, nextCursor, 10);
+      const result = await FeedService.getCommunityPostsCursor(
+        communityName, 
+        nextCursor, 
+        10, 
+        undefined, 
+        sortBy, 
+        timeRange
+      );
       const transformedItems = result.posts.map(post =>
         ContentTransformer.transformToContentItem(post)
       );
@@ -109,7 +208,7 @@ const CommunityPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, communityName, nextCursor]);
+  }, [loading, hasMore, communityName, nextCursor, sortBy, timeRange]);
 
   // Filter content based on search
   const filteredItems = feedItems.filter(item =>
@@ -207,33 +306,71 @@ const CommunityPage: React.FC = () => {
         <div className="community-layout">
           <div className="community-main-content">
             {/* Community Highlights */}
-            <div className="community-highlights">
-              <div className="highlights-header">
-                <span className="highlights-icon"><Pin size={16} /></span>
-                Destaques da comunidade
-                <button className="expand-button">▼</button>
+            {pinnedPosts.length > 0 && (
+              <div className="community-highlights">
+                <div 
+                  className="highlights-header"
+                  onClick={() => setIsHighlightsExpanded(!isHighlightsExpanded)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="highlights-title">
+                    <span className="highlights-icon"><Pin size={16} /></span>
+                    Destaques da comunidade
+                  </div>
+                  <button className="expand-button">
+                    {isHighlightsExpanded ? '▼' : '▲'}
+                  </button>
+                </div>
+                
+                {isHighlightsExpanded && (
+                  <div className="highlights-content">
+                    {pinnedPosts.map(post => (
+                      <div key={post.id} className="pinned-post-wrapper">
+                        <ContentCard item={post} />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              {/* Highlighted posts would go here */}
-            </div>
+            )}
 
             {/* Sort Controls */}
             <div className="sort-controls">
-              <button className="sort-button active">
+              <button 
+                className={`sort-button ${sortBy === 'hot' ? 'active' : ''}`}
+                onClick={() => setSortBy('hot')}
+              >
                 <Flame size={16} />
                 Quente
               </button>
-              <button className="sort-button">
+              <button 
+                className={`sort-button ${sortBy === 'new' ? 'active' : ''}`}
+                onClick={() => setSortBy('new')}
+              >
                 <Sparkles size={16} />
                 Novo
               </button>
-              <button className="sort-button">
+              <button 
+                className={`sort-button ${sortBy === 'top' ? 'active' : ''}`}
+                onClick={() => setSortBy('top')}
+              >
                 <TrendingUp size={16} />
                 Mais votado
               </button>
-              <button className="sort-button">
-                <MessageCircle size={16} />
-                Comentado
-              </button>
+              
+              {sortBy === 'top' && (
+                <select 
+                  className="time-range-select"
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value as TimeRange)}
+                >
+                  <option value="all">Todos os tempos</option>
+                  <option value="year">Este ano</option>
+                  <option value="month">Este mês</option>
+                  <option value="week">Esta semana</option>
+                  <option value="day">Hoje</option>
+                </select>
+              )}
             </div>
 
             {/* Posts Feed */}
@@ -268,6 +405,14 @@ const CommunityPage: React.FC = () => {
                   <span>{community.memberCount.toLocaleString()} membros</span>
                 </div>
                 <div className="stat-item">
+                  <span className="stat-icon"><MessageSquare size={14} /></span>
+                  <span>{metrics.totalPosts.toLocaleString()} posts</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-icon"><TrendingUp size={14} /></span>
+                  <span>{metrics.newMembersWeek.toLocaleString()} novos esta semana</span>
+                </div>
+                <div className="stat-item">
                   <span className="stat-icon"><Calendar size={14} /></span>
                   <span>Criada em {new Date(community.createdAt).toLocaleDateString('pt-BR')}</span>
                 </div>
@@ -275,15 +420,15 @@ const CommunityPage: React.FC = () => {
 
               <div className="community-metrics">
                 <div className="metric">
-                  <span className="metric-number">{Math.floor(community.memberCount * 0.05)}</span>
+                  <span className="metric-number">{metrics.onlineCount}</span>
                   <span className="metric-label">Online</span>
                 </div>
                 <div className="metric">
-                  <span className="metric-number">{Math.floor(community.memberCount / 30)}</span>
+                  <span className="metric-number">{metrics.activeToday}</span>
                   <span className="metric-label">Hoje</span>
                 </div>
                 <div className="metric">
-                  <span className="metric-number">{Math.floor(community.memberCount / 7)}</span>
+                  <span className="metric-number">{metrics.activeWeek}</span>
                   <span className="metric-label">Esta semana</span>
                 </div>
               </div>
@@ -294,8 +439,30 @@ const CommunityPage: React.FC = () => {
               <h4 className="sidebar-subtitle">Seu flair nesta comunidade</h4>
               <div className="user-flair-preview">
                 <span className="flair-icon"><Tag size={14} /></span>
-                <span className="flair-text">Nenhum flair definido</span>
-                <span className="flair-badge">Editar</span>
+                {currentUserFlair && currentUserFlair.flair ? (
+                  <span 
+                    className="flair-badge-preview"
+                    style={{
+                      color: currentUserFlair.flair.flairColor,
+                      backgroundColor: currentUserFlair.flair.flairBackgroundColor,
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.85rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    {currentUserFlair.flair.flairText}
+                  </span>
+                ) : (
+                  <span className="flair-text">Nenhum flair definido</span>
+                )}
+                <span 
+                  className="flair-badge" 
+                  onClick={() => setIsFlairModalOpen(true)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  Editar
+                </span>
               </div>
             </div>
 
@@ -337,6 +504,14 @@ const CommunityPage: React.FC = () => {
         </div>
       </div>
       <MobileBottomBar />
+      {community && (
+        <EditUserFlairModal 
+          isOpen={isFlairModalOpen}
+          onClose={() => setIsFlairModalOpen(false)}
+          communityId={community.id}
+          onFlairUpdated={handleFlairUpdated}
+        />
+      )}
     </div>
   );
 };
