@@ -6,9 +6,10 @@ import React, { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home, Compass, Bell, MessageCircle, Users, Building2, Settings,
-  Share2, Flag, PenTool
+  Share2, Flag, PenTool, User
 } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
+import { useAuth } from '../../hooks/useAuth';
 import { CreateContentModal, CreatePostModal, CreateVideoModal } from '../modals';
 import { getCurrentCommunityContext } from '../../utils/communityUtils';
 import type { ContentType } from '../modals/CreateContentModal';
@@ -33,6 +34,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   onReport
 }) => {
   const { openModal, closeModal, isModalOpen } = useModal();
+  const { userProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -76,24 +78,32 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
     navigate(route);
   }, [navigate]);
 
+  // Navigation items matching the main Sidebar order
   const navigationItems = [
-    { icon: <Home size={20} />, route: '/dashboard', active: location.pathname === '/dashboard' },
-    { icon: <Compass size={20} />, route: '/explore', active: location.pathname === '/explore' },
-    { icon: <Bell size={20} />, route: '/notifications', active: location.pathname === '/notifications' },
-    { icon: <MessageCircle size={20} />, route: '/messages', active: location.pathname === '/messages' },
-    { icon: <Users size={20} />, route: '/dashboard', active: false }, // TODO: Add following page
-    { icon: <Building2 size={20} />, route: '/communities', active: location.pathname === '/communities' },
+    { icon: <Home size={20} />, label: 'Home', route: '/dashboard', active: location.pathname === '/dashboard' },
+    { icon: <Compass size={20} />, label: 'Explore', route: '/explore', active: location.pathname === '/explore' },
+    { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: location.pathname === '/notifications' },
+    { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: location.pathname === '/messages' },
+    { icon: <Users size={20} />, label: 'Following', route: '/dashboard', active: false }, // TODO: Add following page
+    { icon: <Building2 size={20} />, label: 'Communities', route: '/communities', active: location.pathname === '/communities' },
     {
-      icon: <Settings size={20} />,
-      route: '/settings',
-      active: location.pathname === '/settings'
+      icon: <User size={20} />,
+      label: 'Profile',
+      route: '/profile',
+      active: location.pathname === '/profile' || location.pathname === `/u/${userProfile?.username}`
     },
+    { icon: <Settings size={20} />, label: 'Settings', route: '/settings', active: location.pathname === '/settings' },
   ];
 
   return (
     <>
       <aside className="profile-sidebar">
         <div className="profile-sidebar-content">
+          {/* Logo/Brand */}
+          <div className="profile-sidebar-header">
+            <img src="/assets/premiora-logo.png" alt="Premiora" className="profile-sidebar-logo" />
+          </div>
+
           {/* Navigation Icons */}
           <nav className="profile-sidebar-nav">
             <ul className="profile-sidebar-nav-list">
@@ -102,8 +112,8 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
                   <button
                     className={`profile-sidebar-nav-button ${item.active ? 'active' : ''}`}
                     onClick={() => handleNavigation(item.route)}
-                    aria-label={item.route.split('/')[1] || 'home'}
-                    title={item.route.split('/')[1] || 'home'}
+                    aria-label={item.label}
+                    title={item.label}
                   >
                     <span className="profile-sidebar-nav-icon">{item.icon}</span>
                   </button>

@@ -54,9 +54,6 @@ const ProfilePage: React.FC = () => {
   const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTier[]>([]);
   const [connectedCommunityId, setConnectedCommunityId] = useState<string | undefined>(undefined);
 
-  // Verificar se é o próprio perfil do usuário
-  const isOwnProfile = userProfile?.username === username;
-
   const handleShare = useCallback(() => {
     // TODO: Implementar compartilhamento do perfil
     const profileUrl = `${window.location.origin}/u/${username}`;
@@ -308,7 +305,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Main content container */}
         <div style={{
-          marginLeft: '80px', /* Consistent with default sidebar width */
+          marginLeft: '60px', /* Consistent with ProfileSidebar width */
           marginTop: '0',
           padding: '2rem 1rem',
           overflow: 'hidden',
@@ -374,15 +371,13 @@ const ProfilePage: React.FC = () => {
       color: '#DADADA',
       overflowX: 'hidden'
     }}>
-      {/* Conditional Sidebar - Full sidebar for own profile, minimal for others */}
+      {/* Conditional Sidebar - ProfileSidebar for all profile pages */}
       {/* On mobile, hamburger menu opens the full sidebar */}
       {isSidebarOpen ? (
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
-      ) : isOwnProfile ? (
-        <Sidebar />
       ) : (
         <ProfileSidebar
           username={username!}
@@ -394,7 +389,7 @@ const ProfilePage: React.FC = () => {
       {/* Global Header */}
       <Header
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        isProfileMode={!isOwnProfile}
+        isProfileMode={true}
         showProfileTabs={true}
         activeProfileTab={activeTab}
         onProfileTabChange={handleTabChange}
@@ -421,7 +416,7 @@ const ProfilePage: React.FC = () => {
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
-        marginLeft: isSidebarOpen ? '0' : (window.innerWidth <= 768 ? '0' : (isOwnProfile ? '80px' : '60px')), /* Account for sidebar width, hide on mobile */
+        marginLeft: isSidebarOpen ? '0' : (window.innerWidth <= 768 ? '0' : '60px'), /* Account for ProfileSidebar width (60px), hide on mobile */
         marginTop: ['posts', 'community', 'shop'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
         padding: window.innerWidth <= 768 ? '1rem 0.5rem' : '2rem 1rem', /* Reduce padding on mobile */
         paddingBottom: window.innerWidth <= 480 ? '80px' : undefined, /* Add padding for mobile bottom bar */

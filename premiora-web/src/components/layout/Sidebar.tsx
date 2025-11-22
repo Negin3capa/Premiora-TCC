@@ -425,7 +425,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         <div className="sidebar-content">
           {/* Logo/Brand */}
           <div className="sidebar-header">
-            <h1 className="sidebar-logo">Premiora</h1>
+            <img src="/assets/premiora-logo.png" alt="Premiora" className="sidebar-logo" />
           </div>
 
           {/* Navigation Icons */}

@@ -14,9 +14,7 @@ const Footer: React.FC = () => {
         <div className="footer-content">
           <div className="footer-brand">
             <div className="logo">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
+              <img src="/assets/premiora-logo.png" alt="Premiora" />
               <span>Premiora</span>
             </div>
             <p>A plataforma brasileira para monetização de conteúdo criativo.</p>
