@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Plus, Trash2, Check, X, Edit2 } from 'lucide-react';
+import { Plus, Trash2, Check, X, Edit2, Sparkles } from 'lucide-react';
 import type { SubscriptionTier, SubscriptionBenefit } from '../../types/creator';
 import '../../styles/SubscriptionConfig.css';
 
@@ -26,8 +27,21 @@ const SubscriptionConfig: React.FC<SubscriptionConfigProps> = ({ tiers, onChange
     setIsAdding(true);
   };
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleSaveTier = () => {
     if (!editingTier) return;
+    setError(null);
+
+    if (!editingTier.name.trim()) {
+      setError('O nome do nível é obrigatório');
+      return;
+    }
+
+    if (editingTier.price < 0) {
+      setError('O preço não pode ser negativo');
+      return;
+    }
 
     if (isAdding) {
       onChange([...tiers, editingTier]);
@@ -78,6 +92,11 @@ const SubscriptionConfig: React.FC<SubscriptionConfigProps> = ({ tiers, onChange
         </h3>
         
         <div className="form-content">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
           <div className="form-group">
             <label className="form-label">Nome do Nível</label>
             <input
@@ -128,6 +147,7 @@ const SubscriptionConfig: React.FC<SubscriptionConfigProps> = ({ tiers, onChange
               <button
                 onClick={handleAddBenefit}
                 className="add-benefit-btn"
+                aria-label="Adicionar novo benefício"
               >
                 <Plus size={14} /> Adicionar
               </button>
@@ -145,6 +165,7 @@ const SubscriptionConfig: React.FC<SubscriptionConfigProps> = ({ tiers, onChange
                   <button
                     onClick={() => handleRemoveBenefit(benefit.id)}
                     className="remove-benefit-btn"
+                    aria-label="Remover benefício"
                   >
                     <X size={16} />
                   </button>
@@ -175,64 +196,69 @@ const SubscriptionConfig: React.FC<SubscriptionConfigProps> = ({ tiers, onChange
 
   return (
     <div className="subscription-config">
-      <div className="subscription-grid">
-        {tiers.map(tier => (
-          <div 
-            key={tier.id} 
-            className="tier-card"
-            style={{ borderColor: tier.color }}
-          >
-            <div className="tier-color-strip" style={{ backgroundColor: tier.color }} />
-            
-            <div className="tier-actions">
-              <button
-                onClick={() => setEditingTier(tier)}
-                className="action-btn edit"
-                title="Editar"
-              >
-                <Edit2 size={14} />
-              </button>
-              <button
-                onClick={() => handleDeleteTier(tier.id)}
-                className="action-btn delete"
-                title="Excluir"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-
-            <h4 className="tier-name">{tier.name}</h4>
-            <div className="tier-price">
-              R$ {tier.price.toFixed(2)}<span className="tier-period">/mês</span>
-            </div>
-            <p className="tier-description">{tier.description}</p>
-            
-            <div className="tier-benefits">
-              {tier.benefits.slice(0, 3).map(benefit => (
-                <div key={benefit.id} className="benefit-item">
-                  <Check size={14} className="benefit-icon" />
-                  <span className="truncate">{benefit.description}</span>
-                </div>
-              ))}
-              {tier.benefits.length > 3 && (
-                <div className="more-benefits">
-                  + {tier.benefits.length - 3} benefícios
-                </div>
-              )}
-            </div>
+      {tiers.length === 0 ? (
+        <div className="empty-tiers-state">
+          <div className="empty-icon-wrapper">
+            <Sparkles size={48} className="text-yellow-500" />
           </div>
-        ))}
-
-        <button
-          onClick={handleAddTier}
-          className="add-tier-card"
-        >
-          <div className="add-icon-wrapper">
-            <Plus size={24} />
-          </div>
-          <span className="add-text">Adicionar Nível</span>
-        </button>
-      </div>
+          <h3>Comece a Monetizar</h3>
+          <p>Crie níveis de assinatura para oferecer benefícios exclusivos aos seus seguidores.</p>
+          <button onClick={handleAddTier} className="btn-primary-large" aria-label="Criar primeiro nível de assinatura">
+            <Plus size={20} />
+            Criar Primeiro Nível
+          </button>
+        </div>
+      ) : (
+        <div className="subscription-grid">
+          {tiers.map(tier => (
+            <div key={tier.id} className="tier-card" style={{ borderColor: tier.color }}>
+              <div className="tier-header" style={{ backgroundColor: tier.color }}>
+                <h4 className="tier-name">{tier.name}</h4>
+                <div className="tier-price">
+                  <span className="currency">R$</span>
+                  <span className="amount">{tier.price.toFixed(2)}</span>
+                  <span className="period">/mês</span>
+                </div>
+              </div>
+              
+              <div className="tier-body">
+                <p className="tier-description">{tier.description || 'Sem descrição'}</p>
+                
+                <div className="tier-benefits">
+                  <h5>Benefícios:</h5>
+                  {tier.benefits.length > 0 ? (
+                    <ul>
+                      {tier.benefits.map(benefit => (
+                        <li key={benefit.id}>
+                          <Check size={14} />
+                          <span>{benefit.description}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="no-benefits">Nenhum benefício adicionado</p>
+                  )}
+                </div>
+                
+                <div className="tier-actions">
+                  <button onClick={() => setEditingTier(tier)} className="btn-edit" aria-label={`Editar nível ${tier.name}`}>
+                    <Edit2 size={16} /> Editar
+                  </button>
+                  <button onClick={() => handleDeleteTier(tier.id)} className="btn-delete" aria-label={`Excluir nível ${tier.name}`}>
+                    <Trash2 size={16} /> Excluir
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button onClick={handleAddTier} className="add-tier-card" aria-label="Adicionar novo nível de assinatura">
+            <div className="add-icon-wrapper">
+              <Plus size={24} />
+            </div>
+            <span className="add-text">Adicionar Nível</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

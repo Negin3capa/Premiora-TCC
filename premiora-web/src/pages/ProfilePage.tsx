@@ -2,12 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ProfileBanner, FeaturedPost, RecentPosts, PostsTab, CommunityTab, ShopTab } from '../components/profile';
 import { Sidebar, Header, ProfileSidebar } from '../components/layout';
+import SubscriptionModal from '../components/profile/SubscriptionModal';
 import { useAuth } from '../hooks/useAuth';
 import { useProfileTabs } from '../hooks/useProfileTabs';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
+import { CreatorChannelService } from '../services/content/CreatorChannelService';
 import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
 import type { CreatorProfile, Post, PostMedia } from '../types/profile';
+import type { SubscriptionTier } from '../types/creator';
 import '../styles/globals.css';
 
 // Cache global para prefetch - acessível via window
@@ -45,6 +48,11 @@ const ProfilePage: React.FC = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Creator Channel State
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTier[]>([]);
+  const [connectedCommunityId, setConnectedCommunityId] = useState<string | undefined>(undefined);
 
   // Verificar se é o próprio perfil do usuário
   const isOwnProfile = userProfile?.username === username;
@@ -88,6 +96,11 @@ const ProfilePage: React.FC = () => {
         setFeaturedPost(cachedData.featuredPost);
         setProfileLoading(false);
         setPostsLoading(false);
+        
+        // Ainda precisamos buscar os dados do canal, pois não estão no cache
+        if (cachedData.profile.user?.id) {
+          fetchChannelData(cachedData.profile.user.id);
+        }
         return;
       }
 
@@ -103,6 +116,11 @@ const ProfilePage: React.FC = () => {
 
       setCreatorProfile(profileData);
       setProfileLoading(false); // Perfil carregado, mostrar layout
+      
+      // Buscar dados do canal (tiers e comunidade)
+      if (profileData.user?.id) {
+        fetchChannelData(profileData.user.id);
+      }
 
       // Buscar posts do creator em paralelo com o processamento
       const postsPromise = FeedService.getCreatorPosts(profileData.user.id, 1, 20, userProfile?.id);
@@ -161,6 +179,22 @@ const ProfilePage: React.FC = () => {
       setPostsLoading(false);
     }
   }, [username, userProfile?.id]);
+
+  // Função separada para buscar dados do canal
+  const fetchChannelData = async (userId: string) => {
+    try {
+      const channelConfig = await CreatorChannelService.getCreatorChannel(userId);
+      if (channelConfig) {
+        setSubscriptionTiers(channelConfig.subscriptionTiers);
+        setConnectedCommunityId(channelConfig.connectedCommunityId);
+      } else {
+        setSubscriptionTiers([]);
+        setConnectedCommunityId(undefined);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados do canal:', err);
+    }
+  };
 
   // Buscar dados do perfil quando username muda ou quando volta de edição
   useEffect(() => {
@@ -223,6 +257,12 @@ const ProfilePage: React.FC = () => {
     const comments = post.comments || 0;
 
     return (views * 1) + (likes * 2) + (comments * 3);
+  };
+
+  const handleSelectTier = (tierId: string) => {
+    console.log('Selected tier:', tierId);
+    // Aqui implementaremos o fluxo de checkout futuramente
+    setIsSubscriptionModalOpen(false);
   };
 
   // Se ainda está carregando o perfil, mostrar skeleton
@@ -371,7 +411,11 @@ const ProfilePage: React.FC = () => {
           marginRight: '-50vw',
           marginTop: '64px', /* Account for header height */
         }}>
-          <ProfileBanner profile={creatorProfile} userId={creatorProfile.user?.id} />
+          <ProfileBanner 
+            profile={creatorProfile} 
+            userId={creatorProfile.user?.id}
+            onBecomeMember={() => setIsSubscriptionModalOpen(true)}
+          />
         </div>
       )}
 
@@ -420,7 +464,10 @@ const ProfilePage: React.FC = () => {
           )}
 
           {activeTab === 'community' && creatorProfile && (
-            <CommunityTab creatorProfile={creatorProfile} />
+            <CommunityTab 
+              creatorProfile={creatorProfile} 
+              connectedCommunityId={connectedCommunityId}
+            />
           )}
 
           {activeTab === 'shop' && (
@@ -428,6 +475,15 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+        tiers={subscriptionTiers}
+        creatorName={creatorProfile.user?.name || creatorProfile.username || 'Criador'}
+        onSelectTier={handleSelectTier}
+      />
     </div>
   );
 };

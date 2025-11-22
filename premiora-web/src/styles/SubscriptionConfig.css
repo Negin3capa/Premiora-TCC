@@ -93,19 +93,6 @@
 .tier-period {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  font-weight: 400;
-}
-
-.tier-description {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
-.tier-benefits {
-  display: flex;
-  flex-direction: column;
   gap: 0.5rem;
 }
 
@@ -151,35 +138,6 @@
 }
 
 .add-tier-card:hover {
-  border-color: var(--color-primary);
-  background: rgba(59, 130, 246, 0.05);
-  color: var(--color-primary);
-}
-
-.add-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-}
-
-.add-tier-card:hover .add-icon-wrapper {
-  background: rgba(59, 130, 246, 0.1);
-  transform: scale(1.1);
-}
-
-.add-text {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-/* Edit Form */
-.edit-form-container {
-  background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 2rem;

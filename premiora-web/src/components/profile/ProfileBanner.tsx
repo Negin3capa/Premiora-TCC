@@ -17,9 +17,10 @@ import styles from '../../styles/ProfileBanner.module.css';
 interface ProfileBannerProps {
   profile: CreatorProfile;
   userId?: string;
+  onBecomeMember?: () => void;
 }
 
-export const ProfileBanner: React.FC<ProfileBannerProps> = ({ profile, userId }) => {
+export const ProfileBanner: React.FC<ProfileBannerProps> = ({ profile, userId, onBecomeMember }) => {
   const { userProfile } = useAuth();
   const navigate = useNavigate();
 
@@ -35,8 +36,9 @@ export const ProfileBanner: React.FC<ProfileBannerProps> = ({ profile, userId })
   };
 
   const handleBecomeMemberClick = () => {
-    // Lógica para "Become a member" - pode ser implementada futuramente
-    console.log('Become a member clicked');
+    if (onBecomeMember) {
+      onBecomeMember();
+    }
   };
 
   const handleFollowClick = async () => {

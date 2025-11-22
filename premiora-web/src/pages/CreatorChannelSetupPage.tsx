@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Sidebar, Header } from '../components/layout';
 import MobileBottomBar from '../components/layout/MobileBottomBar';
 import SubscriptionConfig from '../components/creator/SubscriptionConfig';
+import SubscriptionConfigSkeleton from '../components/creator/SubscriptionConfigSkeleton';
 import CommunityConnection from '../components/creator/CommunityConnection';
 import type { SubscriptionTier, CreatorChannelConfig } from '../types/creator';
 import { CreatorChannelService } from '../services/content/CreatorChannelService';
@@ -18,43 +19,72 @@ const CreatorChannelSetupPage: React.FC = () => {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
-  const [connectedCommunityId, setConnectedCommunityId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Carregar dados iniciais
-  useEffect(() => {
-    const loadChannelData = async () => {
-      if (!userProfile?.id) return;
+  const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
+  const [connectedCommunityId, setConnectedCommunityId] = useState<string | null>(null);
 
+  // State for unsaved changes tracking
+  const [initialTiers, setInitialTiers] = useState<SubscriptionTier[]>([]);
+  const [initialConnectedCommunityId, setInitialConnectedCommunityId] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    const fetchChannelConfig = async () => {
+      if (!userProfile?.id) return;
+      
       try {
         setLoading(true);
-        const channel = await CreatorChannelService.getCreatorChannel(userProfile.id);
+        const config = await CreatorChannelService.getCreatorChannel(userProfile.id);
         
-        if (channel) {
-          setTiers(channel.subscriptionTiers);
-          setConnectedCommunityId(channel.connectedCommunityId || null);
+        if (config) {
+          setTiers(config.subscriptionTiers || []);
+          setConnectedCommunityId(config.connectedCommunityId || null);
+          
+          // Set initial state for change tracking
+          setInitialTiers(config.subscriptionTiers || []);
+          setInitialConnectedCommunityId(config.connectedCommunityId || null);
         }
       } catch (err) {
-        console.error('Erro ao carregar dados do canal:', err);
-        setError('Falha ao carregar configurações. Tente novamente.');
+        console.error('Error fetching channel config:', err);
+        setError('Falha ao carregar configurações do canal.');
       } finally {
         setLoading(false);
       }
     };
 
-    loadChannelData();
+    fetchChannelConfig();
   }, [userProfile?.id]);
+
+  // Check for unsaved changes
+  useEffect(() => {
+    const tiersChanged = JSON.stringify(tiers) !== JSON.stringify(initialTiers);
+    const communityChanged = connectedCommunityId !== initialConnectedCommunityId;
+    setHasUnsavedChanges(tiersChanged || communityChanged);
+  }, [tiers, connectedCommunityId, initialTiers, initialConnectedCommunityId]);
+
+  // Warn on browser refresh/close
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const handleSave = async () => {
     if (!userProfile?.id) return;
-
-    setSaving(true);
-    setError(null);
-    setSuccessMessage(null);
-
+    
     try {
+      setSaving(true);
+      setError(null);
+      setSuccessMessage(null);
+
       const config: CreatorChannelConfig = {
         id: userProfile.id,
         userId: userProfile.id,
@@ -63,17 +93,19 @@ const CreatorChannelSetupPage: React.FC = () => {
         isSetupCompleted: true
       };
 
-      const success = await CreatorChannelService.saveCreatorChannel(userProfile.id, config);
-
-      if (success) {
-        setSuccessMessage('Alterações salvas com sucesso!');
-        // Limpar mensagem de sucesso após 3 segundos
-        setTimeout(() => setSuccessMessage(null), 3000);
-      } else {
-        setError('Erro ao salvar alterações. Tente novamente.');
-      }
+      await CreatorChannelService.saveCreatorChannel(userProfile.id, config);
+      
+      // Update initial state after successful save
+      setInitialTiers(tiers);
+      setInitialConnectedCommunityId(connectedCommunityId);
+      setHasUnsavedChanges(false);
+      
+      setSuccessMessage('Configurações salvas com sucesso!');
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      console.error('Erro ao salvar:', err);
+      console.error('Error saving channel config:', err);
       setError('Ocorreu um erro inesperado ao salvar.');
     } finally {
       setSaving(false);
@@ -103,6 +135,7 @@ const CreatorChannelSetupPage: React.FC = () => {
               <button 
                 onClick={() => navigate(-1)}
                 className="back-button"
+                aria-label="Voltar para a página anterior"
               >
                 <ArrowLeft size={16} /> Voltar
               </button>
@@ -119,6 +152,8 @@ const CreatorChannelSetupPage: React.FC = () => {
               onClick={handleSave}
               disabled={saving}
               className="save-button"
+              aria-label={saving ? "Salvando alterações" : "Salvar alterações"}
+              aria-busy={saving}
             >
               {saving ? (
                 <>
@@ -151,6 +186,8 @@ const CreatorChannelSetupPage: React.FC = () => {
             <button
               onClick={() => setActiveTab('subscriptions')}
               className={`tab-button ${activeTab === 'subscriptions' ? 'active' : ''}`}
+              aria-selected={activeTab === 'subscriptions'}
+              role="tab"
             >
               Assinaturas e Níveis
               {activeTab === 'subscriptions' && <div className="tab-indicator" />}
@@ -158,11 +195,15 @@ const CreatorChannelSetupPage: React.FC = () => {
             <button
               onClick={() => setActiveTab('community')}
               className={`tab-button ${activeTab === 'community' ? 'active' : ''}`}
+              aria-selected={activeTab === 'community'}
+              role="tab"
             >
               Comunidade Conectada
               {activeTab === 'community' && <div className="tab-indicator" />}
             </button>
           </div>
+
+
 
           {/* Content */}
           <div className="setup-content">
@@ -175,10 +216,14 @@ const CreatorChannelSetupPage: React.FC = () => {
                     Você pode definir preços, nomes e benefícios personalizados para cada nível, similar ao Patreon.
                   </p>
                 </div>
-                <SubscriptionConfig 
-                  tiers={tiers} 
-                  onChange={setTiers} 
-                />
+                {loading ? (
+                  <SubscriptionConfigSkeleton />
+                ) : (
+                  <SubscriptionConfig 
+                    tiers={tiers} 
+                    onChange={setTiers} 
+                  />
+                )}
               </div>
             ) : (
               <div className="animate-fadeIn">

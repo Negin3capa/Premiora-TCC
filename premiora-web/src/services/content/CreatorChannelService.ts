@@ -242,4 +242,36 @@ export class CreatorChannelService {
             return null;
         }
     }
+
+    /**
+     * Busca todas as comunidades onde o usuário é dono/criador
+     */
+    static async getUserCommunities(userId: string): Promise<Community[]> {
+        try {
+            const { data, error } = await supabase
+                .from("communities")
+                .select("*")
+                .eq("creator_id", userId)
+                .order("created_at", { ascending: false });
+
+            if (error) throw error;
+
+            return (data || []).map((community) => ({
+                id: community.id,
+                name: community.name,
+                displayName: community.display_name,
+                description: community.description,
+                bannerUrl: community.cover_image_url,
+                avatarUrl: community.avatar_url,
+                creatorId: community.creator_id,
+                isPrivate: community.is_private,
+                memberCount: community.member_count,
+                createdAt: community.created_at,
+                updatedAt: community.updated_at,
+            }));
+        } catch (err) {
+            console.error("Error fetching user communities:", err);
+            return [];
+        }
+    }
 }
