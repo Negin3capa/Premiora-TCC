@@ -5,6 +5,68 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 22/11/25
+
+### Adicionado
+
+- **Sistema Completo de Canal de Criador**
+  - Página de configuração do canal de criador (`CreatorChannelSetupPage`) com interface intuitiva
+  - Componente `SubscriptionConfig` para gerenciamento de níveis de assinatura (tiers)
+  - Componente `CommunityConnection` para vincular comunidades ao canal
+  - Skeleton loaders para melhor experiência durante carregamento
+  - Sistema de avisos de alterações não salvas antes de sair da página
+  - Estados vazios (empty states) com call-to-action quando não há tiers configurados
+
+- **Integração com Página de Perfil**
+  - Modal de assinatura (`SubscriptionModal`) exibindo tiers disponíveis
+  - Botão "Become a member" no banner do perfil
+  - Aba Community conectada ao canal do criador
+  - Serviço `CreatorChannelService` para operações CRUD de canais
+
+- **Melhorias de UI/UX**
+  - Logo Premiora adicionado em todos os sidebars (Sidebar, ProfileSidebar)
+  - ProfileSidebar agora usado consistentemente em todas as páginas de perfil
+  - Navegação de tabs consistente entre perfil próprio e de terceiros
+  - Ícones de navegação alinhados e ordenados entre Sidebar e ProfileSidebar
+  - Melhorias de acessibilidade com `aria-label` em botões e navegação por teclado
+
+- **Componentes de Layout**
+  - `SubscriptionConfigSkeleton` para loading states
+  - Estilos CSS dedicados para todos os novos componentes
+  - Suporte responsivo para mobile e desktop
+
+### Alterado
+
+- **ProfilePage**
+  - Agora usa ProfileSidebar para perfil próprio (anteriormente usava Sidebar completo)
+  - Header tabs exibidos de forma consistente em todos os perfis
+  - Margens ajustadas para largura do ProfileSidebar (60px)
+
+- **Sidebar e ProfileSidebar**
+  - Logo Premiora substituiu texto/SVG em todos os sidebars
+  - Ícones redimensionados para manter proporções adequadas
+  - Ordem de navegação padronizada: Home, Explore, Notifications, Messages, Following, Communities, Profile, Settings
+
+- **Estilos CSS**
+  - Novos estilos para logo em `Sidebar.css`, `ProfileSidebar.css`, `login.css`, `landing-page.css`
+  - Estilos para `SubscriptionConfig.css` com suporte a skeleton e empty states
+  - Estilos para `SubscriptionModal.css` com design premium
+
+### Corrigido
+
+- Erros de tipo TypeScript em `CreatorChannelSetupPage`
+- Estrutura de objeto `CreatorChannelConfig` alinhada com interface
+- Chamada `saveCreatorChannel` com argumento `creatorId` correto
+- Código duplicado removido em `SubscriptionConfig.tsx`
+- Variável `isOwnProfile` não utilizada removida de `ProfilePage.tsx`
+
+### Técnico
+
+- Migração de banco de dados para sistema de canais de criador
+- Políticas RLS (Row Level Security) para tabelas de canais
+- Funções do banco para gerenciamento de benefícios de assinatura
+- Build verificado e passando sem erros
+
 ## [0.6.0] - 21/11/25
 
 ### Corrigido
