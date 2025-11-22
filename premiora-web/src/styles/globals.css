@@ -5,6 +5,7 @@
 
 /* Variáveis de Design System */
 :root {
+  scroll-behavior: smooth;
   /* Cores Principais */
   --color-primary: #FF424D;
   --color-primary-hover: #E63946;

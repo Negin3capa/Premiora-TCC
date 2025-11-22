@@ -2,29 +2,42 @@
  * Componente Header da Landing Page
  * Contém navegação e botões de autenticação
  */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 /**
  * Componente Header com navegação e botões de autenticação
  */
 const Header: React.FC = () => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="header">
+    <header className={`header ${scrolled ? 'scrolled' : ''}`}>
       <nav className="navbar">
         <div className="navbar-content">
-          <div className="logo">
+          <a href="/" className="logo">
             <img src="/assets/premiora-logo.png" alt="Premiora" />
             <span>Premiora</span>
-          </div>
+          </a>
+          
           <div className="nav-links">
             <a href="#features">Funcionalidades</a>
             <a href="#how-it-works">Como Funciona</a>
             <a href="#creators">Criadores</a>
             <a href="#pricing">Preços</a>
           </div>
+          
           <div className="auth-buttons">
             <a href="/login" className="login-btn">Entrar</a>
-            <a href="/login" className="cta-button-small">Começar</a>
+            <a href="/register" className="cta-button-small">Começar</a>
           </div>
         </div>
       </nav>
