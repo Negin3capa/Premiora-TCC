@@ -29,7 +29,9 @@
 .profile-sidebar-header {
   width: 100%;
   padding-bottom: var(--space-3);
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-bottom: 1px solid #1A1A1A;
   margin-bottom: var(--space-2);
 }

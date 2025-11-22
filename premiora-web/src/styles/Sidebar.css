@@ -33,7 +33,10 @@
 .sidebar-header {
   width: 100%;
   padding: 0px 16px 20px 16px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
   border-bottom: 1px solid #1A1A1A;
   margin-bottom: 20px;
 }
@@ -42,6 +45,13 @@
   height: 32px;
   width: auto;
   object-fit: contain;
+}
+
+.sidebar-brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
 }
 
 /* Navigation */

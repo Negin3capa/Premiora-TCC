@@ -1,50 +1,42 @@
 /**
  * Componente Features da Landing Page
- * Mostra as principais funcionalidades da plataforma
+ * Bento Grid com as principais funcionalidades
  */
 import React from 'react';
 
-/**
- * Componente Features com grid de funcionalidades
- */
 const Features: React.FC = () => {
   return (
     <section id="features" className="features">
       <div className="container">
         <div className="features-header">
-          <h2>Tudo que você precisa para monetizar</h2>
-          <p>Ferramentas poderosas para criar uma relação sustentável com seus fãs.</p>
+          <h2>Tudo que você precisa</h2>
+          <p>Ferramentas poderosas para sua independência criativa.</p>
         </div>
         <div className="features-grid">
           <div className="feature-card">
-            <div className="feature-icon">💳</div>
-            <h3>Pagamentos Automáticos</h3>
-            <p>Receba pagamentos mensais automaticamente via PIX com taxas mínimas.</p>
+            <div className="feature-icon">🎨</div>
+            <h3>Liberdade Criativa Total</h3>
+            <p>Publique o que quiser, quando quiser. Sem censura de algoritmos ou restrições de formato. Seu espaço, suas regras.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🔒</div>
-            <h3>Conteúdo Exclusivo</h3>
-            <p>Crie posts exclusivos e tiers personalizados para diferentes níveis de apoio.</p>
+            <div className="feature-icon">💳</div>
+            <h3>Pagamentos Instantâneos</h3>
+            <p>Receba via PIX direto na sua conta. Sem espera de 30 dias.</p>
           </div>
           <div className="feature-card">
             <div className="feature-icon">📊</div>
-            <h3>Análises Detalhadas</h3>
-            <p>Acompanhe seu crescimento com métricas completas sobre engajamento e receita.</p>
+            <h3>Analytics</h3>
+            <p>Dados reais sobre seu público.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">💬</div>
-            <h3>Comunicação Direta</h3>
-            <p>Interaja diretamente com seus membros através de chat privado e comentários.</p>
+            <div className="feature-icon">🔒</div>
+            <h3>Exclusividade</h3>
+            <p>Conteúdo só para fãs.</p>
           </div>
           <div className="feature-card">
-            <div className="feature-icon">🎨</div>
-            <h3>Personalização Total</h3>
-            <p>Customize sua página completamente para refletir sua marca pessoal.</p>
-          </div>
-          <div className="feature-card">
-            <div className="feature-icon">🌐</div>
-            <h3>Integração com Redes</h3>
-            <p>Conecte com suas redes sociais e importe conteúdo automaticamente.</p>
+            <div className="feature-icon">🤝</div>
+            <h3>Comunidade Real</h3>
+            <p>Ferramentas de engajamento direto. Enquetes, comentários exclusivos e mensagens diretas para seus maiores apoiadores.</p>
           </div>
         </div>
       </div>

@@ -1,32 +1,41 @@
 /**
  * Componente How It Works da Landing Page
- * Explica o processo de funcionamento da plataforma
+ * Layout Timeline vertical
  */
 import React from 'react';
 
-/**
- * Componente How It Works com os passos do processo
- */
 const HowItWorks: React.FC = () => {
   return (
     <section id="how-it-works" className="how-it-works">
       <div className="container">
-        <h2>Como funciona</h2>
+        <div className="features-header">
+          <h2>Sua jornada começa aqui</h2>
+          <p>Três passos simples para sua independência financeira.</p>
+        </div>
+        
         <div className="steps-grid">
           <div className="step">
             <div className="step-number">1</div>
-            <h3>Crie seu perfil</h3>
-            <p>Configure sua página com seu conteúdo, metas e benefícios exclusivos para seus membros.</p>
+            <div className="step-content">
+              <h3>Crie sua Página</h3>
+              <p>Personalize seu perfil com sua marca, bio e links. É sua casa digital, sem algoritmos para atrapalhar.</p>
+            </div>
           </div>
+          
           <div className="step">
             <div className="step-number">2</div>
-            <h3>Engaje sua comunidade</h3>
-            <p>Publique conteúdo exclusivo, atualizações e interaja diretamente com seus apoiadores.</p>
+            <div className="step-content">
+              <h3>Defina seus Planos</h3>
+              <p>Crie níveis de assinatura (Tiers) com benefícios exclusivos. Você decide o valor e o que entregar.</p>
+            </div>
           </div>
+          
           <div className="step">
             <div className="step-number">3</div>
-            <h3>Receba apoio mensal</h3>
-            <p>Seus membros contribuem mensalmente e você recebe pagamentos diretamente via PIX.</p>
+            <div className="step-content">
+              <h3>Receba Mensalmente</h3>
+              <p>Seus fãs assinam e você recebe pagamentos recorrentes via PIX. Previsibilidade para sua carreira.</p>
+            </div>
           </div>
         </div>
       </div>
