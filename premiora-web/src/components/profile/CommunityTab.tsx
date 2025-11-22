@@ -12,13 +12,15 @@ import '../../styles/CommunityTab.css';
 interface CommunityTabProps {
   /** Perfil do criador */
   creatorProfile: CreatorProfile;
+  /** ID da comunidade conectada (opcional) */
+  connectedCommunityId?: string;
 }
 
 /**
  * Componente CommunityTab - Aba de comunidade do perfil
  * Exibe a comunidade do criador caso ele tenha uma
  */
-const CommunityTab: React.FC<CommunityTabProps> = ({ creatorProfile }) => {
+const CommunityTab: React.FC<CommunityTabProps> = ({ creatorProfile, connectedCommunityId }) => {
   const navigate = useNavigate();
   const [community, setCommunity] = useState<Community | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,16 +40,20 @@ const CommunityTab: React.FC<CommunityTabProps> = ({ creatorProfile }) => {
         setLoading(true);
         setError(null);
 
-        // Buscar comunidade do criador diretamente no Supabase
-        const { data, error: communityError } = await supabase
-          .from('communities')
-          .select('*')
-          .eq('creator_id', creatorProfile.user.id)
-          .single();
+        let query = supabase.from('communities').select('*');
+
+        // Se tiver ID conectado, busca por ele. Senão, busca por creator_id
+        if (connectedCommunityId) {
+          query = query.eq('id', connectedCommunityId);
+        } else {
+          query = query.eq('creator_id', creatorProfile.user.id);
+        }
+
+        const { data, error: communityError } = await query.single();
 
         if (communityError) {
           if (communityError.code === 'PGRST116') {
-            // Comunidade não encontrada - criador não tem comunidade
+            // Comunidade não encontrada
             setCommunity(null);
           } else {
             throw communityError;
@@ -78,7 +84,7 @@ const CommunityTab: React.FC<CommunityTabProps> = ({ creatorProfile }) => {
     };
 
     fetchCommunity();
-  }, [creatorProfile.user?.id]);
+  }, [creatorProfile.user?.id, connectedCommunityId]);
 
   /**
    * Handler para navegar para a página da comunidade

@@ -39,11 +39,9 @@
 }
 
 .sidebar-logo {
-  font-size: 20px;
-  font-weight: 700;
-  color: #FFFFFF;
-  margin: 0;
-  letter-spacing: -0.5px;
+  height: 32px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Navigation */

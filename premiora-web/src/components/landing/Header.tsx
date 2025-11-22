@@ -13,9 +13,7 @@ const Header: React.FC = () => {
       <nav className="navbar">
         <div className="navbar-content">
           <div className="logo">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+            <img src="/assets/premiora-logo.png" alt="Premiora" />
             <span>Premiora</span>
           </div>
           <div className="nav-links">

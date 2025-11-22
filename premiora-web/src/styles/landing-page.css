@@ -45,10 +45,10 @@
   text-decoration: none;
 }
 
-.logo svg {
-  width: 32px;
+.logo img {
   height: 32px;
-  color: var(--color-primary);
+  width: auto;
+  object-fit: contain;
 }
 
 .nav-links {

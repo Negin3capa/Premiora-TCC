@@ -45,6 +45,7 @@ const CreateCommunityPage = React.lazy(() => import('./pages/CreateCommunityPage
 const ExplorePage = React.lazy(() => import('./pages/ExplorePage'));
 const MobileSearchPage = React.lazy(() => import('./pages/MobileSearchPage'));
 const PostViewPage = React.lazy(() => import('./pages/PostViewPage'));
+const CreatorChannelSetupPage = React.lazy(() => import('./pages/CreatorChannelSetupPage'));
 
 /**
  * Componente de loading para páginas em lazy loading
@@ -303,6 +304,18 @@ const App: React.FC = () => {
             <ProtectedRoute>
               <ProtectedLayout>
                 <ProfilePage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Setup do Canal de Criador (apenas para autenticados) */}
+        <Route
+          path="/creator/setup"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <CreatorChannelSetupPage />
               </ProtectedLayout>
             </ProtectedRoute>
           }
