@@ -53,10 +53,18 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ results, loading, visib
               onClick={() => handleNavigate(`/u/${user.username}`)}
             >
               <div className="item-icon">
-                <User size={18} />
+                {user.avatar_url ? (
+                  <img 
+                    src={user.avatar_url} 
+                    alt={user.name || user.username} 
+                    className="dropdown-avatar"
+                  />
+                ) : (
+                  <User size={18} />
+                )}
               </div>
               <div className="item-info">
-                <div className="item-name">{user.name}</div>
+                <div className="item-name">{user.name || user.username}</div>
                 <div className="item-subtext">@{user.username}</div>
               </div>
             </div>
@@ -74,7 +82,15 @@ const SearchDropdown: React.FC<SearchDropdownProps> = ({ results, loading, visib
               onClick={() => handleNavigate(`/r/${community.name}`)}
             >
               <div className="item-icon">
-                <Users size={18} />
+                {community.avatarUrl ? (
+                  <img 
+                    src={community.avatarUrl} 
+                    alt={`r/${community.name}`} 
+                    className="dropdown-avatar"
+                  />
+                ) : (
+                  <Users size={18} />
+                )}
               </div>
               <div className="item-info">
                 <div className="item-name">r/{community.name}</div>

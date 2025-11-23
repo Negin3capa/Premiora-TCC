@@ -24,23 +24,88 @@ export class SearchService {
       return [];
     }
 
-    // Usando cliente padrão (respeita RLS)
-    const { data, error } = await supabase
-      .from("users")
-      .select("id, name, username, avatar_url, profile_setup_completed")
-      .or(
-        `name.ilike.%${query.toLowerCase()}%,username.ilike.%${query.toLowerCase()}%`,
-      )
-      .eq("profile_setup_completed", true) // Apenas perfis completos
-      .order("name")
-      .limit(limit);
+    try {
+      // 1. Buscar na tabela users (name ou username)
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select("id")
+        .or(
+          `name.ilike.%${query.toLowerCase()}%,username.ilike.%${query.toLowerCase()}%`,
+        )
+        .eq("profile_setup_completed", true)
+        .limit(limit);
 
-    if (error) {
-      console.error("Erro ao buscar usuários:", error);
+      if (usersError) {
+        console.error("Erro ao buscar usuários (users table):", usersError);
+      }
+
+      // 2. Buscar na tabela creators (display_name)
+      const { data: creatorsData, error: creatorsError } = await supabase
+        .from("creators")
+        .select("id")
+        .ilike("display_name", `%${query}%`)
+        .limit(limit);
+
+      if (creatorsError) {
+        console.error("Erro ao buscar creators (creators table):", creatorsError);
+        // Não falhar se creators table não for acessível (pode ser restrito)
+      }
+
+      // 3. Combinar IDs únicos
+      const userIds = new Set<string>();
+      if (usersData) usersData.forEach((u) => userIds.add(u.id));
+      if (creatorsData) creatorsData.forEach((c) => userIds.add(c.id));
+
+      if (userIds.size === 0) {
+        return [];
+      }
+
+      const uniqueIds = Array.from(userIds).slice(0, limit);
+
+      // 4. Buscar detalhes completos dos usuários
+      const { data: finalUsers, error: finalError } = await supabase
+        .from("users")
+        .select("id, name, username, avatar_url, profile_setup_completed")
+        .in("id", uniqueIds);
+
+      if (finalError) {
+        console.error("Erro ao buscar detalhes finais dos usuários:", finalError);
+        return [];
+      }
+
+      // 5. Buscar display_name atualizado dos creators para esses usuários
+      // Isso garante que mostremos o nome correto mesmo se users.name estiver desatualizado
+      const { data: finalCreators, error: finalCreatorsError } = await supabase
+        .from("creators")
+        .select("id, display_name")
+        .in("id", uniqueIds);
+        
+      if (finalCreatorsError) {
+        console.error("Erro ao buscar detalhes finais dos creators:", finalCreatorsError);
+      }
+      
+      // Criar mapa de creators para lookup rápido
+      const creatorsMap = new Map();
+      if (finalCreators) {
+        finalCreators.forEach(c => creatorsMap.set(c.id, c));
+      }
+
+      // 6. Mesclar dados e retornar
+      return (finalUsers || []).map(user => {
+        const creator = creatorsMap.get(user.id);
+        // Preferir display_name do creator se existir, senão usar name do user
+        const displayName = creator?.display_name || user.name;
+        
+        return {
+          ...user,
+          name: displayName
+        };
+      });
+
+    } catch (err) {
+      console.error("Erro geral na busca de usuários:", err);
       return [];
     }
-
-    return data || [];
   }
 
   /**
