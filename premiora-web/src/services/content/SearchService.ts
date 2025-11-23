@@ -2,10 +2,9 @@
  * Serviço de busca para comunidades e conteúdo
  * Fornece funcionalidades de busca global na plataforma
  */
-import { supabase } from '../../utils/supabaseClient';
-import { supabaseAdmin } from '../../utils/supabaseAdminClient';
-import type { Community } from '../../types/community';
-import type { ContentItem } from '../../types/content';
+import { supabase } from "../../utils/supabaseClient";
+import type { Community } from "../../types/community";
+import type { ContentItem } from "../../types/content";
 
 /**
  * Classe de serviço para operações de busca
@@ -19,22 +18,25 @@ export class SearchService {
    */
   static async searchUsers(
     query: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<any[]> {
     if (!query.trim()) {
       return [];
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('users')
-      .select('id, name, username, avatar_url, profile_setup_completed')
-      .or(`name.ilike.%${query.toLowerCase()}%,username.ilike.%${query.toLowerCase()}%`)
-      .eq('profile_setup_completed', true) // Apenas perfis completos
-      .order('name')
+    // Usando cliente padrão (respeita RLS)
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, username, avatar_url, profile_setup_completed")
+      .or(
+        `name.ilike.%${query.toLowerCase()}%,username.ilike.%${query.toLowerCase()}%`,
+      )
+      .eq("profile_setup_completed", true) // Apenas perfis completos
+      .order("name")
       .limit(limit);
 
     if (error) {
-      console.error('Erro ao buscar usuários:', error);
+      console.error("Erro ao buscar usuários:", error);
       return [];
     }
 
@@ -49,22 +51,24 @@ export class SearchService {
    */
   static async searchCommunities(
     query: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<Community[]> {
     if (!query.trim()) {
       return [];
     }
 
     const { data, error } = await supabase
-      .from('communities')
-      .select('*')
-      .or(`name.ilike.%${query}%,display_name.ilike.%${query}%,description.ilike.%${query}%`)
-      .eq('is_private', false) // Apenas comunidades públicas
-      .order('member_count', { ascending: false })
+      .from("communities")
+      .select("*")
+      .or(
+        `name.ilike.%${query}%,display_name.ilike.%${query}%,description.ilike.%${query}%`,
+      )
+      .eq("is_private", false) // Apenas comunidades públicas
+      .order("member_count", { ascending: false })
       .limit(limit);
 
     if (error) {
-      console.error('Erro ao buscar comunidades:', error);
+      console.error("Erro ao buscar comunidades:", error);
       return [];
     }
 
@@ -79,7 +83,7 @@ export class SearchService {
    */
   static async searchContent(
     query: string,
-    limit: number = 10
+    limit: number = 10,
   ): Promise<ContentItem[]> {
     if (!query.trim()) {
       return [];
@@ -87,7 +91,7 @@ export class SearchService {
 
     // Primeiro busca os posts
     const { data: postsData, error: postsError } = await supabase
-      .from('posts')
+      .from("posts")
       .select(`
         id,
         title,
@@ -106,12 +110,12 @@ export class SearchService {
         )
       `)
       .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
-      .eq('is_published', true)
-      .order('created_at', { ascending: false })
+      .eq("is_published", true)
+      .order("created_at", { ascending: false })
       .limit(limit);
 
     if (postsError) {
-      console.error('Erro ao buscar posts:', postsError);
+      console.error("Erro ao buscar posts:", postsError);
       return [];
     }
 
@@ -119,46 +123,50 @@ export class SearchService {
 
     // Se temos posts, busca os dados dos usuários separadamente
     if (postsData && postsData.length > 0) {
-      const creatorIds = postsData.map(post => post.creator_id);
+      const creatorIds = postsData.map((post) => post.creator_id);
 
-      // Busca dados dos usuários (usa admin client para bypass de RLS)
-      const { data: usersData, error: usersError } = await supabaseAdmin
-        .from('users')
-        .select('id, username, name, avatar_url')
-        .in('id', creatorIds);
+      // Busca dados dos usuários (usa cliente padrão)
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select("id, username, name, avatar_url")
+        .in("id", creatorIds);
 
       if (usersError) {
-        console.error('Erro ao buscar usuários dos posts:', usersError);
+        console.error("Erro ao buscar usuários dos posts:", usersError);
       }
 
       // Cria um mapa de usuários para lookup rápido
       const usersMap = new Map();
       if (usersData) {
-        usersData.forEach(user => usersMap.set(user.id, user));
+        usersData.forEach((user) => usersMap.set(user.id, user));
       }
 
       // Transforma posts em ContentItem
       postsData.forEach((post: any) => {
         const user = usersMap.get(post.creator_id);
-        const communities = Array.isArray(post.communities) ? post.communities[0] : post.communities;
+        const communities = Array.isArray(post.communities)
+          ? post.communities[0]
+          : post.communities;
 
         contentItems.push({
           id: post.id,
-          type: post.content_type === 'video' ? 'video' : 'post',
+          type: post.content_type === "video" ? "video" : "post",
           title: post.title,
-          author: user?.name || user?.username || 'Usuário',
-          authorAvatar: user?.avatar_url || '',
+          author: user?.name || user?.username || "Usuário",
+          authorAvatar: user?.avatar_url || "",
           content: post.content,
           timestamp: post.created_at,
           communityId: post.community_id,
-          communityName: communities?.display_name || communities?.name || '',
-          communityAvatar: '', // TODO: implementar avatar da comunidade
+          communityName: communities?.display_name || communities?.name || "",
+          communityAvatar: "", // TODO: implementar avatar da comunidade
           likes: post.likes_count || 0,
           views: post.views_count || 0,
-          accessLevel: post.is_premium ? 'premium' : 'public',
+          accessLevel: post.is_premium ? "premium" : "public",
           isLocked: post.is_premium,
-          videoUrl: post.content_type === 'video' ? (post.media_urls?.[0] || '') : undefined,
-          creatorId: post.creator_id
+          videoUrl: post.content_type === "video"
+            ? (post.media_urls?.[0] || "")
+            : undefined,
+          creatorId: post.creator_id,
         });
       });
     }
@@ -178,7 +186,7 @@ export class SearchService {
       usersLimit?: number;
       communitiesLimit?: number;
       contentLimit?: number;
-    } = {}
+    } = {},
   ): Promise<{
     users: any[];
     communities: Community[];
@@ -189,7 +197,7 @@ export class SearchService {
     const [users, communities, content] = await Promise.all([
       this.searchUsers(query, usersLimit),
       this.searchCommunities(query, communitiesLimit),
-      this.searchContent(query, contentLimit)
+      this.searchContent(query, contentLimit),
     ]);
 
     return { users, communities, content };
