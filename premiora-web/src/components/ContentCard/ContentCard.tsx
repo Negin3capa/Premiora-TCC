@@ -10,7 +10,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { usePostLike, usePostViews } from '../../hooks/usePostLike';
 import { PostService } from '../../services/content/PostService';
 import type { ContentItem } from '../../types/content';
-import { VideoViewModal } from '../modals';
 import { PostCard, VideoCard, ProfileCard, CardActions } from './index';
 import { isCommunityAdmin, togglePinPost } from '../../utils/communityUtils';
 
@@ -136,9 +135,7 @@ interface ContentCardProps {
  * Suporta: posts, vídeos e perfis de criadores
  */
 const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
-  const { userProfile } = useAuth();
   const navigate = useNavigate();
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { prefetchPost, cancelPrefetch } = usePostPrefetch();
   const [showMenu, setShowMenu] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -204,20 +201,19 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   };
 
   /**
-   * Handler para reproduzir vídeo - redireciona para página de visualização
+   * Handler para clique na imagem - navega com estado para abrir modal
    */
-  const handlePlay = () => {
-    if (item.type === 'video' && item.id && item.authorUsername) {
-      // Redirecionar para página de visualização do vídeo
-      navigate(`/u/${item.authorUsername}/status/${item.id}`);
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (item.id) {
+      incrementView(item.id);
+      const username = item.authorUsername || item.author?.toLowerCase().replace(/\s+/g, '') || 'usuario';
+      const path = item.communityId && item.communityName 
+        ? `/r/${item.communityName}/u/${username}/status/${item.id}`
+        : `/u/${username}/status/${item.id}`;
+        
+      navigate(path, { state: { openImage: true } });
     }
-  };
-
-  /**
-   * Handler para fechar modal do vídeo
-   */
-  const handleCloseVideoModal = () => {
-    setIsVideoModalOpen(false);
   };
 
   /**
@@ -287,10 +283,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         return <ProfileCard item={item} onFollow={() => console.log('Follow clicked')} />;
 
       case 'video':
-        return <VideoCard item={item} onPlay={handlePlay} />;
+        return <VideoCard item={item} />;
 
       case 'post':
-        return <PostCard item={item} onClick={handleViewPost} />;
+        // PostCard onClick já é tratado pelo container pai, mas mantemos para garantir
+        // onImageClick para navegação com foco
+        return <PostCard item={item} onImageClick={handleImageClick} />;
 
       default:
         return null;
@@ -303,6 +301,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         className={`content-card ${item.type}-card`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleViewPost}
+        style={{ cursor: 'pointer' }}
       >
         <div className="card-header">
           <div className="author-info">
@@ -408,22 +408,17 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
           {renderContentSpecific()}
         </div>
 
+        <div onClick={(e) => e.stopPropagation()}>
         <CardActions
-          item={updatedItem}
-          onLike={handleLike}
-          onComment={handleComment}
-          onShare={handleShare}
-          liked={liked}
-          isLoading={likeLoading}
-        />
+            item={updatedItem}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+            liked={liked}
+            isLoading={likeLoading}
+          />
+        </div>
       </article>
-
-      <VideoViewModal
-        item={isVideoModalOpen ? item : null}
-        isOpen={isVideoModalOpen}
-        onClose={handleCloseVideoModal}
-        userTier={userProfile?.tier}
-      />
     </>
   );
 };

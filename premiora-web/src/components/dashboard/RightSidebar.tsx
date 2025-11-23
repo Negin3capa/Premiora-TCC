@@ -4,11 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import TrendingSection from './TrendingSection';
 import WhoToFollow from './WhoToFollow';
 import SearchDropdown from './SearchDropdown';
+import CommunityInfoSection from './CommunityInfoSection';
 import { SearchService } from '../../services/content/SearchService';
 import type { Community } from '../../types/community';
 import '../../styles/RightSidebar.css';
 
-const RightSidebar: React.FC = () => {
+interface RightSidebarProps {
+  communityName?: string;
+}
+
+const RightSidebar: React.FC<RightSidebarProps> = ({ communityName }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<{
     users: any[];
@@ -101,6 +106,11 @@ const RightSidebar: React.FC = () => {
           onSearch={handleManualSearch}
         />
       </div>
+      
+      {communityName && (
+        <CommunityInfoSection communityName={communityName} />
+      )}
+
       <TrendingSection />
       <WhoToFollow />
       <div className="right-sidebar-footer">

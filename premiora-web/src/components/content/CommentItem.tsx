@@ -44,6 +44,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
   // Verificar se o usuário atual é o autor do comentário
   const isAuthor = user?.id === comment.userId;
+  const hasReplies = comment.replies && comment.replies.length > 0;
 
   /**
    * Handler para responder ao comentário
@@ -82,14 +83,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   /**
-   * Calcular margem baseada na profundidade
-   */
-  const getMarginLeft = () => {
-    if (depth === 0) return '0';
-    return `${Math.min(depth, maxDepth) * 24}px`;
-  };
-
-  /**
    * Renderizar data formatada
    */
   const formatDate = (dateString: string) => {
@@ -101,10 +94,10 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <div
-      className={`comment-item ${depth > 0 ? 'comment-reply' : 'comment-root'}`}
-      style={{ marginLeft: getMarginLeft() }}
-    >
+    <div className={`comment-item ${depth > 0 ? 'comment-reply' : 'comment-root'}`}>
+      {/* Connector line for replies */}
+      {hasReplies && <div className="comment-connector" />}
+      
       {/* Avatar e conteúdo principal */}
       <div className="comment-main">
         {/* Avatar */}

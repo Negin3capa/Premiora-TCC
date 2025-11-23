@@ -3,18 +3,19 @@
  * Implementa routing tipo Twitter/Reddit: /u/:username/status/post_id
  */
 import React, { useState, useEffect, Suspense } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePostLike, usePostViews } from '../hooks/usePostLike';
 import { PostService } from '../services/content/PostService';
-import { Sidebar } from '../components/layout';
-import SidebarFeed from '../components/content/SidebarFeed';
-import CommunityPostSidebar from '../components/content/CommunityPostSidebar';
+import { Sidebar, MobileBottomBar } from '../components/layout';
+import RightSidebar from '../components/dashboard/RightSidebar';
 import { CommentList } from '../components/content/CommentList';
 import type { ContentItem, ContentType } from '../types/content';
 import { LikeParticles } from '../components/ContentCard/CardActions';
+import '../styles/HomePage.css';
 import '../styles/PostViewPage.css';
+import '../styles/Comments.css';
 
 // Lazy loading dos componentes para otimização
 const Header = React.lazy(() => import('../components/layout/Header'));
@@ -171,6 +172,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
 const PostViewPage: React.FC = () => {
   const { username, postId } = useParams<{ username: string; postId: string; communityName?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { post, loading, error } = usePost(postId!, username!);
 
@@ -200,6 +202,15 @@ const PostViewPage: React.FC = () => {
       incrementView(postId);
     }
   }, [post, postId, incrementView, loading]);
+
+  // Verificar se deve abrir o modal de imagem automaticamente
+  useEffect(() => {
+    if (location.state && (location.state as any).openImage && post?.thumbnail) {
+      setIsImageModalOpen(true);
+      // Limpar o state para não reabrir ao navegar
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, post?.thumbnail]);
 
   /**
    * Handler para voltar à página anterior
@@ -351,18 +362,21 @@ const PostViewPage: React.FC = () => {
   }
 
   return (
-    <div className="post-view-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="post-view-main-content">
+    <div className="dashboard-page post-view-page">
+      <div className="dashboard-sidebar">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
+      <div className="dashboard-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
             className="dashboard-header"
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         </Suspense>
-        <div className="post-view-content-wrapper" style={{ width: '100%' }}>
-          <div className="post-view-layout">
-            {/* Conteúdo principal do post */}
+        
+        <div className="dashboard-layout">
+          {/* Conteúdo principal do post */}
+          <div className="dashboard-feed-container">
             <div className="post-view-main">
               <div className="post-view-page-container">
                 {/* Header com navegação */}
@@ -628,17 +642,15 @@ const PostViewPage: React.FC = () => {
                 </main>
               </div>
             </div>
+          </div>
 
-            {/* Sidebar condicional baseada no tipo de post */}
-            {post.communityId ? (
-              <CommunityPostSidebar communityName={post.communityName || ''} />
-            ) : (
-              <SidebarFeed />
-            )}
+          <div className="dashboard-right-sidebar-container">
+            <RightSidebar communityName={post.communityName} />
           </div>
         </div>
       </div>
 
+      <MobileBottomBar />
 
       {/* Modal de imagem ampliada */}
       {isImageModalOpen && post.thumbnail && (
