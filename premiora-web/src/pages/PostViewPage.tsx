@@ -179,7 +179,9 @@ const PostViewPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalMenuOpen, setIsModalMenuOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
+  const [showModalParticles, setShowModalParticles] = useState(false);
 
   // Hooks para likes e visualizações
   const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
@@ -226,12 +228,16 @@ const PostViewPage: React.FC = () => {
   /**
    * Handler personalizado para like que inclui efeito de partículas
    */
-  const handleLike = () => {
+  const handleLike = (isModal = false) => {
     const wasLiked = liked;
 
     // Disparar efeito de particulas apenas quando está dando like (não removendo)
     if (!wasLiked && !likeLoading) {
-      setShowParticles(true);
+      if (isModal) {
+        setShowModalParticles(true);
+      } else {
+        setShowParticles(true);
+      }
     }
 
     // Chamar handler original
@@ -590,7 +596,7 @@ const PostViewPage: React.FC = () => {
                         <div className="like-btn-container-post-view">
                           <LikeParticles show={showParticles} />
                           <button
-                            onClick={handleLike}
+                            onClick={() => handleLike(false)}
                             className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
                             disabled={likeLoading}
                             aria-label={liked ? 'Descurtir' : 'Curtir'}
@@ -652,25 +658,165 @@ const PostViewPage: React.FC = () => {
 
       <MobileBottomBar />
 
-      {/* Modal de imagem ampliada */}
+      {/* Modal de imagem ampliada - Layout Focado (Twitter-like) */}
       {isImageModalOpen && post.thumbnail && (
-        <div
-          className="image-modal-overlay"
-          onClick={() => setIsImageModalOpen(false)}
-        >
-          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="image-modal-close"
+        <div className="image-modal-overlay">
+          <div className="image-modal-container">
+            {/* Painel Esquerdo: Mídia */}
+            <div 
+              className="image-modal-media"
               onClick={() => setIsImageModalOpen(false)}
-              aria-label="Fechar imagem ampliada"
             >
-              <X size={16} />
-            </button>
-            <img
-              src={post.thumbnail}
-              alt={post.title}
-              className="image-modal-image"
-            />
+              <button
+                className="image-modal-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsImageModalOpen(false);
+                }}
+                aria-label="Fechar visualização"
+              >
+                <X size={24} />
+              </button>
+              
+              <img
+                src={post.thumbnail}
+                alt={post.title}
+                className="image-modal-image"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Painel Direito: Sidebar de Conteúdo */}
+            <div className="image-modal-sidebar">
+              <div className="image-modal-sidebar-content">
+                {/* Header do Post na Sidebar */}
+                <header className="post-header">
+                  <div className="author-info">
+                    <img
+                      src={post.authorAvatar || '/default-avatar.png'}
+                      alt={post.author}
+                      className="author-avatar"
+                    />
+                    <div className="author-details">
+                      <div className="author-meta">
+                        <Link to={`/u/${username}`} className="author-name">
+                          {post.author}
+                        </Link>
+                        {post.communityId && (
+                          <Link to={`/r/${post.communityName}`} className="community-flair">
+                            {post.communityAvatar && (
+                              <img 
+                                src={post.communityAvatar} 
+                                alt="" 
+                                className="community-avatar-small"
+                              />
+                            )}
+                            <span className="community-prefix">r/</span>
+                            <span className="community-name-small">{post.communityDisplayName || post.communityName}</span>
+                          </Link>
+                        )}
+                      </div>
+                      <span className="post-timestamp">{post.timestamp}</span>
+                    </div>
+                  </div>
+
+                  {/* Menu na Sidebar */}
+                  <div className="post-menu">
+                    <div className="post-menu-container">
+                      <button
+                        className="post-view-menu-button"
+                        onClick={() => setIsModalMenuOpen(!isModalMenuOpen)}
+                        aria-label="Mais opções"
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+
+                      {isModalMenuOpen && (
+                        <>
+                          <div className="post-menu-dropdown">
+                            <button className="post-menu-item" onClick={() => { handleShare(); setIsModalMenuOpen(false); }}>
+                              <Share size={16} />
+                              <span>Compartilhar</span>
+                            </button>
+                            <button className="post-menu-item" onClick={() => { handleBookmark(); setIsModalMenuOpen(false); }}>
+                              <Bookmark size={16} />
+                              <span>{isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}</span>
+                            </button>
+                            {isAuthor && (
+                              <button className="post-menu-item delete-item" onClick={() => { handleDelete(); setIsModalMenuOpen(false); }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                                <span>Excluir</span>
+                              </button>
+                            )}
+                            <button className="post-menu-item report-item" onClick={() => { handleReport(); setIsModalMenuOpen(false); }}>
+                              <Flag size={16} />
+                              <span>Denunciar</span>
+                            </button>
+                          </div>
+                          <div className="post-menu-overlay" onClick={() => setIsModalMenuOpen(false)} />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </header>
+
+                {/* Conteúdo do Post na Sidebar */}
+                <div className="post-view-body">
+                  <h1 className="post-title">{post.title}</h1>
+                  {post.content && (
+                    <div className="post-text">
+                      {post.content.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Ações na Sidebar */}
+                <div className="post-actions">
+                  <div className="action-buttons">
+                    <div className="like-btn-container-post-view">
+                      <LikeParticles show={showModalParticles} />
+                      <button
+                        onClick={() => handleLike(true)}
+                        className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
+                        disabled={likeLoading}
+                      >
+                        <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+                        <span className="action-count">{likeCount}</span>
+                      </button>
+                    </div>
+
+                    <button className="post-view-action-button comment-button">
+                      <MessageCircle size={18} />
+                      <span className="action-count">0</span>
+                    </button>
+
+                    <button onClick={handleShare} className="post-view-action-button share-button">
+                      <Share size={18} />
+                    </button>
+
+                    <button 
+                      onClick={handleBookmark} 
+                      className={`post-view-action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
+                    >
+                      <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
+                    </button>
+                  </div>
+                  
+                  <div className="post-stats">
+                    <span className="views-count">{viewCount?.toLocaleString('pt-BR')} visualizações</span>
+                  </div>
+                </div>
+
+                {/* Comentários na Sidebar */}
+                <div className="comments-section">
+                  <CommentList postId={postId!} className="modal-comments" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
