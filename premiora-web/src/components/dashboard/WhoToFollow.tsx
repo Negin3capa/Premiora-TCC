@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { UserSuggestionsService, type UserSuggestion } from '../../services/content/UserSuggestionsService';
 import { FollowService } from '../../services/followService';
 import '../../styles/RightSidebar.css';
 
 const WhoToFollow: React.FC = () => {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<UserSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,12 +14,24 @@ const WhoToFollow: React.FC = () => {
 
   useEffect(() => {
     const fetchSuggestions = async () => {
-      if (!user) return;
+      if (!user?.id) return;
       
       try {
         setLoading(true);
         const result = await UserSuggestionsService.getUserSuggestions(user.id, 3);
         setSuggestions(result);
+
+        // Check follow status for suggestions
+        if (result.length > 0) {
+          const statusMap: Record<string, boolean> = {};
+          await Promise.all(
+            result.map(async (suggestion) => {
+              const isFollowing = await FollowService.isFollowing(user.id, suggestion.id);
+              statusMap[suggestion.id] = isFollowing;
+            })
+          );
+          setFollowingMap(statusMap);
+        }
       } catch (err) {
         console.error('Failed to fetch suggestions:', err);
       } finally {
@@ -26,7 +40,7 @@ const WhoToFollow: React.FC = () => {
     };
 
     fetchSuggestions();
-  }, [user]);
+  }, [user?.id]);
 
   const handleFollow = async (targetUserId: string) => {
     if (!user) return;
@@ -66,7 +80,16 @@ const WhoToFollow: React.FC = () => {
       <h3 className="right-sidebar-title">Who to follow</h3>
       <div className="suggested-users-list">
         {suggestions.map(suggestion => (
-          <div key={suggestion.id} className="suggested-user-item">
+          <div 
+            key={suggestion.id} 
+            className="suggested-user-item"
+            onClick={() => {
+              const username = suggestion.handle.startsWith('@') 
+                ? suggestion.handle.slice(1) 
+                : suggestion.handle;
+              navigate(`/u/${username}`);
+            }}
+          >
             <img 
               src={suggestion.avatar || 'https://via.placeholder.com/40'} 
               alt={suggestion.username} 
@@ -78,7 +101,10 @@ const WhoToFollow: React.FC = () => {
             </div>
             <button 
               className={`follow-btn ${followingMap[suggestion.id] ? 'following' : ''}`}
-              onClick={() => handleFollow(suggestion.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleFollow(suggestion.id);
+              }}
             >
               {followingMap[suggestion.id] ? 'Following' : 'Follow'}
             </button>

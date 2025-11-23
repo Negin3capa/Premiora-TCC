@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import TrendingSection from './TrendingSection';
 import WhoToFollow from './WhoToFollow';
 import SearchDropdown from './SearchDropdown';
-import { SearchService, type Community } from '../../services/content/SearchService';
+import { SearchService } from '../../services/content/SearchService';
+import type { Community } from '../../types/community';
 import '../../styles/RightSidebar.css';
 
 const RightSidebar: React.FC = () => {

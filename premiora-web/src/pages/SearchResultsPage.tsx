@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { User, Users, ArrowLeft } from 'lucide-react';
-import { SearchService, type Community } from '../services/content/SearchService';
+import { SearchService } from '../services/content/SearchService';
+import type { Community } from '../types/community';
 import { Sidebar, MobileBottomBar } from '../components/layout';
 import RightSidebar from '../components/dashboard/RightSidebar';
 import Header from '../components/layout/Header';
@@ -86,15 +87,15 @@ const SearchResultsPage: React.FC = () => {
           {results.communities.map(community => (
             <div key={community.id} className="result-card community-card" onClick={() => navigate(`/r/${community.name}`)}>
               <div className="result-icon">
-                {community.icon_url ? (
-                  <img src={community.icon_url} alt={community.name} className="result-avatar" />
+                {community.avatarUrl ? (
+                  <img src={community.avatarUrl} alt={community.name} className="result-avatar" />
                 ) : (
                   <Users size={24} />
                 )}
               </div>
               <div className="result-info">
                 <span className="result-title">r/{community.name}</span>
-                <span className="result-subtitle">{community.members_count || 0} members</span>
+                <span className="result-subtitle">{community.memberCount || 0} members</span>
                 {community.description && <p className="result-description">{community.description}</p>}
               </div>
             </div>

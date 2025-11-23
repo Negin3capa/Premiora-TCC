@@ -3,8 +3,8 @@
   top: 100%;
   left: 0;
   right: 0;
-  background-color: var(--bg-primary); /* Ensure solid background */
-  border: 1px solid var(--border-color);
+  background-color: var(--color-bg-secondary); /* Ensure solid background */
+  border: 1px solid var(--color-border-medium);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Stronger shadow */
   margin-top: 8px;
@@ -15,7 +15,7 @@
 
 .dropdown-section {
   padding: 12px 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--color-border-medium);
 }
 
 .dropdown-section:last-child {
@@ -26,7 +26,7 @@
   padding: 0 16px 8px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   text-transform: uppercase;
 }
 
@@ -41,19 +41,19 @@
 }
 
 .dropdown-item:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--color-bg-hover);
 }
 
 .item-icon {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: var(--bg-secondary);
+  background-color: var(--color-bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-right: 12px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   flex-shrink: 0;
 }
 
@@ -64,7 +64,7 @@
 
 .item-name {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   font-size: 15px;
   white-space: nowrap;
   overflow: hidden;
@@ -73,14 +73,14 @@
 
 .item-subtext {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .search-for-item {
-  color: var(--primary-color);
+  color: var(--color-primary);
   font-weight: 500;
 }
 
@@ -88,6 +88,6 @@
 .no-results-item {
   padding: 16px;
   text-align: center;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 14px;
 }

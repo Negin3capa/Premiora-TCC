@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { TrendingService, type TrendingTopic } from '../../services/content/TrendingService';
 import '../../styles/RightSidebar.css';
 
 const TrendingSection: React.FC = () => {
+  const navigate = useNavigate();
   const [trends, setTrends] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,11 @@ const TrendingSection: React.FC = () => {
       <h3 className="right-sidebar-title">What's happening</h3>
       <div className="trending-list">
         {trends.map(trend => (
-          <div key={trend.id} className="trending-item">
+          <div 
+            key={trend.id} 
+            className="trending-item"
+            onClick={() => navigate(`/search?q=${encodeURIComponent(trend.title || trend.key)}`)}
+          >
             <div className="trending-info">
               <span className="trending-category">
                 {trend.category} {trend.trendReason === 'burst' ? '• Trending' : ''}
@@ -62,7 +68,14 @@ const TrendingSection: React.FC = () => {
                   : `${trend.totalMentions} posts`}
               </span>
             </div>
-            <button className="trending-more" aria-label="More options">
+            <button 
+              className="trending-more" 
+              aria-label="More options"
+              onClick={(e) => {
+                e.stopPropagation();
+                // TODO: Implement more options menu
+              }}
+            >
               <MoreHorizontal size={16} />
             </button>
           </div>

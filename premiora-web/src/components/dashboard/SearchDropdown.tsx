@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Users, Search } from 'lucide-react';
-import type { Community } from '../../services/content/SearchService';
+import type { Community } from '../../types/community';
 import '../../styles/SearchDropdown.css';
 
 interface SearchDropdownProps {

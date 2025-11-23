@@ -4,14 +4,7 @@
  */
 import { supabase } from "../../utils/supabaseClient";
 import type { ContentItem } from "../../types/content";
-
-export interface Community {
-  id: string;
-  name: string;
-  description: string;
-  members_count: number;
-  icon_url?: string;
-}
+import type { Community } from "../../types/community";
 
 /**
  * Classe de serviço para operações de busca
@@ -79,7 +72,19 @@ export class SearchService {
       return [];
     }
 
-    return data || [];
+    return (data || []).map((item: any) => ({
+      id: item.id,
+      name: item.name,
+      displayName: item.display_name || item.name,
+      description: item.description,
+      bannerUrl: item.banner_url,
+      avatarUrl: item.icon_url || item.avatar_url,
+      creatorId: item.creator_id,
+      isPrivate: item.is_private,
+      memberCount: item.member_count || item.members_count || 0,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+    }));
   }
 
   /**
