@@ -49,7 +49,7 @@
 }
 
 .ctaButton {
-  background: linear-gradient(135deg, #FF424D 0%, #E63946 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
   border: none;
   padding: 1rem 2rem;

@@ -377,6 +377,12 @@ npm run preview
 - **Upload de Arquivos**: Suporte a imagens e vídeos
 - **Interação Social**: Likes, comentários e compartilhamento
 
+#### Performance e UX
+
+- **Navegação Otimizada**: Prefetch inteligente de dados para navegação instantânea
+- **Cache Global**: Sistema `GlobalPrefetchCache` para gerenciamento eficiente de dados
+- **Identidade Visual Dinâmica**: Suporte a temas claro/escuro com assets adaptativos
+
 #### Comunidades
 
 - **Criação e Gestão**: Crie suas próprias comunidades com banners personalizados

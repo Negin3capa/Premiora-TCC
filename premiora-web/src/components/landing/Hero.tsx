@@ -39,7 +39,7 @@ const Hero: React.FC = () => {
             A plataforma definitiva para criadores que querem transformar sua paixão em um negócio sustentável. Sem algoritmos, apenas você e seus fãs.
           </p>
           <div className="hero-actions animate-target delay-200" style={{ opacity: 0 }}>
-            <a href="/register" className="hero-cta-primary">Começar Agora</a>
+            <a href="/login" className="hero-cta-primary">Começar Agora</a>
             <a href="#how-it-works" className="hero-cta-secondary">Ver Demo</a>
           </div>
         </div>

@@ -1,13 +1,13 @@
 /* Cartão de Post */
 .postCard {
-  background: #121212;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   overflow: hidden;
   width: 280px;
   flex-shrink: 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .postCard:hover {
@@ -40,7 +40,7 @@
 .thumbnailPlaceholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+  background: var(--color-bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +95,7 @@
 .title {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #FFFFFF;
+  color: var(--color-text-primary);
   line-height: 1.4;
   margin-bottom: 0.75rem;
   display: -webkit-box;
@@ -109,12 +109,12 @@
   gap: 0.75rem;
   align-items: center;
   font-size: 0.75rem;
-  color: #DADADA;
+  color: var(--color-text-secondary);
   opacity: 0.7;
 }
 
 .date {
-  color: #DADADA;
+  color: var(--color-text-secondary);
   opacity: 0.6;
 }
 
@@ -123,13 +123,13 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #DADADA;
+  color: var(--color-text-secondary);
   opacity: 0.7;
 }
 
 .views svg,
 .comments svg {
-  color: #DADADA;
+  color: var(--color-text-secondary);
 }
 
 /* Responsividade */

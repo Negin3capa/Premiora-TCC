@@ -6,8 +6,8 @@
   top: 0; /* Extend to the very top like regular sidebar */
   width: 60px;
   height: 100vh;
-  background-color: #0D0D0D;
-  border-right: 1px solid #1A1A1A;
+  background-color: var(--color-bg-primary);
+  border-right: 1px solid var(--color-border-light);
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -32,7 +32,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid #1A1A1A;
+  border-bottom: 1px solid var(--color-border-light);
   margin-bottom: var(--space-2);
 }
 
@@ -128,14 +128,14 @@
   height: 44px;
   border: none;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #FF424D 0%, #FF6B75 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 12px rgba(255, 66, 77, 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 .profile-sidebar-create-button:hover {

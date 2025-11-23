@@ -3,18 +3,24 @@
  * Rodapé com links e informações da empresa
  */
 import React from 'react';
+import { useTheme } from '../../hooks/useUI';
 
 /**
  * Componente Footer com links de navegação e informações
  */
 const Footer: React.FC = () => {
+  const { isDark } = useTheme();
+
   return (
     <footer className="footer">
       <div className="container">
         <div className="footer-content">
           <div className="footer-brand">
             <a href="/" className="logo">
-              <img src="/assets/premiora-logo.png" alt="Premiora" />
+              <img 
+                src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
+                alt="Premiora" 
+              />
               <span>Premiora</span>
             </a>
             <p>A plataforma brasileira para monetização de conteúdo criativo. Construa sua comunidade e viva da sua paixão.</p>

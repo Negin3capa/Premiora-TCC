@@ -636,21 +636,6 @@
   }
 }
 
-/* ========================================
-   DARK MODE (se suportado)
-   ======================================== */
-
-@media (prefers-color-scheme: dark) {
-  .comment-item {
-    background-color: var(--color-bg-primary-dark, #1a1a1a);
-    border-color: var(--color-border-dark, #333);
-  }
-
-  .comment-form-textarea,
-  .comment-edit-textarea {
-    background-color: var(--color-bg-primary-dark, #1a1a1a);
-  }
-}
 
 /* ========================================
    ANIMAÇÕES

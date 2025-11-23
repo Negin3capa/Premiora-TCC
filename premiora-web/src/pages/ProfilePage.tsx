@@ -266,9 +266,9 @@ const ProfilePage: React.FC = () => {
   if (profileLoading) {
   return (
     <div style={{
-      backgroundColor: '#0D0D0D',
+      backgroundColor: 'var(--color-bg-primary)',
       minHeight: '100vh',
-      color: '#DADADA',
+      color: 'var(--color-text-secondary)',
       overflowX: 'hidden'
     }}>
       {/* Show default sidebar during loading to prevent flash */}
@@ -290,13 +290,13 @@ const ProfilePage: React.FC = () => {
           marginRight: '-50vw',
           marginTop: '64px',
           height: '300px',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: 'var(--color-bg-tertiary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
           <div style={{
-            color: '#666',
+            color: 'var(--color-text-tertiary)',
             fontSize: '1.2rem'
           }}>
             Carregando perfil...
@@ -317,14 +317,14 @@ const ProfilePage: React.FC = () => {
           }}>
             {/* Skeleton para posts */}
             <div style={{
-              backgroundColor: '#1a1a1a',
+              backgroundColor: 'var(--color-bg-tertiary)',
               borderRadius: '8px',
               height: '200px',
               marginBottom: '2rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#666'
+              color: 'var(--color-text-tertiary)'
             }}>
               Carregando posts...
             </div>
@@ -337,9 +337,9 @@ const ProfilePage: React.FC = () => {
   if (error || !creatorProfile) {
     return (
       <div style={{
-        backgroundColor: '#0D0D0D',
+        backgroundColor: 'var(--color-bg-primary)',
         minHeight: '100vh',
-        color: '#DADADA',
+        color: 'var(--color-text-secondary)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -366,9 +366,9 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div style={{
-      backgroundColor: '#0D0D0D',
+      backgroundColor: 'var(--color-bg-primary)',
       minHeight: '100vh',
-      color: '#DADADA',
+      color: 'var(--color-text-secondary)',
       overflowX: 'hidden'
     }}>
       {/* Conditional Sidebar - ProfileSidebar for all profile pages */}

@@ -5,8 +5,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useUI';
 import '../../styles/Header.css';
-import { Sun, LogOut, UserPlus, Menu } from 'lucide-react';
+import { Sun, LogOut, UserPlus, Menu, Moon, Bell } from 'lucide-react';
 
 /**
  * Hook personalizado para detectar scroll e controlar visibilidade do header
@@ -110,12 +111,13 @@ const Header: React.FC<HeaderProps> = ({
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, userProfile, signOut } = useAuth();
+  const { setTheme, isDark } = useTheme();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const isHeaderHidden = useScrollVisibility();
 
-  // Define o ícone de notificações (Sun)
-  const NotificationIcon = Sun;
+  // Define o ícone de notificações
+  const NotificationIcon = Bell;
 
   // Nome de exibição (usado no header) - prioriza o name do banco
   const displayName = userProfile?.name ||
@@ -163,6 +165,13 @@ const Header: React.FC<HeaderProps> = ({
   const userAvatar = getAvatarUrl();
 
   /**
+   * Handler para alternar o tema
+   */
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
+
+  /**
    * Handler para ações do header
    */
   const handleAction = (action: string) => {
@@ -187,23 +196,32 @@ const Header: React.FC<HeaderProps> = ({
    */
   const handleSignOut = async () => {
     try {
+      // Set redirect path for ProtectedRoute to handle
+      localStorage.setItem('logoutRedirect', '/');
       await signOut();
       setIsDropdownOpen(false);
-      navigate('/login');
     } catch (error) {
       console.error('Error during logout:', error);
       // Mesmo com erro, fechar dropdown e navegar (logout local foi feito)
       setIsDropdownOpen(false);
-      navigate('/login');
+      navigate('/');
     }
   };
 
   /**
    * Handler para adicionar conta existente
    */
-  const handleAddAccount = () => {
-    setIsDropdownOpen(false);
-    navigate('/login');
+  const handleAddAccount = async () => {
+    try {
+      // Sign out first to allow access to login page
+      await signOut();
+      setIsDropdownOpen(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Error during logout for add account:', error);
+      setIsDropdownOpen(false);
+      navigate('/login');
+    }
   };
 
   /**
@@ -312,6 +330,15 @@ const Header: React.FC<HeaderProps> = ({
             onClick={() => handleAction('notifications')}
           >
             <NotificationIcon size={20} />
+          </button>
+
+          <button
+            className="header-action-button"
+            aria-label={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+            title={isDark ? "Ativar modo claro" : "Ativar modo escuro"}
+            onClick={toggleTheme}
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
 
           <div className="header-avatar-dropdown" ref={dropdownRef}>
