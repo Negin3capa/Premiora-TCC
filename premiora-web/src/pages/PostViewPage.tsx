@@ -356,10 +356,11 @@ const PostViewPage: React.FC = () => {
       <div className="post-view-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
+            className="dashboard-header"
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         </Suspense>
-        <div className="post-view-page">
+        <div className="post-view-content-wrapper" style={{ width: '100%' }}>
           <div className="post-view-layout">
             {/* Conteúdo principal do post */}
             <div className="post-view-main">

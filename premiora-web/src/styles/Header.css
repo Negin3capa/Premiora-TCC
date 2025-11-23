@@ -449,3 +449,17 @@
     flex-shrink: 0; /* Prevent hamburger from shrinking */
   }
 }
+
+/* Sticky Header Override for Dashboard and Post View */
+.dashboard-header {
+  position: sticky !important;
+  top: 0;
+  width: 100%;
+  z-index: 40;
+  /* Reset fixed positioning props */
+  left: auto !important;
+  right: auto !important;
+  border-bottom: 1px solid var(--color-border-light);
+  background-color: rgba(var(--color-bg-primary-rgb), 0.8);
+  backdrop-filter: blur(12px);
+}

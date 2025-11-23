@@ -94,6 +94,7 @@ const Dashboard: React.FC = () => {
       <div className="dashboard-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
+            className="dashboard-header"
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             showTabs={true}
             activeTab={activeTab}

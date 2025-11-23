@@ -1,43 +1,42 @@
 /**
  * Estilos da HomePage do Premiora
- * Layout inspirado em Patreon e Reddit para uma experiência moderna e envolvente
+ * Layout inspirado em Twitter/X para uma experiência moderna e envolvente
  */
 
 /* ==================== Layout Principal ==================== */
 
 .dashboard-page {
-  display: grid;
-  grid-template-columns: 220px 1fr; /* Sidebar + Main content */
+  display: flex;
   min-height: 100vh;
   background-color: var(--color-bg-secondary);
   width: 100%;
-  overflow-x: hidden;
 }
 
-/* Sidebar area - will be controlled by Sidebar component */
+/* Sidebar wrapper - just a placeholder since Sidebar is fixed */
 .dashboard-sidebar {
-  grid-column: 1;
+  display: contents;
 }
 
 /* Main content area */
 .dashboard-main-content {
-  grid-column: 2;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  margin-left: 220px; /* Width of the fixed sidebar */
   min-height: 100vh;
-  overflow-x: hidden;
-  padding-top: 80px; /* Account for fixed header */
+  width: calc(100% - 220px);
+  position: relative;
 }
 
-/* ==================== Dashboard Layout (New) ==================== */
+/* ==================== Dashboard Layout ==================== */
 .dashboard-layout {
   display: flex;
-  justify-content: center;
-  gap: var(--space-8);
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 var(--space-6) var(--space-6);
+  gap: 30px;
   width: 100%;
+  max-width: 1050px; /* Limit width for centered feed */
+  padding: 20px 20px 0 20px;
+  align-items: flex-start;
 }
 
 .dashboard-feed-container {
@@ -50,18 +49,39 @@
   width: 350px;
   flex-shrink: 0;
   position: sticky;
-  top: 100px;
-  height: calc(100vh - 100px);
+  top: 80px; /* Adjust for sticky header height */
+  height: fit-content;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-@media (max-width: 1024px) {
+.dashboard-right-sidebar-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1090px) {
   .dashboard-right-sidebar-container {
     display: none;
   }
   
+  .dashboard-layout {
+    justify-content: center;
+  }
+  
   .dashboard-feed-container {
     max-width: 600px;
-    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* Match Sidebar.css breakpoint where it hides/collapses */
+  .dashboard-main-content {
+    margin-left: 0;
+    width: 100%;
   }
 }
 
@@ -74,14 +94,13 @@
 .dashboard-feed-container .feed-layout {
   max-width: none;
   gap: 0;
+  grid-template-columns: 1fr;
 }
 
 .dashboard-feed-container .feed-content {
   max-width: none;
   margin: 0;
 }
-
-
 
 /* ==================== Feed ==================== */
 
@@ -95,16 +114,10 @@
 
 .feed-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr;
   gap: var(--space-8);
   align-items: start;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.feed-layout--full-width {
-  grid-template-columns: 1fr;
-  gap: 0;
+  width: 100%;
 }
 
 .feed-main {
@@ -112,25 +125,7 @@
 }
 
 .feed-content {
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-.feed-content--full-width {
-  max-width: none;
   width: 100%;
-}
-
-.feed-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  position: fixed;
-  top: 104px; /* Account for fixed header + content padding */
-  right: 0;
-  width: 320px;
-  overflow: visible;
-  padding-right: var(--space-6);
 }
 
 /* ==================== Feed Tabs ==================== */
@@ -139,15 +134,17 @@
   display: flex;
   border-bottom: 1px solid var(--color-border-light);
   margin-bottom: var(--space-4);
-  background-color: var(--color-bg-primary);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: rgba(var(--color-bg-primary-rgb), 0.8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Ajuste para ficar "glued" no topo se necessário */
 }
 
 .feed-tab {
   flex: 1;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4);
   background: none;
   border: none;
   cursor: pointer;
@@ -156,38 +153,52 @@
   color: var(--color-text-secondary);
   transition: all var(--transition-fast);
   position: relative;
-  border-bottom: 2px solid transparent;
+  display: flex;
+  justify-content: center;
 }
 
 .feed-tab:hover {
   background-color: var(--color-bg-hover);
+}
+
+.feed-tab-content {
+  position: relative;
+  padding: 0 var(--space-2);
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.feed-tab.active .feed-tab-content {
   color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
 }
 
-.feed-tab.active {
-  color: var(--color-primary);
-  background-color: var(--color-bg-primary);
-  border-bottom-color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.feed-tab.active::after {
+.feed-tab.active .feed-tab-content::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 2px;
+  bottom: -17px; /* Ajuste conforme padding do pai */
+  left: 0;
+  width: 100%;
+  height: 4px;
   background-color: var(--color-primary);
-  border-radius: 1px;
+  border-radius: 2px;
 }
 
 .content-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: 0; /* Twitter style: no gap between posts if they have borders */
+  border-left: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border-light);
+  min-height: 100vh;
+}
+
+/* Ajuste para os cards de post ficarem "colados" */
+.content-grid > * {
+  border-bottom: 1px solid var(--color-border-light);
+  border-radius: 0;
+  margin-bottom: 0;
 }
 
 .user-suggestions-wrapper {
@@ -235,6 +246,9 @@
   height: 48px;
   opacity: 1;
   transition: opacity 0.2s ease;
+  border-left: 1px solid var(--color-border-light);
+  border-right: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .feed-loading-row.fade-out {
@@ -257,206 +271,6 @@
 .bottom-sentinel {
   height: 1px;
   visibility: hidden;
-}
-
-
-
-/* ==================== Responsive Design ==================== */
-
-/* Large Desktop (1440px+) */
-@media (min-width: 1440px) {
-  .dashboard-page {
-    grid-template-columns: 220px 1fr;
-  }
-
-  .feed-layout {
-    max-width: 1600px;
-    grid-template-columns: 1fr 360px;
-    gap: var(--space-10);
-  }
-
-  .feed-content {
-    max-width: 720px;
-  }
-
-  .feed-sidebar {
-    width: 360px;
-  }
-}
-
-/* Desktop (1280px - 1439px) */
-@media (min-width: 1280px) and (max-width: 1439px) {
-  .dashboard-page {
-    grid-template-columns: 220px 1fr;
-  }
-
-  .feed-layout {
-    max-width: 1400px;
-    grid-template-columns: 1fr 320px;
-    gap: var(--space-8);
-  }
-
-  .feed-content {
-    max-width: 680px;
-  }
-
-  .feed-sidebar {
-    width: 320px;
-  }
-}
-
-/* Standard Desktop (1025px - 1279px) */
-@media (min-width: 1025px) and (max-width: 1279px) {
-  .dashboard-page {
-    grid-template-columns: 220px 1fr;
-  }
-
-  .feed-layout {
-    max-width: 1200px;
-    grid-template-columns: 1fr 280px;
-    gap: var(--space-6);
-  }
-
-  .feed-content {
-    max-width: 640px;
-  }
-
-  .feed-sidebar {
-    width: 280px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .dashboard-page {
-    grid-template-columns: 1fr; /* Sidebar becomes overlay on tablets */
-  }
-
-  .dashboard-main-content {
-    grid-column: 1;
-  }
-
-  .feed-layout {
-    grid-template-columns: 1fr 240px;
-    gap: var(--space-5);
-    max-width: 1000px;
-  }
-
-  .feed-content {
-    max-width: 640px;
-  }
-
-  .feed-sidebar {
-    width: 240px;
-    top: 104px;
-    padding-right: var(--space-4);
-  }
-}
-
-@media (max-width: 768px) {
-  .dashboard-page {
-    grid-template-columns: 1fr; /* Single column layout on mobile */
-  }
-
-  .dashboard-main-content {
-    grid-column: 1;
-    padding-top: 70px; /* Reduced header height on mobile */
-  }
-
-  .feed-layout {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .feed-sidebar {
-    display: none; /* Hide sidebar completely on mobile */
-  }
-
-  .feed {
-    padding: var(--space-3) var(--space-2);
-  }
-
-  .feed-content {
-    max-width: 100%;
-    margin: 0;
-    padding: 0 var(--space-1);
-  }
-
-  .feed-tabs {
-    margin-bottom: var(--space-3);
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-  }
-
-  .feed-tab {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--font-size-sm);
-  }
-
-  .content-grid {
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
-  }
-}
-
-@media (max-width: 640px) {
-  .feed-layout {
-    gap: var(--space-3);
-  }
-
-  .feed {
-    padding: var(--space-2) var(--space-1);
-  }
-
-  .feed-content {
-    padding: 0;
-  }
-
-  .feed-tabs {
-    margin-bottom: var(--space-2);
-  }
-
-  .feed-tab {
-    padding: var(--space-2) var(--space-2);
-    font-size: var(--font-size-xs);
-  }
-
-  .content-grid {
-    gap: var(--space-2);
-    margin-bottom: var(--space-3);
-  }
-
-  .empty-state {
-    padding: var(--space-6) var(--space-3);
-  }
-
-  .loading-state {
-    padding: var(--space-4) var(--space-3);
-  }
-}
-
-@media (max-width: 480px) {
-  .feed {
-    padding: var(--space-1);
-  }
-
-  .feed-content {
-    padding: 0;
-  }
-
-  .content-grid {
-    gap: var(--space-1);
-  }
-
-  .empty-state {
-    padding: var(--space-4) var(--space-2);
-  }
-
-  .loading-state {
-    padding: var(--space-3) var(--space-2);
-  }
-
-  .feed-tabs {
-    margin-bottom: var(--space-1);
-  }
 }
 
 /* ==================== Mobile Bottom Bar ==================== */
@@ -534,40 +348,6 @@
 }
 
 @media (max-width: 480px) {
-  .profile-details {
-    display: none;
-  }
-
-  .profile-name {
-    max-width: 80px; /* Largura ainda menor em telas muito pequenas */
-  }
-
-  .header-actions {
-    gap: var(--space-2);
-  }
-
-  .action-button {
-    width: 36px;
-    height: 36px;
-  }
-
-  .card-actions {
-    padding: var(--space-2) var(--space-3);
-    gap: var(--space-1);
-  }
-
-  .action-btn {
-    padding: var(--space-2);
-  }
-
-  .video-thumbnail img {
-    height: 200px;
-  }
-
-  .post-image {
-    height: 250px;
-  }
-
   /* Show mobile bottom bar on small screens */
   .mobile-bottom-bar {
     display: block;
@@ -578,3 +358,4 @@
     padding-bottom: 80px; /* Space for the bottom bar */
   }
 }
+
