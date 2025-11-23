@@ -6,25 +6,9 @@
  * @component
  */
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGoogleOneTap } from '../../hooks/useGoogleOneTap';
-
-// Função utilitária para decodificar JWT
-function parseJwt(token: string): any {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('❌ Erro ao decodificar JWT:', error);
-    return {};
-  }
-}
+import { signInWithIdToken } from '../../lib/supabaseAuth';
 
 /**
  * Propriedades do componente GoogleOneTap
@@ -49,6 +33,7 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({
   onCredentialResponse,
   className = ''
 }) => {
+  const navigate = useNavigate();
   const {
     hasRecentAccount,
     isOneTapInitialized,
@@ -68,55 +53,38 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({
     });
 
     try {
-      // Salvar temporariamente as credenciais
-      sessionStorage.setItem('googleOneTapCredential', response.credential);
-
       // Chamar callback customizado se fornecido
       if (onCredentialResponse) {
         onCredentialResponse(response);
       }
 
-      // Decodificar JWT para obter informações do usuário
-      const decodedToken = parseJwt(response.credential);
-      console.log('👤 Informações do usuário One Tap:', {
-        email: decodedToken.email,
-        name: decodedToken.name,
-        picture: decodedToken.picture
-      });
+      // Autenticar com Supabase usando o ID Token
+      const { user, error } = await signInWithIdToken(response.credential);
 
-      // Aqui integramos com o Supabase Auth
-      // Como estamos usando OAuth, podemos tentar simular o fluxo OAuth
-      // ou implementar um sistema que use as credenciais diretamente
+      if (error) {
+        throw error;
+      }
 
-      // Por enquanto, redirecionamos para o dashboard (simulando login bem-sucedido)
-      console.log('✅ Login automático via One Tap realizado');
-      console.log('🔄 Redirecionando para dashboard...');
-
-      // Em uma implementação completa, você faria:
-      // 1. Autenticar com Supabase usando as credenciais
-      // 2. Ou enviar as credenciais para seu backend
-      // 3. Redirecionar baseado no sucesso da autenticação
-
-      // Por enquanto, apenas simulamos o sucesso
-      // Você pode implementar o redirecionamento aqui
+      if (user) {
+        console.log('✅ Login via Google One Tap realizado com sucesso:', user.email);
+        navigate('/dashboard');
+      }
 
     } catch (error) {
       console.error('❌ Erro ao processar credenciais One Tap:', error);
     }
   };
 
-
-
-  // Inicializar One Tap quando há conta recente
+  // Inicializar One Tap
   useEffect(() => {
-    if (hasRecentAccount && !isOneTapInitialized && !hasInitializedRef.current && !isLoading) {
+    if (!isOneTapInitialized && !hasInitializedRef.current && !isLoading) {
       hasInitializedRef.current = true;
 
-      console.log('🚀 Inicializando Google One Tap - conta recente detectada');
+      console.log('🚀 Inicializando Google One Tap');
 
       initializeOneTap({
         callback: handleCredentialResponse,
-        auto_select: true, // Auto-select para contas recentes
+        auto_select: hasRecentAccount, // Auto-select apenas se tiver conta recente
         cancel_on_tap_outside: true,
         context: 'signin'
       }).catch(error => {
@@ -128,7 +96,7 @@ const GoogleOneTap: React.FC<GoogleOneTapProps> = ({
 
   // Mostrar prompt quando inicializado
   useEffect(() => {
-    if (isOneTapInitialized && autoShow && hasRecentAccount) {
+    if (isOneTapInitialized && autoShow) {
       console.log('🔄 Exibindo Google One Tap prompt...');
 
       // Pequeno delay para garantir que o componente está montado
