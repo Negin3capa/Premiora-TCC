@@ -44,6 +44,35 @@ export function initializeSupabaseAuth() {
  * @param provider - Provedor OAuth
  * @returns Promise que resolve quando o login é iniciado
  */
+/**
+ * Faz login com token ID (Google One Tap)
+ * @param token - Token ID do Google
+ * @param nonce - Nonce usado na solicitação (opcional)
+ * @returns Promise com resultado do login
+ */
+export async function signInWithIdToken(token: string, nonce?: string): Promise<{ user: User | null; error: AuthError | null }> {
+  try {
+    console.log('🔄 Iniciando login via ID Token (One Tap)');
+
+    const { data, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: token,
+      nonce: nonce,
+    });
+
+    if (error) {
+      console.error('❌ Erro no login via ID Token:', error);
+      throw error;
+    }
+
+    console.log('✅ Login via ID Token realizado com sucesso');
+    return { user: data.user, error: null };
+  } catch (error) {
+    console.error('💥 Erro geral no login via ID Token:', error);
+    return { user: null, error: error as AuthError };
+  }
+}
+
 export async function signInWithProvider(provider: OAuthProvider): Promise<{ error: AuthError | null }> {
   try {
     console.log('🔄 Iniciando login OAuth com proteção de identidade:', provider);

@@ -145,6 +145,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: userProfile?.email
       });
 
+      // Atualizar o estado do perfil no contexto
+      if (userProfile) {
+        userProfileRef.current = userProfile;
+        setUserProfile(userProfile);
+        console.log('✅ Contexto atualizado com perfil obtido via OAuth callback');
+      }
+
       if (!userProfile) {
         console.error('❌ Perfil não foi criado corretamente - será redirectado pelo PublicRoute');
 

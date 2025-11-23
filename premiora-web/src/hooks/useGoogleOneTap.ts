@@ -53,11 +53,17 @@ export const useGoogleOneTap = () => {
       // Verificar se script já foi adicionado
       if (gsiScriptLoadedRef.current) {
         console.log('⏳ Aguardando carregamento do script GSI...');
+        let attempts = 0;
         const checkGSI = setInterval(() => {
+          attempts++;
           if (window.google?.accounts?.id) {
             clearInterval(checkGSI);
             console.log('✅ Google Identity Services carregado após aguardar');
             resolve();
+          } else if (attempts > 50) { // Timeout após 5 segundos
+            clearInterval(checkGSI);
+            console.error('❌ Timeout aguardando script Google Identity Services');
+            reject(new Error('Timeout waiting for Google Identity Services'));
           }
         }, 100);
         return;
@@ -167,13 +173,15 @@ export const useGoogleOneTap = () => {
         context: 'signin',
         ux_mode: 'popup',
         // FedCM migration: Opt-in to FedCM to prepare for when it becomes mandatory
-        use_fedcm_for_prompt: true
+        // Temporariamente desativado para garantir compatibilidade
+        use_fedcm_for_prompt: false
       };
 
       // Mesclar com configuração passada
       const finalConfig = { ...defaultConfig, ...config };
 
       console.log('🚀 Inicializando Google One Tap:', {
+        client_id: finalConfig.client_id ? 'Configurado' : 'Ausente',
         hasLastAccount: !!lastGoogleAccount,
         auto_select: finalConfig.auto_select,
         context: finalConfig.context,

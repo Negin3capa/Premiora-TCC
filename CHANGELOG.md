@@ -5,6 +5,22 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 23/11/25
+
+### Adicionado
+
+- **Autenticação Google Aprimorada**
+  - Implementação do Google One Tap (notificação) funcional com autenticação real via Supabase
+  - Suporte a login via popup ("mini window") para o botão "Entrar com Google", melhorando a UX
+  - Otimização do fechamento do popup para minimizar flash de conteúdo
+  - Correção de race condition no carregamento do Dashboard após login
+
+### Corrigido
+
+- Bug onde o Google One Tap não aparecia ou não autenticava corretamente
+- Bug onde o Dashboard carregava vazio após login rápido via OAuth
+- Melhoria na detecção de sessão para fechamento automático de janelas de login
+
 ## [0.10.0] - 23/11/25
 
 ### Adicionado
