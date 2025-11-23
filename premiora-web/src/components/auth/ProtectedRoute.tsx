@@ -52,6 +52,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Redireciona para login se não estiver autenticado
   if (!user) {
+    // Check for custom logout redirect (set by sign out button)
+    const logoutRedirect = localStorage.getItem('logoutRedirect');
+    if (logoutRedirect) {
+      // Note: We don't remove the item here to avoid side effects in render (React Strict Mode issues)
+      // The item will be overwritten on next logout or can be cleared by the target page
+      return <Navigate to={logoutRedirect} replace />;
+    }
     return <Navigate to="/login" replace />;
   }
 

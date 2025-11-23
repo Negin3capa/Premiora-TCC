@@ -15,7 +15,7 @@ const SocialProof: React.FC = () => {
     <section className="social-proof" style={{ overflow: 'hidden', padding: '40px 0', background: 'var(--landing-bg-dark)' }}>
       <div className="container" style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', color: 'var(--landing-text-muted)', fontWeight: 'normal' }}>
-          A casa de <span style={{ color: '#fff', fontWeight: 'bold' }}>+100.000</span> criadores independentes
+          A casa de <span style={{ color: 'var(--color-text-primary)', fontWeight: 'bold' }}>+100.000</span> criadores independentes
         </h2>
       </div>
       
@@ -31,7 +31,8 @@ const SocialProof: React.FC = () => {
             <span key={index} style={{ 
               fontSize: '4rem', 
               fontWeight: '800', 
-              color: 'rgba(255,255,255,0.1)',
+              color: 'var(--color-text-tertiary)',
+              opacity: 0.2,
               textTransform: 'uppercase'
             }}>
               {item}
@@ -42,7 +43,8 @@ const SocialProof: React.FC = () => {
             <span key={`dup-${index}`} style={{ 
               fontSize: '4rem', 
               fontWeight: '800', 
-              color: 'rgba(255,255,255,0.1)',
+              color: 'var(--color-text-tertiary)',
+              opacity: 0.2,
               textTransform: 'uppercase'
             }}>
               {item}

@@ -22,7 +22,7 @@ const Testimonials: React.FC = () => {
               <div className="testimonial-author" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" alt="Creator" />
                 <div>
-                  <strong style={{ color: '#fff', display: 'block' }}>Maria Santos</strong>
+                  <strong style={{ color: 'var(--color-text-primary)', display: 'block' }}>Maria Santos</strong>
                   <span style={{ color: 'var(--landing-text-muted)', fontSize: '0.9rem' }}>Artista Digital</span>
                 </div>
               </div>
@@ -37,7 +37,7 @@ const Testimonials: React.FC = () => {
               <div className="testimonial-author" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face" alt="Creator" />
                 <div>
-                  <strong style={{ color: '#fff', display: 'block' }}>João Silva</strong>
+                  <strong style={{ color: 'var(--color-text-primary)', display: 'block' }}>João Silva</strong>
                   <span style={{ color: 'var(--landing-text-muted)', fontSize: '0.9rem' }}>Podcaster</span>
                 </div>
               </div>
@@ -52,7 +52,7 @@ const Testimonials: React.FC = () => {
               <div className="testimonial-author" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <img src="https://images.unsplash.com/photo-1494790108755-2616b60d0de9?w=100&h=100&fit=crop&crop=face" alt="Creator" />
                 <div>
-                  <strong style={{ color: '#fff', display: 'block' }}>Ana Costa</strong>
+                  <strong style={{ color: 'var(--color-text-primary)', display: 'block' }}>Ana Costa</strong>
                   <span style={{ color: 'var(--landing-text-muted)', fontSize: '0.9rem' }}>Escritora</span>
                 </div>
               </div>
@@ -67,7 +67,7 @@ const Testimonials: React.FC = () => {
               <div className="testimonial-author" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Creator" />
                 <div>
-                  <strong style={{ color: '#fff', display: 'block' }}>Carlos Lima</strong>
+                  <strong style={{ color: 'var(--color-text-primary)', display: 'block' }}>Carlos Lima</strong>
                   <span style={{ color: 'var(--landing-text-muted)', fontSize: '0.9rem' }}>Músico Independente</span>
                 </div>
               </div>

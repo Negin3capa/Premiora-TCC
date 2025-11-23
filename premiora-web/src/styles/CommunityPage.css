@@ -68,9 +68,9 @@
 /* ==================== Community Header Banner ==================== */
 
 .community-header-banner {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #FF6B75 100%);
+  background: linear-gradient(135deg, #0D0D0D 0%, #1a1a1a 100%);
   padding: var(--space-6) var(--space-6) var(--space-4);
-  color: var(--color-text-white);
+  color: #FFFFFF;
   position: relative;
 }
 
@@ -114,6 +114,7 @@
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   margin: 0 0 var(--space-2) 0;
+  color: #FFFFFF;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 

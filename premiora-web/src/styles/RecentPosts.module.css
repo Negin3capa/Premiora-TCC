@@ -13,7 +13,7 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -23,9 +23,9 @@
 }
 
 .navButton {
-  background: #121212;
-  border: 1px solid #343536;
-  color: #DADADA;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-medium);
+  color: var(--color-text-secondary);
   width: 40px;
   height: 40px;
   border-radius: 8px;
@@ -37,9 +37,9 @@
 }
 
 .navButton:hover:not(.disabled) {
-  background: #1a1a1a;
-  border-color: #474849;
-  color: #FFFFFF;
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-dark);
+  color: var(--color-text-primary);
 }
 
 .navButton.disabled {

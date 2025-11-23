@@ -27,7 +27,7 @@ const Pricing: React.FC = () => {
               <li>Pagamentos mensais</li>
               <li>Suporte por email</li>
             </ul>
-            <a href="/register" className="pricing-btn">Criar Conta Grátis</a>
+            <a href="/login" className="pricing-btn">Criar Conta Grátis</a>
           </div>
           
           <div className="pricing-card pro" style={{ display: 'flex', flexDirection: 'column', transform: 'scale(1.05)', zIndex: 2 }}>
@@ -45,7 +45,7 @@ const Pricing: React.FC = () => {
               <li>Integrações exclusivas</li>
               <li>Suporte prioritário</li>
             </ul>
-            <a href="/register" className="pricing-btn primary">Começar Agora</a>
+            <a href="/login" className="pricing-btn primary">Começar Agora</a>
           </div>
           
           <div className="pricing-card" style={{ display: 'flex', flexDirection: 'column' }}>

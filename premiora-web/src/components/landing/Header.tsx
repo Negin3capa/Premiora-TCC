@@ -3,12 +3,14 @@
  * Contém navegação e botões de autenticação
  */
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '../../hooks/useUI';
 
 /**
  * Componente Header com navegação e botões de autenticação
  */
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,7 +26,10 @@ const Header: React.FC = () => {
       <nav className="navbar">
         <div className="navbar-content">
           <a href="/" className="logo">
-            <img src="/assets/premiora-logo.png" alt="Premiora" />
+            <img 
+              src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
+              alt="Premiora" 
+            />
             <span>Premiora</span>
           </a>
           
@@ -37,7 +42,7 @@ const Header: React.FC = () => {
           
           <div className="auth-buttons">
             <a href="/login" className="login-btn">Entrar</a>
-            <a href="/register" className="cta-button-small">Começar</a>
+            <a href="/login" className="cta-button-small">Começar</a>
           </div>
         </div>
       </nav>

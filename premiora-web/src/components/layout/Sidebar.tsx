@@ -8,6 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Bell, MessageCircle, Building2, Settings, PenTool, User } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useUI';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
 import { ProfileService } from '../../services/auth/ProfileService';
 import { FeedService } from '../../services/content/FeedService';
@@ -248,6 +249,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { userProfile } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const prefetchTimeoutRef = useRef<number | null>(null);
@@ -423,7 +425,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         <div className="sidebar-content">
           {/* Logo/Brand */}
           <div className="sidebar-header">
-            <img src="/assets/premiora-logo.png" alt="Premiora" className="sidebar-logo" />
+            <img 
+              src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
+              alt="Premiora" 
+              className="sidebar-logo" 
+            />
             <span className="sidebar-brand-name">Premiora</span>
           </div>
 

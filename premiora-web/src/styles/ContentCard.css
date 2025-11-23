@@ -6,7 +6,7 @@
 /* ==================== Content Card ==================== */
 
 .content-card {
-  background-color: #0D0D0D;
+  background-color: var(--color-bg-primary);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-light);
   overflow: hidden;

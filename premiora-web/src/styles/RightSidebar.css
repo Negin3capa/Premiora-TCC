@@ -179,17 +179,13 @@
 }
 
 .search-input-wrapper {
-  background-color: var(--color-bg-tertiary, #eff3f4); /* Default light mode color */
+  background-color: var(--color-bg-tertiary);
   border-radius: 9999px;
   padding: 10px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
   border: 1px solid transparent;
-}
-
-[data-theme='dark'] .search-input-wrapper {
-  background-color: #202327;
 }
 
 .search-input-wrapper:focus-within {

@@ -5,6 +5,27 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 23/11/25
+
+### Adicionado
+
+- **Otimização de Performance**
+  - Implementação de `GlobalPrefetchCache` para carregamento antecipado de dados
+  - Prefetch inteligente de perfil e feed ao passar o mouse nos itens de navegação (Home e Profile)
+  - Melhoria significativa na percepção de velocidade de navegação
+
+- **Identidade Visual Refinada**
+  - Suporte a logo em versão clara (`premiora-logo-light.png`) para melhor contraste em temas escuros/claros
+  - Atualização dinâmica de logo baseada no tema em Sidebar, Header e Login
+  - Refinamento de estilos globais e componentes para maior consistência visual
+
+### Alterado
+
+- **Melhorias de UI/UX**
+  - Ajustes de espaçamento e layout na Sidebar e ProfileSidebar
+  - Polimento visual na Landing Page (Header, Footer, Hero)
+  - Atualização de estilos em componentes de conteúdo e comunidade
+
 ## [0.11.0] - 23/11/25
 
 ### Adicionado

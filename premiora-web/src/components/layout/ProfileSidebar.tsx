@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useUI';
 import { CreateContentModal, CreatePostModal, CreateVideoModal } from '../modals';
 import { getCurrentCommunityContext } from '../../utils/communityUtils';
 import type { ContentType } from '../modals/CreateContentModal';
@@ -35,6 +36,7 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 }) => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { userProfile } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -99,7 +101,11 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
         <div className="profile-sidebar-content">
           {/* Logo/Brand */}
           <div className="profile-sidebar-header">
-            <img src="/assets/premiora-logo.png" alt="Premiora" className="profile-sidebar-logo" />
+            <img 
+              src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
+              alt="Premiora" 
+              className="profile-sidebar-logo" 
+            />
           </div>
 
           {/* Navigation Icons */}
