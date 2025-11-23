@@ -15,11 +15,11 @@ Para informações detalhadas sobre a arquitetura técnica, padrões de design e
 ### Tecnologias Principais
 
 - **Framework**: React 19.2.0 com TypeScript ~5.9.3
-- **Build Tool**: Vite ^7.1.7 com code splitting otimizado
+- **Build Tool**: Vite ^7.2.2 com code splitting otimizado
 - **Roteamento**: React Router DOM ^7.9.4
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
 - **Estilização**: CSS personalizado com variáveis CSS e suporte a temas
-- **Ícones**: Lucide React ^0.552.0
+- **Ícones**: Lucide React ^0.553.0
 - **Captcha**: HCaptcha React ^1.14.0
 - **Git Hooks**: Husky ^9.1.7 + Commitlint ^20.1.0
 - **Context API**: Gerenciamento de estado global com 4 contexts especializados
@@ -156,17 +156,21 @@ premiora-web/
 │   │   ├── AuthCallback.tsx
 │   │   ├── CommunitiesPage.tsx
 │   │   ├── CommunityPage.tsx
+│   │   ├── CreateCommunityPage.tsx
 │   │   ├── Dashboard.tsx
 │   │   ├── EmailConfirmation.tsx
 │   │   │   ├── EmailConfirmationSuccess.tsx
+│   │   ├── ExplorePage.tsx
 │   │   ├── HomePage.tsx
 │   │   ├── LandingPage.tsx
 │   │   ├── Login.tsx
 │   │   ├── MessagesPage.tsx
 │   │   ├── NotificationsPage.tsx
+│   │   ├── PostViewPage.tsx
 │   │   ├── ProfileEditPage.tsx
 │   │   ├── ProfilePage.tsx
 │   │   ├── ProfileSetup.tsx
+│   │   ├── SearchResultsPage.tsx
 │   │   ├── SettingsPage.tsx
 │   │   └── Signup.tsx
 │   ├── services/        # Serviços organizados por domínio (arquitetura modular)
@@ -338,10 +342,19 @@ npm run preview
 ### Navegação
 
 - **Página Inicial (/)**: Landing page com informações sobre a plataforma
-- **Dashboard (/dashboard)**: Página principal após login com feed de conteúdo
+- **Dashboard (/dashboard)**: Página principal após login com feed de conteúdo, tendências e sugestões
+- **Explorar (/explore)**: Descubra novos conteúdos e criadores
+- **Comunidades (/communities)**: Navegue e participe de comunidades
+- **Configurações (/settings)**: Personalize sua experiência
 - **Login (/login)**: Página de autenticação com opções de login via Google, Facebook ou email/senha
 
 ### Funcionalidades
+
+#### Busca e Descoberta
+
+- **Busca Global**: Encontre usuários, comunidades e posts rapidamente
+- **Tendências**: Veja tópicos em alta e discussões populares
+- **Sugestões**: Recomendações personalizadas de quem seguir
 
 #### Autenticação e Usuários
 
@@ -364,11 +377,13 @@ npm run preview
 - **Upload de Arquivos**: Suporte a imagens e vídeos
 - **Interação Social**: Likes, comentários e compartilhamento
 
-#### Comunidades (Em Desenvolvimento)
+#### Comunidades
 
-- **Estrutura Preparada**: Base para funcionalidades de comunidades
+- **Criação e Gestão**: Crie suas próprias comunidades com banners personalizados
+- **Postagens**: Compartilhe conteúdo específico dentro de comunidades
+- **Flairs**: Categorize discussões com etiquetas personalizadas
 - **Integração com Tiers**: Controle de acesso baseado em assinatura
-- **Sistema de Tags**: Organização de conteúdo por categorias
+- **Moderação**: Ferramentas para gerenciar membros e conteúdo
 
 ### Servidor de Desenvolvimento
 

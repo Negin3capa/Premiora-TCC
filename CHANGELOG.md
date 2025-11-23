@@ -5,6 +5,35 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 23/11/25
+
+### Adicionado
+
+- **Sistema de Busca Global**
+  - Funcionalidade de busca global com dropdown interativo
+  - Nova página de resultados de busca (`SearchResultsPage`)
+  - Integração de serviço de busca unificado
+
+- **Melhorias no Dashboard**
+  - Barra lateral direita (RightSidebar) com busca, tópicos em tendência e sugestões de usuários para seguir
+  - Novas páginas de Dashboard e Visualização de Post (PostView) com estilos dedicados
+  - Seção de "Quem Seguir" (WhoToFollow) e "Tópicos em Alta" (TrendingSection)
+
+- **Novas Páginas e Navegação**
+  - Implementação das páginas Configurações, Explorar e Comunidades
+  - Componentes e estilos associados para as novas rotas
+
+- **Sistema de Comunidades Aprimorado**
+  - Criação de posts em comunidades
+  - Suporte a flairs (etiquetas)
+  - Componentes de exibição de conteúdo otimizados
+
+### Alterado
+
+- **Refatoração de Componentes**
+  - Refatoração dos componentes e estilos relacionados à busca para maior consistência
+  - Melhorias na funcionalidade e interface do usuário para elementos de busca
+
 ## [0.8.0] - 22/11/25
 
 ### Adicionado
