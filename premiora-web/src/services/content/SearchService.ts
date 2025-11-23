@@ -3,8 +3,15 @@
  * Fornece funcionalidades de busca global na plataforma
  */
 import { supabase } from "../../utils/supabaseClient";
-import type { Community } from "../../types/community";
 import type { ContentItem } from "../../types/content";
+
+export interface Community {
+  id: string;
+  name: string;
+  description: string;
+  members_count: number;
+  icon_url?: string;
+}
 
 /**
  * Classe de serviço para operações de busca
