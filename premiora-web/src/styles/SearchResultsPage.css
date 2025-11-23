@@ -1,0 +1,205 @@
+/* Search Results Page Styles */
+
+/* Container for the search results content */
+.search-results-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header with back button and title */
+.search-header-simple {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-4);
+  background-color: rgba(var(--color-bg-primary-rgb), 0.85);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.search-header-simple h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  margin-left: var(--space-4);
+}
+
+.back-button-simple {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.back-button-simple:hover {
+  background-color: var(--color-bg-hover);
+}
+
+/* Tabs */
+.search-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-primary);
+  position: sticky;
+  top: 60px; /* Below header */
+  z-index: 9;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-base);
+}
+
+.tab-btn:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.tab-btn.active {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 4px;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Content Area */
+.search-content {
+  padding: var(--space-4) 0;
+}
+
+.loading-state {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.results-section {
+  margin-bottom: var(--space-6);
+}
+
+.results-section h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.no-results {
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: var(--space-8);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  margin: 0 var(--space-4);
+}
+
+/* Grid for Users and Communities */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-4);
+  padding: 0 var(--space-4);
+}
+
+.result-card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
+}
+
+.result-icon {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.result-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.result-info {
+  width: 100%;
+}
+
+.result-title {
+  display: block;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-subtitle {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.result-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+/* List for Posts (using ContentCard, so just container styles) */
+.results-list {
+  display: flex;
+  flex-direction: column;
+  /* No gap needed if ContentCard has borders/margins handled by parent grid or itself */
+}

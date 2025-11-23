@@ -5,7 +5,7 @@
 import React, { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Home, Compass, Bell, MessageCircle, Users, Building2, Settings,
+  Home, Bell, MessageCircle, Building2, Settings,
   Share2, Flag, PenTool, User
 } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
@@ -81,10 +81,8 @@ const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
   // Navigation items matching the main Sidebar order
   const navigationItems = [
     { icon: <Home size={20} />, label: 'Home', route: '/dashboard', active: location.pathname === '/dashboard' },
-    { icon: <Compass size={20} />, label: 'Explore', route: '/explore', active: location.pathname === '/explore' },
     { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: location.pathname === '/notifications' },
     { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: location.pathname === '/messages' },
-    { icon: <Users size={20} />, label: 'Following', route: '/dashboard', active: false }, // TODO: Add following page
     { icon: <Building2 size={20} />, label: 'Communities', route: '/communities', active: location.pathname === '/communities' },
     {
       icon: <User size={20} />,

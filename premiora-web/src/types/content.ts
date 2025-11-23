@@ -5,12 +5,12 @@
 /**
  * Tipos de conteúdo suportados na plataforma
  */
-export type ContentType = 'profile' | 'video' | 'post';
+export type ContentType = "profile" | "video" | "post";
 
 /**
  * Níveis de acesso para conteúdo (similar ao Patreon)
  */
-export type AccessLevel = 'public' | 'supporters' | 'premium';
+export type AccessLevel = "public" | "supporters" | "premium";
 
 /**
  * Item de conteúdo exibido no feed
@@ -43,6 +43,11 @@ export interface ContentItem {
   communityLikes?: number;
   communityComments?: number;
   isPinned?: boolean;
+  flair?: {
+    text: string;
+    color: string;
+    backgroundColor: string;
+  };
   // Propriedades específicas para vídeos
   videoUrl?: string;
   duration?: number;
@@ -58,6 +63,7 @@ export interface PostFormData {
   title: string;
   content: string;
   communityId?: string;
+  flairId?: string;
   image?: File | null;
 }
 
@@ -121,8 +127,8 @@ export interface CommentFilters {
   parentCommentId?: string | null; // null para comentários raiz, string para respostas
   limit?: number;
   offset?: number;
-  sortBy?: 'created_at' | 'updated_at';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "created_at" | "updated_at";
+  sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -133,3 +139,13 @@ export interface CommentStats {
   topLevelComments: number; // Comentários raiz (não respostas)
   lastCommentAt?: string;
 }
+
+/**
+ * Opções de ordenação para feeds
+ */
+export type SortOption = "hot" | "new" | "top";
+
+/**
+ * Filtros de tempo para ordenação "Top"
+ */
+export type TimeRange = "all" | "year" | "month" | "week" | "day";

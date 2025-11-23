@@ -43,7 +43,7 @@ const ProfilePage = React.lazy(() => import('./pages/ProfilePage'));
 const ProfileEditPage = React.lazy(() => import('./pages/ProfileEditPage'));
 const CreateCommunityPage = React.lazy(() => import('./pages/CreateCommunityPage'));
 const ExplorePage = React.lazy(() => import('./pages/ExplorePage'));
-const MobileSearchPage = React.lazy(() => import('./pages/MobileSearchPage'));
+const SearchResultsPage = React.lazy(() => import('./pages/SearchResultsPage'));
 const PostViewPage = React.lazy(() => import('./pages/PostViewPage'));
 const CreatorChannelSetupPage = React.lazy(() => import('./pages/CreatorChannelSetupPage'));
 
@@ -177,13 +177,13 @@ const App: React.FC = () => {
           }
         />
 
-        {/* Rota Busca Móvel (apenas para autenticados) */}
+        {/* Rota Busca Móvel e Desktop (apenas para autenticados) */}
         <Route
           path="/search"
           element={
             <ProtectedRoute>
               <ProtectedLayout>
-                <MobileSearchPage />
+                <SearchResultsPage />
               </ProtectedLayout>
             </ProtectedRoute>
           }

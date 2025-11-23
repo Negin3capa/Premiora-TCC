@@ -82,14 +82,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   /**
-   * Calcular margem baseada na profundidade
-   */
-  const getMarginLeft = () => {
-    if (depth === 0) return '0';
-    return `${Math.min(depth, maxDepth) * 24}px`;
-  };
-
-  /**
    * Renderizar data formatada
    */
   const formatDate = (dateString: string) => {
@@ -101,10 +93,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <div
-      className={`comment-item ${depth > 0 ? 'comment-reply' : 'comment-root'}`}
-      style={{ marginLeft: getMarginLeft() }}
-    >
+    <div className={`comment-item ${depth > 0 ? 'comment-reply' : 'comment-root'}`}>
       {/* Avatar e conteúdo principal */}
       <div className="comment-main">
         {/* Avatar */}
@@ -119,11 +108,13 @@ export const CommentItem: React.FC<CommentItemProps> = ({
         <div className="comment-content">
           {/* Header com autor e data */}
           <div className="comment-header">
-            <span className="comment-author">{comment.author.name || comment.author.username}</span>
+            <span className="comment-author-name">{comment.author.name || comment.author.username}</span>
+            <span className="comment-author-username">@{comment.author.username}</span>
+            <span className="comment-separator">·</span>
+            <span className="comment-date">{formatDate(comment.createdAt)}</span>
             {comment.isEdited && (
               <span className="comment-edited">(editado)</span>
             )}
-            <span className="comment-date">{formatDate(comment.createdAt)}</span>
           </div>
 
           {/* Conteúdo ou editor */}
@@ -233,24 +224,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
           )}
         </div>
       </div>
-
-      {/* Respostas aninhadas */}
-      {comment.replies && comment.replies.length > 0 && (
-        <div className="comment-replies">
-          {comment.replies.map(reply => (
-            <CommentItem
-              key={reply.id}
-              comment={reply}
-              depth={depth + 1}
-              maxDepth={maxDepth}
-              onReply={onReply}
-              onEdit={onEdit}
-              onDelete={onDelete}
-              onLike={onLike}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };

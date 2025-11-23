@@ -4,13 +4,14 @@
  */
 import React, { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Pin } from 'lucide-react';
 import '../../styles/ContentCard.css';
 import { useAuth } from '../../hooks/useAuth';
 import { usePostLike, usePostViews } from '../../hooks/usePostLike';
 import { PostService } from '../../services/content/PostService';
 import type { ContentItem } from '../../types/content';
-import { VideoViewModal } from '../modals';
 import { PostCard, VideoCard, ProfileCard, CardActions } from './index';
+import { isCommunityAdmin, togglePinPost } from '../../utils/communityUtils';
 
 // Importa cache global compartilhado com PostViewPage
 // Cache global para posts prefetched
@@ -134,10 +135,34 @@ interface ContentCardProps {
  * Suporta: posts, vídeos e perfis de criadores
  */
 const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
-  const { userProfile } = useAuth();
   const navigate = useNavigate();
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const { prefetchPost, cancelPrefetch } = usePostPrefetch();
+  const [showMenu, setShowMenu] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { user } = useAuth();
+
+  // Check if user is admin of the community
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      if (item.communityId && user?.id) {
+        const admin = await isCommunityAdmin(item.communityId, user.id);
+        setIsAdmin(admin);
+      }
+    };
+    checkAdmin();
+  }, [item.communityId, user?.id]);
+
+  const handleTogglePin = async () => {
+    if (item.id) {
+      const success = await togglePinPost(item.id);
+      if (success !== null) {
+        // Close menu
+        setShowMenu(false);
+        // Reload to show changes (temporary solution until we have better state management)
+        window.location.reload();
+      }
+    }
+  };
 
   // Hooks para likes e visualizações
   const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
@@ -176,20 +201,19 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   };
 
   /**
-   * Handler para reproduzir vídeo - redireciona para página de visualização
+   * Handler para clique na imagem - navega com estado para abrir modal
    */
-  const handlePlay = () => {
-    if (item.type === 'video' && item.id && item.authorUsername) {
-      // Redirecionar para página de visualização do vídeo
-      navigate(`/u/${item.authorUsername}/status/${item.id}`);
+  const handleImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (item.id) {
+      incrementView(item.id);
+      const username = item.authorUsername || item.author?.toLowerCase().replace(/\s+/g, '') || 'usuario';
+      const path = item.communityId && item.communityName 
+        ? `/r/${item.communityName}/u/${username}/status/${item.id}`
+        : `/u/${username}/status/${item.id}`;
+        
+      navigate(path, { state: { openImage: true } });
     }
-  };
-
-  /**
-   * Handler para fechar modal do vídeo
-   */
-  const handleCloseVideoModal = () => {
-    setIsVideoModalOpen(false);
   };
 
   /**
@@ -259,10 +283,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         return <ProfileCard item={item} onFollow={() => console.log('Follow clicked')} />;
 
       case 'video':
-        return <VideoCard item={item} onPlay={handlePlay} />;
+        return <VideoCard item={item} />;
 
       case 'post':
-        return <PostCard item={item} onClick={handleViewPost} />;
+        // PostCard onClick já é tratado pelo container pai, mas mantemos para garantir
+        // onImageClick para navegação com foco
+        return <PostCard item={item} onImageClick={handleImageClick} />;
 
       default:
         return null;
@@ -275,6 +301,8 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         className={`content-card ${item.type}-card`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleViewPost}
+        style={{ cursor: 'pointer' }}
       >
         <div className="card-header">
           <div className="author-info">
@@ -302,6 +330,12 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
                 >
                   {item.author}
                 </Link>
+                {item.isPinned && (
+                  <span className="pinned-badge" title="Post fixado">
+                    <Pin size={12} className="pinned-icon" />
+                    <span className="pinned-text">Fixado</span>
+                  </span>
+                )}
                 {item.communityId && (
                   <Link to={`/r/${item.communityName}`} className="community-flair">
                     {item.communityAvatar && (
@@ -317,40 +351,74 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
                     </span>
                   </Link>
                 )}
+                {item.flair && (
+                  <span 
+                    className="post-flair-badge" 
+                    style={{ 
+                      color: item.flair.color, 
+                      backgroundColor: item.flair.backgroundColor,
+                      marginLeft: '8px',
+                      padding: '2px 8px',
+                      borderRadius: '12px',
+                      fontSize: '0.75rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    {item.flair.text}
+                  </span>
+                )}
               </div>
               <span className="content-type">{item.type}</span>
             </div>
           </div>
 
-          <button
-            className="card-menu"
-            aria-label="Mais opções"
-            title="Mais opções"
-          >
-            ⋯
-          </button>
+          <div className="card-menu-container" style={{ position: 'relative' }}>
+            <button
+              className="card-menu"
+              aria-label="Mais opções"
+              title="Mais opções"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+            >
+              ⋯
+            </button>
+            {showMenu && (
+              <div className="menu-dropdown">
+                {isAdmin && (
+                  <button 
+                    className="menu-item"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTogglePin();
+                    }}
+                  >
+                    <Pin size={14} />
+                    {item.isPinned ? 'Desafixar do topo' : 'Fixar no topo'}
+                  </button>
+                )}
+                <button className="menu-item">Denunciar</button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="card-content">
           {renderContentSpecific()}
         </div>
 
+        <div onClick={(e) => e.stopPropagation()}>
         <CardActions
-          item={updatedItem}
-          onLike={handleLike}
-          onComment={handleComment}
-          onShare={handleShare}
-          liked={liked}
-          isLoading={likeLoading}
-        />
+            item={updatedItem}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+            liked={liked}
+            isLoading={likeLoading}
+          />
+        </div>
       </article>
-
-      <VideoViewModal
-        item={isVideoModalOpen ? item : null}
-        isOpen={isVideoModalOpen}
-        onClose={handleCloseVideoModal}
-        userTier={userProfile?.tier}
-      />
     </>
   );
 };

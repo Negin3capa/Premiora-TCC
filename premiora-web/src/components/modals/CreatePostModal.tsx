@@ -11,7 +11,8 @@ import { useModal } from '../../hooks/useModal';
 import '../../styles/modals.css';
 import { CommunityDropdown, FileUpload } from '../common';
 import { Loader } from 'lucide-react';
-import type { Community } from '../../types/community';
+import type { Community, CommunityFlair } from '../../types/community';
+import { getCommunityFlairs } from '../../utils/communityUtils';
 
 /**
  * Props do componente CreatePostModal
@@ -32,6 +33,7 @@ interface PostFormData {
   title: string;
   content: string;
   communityId?: string;
+  flairId?: string;
   image?: File | null;
 }
 
@@ -56,8 +58,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     title: '',
     content: '',
     communityId: '',
+    flairId: '',
     image: null
   });
+
+  const [flairs, setFlairs] = useState<CommunityFlair[]>([]);
 
   // Estados de interface
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,6 +80,22 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       }
     }
   }, [isOpen, getModalData]);
+
+  // Fetch flairs when community changes
+  useEffect(() => {
+    const loadFlairs = async () => {
+      if (formData.communityId) {
+        const communityFlairs = await getCommunityFlairs(formData.communityId, 'post');
+        setFlairs(communityFlairs);
+        // Reset selected flair if not in new list
+        setFormData(prev => ({ ...prev, flairId: '' }));
+      } else {
+        setFlairs([]);
+        setFormData(prev => ({ ...prev, flairId: '' }));
+      }
+    };
+    loadFlairs();
+  }, [formData.communityId]);
 
   /**
    * Handler para mudanças nos inputs de texto
@@ -100,6 +121,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       title: '',
       content: '',
       communityId: '',
+      flairId: '',
       image: null
     });
     onClose();
@@ -195,6 +217,44 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
               disabled={isSubmitting}
             />
           </div>
+
+          {/* Flair Selection */}
+          {flairs.length > 0 && (
+            <div className="form-group">
+              <label className="form-label">Flair (opcional)</label>
+              <div className="flair-selection">
+                {flairs.map(flair => (
+                  <button
+                    key={flair.id}
+                    type="button"
+                    className={`flair-option ${formData.flairId === flair.id ? 'selected' : ''}`}
+                    style={{
+                      '--flair-color': flair.flairColor,
+                      '--flair-bg': flair.flairBackgroundColor,
+                      borderColor: formData.flairId === flair.id ? flair.flairColor : 'var(--border-color)',
+                      backgroundColor: formData.flairId === flair.id ? flair.flairBackgroundColor : 'var(--bg-secondary)',
+                      color: formData.flairId === flair.id ? flair.flairColor : 'var(--text-secondary)',
+                      borderWidth: '1px',
+                      borderStyle: 'solid',
+                      padding: '4px 12px',
+                      borderRadius: '16px',
+                      marginRight: '8px',
+                      marginBottom: '8px',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      transition: 'all 0.2s'
+                    } as React.CSSProperties}
+                    onClick={() => setFormData(prev => ({ 
+                      ...prev, 
+                      flairId: prev.flairId === flair.id ? '' : flair.id 
+                    }))}
+                  >
+                    {flair.flairText}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Conteúdo */}
           <div className="form-group">

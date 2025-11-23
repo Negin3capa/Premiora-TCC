@@ -1,42 +1,55 @@
-/**
- * Página de Comunidades - Design Limpo e Profissional
- * Layout minimalista focado na descoberta de comunidades
- */
-
+/* Communities Page Styles */
 .communities-page {
   display: flex;
   min-height: 100vh;
-  background-color: var(--color-bg-primary);
+  background-color: var(--color-bg-secondary);
 }
 
 .communities-main-content {
   flex: 1;
-  margin-left: 280px;
+  margin-left: 220px;
+  padding-top: 80px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: calc(100vw - 220px);
 }
 
-.communities-page-container {
-  padding: var(--space-6);
-  padding-top: 84px; /* Add space for fixed header (64px height + extra margin) */
-  max-width: 1200px;
+.communities-layout {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  max-width: 1280px;
   margin: 0 auto;
+  padding: 0 var(--space-6) var(--space-6);
   width: 100%;
 }
 
-/* ==================== Header Section ==================== */
+.communities-content-container {
+  flex: 1;
+  max-width: 800px;
+  min-width: 0;
+}
 
+.communities-right-sidebar {
+  width: 350px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 100px;
+  height: calc(100vh - 100px);
+}
+
+/* Header Section */
 .communities-header {
-  text-align: center;
   margin-bottom: var(--space-8);
+  text-align: center;
 }
 
 .page-title {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .page-subtitle {
@@ -44,92 +57,76 @@
   color: var(--color-text-secondary);
   max-width: 600px;
   margin: 0 auto;
-  line-height: 1.6;
 }
 
-/* ==================== Controls Section ==================== */
-
+/* Search and Controls */
 .controls-section {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-6);
-  margin-bottom: var(--space-8);
-  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
 }
 
 .communities-search-bar {
-  flex: 1;
-  min-width: 300px;
-  max-width: 500px;
+  margin-bottom: var(--space-4);
 }
 
 .communities-search-input-container {
   position: relative;
   display: flex;
   align-items: center;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border-light);
+  border-radius: 9999px;
+  padding: var(--space-3) var(--space-4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all var(--transition-fast);
+}
+
+.communities-search-input-container:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(255, 66, 77, 0.2);
 }
 
 .communities-search-icon {
-  position: absolute;
-  left: var(--space-4);
-  color: var(--color-text-secondary);
-  z-index: 1;
+  color: var(--color-text-tertiary);
+  margin-right: var(--space-3);
 }
 
 .communities-search-input {
-  width: 100%;
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
-  border: 2px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-bg-secondary);
-  color: var(--color-text-primary);
+  flex: 1;
+  border: none;
+  background: none;
   font-size: var(--font-size-base);
-  transition: all var(--transition-fast);
-}
-
-.communities-search-input:focus {
+  color: var(--color-text-primary);
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.communities-search-input::placeholder {
-  color: var(--color-text-secondary);
 }
 
 .communities-clear-search {
-  position: absolute;
-  right: var(--space-4);
   background: none;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xl);
   cursor: pointer;
-  font-size: var(--font-size-lg);
-  padding: var(--space-1);
-  border-radius: var(--radius-sm);
-  transition: all var(--transition-fast);
+  padding: 0 var(--space-2);
 }
 
 .communities-clear-search:hover {
-  background-color: var(--color-bg-hover);
   color: var(--color-text-primary);
 }
 
 .filter-buttons {
   display: flex;
   gap: var(--space-3);
-  flex-shrink: 0;
+  overflow-x: auto;
+  padding-bottom: var(--space-2);
 }
 
 .filter-button {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  border: 2px solid var(--color-border-light);
-  border-radius: var(--radius-full);
-  background-color: var(--color-bg-secondary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 9999px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-white);
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
@@ -140,360 +137,177 @@
 
 .filter-button:hover {
   background-color: var(--color-bg-hover);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  transform: translateY(-1px);
+  color: var(--color-text-primary);
 }
 
 .filter-button.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-text-white);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-white);
+  border-color: var(--color-text-primary);
 }
 
-/* ==================== Communities Grid ==================== */
-
+/* Communities Grid */
 .communities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-6);
-  margin-bottom: var(--space-8);
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
 }
 
-/* ==================== Community Card ==================== */
-
 .community-card {
-  background-color: var(--color-bg-secondary);
-  border: 2px solid var(--color-border-light);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
-  cursor: pointer;
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-light);
   transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .community-card:hover {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-primary-light);
 }
 
-/* Community Header */
 .community-header {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: var(--space-4);
 }
 
 .community-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-full);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--color-border-light);
 }
 
 .community-basic-info {
   flex: 1;
-  min-width: 0;
 }
 
 .community-name {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin: 0;
 }
 
 .community-tag {
   font-size: var(--font-size-sm);
-  color: var(--color-primary);
-  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
 }
 
-/* Community Description */
 .community-description {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   line-height: 1.5;
-  margin-bottom: var(--space-4);
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* Community Footer */
 .community-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .member-count {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
   font-weight: var(--font-weight-medium);
 }
 
-/* ==================== No Results ==================== */
-
-.no-results {
-  text-align: center;
-  padding: var(--space-16) var(--space-6);
-  color: var(--color-text-secondary);
+/* Top Communities Sidebar Widget */
+.top-communities-widget {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-6);
 }
 
-.no-results p {
+.widget-title {
   font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
   margin-bottom: var(--space-4);
 }
 
-.clear-search-button {
-  padding: var(--space-3) var(--space-6);
-  background-color: var(--color-primary);
-  color: var(--color-text-white);
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.clear-search-button:hover {
-  background-color: var(--color-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-/* ==================== Loading State ==================== */
-
-.communities-loading {
+.top-community-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  height: 300px;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.top-community-item:last-child {
+  border-bottom: none;
+}
+
+.rank-number {
   font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+  width: 24px;
+}
+
+.top-community-info {
+  flex: 1;
+}
+
+.top-community-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.top-community-members {
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
 }
 
-/* ==================== Responsive Design ==================== */
-
+/* Responsive */
 @media (max-width: 1024px) {
-  .communities-main-content {
-    margin-left: 0;
-  }
-
-  .controls-section {
+  .communities-layout {
     flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-4);
   }
 
-  .search-bar {
-    min-width: auto;
-    max-width: none;
+  .communities-right-sidebar {
+    display: none;
   }
 
-  .filter-buttons {
-    justify-content: center;
-    flex-wrap: wrap;
+  .communities-content-container {
+    max-width: 100%;
   }
 
   .communities-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-4);
   }
 }
 
 @media (max-width: 768px) {
-  .communities-page-container {
-    padding: var(--space-4);
-    padding-top: 72px; /* Adjusted for mobile header height (56px + extra margin) */
+  .communities-main-content {
+    margin-left: 0;
+    padding-top: 70px;
+    width: 100%;
   }
 
-  .communities-header {
-    margin-bottom: var(--space-6);
-  }
-
-  .page-title {
-    font-size: var(--font-size-2xl);
-  }
-
-  .page-subtitle {
-    font-size: var(--font-size-base);
-  }
-
-  .controls-section {
-    gap: var(--space-3);
-  }
-
-  .communities-search-input {
-    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-10);
-  }
-
-  .communities-search-icon {
-    left: var(--space-3);
-  }
-
-  .communities-clear-search {
-    right: var(--space-3);
-  }
-
-  .filter-button {
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-xs);
-  }
-
-  .communities-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-
-  .community-card {
-    padding: var(--space-4);
-  }
-
-  .community-header {
-    gap: var(--space-3);
-    margin-bottom: var(--space-3);
-  }
-
-  .community-avatar {
-    width: 48px;
-    height: 48px;
-  }
-
-  .community-name {
-    font-size: var(--font-size-base);
-  }
-
-  .community-description {
-    font-size: var(--font-size-xs);
-    margin-bottom: var(--space-3);
-  }
-}
-
-@media (max-width: 480px) {
-  .communities-page-container {
-    padding: var(--space-3);
-    padding-top: 72px; /* Adjusted for mobile header height (56px + extra margin) */
-  }
-
-  .communities-header {
-    margin-bottom: var(--space-4);
-  }
-
-  .page-title {
-    font-size: var(--font-size-xl);
-  }
-
-  .controls-section {
-    gap: var(--space-2);
-  }
-
-  .filter-buttons {
-    gap: var(--space-2);
-  }
-
-  .filter-button {
-    padding: var(--space-2) var(--space-3);
-    gap: var(--space-1);
-  }
-
-  .community-card {
-    padding: var(--space-3);
-  }
-
-  .community-header {
-    gap: var(--space-2);
-  }
-
-  .community-avatar {
-    width: 40px;
-    height: 40px;
-  }
-
-  .community-name {
-    font-size: var(--font-size-sm);
-  }
-
-  .community-tag {
-    font-size: var(--font-size-xs);
-  }
-
-  .community-description {
-    font-size: var(--font-size-xs);
-    -webkit-line-clamp: 2;
-  }
-
-  .member-count {
-    font-size: var(--font-size-xs);
-  }
-}
-
-/* ==================== Animations ==================== */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.community-card {
-  animation: fadeInUp 0.4s ease-out;
-}
-
-.community-card:nth-child(1) { animation-delay: 0.05s; }
-.community-card:nth-child(2) { animation-delay: 0.1s; }
-.community-card:nth-child(3) { animation-delay: 0.15s; }
-.community-card:nth-child(4) { animation-delay: 0.2s; }
-.community-card:nth-child(5) { animation-delay: 0.25s; }
-.community-card:nth-child(6) { animation-delay: 0.3s; }
-.community-card:nth-child(7) { animation-delay: 0.35s; }
-.community-card:nth-child(8) { animation-delay: 0.4s; }
-
-/* ==================== Focus States ==================== */
-
-.community-card:focus,
-.filter-button:focus,
-.communities-search-input:focus,
-.communities-clear-search:focus,
-.clear-search-button:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* ==================== Dark Mode Support ==================== */
-
-@media (prefers-color-scheme: dark) {
-  .community-card {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border-light);
-  }
-
-  .communities-search-input {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border-light);
-  }
-
-  .filter-button {
-    background-color: var(--color-bg-secondary);
-    border-color: var(--color-border-light);
+  .communities-layout {
+    padding: 0 var(--space-4) var(--space-4);
   }
 }

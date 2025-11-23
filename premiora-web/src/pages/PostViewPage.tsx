@@ -3,18 +3,19 @@
  * Implementa routing tipo Twitter/Reddit: /u/:username/status/post_id
  */
 import React, { useState, useEffect, Suspense } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePostLike, usePostViews } from '../hooks/usePostLike';
 import { PostService } from '../services/content/PostService';
-import { Sidebar } from '../components/layout';
-import SidebarFeed from '../components/content/SidebarFeed';
-import CommunityPostSidebar from '../components/content/CommunityPostSidebar';
+import { Sidebar, MobileBottomBar } from '../components/layout';
+import RightSidebar from '../components/dashboard/RightSidebar';
 import { CommentList } from '../components/content/CommentList';
 import type { ContentItem, ContentType } from '../types/content';
 import { LikeParticles } from '../components/ContentCard/CardActions';
+import '../styles/HomePage.css';
 import '../styles/PostViewPage.css';
+import '../styles/Comments.css';
 
 // Lazy loading dos componentes para otimização
 const Header = React.lazy(() => import('../components/layout/Header'));
@@ -171,13 +172,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
 const PostViewPage: React.FC = () => {
   const { username, postId } = useParams<{ username: string; postId: string; communityName?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { post, loading, error } = usePost(postId!, username!);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalMenuOpen, setIsModalMenuOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
+  const [showModalParticles, setShowModalParticles] = useState(false);
 
   // Hooks para likes e visualizações
   const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
@@ -201,6 +205,15 @@ const PostViewPage: React.FC = () => {
     }
   }, [post, postId, incrementView, loading]);
 
+  // Verificar se deve abrir o modal de imagem automaticamente
+  useEffect(() => {
+    if (location.state && (location.state as any).openImage && post?.thumbnail) {
+      setIsImageModalOpen(true);
+      // Limpar o state para não reabrir ao navegar
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, post?.thumbnail]);
+
   /**
    * Handler para voltar à página anterior
    */
@@ -215,12 +228,16 @@ const PostViewPage: React.FC = () => {
   /**
    * Handler personalizado para like que inclui efeito de partículas
    */
-  const handleLike = () => {
+  const handleLike = (isModal = false) => {
     const wasLiked = liked;
 
     // Disparar efeito de particulas apenas quando está dando like (não removendo)
     if (!wasLiked && !likeLoading) {
-      setShowParticles(true);
+      if (isModal) {
+        setShowModalParticles(true);
+      } else {
+        setShowParticles(true);
+      }
     }
 
     // Chamar handler original
@@ -351,17 +368,21 @@ const PostViewPage: React.FC = () => {
   }
 
   return (
-    <div className="post-view-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="post-view-main-content">
+    <div className="dashboard-page post-view-page">
+      <div className="dashboard-sidebar">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
+      <div className="dashboard-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
+            className="dashboard-header"
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         </Suspense>
-        <div className="post-view-page">
-          <div className="post-view-layout">
-            {/* Conteúdo principal do post */}
+        
+        <div className="dashboard-layout">
+          {/* Conteúdo principal do post */}
+          <div className="dashboard-feed-container">
             <div className="post-view-main">
               <div className="post-view-page-container">
                 {/* Header com navegação */}
@@ -575,7 +596,7 @@ const PostViewPage: React.FC = () => {
                         <div className="like-btn-container-post-view">
                           <LikeParticles show={showParticles} />
                           <button
-                            onClick={handleLike}
+                            onClick={() => handleLike(false)}
                             className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
                             disabled={likeLoading}
                             aria-label={liked ? 'Descurtir' : 'Curtir'}
@@ -627,37 +648,175 @@ const PostViewPage: React.FC = () => {
                 </main>
               </div>
             </div>
+          </div>
 
-            {/* Sidebar condicional baseada no tipo de post */}
-            {post.communityId ? (
-              <CommunityPostSidebar communityName={post.communityName || ''} />
-            ) : (
-              <SidebarFeed />
-            )}
+          <div className="dashboard-right-sidebar-container">
+            <RightSidebar communityName={post.communityName} />
           </div>
         </div>
       </div>
 
+      <MobileBottomBar />
 
-      {/* Modal de imagem ampliada */}
+      {/* Modal de imagem ampliada - Layout Focado (Twitter-like) */}
       {isImageModalOpen && post.thumbnail && (
-        <div
-          className="image-modal-overlay"
-          onClick={() => setIsImageModalOpen(false)}
-        >
-          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="image-modal-close"
+        <div className="image-modal-overlay">
+          <div className="image-modal-container">
+            {/* Painel Esquerdo: Mídia */}
+            <div 
+              className="image-modal-media"
               onClick={() => setIsImageModalOpen(false)}
-              aria-label="Fechar imagem ampliada"
             >
-              <X size={16} />
-            </button>
-            <img
-              src={post.thumbnail}
-              alt={post.title}
-              className="image-modal-image"
-            />
+              <button
+                className="image-modal-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsImageModalOpen(false);
+                }}
+                aria-label="Fechar visualização"
+              >
+                <X size={24} />
+              </button>
+              
+              <img
+                src={post.thumbnail}
+                alt={post.title}
+                className="image-modal-image"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Painel Direito: Sidebar de Conteúdo */}
+            <div className="image-modal-sidebar">
+              <div className="image-modal-sidebar-content">
+                {/* Header do Post na Sidebar */}
+                <header className="post-header">
+                  <div className="author-info">
+                    <img
+                      src={post.authorAvatar || '/default-avatar.png'}
+                      alt={post.author}
+                      className="author-avatar"
+                    />
+                    <div className="author-details">
+                      <div className="author-meta">
+                        <Link to={`/u/${username}`} className="author-name">
+                          {post.author}
+                        </Link>
+                        {post.communityId && (
+                          <Link to={`/r/${post.communityName}`} className="community-flair">
+                            {post.communityAvatar && (
+                              <img 
+                                src={post.communityAvatar} 
+                                alt="" 
+                                className="community-avatar-small"
+                              />
+                            )}
+                            <span className="community-prefix">r/</span>
+                            <span className="community-name-small">{post.communityDisplayName || post.communityName}</span>
+                          </Link>
+                        )}
+                      </div>
+                      <span className="post-timestamp">{post.timestamp}</span>
+                    </div>
+                  </div>
+
+                  {/* Menu na Sidebar */}
+                  <div className="post-menu">
+                    <div className="post-menu-container">
+                      <button
+                        className="post-view-menu-button"
+                        onClick={() => setIsModalMenuOpen(!isModalMenuOpen)}
+                        aria-label="Mais opções"
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+
+                      {isModalMenuOpen && (
+                        <>
+                          <div className="post-menu-dropdown">
+                            <button className="post-menu-item" onClick={() => { handleShare(); setIsModalMenuOpen(false); }}>
+                              <Share size={16} />
+                              <span>Compartilhar</span>
+                            </button>
+                            <button className="post-menu-item" onClick={() => { handleBookmark(); setIsModalMenuOpen(false); }}>
+                              <Bookmark size={16} />
+                              <span>{isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}</span>
+                            </button>
+                            {isAuthor && (
+                              <button className="post-menu-item delete-item" onClick={() => { handleDelete(); setIsModalMenuOpen(false); }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                                <span>Excluir</span>
+                              </button>
+                            )}
+                            <button className="post-menu-item report-item" onClick={() => { handleReport(); setIsModalMenuOpen(false); }}>
+                              <Flag size={16} />
+                              <span>Denunciar</span>
+                            </button>
+                          </div>
+                          <div className="post-menu-overlay" onClick={() => setIsModalMenuOpen(false)} />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </header>
+
+                {/* Conteúdo do Post na Sidebar */}
+                <div className="post-view-body">
+                  <h1 className="post-title">{post.title}</h1>
+                  {post.content && (
+                    <div className="post-text">
+                      {post.content.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Ações na Sidebar */}
+                <div className="post-actions">
+                  <div className="action-buttons">
+                    <div className="like-btn-container-post-view">
+                      <LikeParticles show={showModalParticles} />
+                      <button
+                        onClick={() => handleLike(true)}
+                        className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
+                        disabled={likeLoading}
+                      >
+                        <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+                        <span className="action-count">{likeCount}</span>
+                      </button>
+                    </div>
+
+                    <button className="post-view-action-button comment-button">
+                      <MessageCircle size={18} />
+                      <span className="action-count">0</span>
+                    </button>
+
+                    <button onClick={handleShare} className="post-view-action-button share-button">
+                      <Share size={18} />
+                    </button>
+
+                    <button 
+                      onClick={handleBookmark} 
+                      className={`post-view-action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
+                    >
+                      <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
+                    </button>
+                  </div>
+                  
+                  <div className="post-stats">
+                    <span className="views-count">{viewCount?.toLocaleString('pt-BR')} visualizações</span>
+                  </div>
+                </div>
+
+                {/* Comentários na Sidebar */}
+                <div className="comments-section">
+                  <CommentList postId={postId!} className="modal-comments" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

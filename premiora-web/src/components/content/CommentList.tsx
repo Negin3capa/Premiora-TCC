@@ -202,9 +202,13 @@ export const CommentList: React.FC<CommentListProps> = ({
   const renderComment = useCallback((comment: Comment, depth: number = 0): React.ReactNode => {
     const isEditing = editingCommentId === comment.id;
     const isReplyingTo = showReplyForm === comment.id && replyingToCommentId === comment.id;
+    const hasReplies = comment.replies && comment.replies.length > 0;
 
     return (
       <div key={comment.id} className="comment-thread">
+        {/* Connector line for replies */}
+        {hasReplies && <div className="comment-connector" />}
+
         <CommentItem
           comment={comment}
           depth={depth}
@@ -261,8 +265,11 @@ export const CommentList: React.FC<CommentListProps> = ({
   ]);
 
   // Memoizar lista renderizada para performance
+  // Filtramos para garantir que apenas comentários raiz sejam renderizados no nível superior
   const renderedComments = useMemo(() => {
-    return comments.map(comment => renderComment(comment, 0));
+    return comments
+      .filter(comment => !comment.parentCommentId)
+      .map(comment => renderComment(comment, 0));
   }, [comments, renderComment]);
 
   return (

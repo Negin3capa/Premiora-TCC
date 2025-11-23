@@ -9,13 +9,14 @@ import type { ContentItem } from '../../types/content';
 interface PostCardProps {
   item: ContentItem;
   onClick?: () => void;
+  onImageClick?: (e: React.MouseEvent) => void;
 }
 
 /**
  * Card específico para posts
  * Exibe título, conteúdo, imagem e informações do post
  */
-const PostCard: React.FC<PostCardProps> = ({ item, onClick }) => {
+const PostCard: React.FC<PostCardProps> = ({ item, onClick, onImageClick }) => {
   return (
     <div
       className="post-content"
@@ -36,6 +37,8 @@ const PostCard: React.FC<PostCardProps> = ({ item, onClick }) => {
           alt={item.title}
           className="post-image"
           loading="lazy"
+          onClick={onImageClick}
+          style={{ cursor: onImageClick ? 'zoom-in' : 'inherit' }}
         />
       )}
       {item.isLocked && (
