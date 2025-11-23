@@ -5,6 +5,28 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 23/11/25
+
+### Adicionado
+
+- **Experiência de Mídia Aprimorada**
+  - Modal de imagem aprimorado com barra lateral de conteúdo para visualização imersiva
+  - Navegação de clique em imagens nos componentes `ContentCard` e `PostCard`
+
+- **Melhorias na Comunidade e Post**
+  - Nova seção `CommunityInfoSection` para informações detalhadas da comunidade
+  - Layout da página `PostViewPage` otimizado
+
+- **Busca Aprimorada**
+  - Dropdown de busca agora exibe avatares de usuários e comunidades
+  - Melhoria no serviço de busca para exibição correta de nomes de usuários
+
+### Alterado
+
+- **Refatoração do Sistema de Comentários**
+  - Layout e funcionalidades dos componentes de comentário refatorados para uma experiência estilo "Twitter"
+  - Estilos atualizados para maior consistência visual
+
 ## [0.9.0] - 23/11/25
 
 ### Adicionado
