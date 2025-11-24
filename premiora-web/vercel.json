@@ -1,8 +1,8 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "devCommand": "npm run dev",
-  "installCommand": "npm ci",
+  "installCommand": "cd premiora-web && npm ci",
+  "buildCommand": "cd premiora-web && npm run build",
+  "outputDirectory": "premiora-web/dist",
+  "devCommand": "cd premiora-web && npm run dev",
   "framework": "vite",
   "regions": ["gru1"],
   "rewrites": [

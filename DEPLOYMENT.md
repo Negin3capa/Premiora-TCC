@@ -127,8 +127,8 @@ As chaves secretas do Stripe são usadas pelas Edge Functions para processar pag
 1.  Acesse o **Supabase Dashboard**.
 2.  Navegue até **Project Settings** > **Edge Functions**.
 3.  Na seção **Secrets**, adicione as seguintes chaves:
-    *   `STRIPE_SECRET_KEY`: Sua chave secreta do Stripe de produção (ex: `sk_live_...`).
-    *   `STRIPE_WEBHOOK_SECRET`: O segredo do webhook do Stripe, que garante que as requisições vêm do Stripe.
+    - `STRIPE_SECRET_KEY`: Sua chave secreta do Stripe de produção (ex: `sk_live_...`).
+    - `STRIPE_WEBHOOK_SECRET`: O segredo do webhook do Stripe, que garante que as requisições vêm do Stripe.
 4.  Clique em **Save** para cada segredo.
 
 ### 3. Configurar Domínios no Google Cloud Console (para Google OAuth)
