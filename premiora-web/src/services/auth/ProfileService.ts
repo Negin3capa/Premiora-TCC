@@ -3,7 +3,6 @@
  * Responsável por operações CRUD de perfil de usuário
  */
 import { supabase } from '../../utils/supabaseClient';
-import { supabaseAdmin } from '../../utils/supabaseAdminClient';
 import type { User } from '@supabase/supabase-js';
 
 /**
