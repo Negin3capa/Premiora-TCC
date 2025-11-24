@@ -373,6 +373,7 @@ npm run preview
 #### Conteúdo e Feed
 
 - **Posts e Vídeos**: Crie e compartilhe conteúdo diversificado
+- **Player de Vídeo**: Experiência de visualização otimizada
 - **Feed Personalizado**: Timeline com conteúdo relevante
 - **Upload de Arquivos**: Suporte a imagens e vídeos
 - **Interação Social**: Likes, comentários e compartilhamento

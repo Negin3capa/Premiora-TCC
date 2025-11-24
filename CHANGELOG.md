@@ -5,6 +5,26 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 24/11/25
+
+### Adicionado
+
+- **Aprimoramentos em Cards de Vídeo**
+  - Melhorias visuais e funcionais no `VideoCard.tsx`
+  - Atualizações no modal de criação de vídeo (`CreateVideoModal.tsx`)
+  - Refinamentos de estilo para experiência de visualização de vídeo
+
+- **Melhorias na Exibição de Conteúdo**
+  - Refatoração do `ContentCard.tsx` para melhor performance e manutenção
+  - Atualizações nos serviços de Feed e Post para otimização de entrega de conteúdo
+  - Ajustes de layout na página de visualização de post (`PostViewPage.tsx`)
+
+### Alterado
+
+- **Estilos e UI**
+  - Atualização de estilos em `ContentCard.css` e `CreatePostModal.css`
+  - Melhorias na responsividade e apresentação de cards de conteúdo
+
 ## [0.12.0] - 23/11/25
 
 ### Adicionado
