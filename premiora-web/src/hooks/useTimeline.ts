@@ -149,7 +149,7 @@ export const useTimeline = () => {
         title: postData.title || '',
         content: postData.content,
         communityId: postData.communityId,
-        image: null // TODO: Suporte a imagens
+        images: [] // TODO: Suporte a imagens
       }, user.id);
 
       // Reconciliação bem-sucedida

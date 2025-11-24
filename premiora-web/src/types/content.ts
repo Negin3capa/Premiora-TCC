@@ -33,6 +33,7 @@ export interface ContentItem {
   isLocked?: boolean;
   previewContent?: string; // Conteúdo preview para posts bloqueados
   requiredTier?: string; // Nome do tier necessário
+  requiredTierId?: string; // ID do tier necessário
   fullContent?: string; // Conteúdo completo (só para usuários autorizados)
   // Propriedades de comunidade
   communityId?: string;
@@ -64,7 +65,9 @@ export interface PostFormData {
   content: string;
   communityId?: string;
   flairId?: string;
-  image?: File | null;
+  images?: File[]; // Array de imagens/GIFs
+  visibility?: 'public' | 'subscribers' | 'tier'; // Nível de visibilidade
+  requiredTierId?: string; // ID do tier específico se visibility == 'tier'
 }
 
 /**
