@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ProfileBanner, FeaturedPost, RecentPosts, PostsTab, CommunityTab, ShopTab } from '../components/profile';
+import CreatorTab from '../components/profile/CreatorTab';
 import { Sidebar, Header, ProfileSidebar } from '../components/layout';
+import CreatorSidebar from '../components/layout/CreatorSidebar';
 import SubscriptionModal from '../components/profile/SubscriptionModal';
 import { useAuth } from '../hooks/useAuth';
 import { useProfileTabs } from '../hooks/useProfileTabs';
@@ -53,6 +55,12 @@ const ProfilePage: React.FC = () => {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTier[]>([]);
   const [connectedCommunityId, setConnectedCommunityId] = useState<string | undefined>(undefined);
+
+  // Creator Tab State
+  const [creatorSection, setCreatorSection] = useState('dashboard');
+  const [isCreatorSidebarCollapsed, setIsCreatorSidebarCollapsed] = useState(false);
+
+  const isOwnProfile = userProfile?.username === username;
 
   const handleShare = useCallback(() => {
     // TODO: Implementar compartilhamento do perfil
@@ -364,6 +372,14 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // Calculate sidebar width based on state
+  const getSidebarWidth = () => {
+    if (isSidebarOpen) return '0'; // Mobile sidebar is overlay
+    if (window.innerWidth <= 768) return '0'; // Mobile
+    if (activeTab === 'creator' && !isCreatorSidebarCollapsed) return '240px'; // Expanded Creator Sidebar
+    return '60px'; // Default/Collapsed
+  };
+
   return (
     <div style={{
       backgroundColor: 'var(--color-bg-primary)',
@@ -371,7 +387,7 @@ const ProfilePage: React.FC = () => {
       color: 'var(--color-text-secondary)',
       overflowX: 'hidden'
     }}>
-      {/* Conditional Sidebar - ProfileSidebar for all profile pages */}
+      {/* Conditional Sidebar */}
       {/* On mobile, hamburger menu opens the full sidebar */}
       {isSidebarOpen ? (
         <Sidebar
@@ -379,11 +395,21 @@ const ProfilePage: React.FC = () => {
           onClose={() => setIsSidebarOpen(false)}
         />
       ) : (
-        <ProfileSidebar
-          username={username!}
-          onShare={handleShare}
-          onReport={handleReport}
-        />
+        activeTab === 'creator' ? (
+          <CreatorSidebar
+            activeSection={creatorSection}
+            onSectionChange={setCreatorSection}
+            onBackToProfile={() => handleTabChange('home')}
+            isCollapsed={isCreatorSidebarCollapsed}
+            onToggleCollapse={() => setIsCreatorSidebarCollapsed(!isCreatorSidebarCollapsed)}
+          />
+        ) : (
+          <ProfileSidebar
+            username={username!}
+            onShare={handleShare}
+            onReport={handleReport}
+          />
+        )
       )}
 
       {/* Global Header */}
@@ -393,10 +419,11 @@ const ProfilePage: React.FC = () => {
         showProfileTabs={true}
         activeProfileTab={activeTab}
         onProfileTabChange={handleTabChange}
+        isOwnProfile={isOwnProfile}
       />
 
-      {/* Profile Banner - Full screen width - Only show when not on posts, community, or shop tabs */}
-      {!['posts', 'community', 'shop'].includes(activeTab) && (
+      {/* Profile Banner - Full screen width - Only show when not on posts, community, shop, or creator tabs */}
+      {!['posts', 'community', 'shop', 'creator'].includes(activeTab) && (
         <div style={{
           position: 'relative',
           width: '100vw',
@@ -416,11 +443,12 @@ const ProfilePage: React.FC = () => {
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
-        marginLeft: isSidebarOpen ? '0' : (window.innerWidth <= 768 ? '0' : '60px'), /* Account for ProfileSidebar width (60px), hide on mobile */
-        marginTop: ['posts', 'community', 'shop'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
+        marginLeft: getSidebarWidth(),
+        marginTop: ['posts', 'community', 'shop', 'creator'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
         padding: window.innerWidth <= 768 ? '1rem 0.5rem' : '2rem 1rem', /* Reduce padding on mobile */
         paddingBottom: window.innerWidth <= 480 ? '80px' : undefined, /* Add padding for mobile bottom bar */
         overflow: 'hidden',
+        transition: 'margin-left 0.3s ease' /* Smooth transition for sidebar toggle */
       }}>
         {/* Content container */}
         <div style={{
@@ -467,6 +495,10 @@ const ProfilePage: React.FC = () => {
 
           {activeTab === 'shop' && (
             <ShopTab />
+          )}
+
+          {activeTab === 'creator' && (
+            <CreatorTab activeSection={creatorSection} />
           )}
         </div>
       </div>
