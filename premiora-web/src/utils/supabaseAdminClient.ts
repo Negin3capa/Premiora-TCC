@@ -13,16 +13,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  throw new Error(
-    'Variáveis de ambiente administrativas do Supabase não encontradas. ' +
-    'Verifique se VITE_SUPABASE_URL e VITE_SUPABASE_SERVICE_ROLE_KEY estão definidas no arquivo .env'
-  );
-}
+// ATENÇÃO: Em produção, a service role key NÃO deve estar presente no frontend.
+// Este check evita que a aplicação quebre se a chave não estiver presente,
+// mas funcionalidades que dependem dela falharão.
+// TODO: Refatorar serviços para não dependerem de supabaseAdmin no frontend.
 
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+export const supabaseAdmin = (supabaseUrl && supabaseServiceRoleKey)
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
+  : null as any; // Cast para evitar erros de TS, mas causará erro em tempo de execução se usado sem chave
