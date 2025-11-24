@@ -1,0 +1,283 @@
+.subscriptions-page {
+  display: flex;
+  height: 100vh;
+  background-color: #000;
+}
+
+.subscriptions-main-content {
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.subscriptions-container {
+  padding: 2rem;
+}
+
+.pricing {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.pricing h2 {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  color: #fff;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.pricing-card {
+  background-color: #1a1a1a;
+  border-radius: 10px;
+  padding: 40px;
+  border: 1px solid #333;
+  position: relative;
+}
+
+.pricing-card.pro {
+  border-color: #ff424d;
+}
+
+.popular-badge {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #ff424d;
+  color: #fff;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.pricing-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.price .currency {
+  font-size: 1.5rem;
+  vertical-align: super;
+}
+
+.price .period {
+  font-size: 1rem;
+  color: #888;
+}
+
+.pricing-card p {
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.pricing-card ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 40px;
+}
+
+.pricing-card ul li {
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+.pricing-btn {
+  display: inline-block;
+  background-color: #333;
+  color: #fff;
+  padding: 15px 40px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.pricing-btn:hover {
+  background-color: #444;
+}
+
+.pricing-btn.primary {
+  background-color: #ff424d;
+}
+
+.pricing-btn.primary:hover {
+  background-color: #e63b45;
+}
+
+/* Estilo para link desabilitado */
+.pricing-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pricing-btn.disabled:hover {
+  background-color: #ff424d;
+}
+
+/* Estilo para botão em loading */
+.pricing-btn.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.pricing-btn.loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  right: 15px;
+  margin-top: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spinner 0.6s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos para páginas de checkout */
+.checkout-success,
+.checkout-cancel {
+  max-width: 600px;
+  margin: 60px auto;
+  text-align: center;
+  padding: 40px;
+  background-color: #1a1a1a;
+  border-radius: 10px;
+  border: 1px solid #333;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.cancel-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background-color: #f44336;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #fff;
+  font-weight: bold;
+}
+
+.checkout-success h1,
+.checkout-cancel h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.success-message,
+.cancel-message {
+  font-size: 1.1rem;
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.success-details {
+  text-align: left;
+  margin: 30px 0;
+  padding: 20px;
+  background-color: #0a0a0a;
+  border-radius: 8px;
+}
+
+.success-details h3 {
+  color: #fff;
+  margin-bottom: 15px;
+}
+
+.success-details ul {
+  list-style: none;
+  padding: 0;
+}
+
+.success-details ul li {
+  color: #4caf50;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.cancel-details {
+  margin: 30px 0;
+  padding: 20px;
+  background-color: #0a0a0a;
+  border-radius: 8px;
+}
+
+.cancel-details p {
+  color: #aaa;
+  line-height: 1.6;
+}
+
+.success-actions,
+.cancel-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.success-actions .pricing-btn,
+.cancel-actions .pricing-btn {
+  flex: 1;
+  max-width: 200px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+
+  .checkout-success,
+  .checkout-cancel {
+    margin: 20px;
+    padding: 30px 20px;
+  }
+
+  .success-actions,
+  .cancel-actions {
+    flex-direction: column;
+  }
+
+  .success-actions .pricing-btn,
+  .cancel-actions .pricing-btn {
+    max-width: 100%;
+  }
+}

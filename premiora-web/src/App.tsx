@@ -45,6 +45,9 @@ const CreateCommunityPage = React.lazy(() => import('./pages/CreateCommunityPage
 const ExplorePage = React.lazy(() => import('./pages/ExplorePage'));
 const SearchResultsPage = React.lazy(() => import('./pages/SearchResultsPage'));
 const PostViewPage = React.lazy(() => import('./pages/PostViewPage'));
+const SubscriptionsPage = React.lazy(() => import('./pages/SubscriptionsPage'));
+const CheckoutSuccessPage = React.lazy(() => import('./pages/CheckoutSuccessPage'));
+const CheckoutCancelPage = React.lazy(() => import('./pages/CheckoutCancelPage'));
 const CreatorChannelSetupPage = React.lazy(() => import('./pages/CreatorChannelSetupPage'));
 
 /**
@@ -220,6 +223,42 @@ const App: React.FC = () => {
             <ProtectedRoute>
               <ProtectedLayout>
                 <SettingsPage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Assinaturas (apenas para autenticados) */}
+        <Route
+          path="/subscriptions"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <SubscriptionsPage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Checkout Success (apenas para autenticados) */}
+        <Route
+          path="/checkout/success"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <CheckoutSuccessPage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota Checkout Cancel (apenas para autenticados) */}
+        <Route
+          path="/checkout/cancel"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <CheckoutCancelPage />
               </ProtectedLayout>
             </ProtectedRoute>
           }

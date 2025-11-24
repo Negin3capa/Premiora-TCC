@@ -13,7 +13,7 @@
   width: 220px;
   background-color: var(--color-bg-primary);
   border-right: 1px solid var(--color-border-light);
-  z-index: 100;
+  z-index: 2000; /* Garante que a sidebar esteja sempre no topo */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -235,12 +235,19 @@
 .sidebar-overlay {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 220px; /* Começa depois da sidebar em telas maiores */
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1999; /* Just below sidebar z-index */
+  z-index: 1999; /* Fica abaixo da sidebar */
   display: block;
+}
+
+/* Em telas menores, o overlay cobre tudo, pois a sidebar desliza por cima */
+@media (max-width: 1024px) {
+  .sidebar-overlay {
+    left: 0;
+  }
 }
 
 @media (max-width: 768px) {

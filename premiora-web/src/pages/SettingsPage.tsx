@@ -10,9 +10,6 @@ import {
   Accessibility,
   Database,
   DollarSign,
-  Sun,
-  Moon,
-  Monitor,
   Download,
   Settings as SettingsIcon,
   Upload,
@@ -175,9 +172,9 @@ const SettingsPage: React.FC = () => {
                         value={theme}
                         onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
                       >
-                        <option value="light"><Sun size={16} /> Claro</option>
-                        <option value="dark"><Moon size={16} /> Escuro</option>
-                        <option value="system"><Monitor size={16} /> Sistema</option>
+                        <option value="light">Claro</option>
+                        <option value="dark">Escuro</option>
+                        <option value="system">Sistema</option>
                       </select>
                     </label>
                     <p className="setting-description">

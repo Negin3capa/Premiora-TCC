@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Bell, MessageCircle, Users, Search } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
 
 /**
  * Hook personalizado para detectar scroll e controlar visibilidade da bottom bar
@@ -79,9 +79,6 @@ const MobileBottomBar: React.FC<MobileBottomBarProps> = ({ className = '' }) => 
   const mobileNavigationItems = [
     { icon: <Home size={20} />, label: 'Home', route: '/dashboard' },
     { icon: <Search size={20} />, label: 'Buscar', route: '/search' },
-    { icon: <Bell size={20} />, label: 'Notificações', route: '/notifications' },
-    { icon: <MessageCircle size={20} />, label: 'Mensagens', route: '/messages' },
-    { icon: <Users size={20} />, label: 'Comunidades', route: '/communities' },
   ];
 
   /**
