@@ -2,9 +2,7 @@
 
 Este documento descreve como configurar e gerenciar os ambientes de deploy da aplicação Premiora Web.
 
-## ⚠️ Status do Deploy
-
-**Vercel deployment temporariamente desabilitado** - O projeto não está pronto para deploy ainda. Para reativar:
+## Status do Deploy: Pronto
 
 1. Renomeie `premiora-web/vercel.json.disabled` para `premiora-web/vercel.json`
 2. Descomente o job `deploy-preview` no arquivo `.github/workflows/ci.yml`
