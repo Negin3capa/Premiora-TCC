@@ -3,6 +3,7 @@
  * Responsável por busca e paginação de conteúdo do feed
  */
 import { supabase } from "../../utils/supabaseClient";
+import { supabaseAdmin } from "../../utils/supabaseAdminClient";
 import { VideoService } from "./VideoService";
 import type { SortOption, TimeRange } from "../../types/content";
 
@@ -108,7 +109,9 @@ export class FeedService {
     userId?: string,
   ): Promise<{ posts: any[]; nextCursor?: string; hasMore: boolean }> {
     try {
-      let query = supabase
+      // Usar supabaseAdmin para garantir que posts premium sejam retornados (bypass RLS)
+      // O filtro de acesso será feito manualmente abaixo
+      let query = supabaseAdmin
         .from("posts")
         .select(`
           *,
@@ -136,19 +139,17 @@ export class FeedService {
               flair_color,
               flair_background_color
             )
+          ),
+          required_tier:required_tier_id (
+            id,
+            name,
+            tier_order
           )
         `)
         .eq("is_published", true)
         .neq("content_type", "video")
         .order("published_at", { ascending: false })
         .limit(limit);
-
-      // Aplicar filtros de acesso baseado no usuário
-      if (userId) {
-        query = query.or(`is_premium.eq.false,creator_id.eq.${userId}`);
-      } else {
-        query = query.eq("is_premium", false);
-      }
 
       // Aplicar cursor se fornecido
       if (cursor) {
@@ -165,7 +166,59 @@ export class FeedService {
         throw new Error(`Erro ao buscar posts com cursor: ${error.message}`);
       }
 
-      const posts = data || [];
+      let posts = data || [];
+
+      // Buscar assinaturas do usuário se estiver logado
+      let userSubscribedTiers: any[] = [];
+      if (userId) {
+        const { data: userSubs } = await supabase
+          .from('user_subscriptions')
+          .select('plan_id')
+          .eq('user_id', userId)
+          .eq('status', 'active');
+        
+        const planIds = userSubs?.map(s => s.plan_id) || [];
+        
+        if (planIds.length > 0) {
+          const { data: tiers } = await supabaseAdmin
+            .from('subscription_tiers')
+            .select('id, tier_order, creator_channel_id')
+            .in('id', planIds);
+          
+          userSubscribedTiers = tiers || [];
+        }
+      }
+
+      // Processar posts para verificar acesso e sanitizar se necessário
+      posts = posts.map(post => {
+        if (!post.is_premium) return post;
+        
+        // Se é o criador, tem acesso
+        if (userId && post.creator_id === userId) return post;
+
+        let hasAccess = false;
+        
+        if (userId && userSubscribedTiers.length > 0) {
+          const requiredOrder = post.required_tier?.tier_order || 0;
+          // Verificar se tem tier suficiente para este criador
+          hasAccess = userSubscribedTiers.some(t => 
+            t.creator_channel_id === post.creator_id && t.tier_order >= requiredOrder
+          );
+        }
+
+        if (!hasAccess) {
+          return {
+            ...post,
+            content: null,
+            media_urls: [],
+            isLocked: true,
+            requiredTier: post.required_tier?.name
+          };
+        }
+
+        return post;
+      });
+
       let nextCursor: string | undefined;
       const hasMore = posts.length === limit;
 
@@ -633,21 +686,12 @@ export class FeedService {
   ): Promise<FeedResult> {
     try {
       // Primeiro, obter o total de registros para evitar erros de range
-      let countQuery = supabase
+      // Usar supabaseAdmin para incluir posts premium na contagem
+      let countQuery = supabaseAdmin
         .from("posts")
         .select("*", { count: "exact", head: true })
         .eq("is_published", true)
         .eq("creator_id", creatorId);
-
-      // Aplicar filtros de acesso baseado no usuário
-      if (userId) {
-        countQuery = countQuery.or(
-          `is_premium.eq.false,creator_id.eq.${userId}`,
-        );
-      } else {
-        // Usuário não logado vê apenas conteúdo público
-        countQuery = countQuery.eq("is_premium", false);
-      }
 
       const { count, error: countError } = await countQuery;
 
@@ -671,7 +715,7 @@ export class FeedService {
       // Ajustar o limite se estamos na última página
       const actualLimit = Math.min(limit, totalPosts - from);
 
-      let dataQuery = supabase
+      let dataQuery = supabaseAdmin
         .from("posts")
         .select(`
           *,
@@ -692,20 +736,17 @@ export class FeedService {
           ),
           comments (
             id
+          ),
+          required_tier:required_tier_id (
+            id,
+            name,
+            tier_order
           )
         `)
         .eq("is_published", true)
         .eq("creator_id", creatorId)
         .order("published_at", { ascending: false })
         .range(from, from + actualLimit - 1);
-
-      // Aplicar filtros de acesso baseado no usuário
-      if (userId) {
-        dataQuery = dataQuery.or(`is_premium.eq.false,creator_id.eq.${userId}`);
-      } else {
-        // Usuário não logado vê apenas conteúdo público
-        dataQuery = dataQuery.eq("is_premium", false);
-      }
 
       const { data, error: dataError } = await dataQuery;
 
@@ -715,10 +756,63 @@ export class FeedService {
         );
       }
 
+      let posts = data || [];
+
+      // Buscar assinaturas do usuário se estiver logado
+      let userSubscribedTiers: any[] = [];
+      if (userId) {
+        const { data: userSubs } = await supabase
+          .from('user_subscriptions')
+          .select('plan_id')
+          .eq('user_id', userId)
+          .eq('status', 'active');
+        
+        const planIds = userSubs?.map(s => s.plan_id) || [];
+        
+        if (planIds.length > 0) {
+          const { data: tiers } = await supabaseAdmin
+            .from('subscription_tiers')
+            .select('id, tier_order, creator_channel_id')
+            .in('id', planIds);
+          
+          userSubscribedTiers = tiers || [];
+        }
+      }
+
+      // Processar posts para verificar acesso e sanitizar se necessário
+      posts = posts.map(post => {
+        if (!post.is_premium) return post;
+        
+        // Se é o criador, tem acesso
+        if (userId && post.creator_id === userId) return post;
+
+        let hasAccess = false;
+        
+        if (userId && userSubscribedTiers.length > 0) {
+          const requiredOrder = post.required_tier?.tier_order || 0;
+          // Verificar se tem tier suficiente para este criador
+          hasAccess = userSubscribedTiers.some(t => 
+            t.creator_channel_id === post.creator_id && t.tier_order >= requiredOrder
+          );
+        }
+
+        if (!hasAccess) {
+          return {
+            ...post,
+            content: null,
+            media_urls: [],
+            isLocked: true,
+            requiredTier: post.required_tier?.name
+          };
+        }
+
+        return post;
+      });
+
       const hasMore = (from + actualLimit) < totalPosts;
 
       return {
-        posts: data || [],
+        posts,
         hasMore,
       };
     } catch (error) {

@@ -510,25 +510,67 @@
   white-space: pre-wrap;
 }
 
-.locked-indicator {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+/* Locked Content Styles */
+.locked-content {
+  padding: var(--space-6) var(--space-4);
   background-color: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-light);
   border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 1px dashed var(--color-border-medium);
+}
+
+.locked-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 400px;
+}
+
+.lock-icon-large {
   color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
 }
 
-.lock-icon {
+.locked-overlay h3 {
+  color: var(--color-text-primary);
   font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
 }
 
-.lock-text {
-  font-weight: var(--font-weight-medium);
+.locked-overlay p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+.locked-overlay strong {
+  color: var(--color-text-primary);
+}
+
+.unlock-button {
+  margin-top: var(--space-2);
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
+  padding: var(--space-2) var(--space-6);
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.unlock-button:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* ==================== Card Actions ==================== */

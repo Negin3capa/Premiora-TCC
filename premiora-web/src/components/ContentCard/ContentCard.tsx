@@ -4,7 +4,7 @@
  */
 import React, { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Pin } from 'lucide-react';
+import { Pin, Lock } from 'lucide-react';
 import '../../styles/ContentCard.css';
 import { useAuth } from '../../hooks/useAuth';
 import { usePostLike, usePostViews } from '../../hooks/usePostLike';
@@ -132,6 +132,27 @@ interface ContentCardProps {
 }
 
 /**
+ * Componente para exibir conteúdo bloqueado (Premium)
+ */
+const LockedContent: React.FC<{ item: ContentItem }> = ({ item }) => (
+  <div className="locked-content">
+    <div className="locked-overlay">
+      <Lock size={48} className="lock-icon-large" />
+      <h3>Conteúdo Exclusivo</h3>
+      <p>Este post é exclusivo para apoiadores do nível <strong>{item.requiredTier || 'Premium'}</strong>.</p>
+      <button className="unlock-button" onClick={(e) => {
+        e.stopPropagation();
+        // Navegar para página de assinatura ou modal
+        // TODO: Implementar navegação para assinatura
+        console.log('Navigate to subscribe');
+      }}>
+        Assinar para Desbloquear
+      </button>
+    </div>
+  </div>
+);
+
+/**
  * Card de conteúdo reutilizável para diferentes tipos de mídia
  * Suporta: posts, vídeos e perfis de criadores
  */
@@ -185,6 +206,11 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Handler para visualizar post detalhado - navega para página dedicada
    */
   const handleViewPost = () => {
+    // Se estiver bloqueado, não navegar
+    if (item.isLocked) {
+      return;
+    }
+
     if ((item.type === 'post' || item.type === 'video') && item.id) {
       // Incrementar visualização
       incrementView(item.id);
@@ -279,6 +305,11 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
    * Renderiza o conteúdo específico baseado no tipo usando componentes especializados
    */
   const renderContentSpecific = () => {
+    // Se o conteúdo estiver bloqueado, exibir overlay de bloqueio
+    if (item.isLocked) {
+      return <LockedContent item={item} />;
+    }
+
     switch (item.type) {
       case 'profile':
         return <ProfileCard item={item} onFollow={() => console.log('Follow clicked')} />;

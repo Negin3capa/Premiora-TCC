@@ -79,7 +79,10 @@ export interface VideoFormData {
   description: string;
   communityId?: string;
   video?: File | null;
+  youtubeUrl?: string;
   thumbnail?: File | null;
+  visibility?: 'public' | 'subscribers' | 'tier';
+  requiredTierId?: string;
 }
 
 /**

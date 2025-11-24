@@ -23,6 +23,11 @@ export const FeaturedPost: React.FC<FeaturedPostProps> = ({ post }) => {
    * Navega para a PostViewPage com o username e postId
    */
   const handleViewPost = () => {
+    // Se o post estiver bloqueado, não permitir navegação
+    if (post?.locked) {
+      return;
+    }
+
     if (username && post?.id) {
       navigate(`/u/${username}/status/${post.id}`);
     }
@@ -100,7 +105,7 @@ export const FeaturedPost: React.FC<FeaturedPostProps> = ({ post }) => {
               </div>
             )}
             {/* Overlay de play para vídeos */}
-            {post.contentType === 'video' && (
+            {post.contentType === 'video' && !post.locked && (
               <div className={styles.videoOverlay}>
                 <div className={styles.playIcon}>
                   <svg viewBox="0 0 24 24" width="48" height="48">
@@ -110,6 +115,29 @@ export const FeaturedPost: React.FC<FeaturedPostProps> = ({ post }) => {
                     />
                   </svg>
                 </div>
+              </div>
+            )}
+
+            {/* Overlay de bloqueio */}
+            {post.locked && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                color: 'white',
+                backdropFilter: 'blur(4px)'
+              }}>
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm3 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                </svg>
+                <span style={{ marginTop: '8px', fontWeight: 600 }}>Locked Content</span>
               </div>
             )}
           </div>
