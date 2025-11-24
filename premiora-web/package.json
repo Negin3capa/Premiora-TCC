@@ -28,7 +28,7 @@
     "@hcaptcha/react-hcaptcha": "^1.14.0",
     "@supabase/supabase-js": "^2.84.0",
     "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
+    "@types/react-dom": "^19.2.3",
     "@types/react-router-dom": "^5.3.3",
     "google-one-tap": "^1.0.6",
     "lucide-react": "^0.553.0",
