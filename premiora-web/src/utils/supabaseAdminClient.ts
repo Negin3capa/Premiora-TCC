@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Cliente Supabase administrativo configurado com service role key
@@ -25,4 +25,4 @@ export const supabaseAdmin = (supabaseUrl && supabaseServiceRoleKey)
         persistSession: false
       }
     })
-  : null as any; // Cast para evitar erros de TS, mas causará erro em tempo de execução se usado sem chave
+  : (null as unknown as SupabaseClient);
