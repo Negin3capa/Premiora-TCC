@@ -1,3 +1,4 @@
+
 /**
  * Serviço de autenticação OAuth
  * Responsável por operações de login com provedores OAuth
