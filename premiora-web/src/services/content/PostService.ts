@@ -23,22 +23,21 @@ export class PostService {
   ): Promise<any> {
     let mediaUrls: string[] = [];
 
-    // Upload da imagem se existir
-    if (postData.image) {
+    // Upload de imagens se existirem
+    if (postData.images && postData.images.length > 0) {
       try {
-        const uploadResult = await FileUploadService.uploadFile(
-          postData.image,
-          "posts",
-          userId,
+        const uploadPromises = postData.images.map(file => 
+          FileUploadService.uploadFile(file, "posts", userId)
         );
-        mediaUrls = [uploadResult.url];
+        
+        const uploadResults = await Promise.all(uploadPromises);
+        mediaUrls = uploadResults.map(result => result.url);
       } catch (error) {
         console.warn(
-          "Erro no upload da imagem (continuando sem imagem):",
+          "Erro no upload de imagens (continuando sem imagens):",
           error,
         );
-        // Não falhar a criação do post se o upload da imagem falhar
-        // O post será criado como texto apenas
+        // Não falhar a criação do post se o upload falhar
       }
     }
 
@@ -101,17 +100,20 @@ export class PostService {
 
     // Agora inserir o post
 
+    const isPremium = postData.visibility === 'subscribers' || postData.visibility === 'tier';
+    
     const { data, error } = await supabase
       .from("posts")
       .insert({
         title: postData.title,
         content: postData.content,
-        content_type: postData.image ? "image" : "text",
+        content_type: mediaUrls.length > 0 ? "image" : "text",
         media_urls: mediaUrls,
         community_id: postData.communityId || null,
         creator_id: creatorId,
         username: userData.username, // Foreign key direta para users.username
-        is_premium: false, // Por padrão, posts são públicos
+        is_premium: isPremium,
+        required_tier_id: postData.requiredTierId || null,
         is_published: true,
       })
       .select("id")
@@ -242,17 +244,17 @@ export class PostService {
 
     let mediaUrls = existingPost.media_urls || [];
 
-    // Upload de nova imagem se fornecida
-    if (updateData.image) {
+    // Upload de novas imagens se fornecidas
+    if (updateData.images && updateData.images.length > 0) {
       try {
-        const uploadResult = await FileUploadService.uploadFile(
-          updateData.image,
-          "posts",
-          userId,
+        const uploadPromises = updateData.images.map(file => 
+          FileUploadService.uploadFile(file, "posts", userId)
         );
-        mediaUrls = [uploadResult.url];
+        
+        const uploadResults = await Promise.all(uploadPromises);
+        mediaUrls = uploadResults.map(result => result.url);
       } catch (error) {
-        console.warn("Erro no upload da nova imagem:", error);
+        console.warn("Erro no upload das novas imagens:", error);
       }
     }
 
@@ -275,9 +277,11 @@ export class PostService {
       .update({
         title: updateData.title,
         content: updateData.content,
-        content_type: updateData.image ? "image" : existingPost.content_type,
+        content_type: (updateData.images && updateData.images.length > 0) ? "image" : existingPost.content_type,
         media_urls: mediaUrls,
         community_id: updateData.communityId || existingPost.community_id,
+        is_premium: updateData.visibility ? (updateData.visibility === 'subscribers' || updateData.visibility === 'tier') : undefined,
+        required_tier_id: updateData.requiredTierId !== undefined ? updateData.requiredTierId : undefined
       })
       .eq("id", postId)
       .select(`

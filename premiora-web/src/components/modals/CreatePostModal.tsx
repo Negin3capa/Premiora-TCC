@@ -6,13 +6,18 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { ContentService } from '../../services/contentService';
+import { CreatorChannelService } from '../../services/content/CreatorChannelService';
 import { useFeed } from '../../hooks/useFeed';
 import { useModal } from '../../hooks/useModal';
 import '../../styles/modals.css';
-import { CommunityDropdown, FileUpload } from '../common';
-import { Loader } from 'lucide-react';
+import '../../styles/CreatePostModal.css';
+import { MultiImageUpload } from '../common/MultiImageUpload';
+import { CommunityFlairSelector } from '../common/CommunityFlairSelector';
+import { Loader, Globe, Lock, Image as ImageIcon, Smile } from 'lucide-react';
 import type { Community, CommunityFlair } from '../../types/community';
+import type { SubscriptionTier } from '../../types/creator';
 import { getCommunityFlairs } from '../../utils/communityUtils';
+import type { PostFormData } from '../../types/content';
 
 /**
  * Props do componente CreatePostModal
@@ -25,19 +30,6 @@ interface CreatePostModalProps {
   /** Callback chamado ao publicar o post */
   onPublish?: (postData: PostFormData) => void;
 }
-
-/**
- * Dados do formulário de criação de post
- */
-interface PostFormData {
-  title: string;
-  content: string;
-  communityId?: string;
-  flairId?: string;
-  image?: File | null;
-}
-
-
 
 /**
  * Modal para criação de posts
@@ -59,13 +51,15 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     content: '',
     communityId: '',
     flairId: '',
-    image: null
+    images: [],
+    visibility: 'public',
+    requiredTierId: ''
   });
 
   const [flairs, setFlairs] = useState<CommunityFlair[]>([]);
-
-  // Estados de interface
+  const [tiers, setTiers] = useState<SubscriptionTier[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showVisibilityMenu, setShowVisibilityMenu] = useState(false);
 
   // Configurar comunidade pré-selecionada quando modal abre
   useEffect(() => {
@@ -75,11 +69,19 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         const preselectedCommunity = modalData.preselectedCommunity as Community;
         setFormData(prev => ({ ...prev, communityId: preselectedCommunity.id }));
       } else {
-        // Reset para vazio se não houver comunidade pré-selecionada
         setFormData(prev => ({ ...prev, communityId: '' }));
       }
+      
+      // Fetch creator tiers
+      if (user?.id) {
+        CreatorChannelService.getCreatorChannel(user.id).then(channel => {
+          if (channel) {
+            setTiers(channel.subscriptionTiers || []);
+          }
+        });
+      }
     }
-  }, [isOpen, getModalData]);
+  }, [isOpen, getModalData, user?.id]);
 
   // Fetch flairs when community changes
   useEffect(() => {
@@ -87,7 +89,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       if (formData.communityId) {
         const communityFlairs = await getCommunityFlairs(formData.communityId, 'post');
         setFlairs(communityFlairs);
-        // Reset selected flair if not in new list
         setFormData(prev => ({ ...prev, flairId: '' }));
       } else {
         setFlairs([]);
@@ -111,8 +112,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     setFormData(prev => ({ ...prev, communityId }));
   };
 
-
-
   /**
    * Handler para cancelar criação
    */
@@ -122,7 +121,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       content: '',
       communityId: '',
       flairId: '',
-      image: null
+      images: [],
+      visibility: 'public',
+      requiredTierId: ''
     });
     onClose();
   };
@@ -169,10 +170,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   };
 
-
-
   // Não renderiza se o modal não estiver aberto
   if (!isOpen) return null;
+
+  const selectedTier = tiers.find(t => t.id === formData.requiredTierId);
 
   return (
     <>
@@ -180,141 +181,178 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       <div className="modal-backdrop" onClick={onClose} />
 
       {/* Modal */}
-      <div className="modal">
-        {/* Header */}
+      <div className="modal create-post-modal">
+        {/* Header with close button */}
         <div className="modal-header">
-          <h2 className="modal-title">Criar Novo Post</h2>
-          <p className="modal-subtitle">Compartilhe suas ideias e pensamentos</p>
+           <button onClick={onClose} className="close-button">
+             ×
+           </button>
+           <div style={{ flex: 1 }} />
+           <button className="drafts-button">
+             Rascunhos
+           </button>
         </div>
 
-        {/* Formulário */}
-        <div className="modal-form">
-          {/* Título */}
-          <div className="form-group">
-            <label htmlFor="post-title" className="form-label form-label-required">
-              Título
-            </label>
-            <input
-              id="post-title"
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              placeholder="Digite o título do seu post..."
-              className="form-input"
-              maxLength={200}
-            />
-            <div className="char-counter">
-              {formData.title.length}/200
+        <div className="modal-content">
+          {/* Avatar Column */}
+          <div className="avatar-column">
+            <div className="avatar-placeholder">
+              {user?.user_metadata?.avatar_url ? (
+                <img src={user.user_metadata.avatar_url} alt="User" />
+              ) : (
+                <span>{user?.user_metadata?.name?.[0] || 'U'}</span>
+              )}
             </div>
           </div>
 
-          {/* Seleção de comunidade */}
-          <div className="form-group">
-            <label className="form-label">Comunidade (opcional)</label>
-            <CommunityDropdown
-              selectedCommunityId={formData.communityId}
-              onCommunitySelect={handleCommunitySelect}
-              disabled={isSubmitting}
-            />
-          </div>
+          {/* Content Column */}
+          <div className="content-column">
+             {/* Community Selector */}
+             <div style={{ marginBottom: '12px' }}>
+               <CommunityFlairSelector 
+                 selectedCommunityId={formData.communityId}
+                 onCommunitySelect={handleCommunitySelect}
+                 disabled={isSubmitting}
+               />
+             </div>
 
-          {/* Flair Selection */}
-          {flairs.length > 0 && (
-            <div className="form-group">
-              <label className="form-label">Flair (opcional)</label>
-              <div className="flair-selection">
-                {flairs.map(flair => (
-                  <button
-                    key={flair.id}
-                    type="button"
-                    className={`flair-option ${formData.flairId === flair.id ? 'selected' : ''}`}
-                    style={{
-                      '--flair-color': flair.flairColor,
-                      '--flair-bg': flair.flairBackgroundColor,
-                      borderColor: formData.flairId === flair.id ? flair.flairColor : 'var(--border-color)',
-                      backgroundColor: formData.flairId === flair.id ? flair.flairBackgroundColor : 'var(--bg-secondary)',
-                      color: formData.flairId === flair.id ? flair.flairColor : 'var(--text-secondary)',
-                      borderWidth: '1px',
-                      borderStyle: 'solid',
-                      padding: '4px 12px',
-                      borderRadius: '16px',
-                      marginRight: '8px',
-                      marginBottom: '8px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      transition: 'all 0.2s'
-                    } as React.CSSProperties}
-                    onClick={() => setFormData(prev => ({ 
-                      ...prev, 
-                      flairId: prev.flairId === flair.id ? '' : flair.id 
-                    }))}
-                  >
-                    {flair.flairText}
+             {/* Title Input */}
+             <input
+               type="text"
+               value={formData.title}
+               onChange={(e) => handleInputChange('title', e.target.value)}
+               placeholder="Título do post"
+               className="post-title-input"
+               maxLength={200}
+             />
+
+             {/* Content Textarea */}
+             <textarea
+               value={formData.content}
+               onChange={(e) => handleInputChange('content', e.target.value)}
+               placeholder="O que está acontecendo?"
+               className="post-content-textarea"
+               rows={4}
+               maxLength={5000}
+             />
+
+             {/* Image Upload Preview */}
+             <MultiImageUpload
+               images={formData.images || []}
+               onImagesChange={(images) => setFormData(prev => ({ ...prev, images }))}
+               disabled={isSubmitting}
+             />
+
+             {/* Flair Selection (if community selected) */}
+             {flairs.length > 0 && (
+                <div className="flair-selection">
+                  {flairs.map(flair => (
+                    <button
+                      key={flair.id}
+                      type="button"
+                      className={`flair-option ${formData.flairId === flair.id ? 'selected' : ''}`}
+                      style={{
+                        '--flair-color': flair.flairColor,
+                        '--flair-bg': flair.flairBackgroundColor,
+                        borderColor: formData.flairId === flair.id ? flair.flairColor : 'var(--color-border-light)',
+                        backgroundColor: formData.flairId === flair.id ? flair.flairBackgroundColor : 'var(--color-bg-secondary)',
+                        color: formData.flairId === flair.id ? flair.flairColor : 'var(--color-text-secondary)',
+                      } as React.CSSProperties}
+                      onClick={() => setFormData(prev => ({ 
+                        ...prev, 
+                        flairId: prev.flairId === flair.id ? '' : flair.id 
+                      }))}
+                    >
+                      {flair.flairText}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+             {/* Visibility Setting */}
+             <div className="visibility-section">
+               <div style={{ position: 'relative' }}>
+                 <button 
+                   className="visibility-trigger"
+                   onClick={() => setShowVisibilityMenu(!showVisibilityMenu)}
+                 >
+                   {formData.visibility === 'public' ? <Globe size={16} /> : <Lock size={16} />}
+                   {formData.visibility === 'public' 
+                     ? 'Qualquer pessoa pode ver' 
+                     : `Apenas assinantes${selectedTier ? ` ${selectedTier.name}` : ''}`}
+                 </button>
+                 
+                 {showVisibilityMenu && (
+                   <div className="visibility-menu">
+                     <div className="visibility-menu-title">Quem pode ver?</div>
+                     
+                     <div 
+                       onClick={() => {
+                         setFormData(prev => ({ ...prev, visibility: 'public', requiredTierId: '' }));
+                         setShowVisibilityMenu(false);
+                       }}
+                       className="visibility-menu-item"
+                     >
+                       <div style={{ background: 'var(--color-primary)', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                         <Globe size={16} color="white" />
+                       </div>
+                       <div>
+                         <div style={{ fontWeight: 500 }}>Qualquer pessoa</div>
+                         <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Público para todos</div>
+                       </div>
+                     </div>
+
+                     {tiers.map(tier => (
+                       <div 
+                         key={tier.id}
+                         onClick={() => {
+                           setFormData(prev => ({ ...prev, visibility: 'tier', requiredTierId: tier.id }));
+                           setShowVisibilityMenu(false);
+                         }}
+                         className="visibility-menu-item"
+                       >
+                         <div style={{ background: tier.color || 'var(--color-success)', borderRadius: '50%', padding: '6px', display: 'flex' }}>
+                           <Lock size={16} color="white" />
+                         </div>
+                         <div>
+                           <div style={{ fontWeight: 500 }}>Assinantes {tier.name}</div>
+                           <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>Apenas membros deste nível</div>
+                         </div>
+                       </div>
+                     ))}
+                   </div>
+                 )}
+               </div>
+             </div>
+
+             {/* Bottom Toolbar */}
+             <div className="modal-toolbar">
+                <div className="tools">
+                  <button title="Mídia" className="tool-button" onClick={() => document.querySelector<HTMLInputElement>('.multi-image-upload input')?.click()}>
+                    <ImageIcon size={20} />
                   </button>
-                ))}
-              </div>
-            </div>
-          )}
+                  <button title="GIF" className="tool-button" onClick={() => document.querySelector<HTMLInputElement>('.multi-image-upload input')?.click()}>
+                    <div style={{ border: '1.5px solid currentColor', borderRadius: '4px', fontSize: '10px', fontWeight: 'bold', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>GIF</div>
+                  </button>
+                  <button title="Emoji" className="tool-button">
+                    <Smile size={20} />
+                  </button>
+                </div>
 
-          {/* Conteúdo */}
-          <div className="form-group">
-            <label htmlFor="post-content" className="form-label form-label-required">
-              Conteúdo
-            </label>
-            <textarea
-              id="post-content"
-              value={formData.content}
-              onChange={(e) => handleInputChange('content', e.target.value)}
-              placeholder="Conteúdo do seu post..."
-              className="form-textarea"
-              rows={6}
-              maxLength={5000}
-            />
-            <div className="char-counter">
-              {formData.content.length}/5000
-            </div>
+                <button
+                  onClick={handlePublish}
+                  disabled={isSubmitting || (!formData.title.trim() && !formData.content.trim() && (!formData.images || formData.images.length === 0))}
+                  className="btn btn-primary post-button"
+                >
+                  {isSubmitting ? (
+                    <Loader size={16} className="spinner" />
+                  ) : (
+                    'Postar'
+                  )}
+                </button>
+             </div>
+
           </div>
-
-          {/* Upload de imagem */}
-          <div className="form-group">
-            <label className="form-label">Imagem (opcional)</label>
-            <FileUpload
-              file={formData.image || null}
-              fileType="image"
-              inputId="image-upload"
-              title="Clique para adicionar uma imagem"
-              subtitle="PNG, JPG até 10MB"
-              onFileSelect={(file) => setFormData(prev => ({ ...prev, image: file }))}
-              disabled={isSubmitting}
-              maxSizeMB={10}
-            />
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="modal-footer">
-          <button
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            className="btn btn-secondary"
-          >
-            Cancelar
-          </button>
-
-          <button
-            onClick={handlePublish}
-            disabled={isSubmitting || !formData.title.trim() || !formData.content.trim()}
-            className="btn btn-primary"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader size={16} className="spinner" />
-                Publicando...
-              </>
-            ) : (
-              'Publicar Post'
-            )}
-          </button>
         </div>
       </div>
     </>

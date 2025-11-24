@@ -1,0 +1,199 @@
+/* Create Post Modal Specific Styles */
+
+.create-post-modal {
+  max-width: 600px;
+  padding: 0;
+  border-radius: var(--radius-xl);
+  background-color: var(--color-bg-primary);
+  overflow: visible; /* Allow menus to extend outside */
+}
+
+.create-post-modal .modal-header {
+  border-bottom: none;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.create-post-modal .close-button {
+  font-size: var(--font-size-2xl);
+  padding: var(--space-1);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.create-post-modal .drafts-button {
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.create-post-modal .modal-content {
+  padding: 0 var(--space-4) var(--space-4);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.create-post-modal .avatar-column {
+  flex-shrink: 0;
+}
+
+.create-post-modal .avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.create-post-modal .avatar-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.create-post-modal .content-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-post-modal .post-title-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
+  outline: none;
+}
+
+.create-post-modal .post-content-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-primary);
+  min-height: 100px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.create-post-modal .flair-selection {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.create-post-modal .flair-option {
+  border-width: 1px;
+  border-style: solid;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  margin-right: var(--space-2);
+  margin-bottom: var(--space-2);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  transition: all var(--transition-fast);
+}
+
+.create-post-modal .visibility-section {
+  margin-top: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.create-post-modal .visibility-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.create-post-modal .visibility-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: var(--space-2);
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2) 0;
+  z-index: 1000;
+  min-width: 250px;
+}
+
+.create-post-modal .visibility-menu-title {
+  padding: var(--space-2) var(--space-4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.create-post-modal .visibility-menu-item {
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.create-post-modal .visibility-menu-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.create-post-modal .modal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+}
+
+.create-post-modal .tools {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.create-post-modal .tool-button {
+  padding: var(--space-2);
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-post-modal .tool-button:hover {
+  background-color: var(--color-primary-light);
+}
+
+.create-post-modal .tool-button:disabled {
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+.create-post-modal .post-button {
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-6);
+  font-weight: var(--font-weight-semibold);
+}
