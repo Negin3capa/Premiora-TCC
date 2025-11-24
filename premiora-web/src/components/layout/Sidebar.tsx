@@ -5,7 +5,7 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import '../../styles/Sidebar.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Compass, Bell, MessageCircle, Users, Building2, Settings, PenTool, User } from 'lucide-react';
+import { Home, Compass, Bell, MessageCircle, Users, Building2, Settings, PenTool, User, CreditCard } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { useAuth } from '../../hooks/useAuth';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
@@ -337,6 +337,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
       active: location.pathname === '/profile' || location.pathname === `/u/${userProfile?.username}`
     },
     { icon: <Settings size={20} />, label: 'Settings', route: '/settings', active: location.pathname === '/settings' },
+    { icon: <CreditCard size={20} />, label: 'Subscriptions', route: '/subscriptions', active: location.pathname === '/subscriptions' },
   ];
 
   /**
