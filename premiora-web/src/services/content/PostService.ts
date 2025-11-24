@@ -175,7 +175,8 @@ export class PostService {
    * @returns Promise com dados do post
    */
   static async getPostById(postId: string, userId?: string): Promise<any> {
-    let query = supabase
+    // Busca o post sem filtros de premium inicialmente para verificar acesso
+    let { data: post, error } = await supabase
       .from("posts")
       .select(`
         *,
@@ -193,26 +194,109 @@ export class PostService {
         post_likes (
           id,
           user_id
+        ),
+        required_tier:required_tier_id (
+          id,
+          name,
+          tier_order
         )
       `)
       .eq("id", postId)
-      .eq("is_published", true);
+      .eq("is_published", true)
+      .single();
 
-    // Aplicar filtros de acesso baseado no usuário
+    // Se falhar (provavelmente por RLS em post premium), tenta com admin para mostrar bloqueado
+    if (error || !post) {
+      const { data: adminPost, error: adminError } = await supabaseAdmin
+        .from("posts")
+        .select(`
+          *,
+          creator:creator_id (
+            id,
+            display_name,
+            profile_image_url
+          ),
+          community:community_id (
+            id,
+            name,
+            display_name,
+            avatar_url
+          ),
+          post_likes (
+            id,
+            user_id
+          ),
+          required_tier:required_tier_id (
+            id,
+            name,
+            tier_order
+          )
+        `)
+        .eq("id", postId)
+        .eq("is_published", true)
+        .single();
+
+      if (adminError) {
+        throw new Error(`Erro ao buscar post: ${error?.message || adminError.message}`);
+      }
+      post = adminPost;
+    }
+
+    // Se o post não é premium, retorna direto
+    if (!post.is_premium) {
+      return post;
+    }
+
+    // Se é premium e usuário é o criador, retorna direto
+    if (userId && post.creator_id === userId) {
+      return post;
+    }
+
+    // Verificação de acesso para usuários inscritos
+    let hasAccess = false;
+
     if (userId) {
-      query = query.or(`is_premium.eq.false,creator_id.eq.${userId}`);
-    } else {
-      // Usuário não logado vê apenas conteúdo público
-      query = query.eq("is_premium", false);
+      // 1. Obter ordem do tier necessário
+      const requiredTierOrder = post.required_tier?.tier_order || 0;
+
+      // 2. Buscar assinaturas ativas do usuário
+      const { data: userSubs } = await supabase
+        .from('user_subscriptions')
+        .select('plan_id')
+        .eq('user_id', userId)
+        .eq('status', 'active');
+
+      const planIds = userSubs?.map(s => s.plan_id) || [];
+
+      if (planIds.length > 0) {
+        // 3. Verificar se alguma assinatura corresponde ao criador e tem nível suficiente
+        // Usamos supabaseAdmin aqui para garantir acesso à tabela subscription_tiers se necessário,
+        // mas supabase client deve funcionar se as políticas permitirem leitura pública de tiers
+        const { data: tiers } = await supabase
+          .from('subscription_tiers')
+          .select('id, tier_order, creator_channel_id')
+          .in('id', planIds)
+          .eq('creator_channel_id', post.creator_id);
+
+        if (tiers && tiers.length > 0) {
+          // Verifica se algum tier tem ordem maior ou igual ao necessário
+          hasAccess = tiers.some(t => t.tier_order >= requiredTierOrder);
+        }
+      }
     }
 
-    const { data, error } = await query.single();
-
-    if (error) {
-      throw new Error(`Erro ao buscar post: ${error.message}`);
+    // Se não tem acesso, sanitizar o conteúdo
+    if (!hasAccess) {
+      return {
+        ...post,
+        content: null, // Remove conteúdo
+        media_urls: [], // Remove mídia
+        isLocked: true, // Flag para UI
+        requiredTier: post.required_tier?.name // Nome do tier para UI
+      };
     }
 
-    return data;
+    return post;
   }
 
   /**

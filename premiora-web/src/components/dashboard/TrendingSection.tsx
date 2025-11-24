@@ -81,7 +81,12 @@ const TrendingSection: React.FC = () => {
           </div>
         ))}
       </div>
-      <button className="show-more-btn">Show more</button>
+      <button 
+        className="show-more-btn"
+        onClick={() => navigate('/search?type=trending')}
+      >
+        Show more
+      </button>
     </div>
   );
 };

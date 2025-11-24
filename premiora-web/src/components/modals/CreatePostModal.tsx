@@ -223,7 +223,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                onChange={(e) => handleInputChange('title', e.target.value)}
                placeholder="Título do post"
                className="post-title-input"
-               maxLength={200}
+               maxLength={30}
              />
 
              {/* Content Textarea */}

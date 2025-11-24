@@ -4,10 +4,11 @@
  */
 import React, { useState, useEffect, Suspense } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
-import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X, Lock } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePostLike, usePostViews } from '../hooks/usePostLike';
 import { PostService } from '../services/content/PostService';
+import { VideoService } from '../services/content/VideoService';
 import { Sidebar, MobileBottomBar } from '../components/layout';
 import RightSidebar from '../components/dashboard/RightSidebar';
 import { CommentList } from '../components/content/CommentList';
@@ -96,9 +97,10 @@ const usePost = (postId: string, username: string) => {
               fileSize: mediaData.video?.metadata?.fileSize
             };
           } else {
-            // Para posts, usar primeira URL como thumbnail
+            // Para posts
             mediaUrls = {
-              thumbnail: postData.media_urls[0]
+              thumbnail: postData.media_urls[0],
+              mediaUrls: postData.media_urls || []
             };
           }
         }
@@ -143,6 +145,48 @@ const usePost = (postId: string, username: string) => {
 };
 
 /**
+ * Componente para exibir conteúdo bloqueado (Premium)
+ */
+const LockedPostContent: React.FC<{ requiredTier?: string }> = ({ requiredTier }) => (
+  <div className="locked-content" style={{ 
+    padding: '60px 20px', 
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    textAlign: 'center',
+    backgroundColor: 'var(--color-bg-secondary)',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px dashed var(--color-border-medium)',
+    margin: '20px 0'
+  }}>
+    <Lock size={64} className="lock-icon-large" style={{ marginBottom: '20px', color: 'var(--color-text-secondary)' }} />
+    <h2 style={{ marginBottom: '10px', fontSize: '1.5rem' }}>Conteúdo Exclusivo</h2>
+    <p style={{ marginBottom: '24px', color: 'var(--color-text-secondary)', maxWidth: '500px' }}>
+      Este post é exclusivo para apoiadores do nível <strong>{requiredTier || 'Premium'}</strong>. 
+      Assine para ter acesso a este e outros conteúdos exclusivos.
+    </p>
+    <button 
+      className="unlock-button"
+      style={{
+        backgroundColor: 'var(--color-primary)',
+        color: 'white',
+        border: 'none',
+        padding: '12px 32px',
+        borderRadius: '9999px',
+        fontWeight: 600,
+        fontSize: '1rem',
+        cursor: 'pointer',
+        transition: 'transform 0.2s'
+      }}
+      onClick={() => console.log('Navigate to subscribe')}
+    >
+      Assinar para Desbloquear
+    </button>
+  </div>
+);
+
+/**
  * Componente VideoPlayer
  * Player de vídeo customizado com controles
  */
@@ -152,6 +196,22 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
+  const youtubeId = VideoService.getYouTubeId(src);
+
+  if (youtubeId) {
+    return (
+      <div className="post-video-container" style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
+        <iframe
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0`}
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="post-video-container">
       <video
@@ -178,6 +238,7 @@ const PostViewPage: React.FC = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalMenuOpen, setIsModalMenuOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
@@ -209,6 +270,7 @@ const PostViewPage: React.FC = () => {
   useEffect(() => {
     if (location.state && (location.state as any).openImage && post?.thumbnail) {
       setIsImageModalOpen(true);
+      setSelectedImageIndex(0);
       // Limpar o state para não reabrir ao navegar
       window.history.replaceState({}, document.title);
     }
@@ -524,8 +586,12 @@ const PostViewPage: React.FC = () => {
 
                     {/* Título e conteúdo */}
                     <div className="post-view-body">
-                      {/* Para vídeos: mostrar player primeiro, depois título e descrição */}
-                      {post.type === 'video' && post.videoUrl ? (
+                      {post.isLocked ? (
+                        <>
+                          <h1 className="post-title">{post.title}</h1>
+                          <LockedPostContent requiredTier={post.requiredTier} />
+                        </>
+                      ) : post.type === 'video' && post.videoUrl ? (
                         <>
                           <VideoPlayer
                             src={post.videoUrl}
@@ -557,15 +623,36 @@ const PostViewPage: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Mídia do post - imagem */}
-                          {post.thumbnail ? (
+                          {/* Mídia do post - imagens */}
+                          {(post.mediaUrls && post.mediaUrls.length > 0) ? (
+                            <div className="post-images-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                              {post.mediaUrls.map((url, index) => (
+                                <div key={index} className="post-image-container">
+                                  <img
+                                    src={url}
+                                    alt={`${post.title} - ${index + 1}`}
+                                    className="post-image clickable-image"
+                                    loading="lazy"
+                                    onClick={() => {
+                                      setSelectedImageIndex(index);
+                                      setIsImageModalOpen(true);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ) : post.thumbnail ? (
                             <div className="post-image-container">
                               <img
                                 src={post.thumbnail}
                                 alt={post.title}
                                 className="post-image clickable-image"
                                 loading="lazy"
-                                onClick={() => setIsImageModalOpen(true)}
+                                onClick={() => {
+                                  setSelectedImageIndex(0);
+                                  setIsImageModalOpen(true);
+                                }}
                                 style={{ cursor: 'pointer' }}
                               />
                             </div>
@@ -659,13 +746,14 @@ const PostViewPage: React.FC = () => {
       <MobileBottomBar />
 
       {/* Modal de imagem ampliada - Layout Focado (Twitter-like) */}
-      {isImageModalOpen && post.thumbnail && (
+      {isImageModalOpen && (post.mediaUrls?.length || post.thumbnail) && (
         <div className="image-modal-overlay">
           <div className="image-modal-container">
             {/* Painel Esquerdo: Mídia */}
             <div 
               className="image-modal-media"
               onClick={() => setIsImageModalOpen(false)}
+              style={{ position: 'relative' }}
             >
               <button
                 className="image-modal-close"
@@ -678,9 +766,67 @@ const PostViewPage: React.FC = () => {
                 <X size={24} />
               </button>
               
+              {/* Navigation Arrows */}
+              {post.mediaUrls && post.mediaUrls.length > 1 && (
+                <>
+                  <button
+                    className="image-nav-prev"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : post.mediaUrls!.length - 1));
+                    }}
+                    style={{
+                      position: 'absolute',
+                      left: '20px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="image-nav-next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev < post.mediaUrls!.length - 1 ? prev + 1 : 0));
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '20px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10
+                    }}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
               <img
-                src={post.thumbnail}
-                alt={post.title}
+                src={post.mediaUrls && post.mediaUrls.length > 0 ? post.mediaUrls[selectedImageIndex] : post.thumbnail}
+                alt={`${post.title} - ${selectedImageIndex + 1}`}
                 className="image-modal-image"
                 onClick={(e) => e.stopPropagation()}
               />

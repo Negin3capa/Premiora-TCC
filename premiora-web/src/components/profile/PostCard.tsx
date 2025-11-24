@@ -35,6 +35,11 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
    * Navega para a PostViewPage com o username e postId
    */
   const handleViewPost = () => {
+    // Se o post estiver bloqueado, não permitir navegação
+    if (post.locked) {
+      return;
+    }
+
     if (username && post.id) {
       navigate(`/u/${username}/status/${post.id}`);
     }

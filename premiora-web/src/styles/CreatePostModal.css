@@ -5,7 +5,7 @@
   padding: 0;
   border-radius: var(--radius-xl);
   background-color: var(--color-bg-primary);
-  overflow: visible; /* Allow menus to extend outside */
+  /* overflow: visible; Removed to allow scrolling when content is tall */
 }
 
 .create-post-modal .modal-header {
@@ -129,9 +129,9 @@
 
 .create-post-modal .visibility-menu {
   position: absolute;
-  top: 100%;
+  bottom: 100%;
   left: 0;
-  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
   background: var(--color-bg-primary);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-lg);

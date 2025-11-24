@@ -23,6 +23,7 @@ export interface ContentItem {
   authorUsername?: string; // Username real da tabela users
   authorAvatar: string;
   thumbnail?: string;
+  mediaUrls?: string[];
   content?: string;
   views?: number;
   likes?: number;
@@ -78,7 +79,10 @@ export interface VideoFormData {
   description: string;
   communityId?: string;
   video?: File | null;
+  youtubeUrl?: string;
   thumbnail?: File | null;
+  visibility?: 'public' | 'subscribers' | 'tier';
+  requiredTierId?: string;
 }
 
 /**
