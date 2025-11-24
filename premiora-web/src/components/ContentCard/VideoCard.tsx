@@ -20,7 +20,10 @@ const VideoCard: React.FC<VideoCardProps> = ({ item }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const youtubeId = useMemo(() => {
-    return item.videoUrl ? VideoService.getYouTubeId(item.videoUrl) : null;
+    if (typeof item.videoUrl === 'string' && item.videoUrl) {
+      return VideoService.getYouTubeId(item.videoUrl);
+    }
+    return null;
   }, [item.videoUrl]);
 
   const handlePlay = (e: React.MouseEvent) => {

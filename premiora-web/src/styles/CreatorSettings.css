@@ -1,0 +1,115 @@
+/* Estilos para a página de configurações do criador .creator-settings {
+  /* Adicione aqui os estilos gerais se necessário */
+
+.creator-settings h2 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.creator-tabs {
+  display: flex;
+  gap: 1.5rem; /* Reduzido para melhor espaçamento */
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  padding-bottom: 0.5rem; /* Adicionado para evitar que a borda ativa sobreponha o texto */
+}
+
+.creator-tabs button {
+  padding: 0.5rem 0.25rem 1rem 0.25rem; /* Ajuste no padding */
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  border-bottom: 2px solid transparent; /* Borda padrão transparente */
+  transition: all 0.2s ease-in-out;
+}
+
+.creator-tabs button:hover {
+  color: var(--color-text-primary);
+}
+
+.creator-tabs button.active {
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-accent);
+  font-weight: 600;
+}
+
+.settings-card {
+  background-color: var(--color-bg-secondary);
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+}
+
+.settings-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.settings-card .card-description {
+  color: var(--color-text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.settings-card .card-sub-description {
+  color: var(--color-text-secondary);
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+
+.settings-card .card-sub-description a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.settings-card .card-sub-description a:hover {
+  text-decoration: underline;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.team-member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #FF424D;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0; /* Evita que o avatar encolha */
+}
+
+.team-member-info .member-name {
+  font-weight: bold;
+}
+
+.team-member-info .member-email {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.invite-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.invite-button:hover {
+  color: var(--color-accent-hover);
+}
