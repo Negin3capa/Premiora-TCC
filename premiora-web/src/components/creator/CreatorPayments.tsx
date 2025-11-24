@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, CreditCard, FileText, ExternalLink, AlertCircle } from 'lucide-react';
-import { useTheme } from '../../hooks/useUI';
+import { DollarSign, FileText, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { CreatorChannelService } from '../../services/content/CreatorChannelService';
 import { paymentService } from '../../services/payment/PaymentService';
 import type { CreatorChannelConfig } from '../../types/creator';
 
 const CreatorPayments: React.FC = () => {
-  const { isDark } = useTheme();
   const { userProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<'withdraw' | 'documents'>('withdraw');
   const [channelConfig, setChannelConfig] = useState<CreatorChannelConfig | null>(null);

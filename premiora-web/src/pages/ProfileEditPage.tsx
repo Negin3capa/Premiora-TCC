@@ -13,6 +13,7 @@ import { FeedService } from '../services/content/FeedService';
 import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
 import type { CreatorProfile, Post, PostMedia } from '../types/profile';
 import '../styles/globals.css';
+import '../styles/ProfileEditPage.css';
 
 /**
  * Página de edição de perfil do criador
@@ -219,14 +220,7 @@ const ProfileEditPage: React.FC = () => {
   // Mostrar loading inicial
   if (loading) {
     return (
-      <div style={{
-        backgroundColor: '#0D0D0D',
-        minHeight: '100vh',
-        color: '#DADADA',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
+      <div className="profile-edit-loading">
         Carregando perfil...
       </div>
     );
@@ -235,27 +229,11 @@ const ProfileEditPage: React.FC = () => {
   // Mostrar erro se não conseguir carregar
   if (error || !creatorProfile) {
     return (
-      <div style={{
-        backgroundColor: '#0D0D0D',
-        minHeight: '100vh',
-        color: '#DADADA',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column'
-      }}>
+      <div className="profile-edit-error">
         <h2>{error || 'Perfil não encontrado'}</h2>
         <button
           onClick={() => navigate('/dashboard')}
-          style={{
-            marginTop: '1rem',
-            padding: '0.5rem 1rem',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className="profile-edit-button"
         >
           Voltar ao Dashboard
         </button>
@@ -266,27 +244,11 @@ const ProfileEditPage: React.FC = () => {
   // Verificar permissão
   if (!isOwnProfile) {
     return (
-      <div style={{
-        backgroundColor: '#0D0D0D',
-        minHeight: '100vh',
-        color: '#DADADA',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column'
-      }}>
+      <div className="profile-edit-permission-denied">
         <h2>Você não tem permissão para editar este perfil</h2>
         <button
           onClick={() => navigate(`/u/${username}`)}
-          style={{
-            marginTop: '1rem',
-            padding: '0.5rem 1rem',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
+          className="profile-edit-button"
         >
           Voltar ao Perfil
         </button>
@@ -295,12 +257,7 @@ const ProfileEditPage: React.FC = () => {
   }
 
   return (
-    <div style={{
-      backgroundColor: '#0D0D0D',
-      minHeight: '100vh',
-      color: '#DADADA',
-      overflowX: 'hidden'
-    }}>
+    <div className="profile-edit-page">
       {/* Global Sidebar */}
       <Sidebar />
 
@@ -310,15 +267,7 @@ const ProfileEditPage: React.FC = () => {
       />
 
       {/* Profile Banner Editable - Full screen width */}
-      <div style={{
-        position: 'relative',
-        width: '100vw',
-        left: '50%',
-        right: '50%',
-        marginLeft: '-50vw',
-        marginRight: '-50vw',
-        marginTop: '64px', /* Account for header height */
-      }}>
+      <div className="profile-edit-banner-wrapper">
         <ProfileBannerEditable
           profile={editedProfile}
           isUploading={isUploading}
@@ -336,18 +285,9 @@ const ProfileEditPage: React.FC = () => {
       </div>
 
       {/* Main content container - adjusted for fixed sidebar and header */}
-      <div style={{
-        marginLeft: '80px', /* Account for sidebar width */
-        marginTop: '0', /* Banner now handles the top spacing */
-        padding: '2rem 1rem',
-        overflow: 'hidden',
-      }}>
+      <div className="profile-edit-main-content">
         {/* Content container */}
-        <div style={{
-          maxWidth: '1200px',
-          margin: '0 auto',
-          overflow: 'hidden',
-        }}>
+        <div className="profile-edit-content-container">
           <FeaturedPost post={featuredPost} />
           <RecentPosts posts={recentPosts} />
         </div>
@@ -355,29 +295,12 @@ const ProfileEditPage: React.FC = () => {
 
       {/* Error Display */}
       {(error || editError) && (
-        <div style={{
-          position: 'fixed',
-          top: '80px',
-          right: '20px',
-          backgroundColor: '#dc3545',
-          color: 'white',
-          padding: '1rem',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-          zIndex: 1000,
-          maxWidth: '400px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="profile-edit-error-toast">
+          <div className="profile-edit-error-toast-content">
             <span>{error || editError}</span>
             <button
               onClick={clearError}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '1.2rem'
-              }}
+              className="profile-edit-error-toast-close-button"
             >
               ×
             </button>
