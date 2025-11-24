@@ -47,6 +47,17 @@ export class OAuthService {
         };
       }
 
+      // CHECK IF ADMIN CLIENT IS AVAILABLE (Production Fix)
+      if (!(supabaseAdmin as any)) {
+        console.warn('⚠️ Supabase Admin indisponível (Produção). Pulando verificação de proteção de identidade.');
+        return {
+          blocked: false,
+          canLinkAccount: true,
+          accountType: 'new', // Assume safe fallback
+          existingAccount: null
+        };
+      }
+
       // 1. VERIFICAR SE JÁ EXISTE CONTA SUPABASE PARA ESTE EMAIL
       const { data: existingUsers, error: userError } = await supabaseAdmin
         .from('users')
@@ -187,6 +198,11 @@ export class OAuthService {
   }> {
     try {
       console.log('⚠️ checkConflictingProviders DEPRECATED - use checkIdentityProtection');
+
+      if (!(supabaseAdmin as any)) {
+        console.warn('⚠️ Supabase Admin indisponível. Pulando checkConflictingProviders.');
+        return { hasGoogle: false, hasFacebook: false, shouldBlockFacebook: false };
+      }
 
       // Buscar na tabela auth.identities para verificar provedores OAuth
       const { data: identities, error } = await supabaseAdmin
