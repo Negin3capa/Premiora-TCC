@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TrendingService, type TrendingTopic, type TrendingStats } from '../../services/content/TrendingService';
 import { useAuth } from '../../hooks/useAuth';
 import { Sparkles, TrendingUp, BarChart3, Hash } from 'lucide-react';
@@ -21,6 +22,7 @@ const SidebarFeed: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { user } = useAuth();
   const { isModalOpen } = useModal();
+  const navigate = useNavigate();
 
   /**
    * Carrega dados da sidebar (tendências e estatísticas)
@@ -82,7 +84,10 @@ const SidebarFeed: React.FC = () => {
         </h3>
         <div className="gift-content">
           <p>Compartilhe seu talento e crie conteúdo exclusivo para seus seguidores</p>
-          <button className="gift-btn">
+          <button 
+            className="gift-btn"
+            onClick={() => navigate('/creator/setup')}
+          >
             <Sparkles size={16} />
             Começar
           </button>

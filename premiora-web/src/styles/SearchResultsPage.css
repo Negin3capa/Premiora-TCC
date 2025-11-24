@@ -1,0 +1,258 @@
+/* Search Results Page Styles */
+
+/* Container for the search results content */
+.search-results-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Header with back button and title */
+.search-header-simple {
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-4);
+  background-color: rgba(var(--color-bg-primary-rgb), 0.85);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.search-header-simple h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  margin-left: var(--space-4);
+}
+
+.back-button-simple {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-full);
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast);
+}
+
+.back-button-simple:hover {
+  background-color: var(--color-bg-hover);
+}
+
+/* Tabs */
+.search-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--color-border-light);
+  background-color: var(--color-bg-primary);
+  position: sticky;
+  top: 60px; /* Below header */
+  z-index: 9;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: var(--space-4);
+  background: none;
+  border: none;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-fast);
+  font-size: var(--font-size-base);
+}
+
+.tab-btn:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.tab-btn.active {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 4px;
+  background-color: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Content Area */
+.search-content {
+  padding: var(--space-4) 0;
+}
+
+.loading-state {
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.results-section {
+  margin-bottom: var(--space-6);
+}
+
+.results-section h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-4);
+  padding: 0 var(--space-4);
+  color: var(--color-text-primary);
+}
+
+.no-results {
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: var(--space-8);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  margin: 0 var(--space-4);
+}
+
+/* List for Users and Communities (Twitter-like) */
+.results-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* No gap, using border-bottom */
+}
+
+.result-card {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-light);
+  border-radius: 0;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* Center vertically */
+  text-align: left;
+  width: 100%;
+}
+
+.result-card:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--color-border-light);
+  background-color: var(--color-bg-hover);
+}
+
+.result-icon {
+  margin-bottom: 0;
+  margin-right: var(--space-3);
+  color: var(--color-text-secondary);
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.result-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+
+.result-info {
+  flex: 1; /* Take remaining space */
+  min-width: 0; /* Enable text truncation */
+  margin-right: var(--space-3);
+}
+
+.result-title {
+  display: block;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-subtitle {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+/* Special styling for trending items */
+.trending-card {
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+}
+
+.trending-card .result-icon {
+  display: none; /* Hide icon for trends if desired, or keep it small */
+}
+
+.trending-card .result-info {
+  margin: 0;
+}
+
+.trending-card .result-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 2px;
+}
+
+.trending-card .result-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Button styling within card */
+.follow-btn-small {
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  border: none;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.follow-btn-small:hover {
+  opacity: 0.9;
+}
+
+/* List for Posts (using ContentCard, so just container styles) */
+.results-list {
+  display: flex;
+  flex-direction: column;
+  /* No gap needed if ContentCard has borders/margins handled by parent grid or itself */
+}

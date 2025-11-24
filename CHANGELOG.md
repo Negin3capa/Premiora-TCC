@@ -5,6 +5,227 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 24/11/25
+
+### Adicionado
+
+- **Aprimoramentos em Cards de Vídeo**
+  - Melhorias visuais e funcionais no `VideoCard.tsx`
+  - Atualizações no modal de criação de vídeo (`CreateVideoModal.tsx`)
+  - Refinamentos de estilo para experiência de visualização de vídeo
+
+- **Melhorias na Exibição de Conteúdo**
+  - Refatoração do `ContentCard.tsx` para melhor performance e manutenção
+  - Atualizações nos serviços de Feed e Post para otimização de entrega de conteúdo
+  - Ajustes de layout na página de visualização de post (`PostViewPage.tsx`)
+
+### Alterado
+
+- **Estilos e UI**
+  - Atualização de estilos em `ContentCard.css` e `CreatePostModal.css`
+  - Melhorias na responsividade e apresentação de cards de conteúdo
+
+## [0.12.0] - 23/11/25
+
+### Adicionado
+
+- **Otimização de Performance**
+  - Implementação de `GlobalPrefetchCache` para carregamento antecipado de dados
+  - Prefetch inteligente de perfil e feed ao passar o mouse nos itens de navegação (Home e Profile)
+  - Melhoria significativa na percepção de velocidade de navegação
+
+- **Identidade Visual Refinada**
+  - Suporte a logo em versão clara (`premiora-logo-light.png`) para melhor contraste em temas escuros/claros
+  - Atualização dinâmica de logo baseada no tema em Sidebar, Header e Login
+  - Refinamento de estilos globais e componentes para maior consistência visual
+
+### Alterado
+
+- **Melhorias de UI/UX**
+  - Ajustes de espaçamento e layout na Sidebar e ProfileSidebar
+  - Polimento visual na Landing Page (Header, Footer, Hero)
+  - Atualização de estilos em componentes de conteúdo e comunidade
+
+## [0.11.0] - 23/11/25
+
+### Adicionado
+
+- **Autenticação Google Aprimorada**
+  - Implementação do Google One Tap (notificação) funcional com autenticação real via Supabase
+  - Suporte a login via popup ("mini window") para o botão "Entrar com Google", melhorando a UX
+  - Otimização do fechamento do popup para minimizar flash de conteúdo
+  - Correção de race condition no carregamento do Dashboard após login
+
+### Corrigido
+
+- Bug onde o Google One Tap não aparecia ou não autenticava corretamente
+- Bug onde o Dashboard carregava vazio após login rápido via OAuth
+- Melhoria na detecção de sessão para fechamento automático de janelas de login
+
+## [0.10.0] - 23/11/25
+
+### Adicionado
+
+- **Experiência de Mídia Aprimorada**
+  - Modal de imagem aprimorado com barra lateral de conteúdo para visualização imersiva
+  - Navegação de clique em imagens nos componentes `ContentCard` e `PostCard`
+
+- **Melhorias na Comunidade e Post**
+  - Nova seção `CommunityInfoSection` para informações detalhadas da comunidade
+  - Layout da página `PostViewPage` otimizado
+
+- **Busca Aprimorada**
+  - Dropdown de busca agora exibe avatares de usuários e comunidades
+  - Melhoria no serviço de busca para exibição correta de nomes de usuários
+
+### Alterado
+
+- **Refatoração do Sistema de Comentários**
+  - Layout e funcionalidades dos componentes de comentário refatorados para uma experiência estilo "Twitter"
+  - Estilos atualizados para maior consistência visual
+
+## [0.9.0] - 23/11/25
+
+### Adicionado
+
+- **Sistema de Busca Global**
+  - Funcionalidade de busca global com dropdown interativo
+  - Nova página de resultados de busca (`SearchResultsPage`)
+  - Integração de serviço de busca unificado
+
+- **Melhorias no Dashboard**
+  - Barra lateral direita (RightSidebar) com busca, tópicos em tendência e sugestões de usuários para seguir
+  - Novas páginas de Dashboard e Visualização de Post (PostView) com estilos dedicados
+  - Seção de "Quem Seguir" (WhoToFollow) e "Tópicos em Alta" (TrendingSection)
+
+- **Novas Páginas e Navegação**
+  - Implementação das páginas Configurações, Explorar e Comunidades
+  - Componentes e estilos associados para as novas rotas
+
+- **Sistema de Comunidades Aprimorado**
+  - Criação de posts em comunidades
+  - Suporte a flairs (etiquetas)
+  - Componentes de exibição de conteúdo otimizados
+
+### Alterado
+
+- **Refatoração de Componentes**
+  - Refatoração dos componentes e estilos relacionados à busca para maior consistência
+  - Melhorias na funcionalidade e interface do usuário para elementos de busca
+
+## [0.8.0] - 22/11/25
+
+### Adicionado
+
+- **Redesign Completo da Landing Page**
+  - Nova estética premium inspirada no Patreon com tema escuro e acentos vibrantes
+  - Layouts modernos: Timeline (Como Funciona), Masonry (Depoimentos), Bento Grid (Funcionalidades), Accordion (FAQ)
+  - Animações de scroll (`fade-up`, `scale-in`) e interações refinadas
+  - Seção Hero redesenhada com tipografia de impacto e mockup 3D
+
+- **Melhorias de UX/UI**
+  - **Header**: Layout em Grid para alinhamento preciso (Logo à esquerda, Nav ao centro, Botões à direita)
+  - **Navegação**: Scroll suave (`scroll-behavior: smooth`) e links funcionais para todas as seções
+  - **Pricing**: Alinhamento corrigido (Premium ao lado do Pro) e destaque visual para o plano Pro
+  - **Features**: Bento Grid otimizado (layout 4x2 compacto sem espaços vazios)
+  - **CTA**: Nova seção de chamada para ação com gradientes e botões de alto contraste
+  - **Polimento Visual**: Glow centralizado nos botões e correção de visibilidade de texto em hover nos botões vermelhos
+
+### Alterado
+
+- **Estilos Globais**
+  - Variáveis de cor e espaçamento padronizadas em `landing-page.css`
+  - Tipografia atualizada para família Inter com novos pesos e tracking
+  - Remoção de restrições de largura (`max-width`) na Navbar para layout fluido
+
+### Corrigido
+
+- Bug visual onde o texto dos botões vermelhos (Login, CTA, Pro Plan) desaparecia no hover
+- Desalinhamento do efeito de "glow" nos botões CTA
+- Links de navegação do header quebrados (seções sem ID correspondente)
+
+## [0.7.0] - 22/11/25
+
+### Adicionado
+
+- **Sistema Completo de Canal de Criador**
+  - Página de configuração do canal de criador (`CreatorChannelSetupPage`) com interface intuitiva
+  - Componente `SubscriptionConfig` para gerenciamento de níveis de assinatura (tiers)
+  - Componente `CommunityConnection` para vincular comunidades ao canal
+  - Skeleton loaders para melhor experiência durante carregamento
+  - Sistema de avisos de alterações não salvas antes de sair da página
+  - Estados vazios (empty states) com call-to-action quando não há tiers configurados
+
+- **Integração com Página de Perfil**
+  - Modal de assinatura (`SubscriptionModal`) exibindo tiers disponíveis
+  - Botão "Become a member" no banner do perfil
+  - Aba Community conectada ao canal do criador
+  - Serviço `CreatorChannelService` para operações CRUD de canais
+
+- **Melhorias de UI/UX**
+  - Logo Premiora adicionado em todos os sidebars (Sidebar, ProfileSidebar)
+  - ProfileSidebar agora usado consistentemente em todas as páginas de perfil
+  - Navegação de tabs consistente entre perfil próprio e de terceiros
+  - Ícones de navegação alinhados e ordenados entre Sidebar e ProfileSidebar
+  - Melhorias de acessibilidade com `aria-label` em botões e navegação por teclado
+
+- **Componentes de Layout**
+  - `SubscriptionConfigSkeleton` para loading states
+  - Estilos CSS dedicados para todos os novos componentes
+  - Suporte responsivo para mobile e desktop
+
+### Alterado
+
+- **ProfilePage**
+  - Agora usa ProfileSidebar para perfil próprio (anteriormente usava Sidebar completo)
+  - Header tabs exibidos de forma consistente em todos os perfis
+  - Margens ajustadas para largura do ProfileSidebar (60px)
+
+- **Sidebar e ProfileSidebar**
+  - Logo Premiora substituiu texto/SVG em todos os sidebars
+  - Ícones redimensionados para manter proporções adequadas
+  - Ordem de navegação padronizada: Home, Explore, Notifications, Messages, Following, Communities, Profile, Settings
+
+- **Estilos CSS**
+  - Novos estilos para logo em `Sidebar.css`, `ProfileSidebar.css`, `login.css`, `landing-page.css`
+  - Estilos para `SubscriptionConfig.css` com suporte a skeleton e empty states
+  - Estilos para `SubscriptionModal.css` com design premium
+
+### Corrigido
+
+- Erros de tipo TypeScript em `CreatorChannelSetupPage`
+- Estrutura de objeto `CreatorChannelConfig` alinhada com interface
+- Chamada `saveCreatorChannel` com argumento `creatorId` correto
+- Código duplicado removido em `SubscriptionConfig.tsx`
+- Variável `isOwnProfile` não utilizada removida de `ProfilePage.tsx`
+
+### Técnico
+
+- Migração de banco de dados para sistema de canais de criador
+- Políticas RLS (Row Level Security) para tabelas de canais
+- Funções do banco para gerenciamento de benefícios de assinatura
+- Build verificado e passando sem erros
+
+## [0.6.0] - 21/11/25
+
+### Corrigido
+
+- Problemas de política RLS (Row Level Security) no Creator Channel causando erros 403 Forbidden ao salvar configurações de canal
+- Violações de restrição de chave estrangeira (23503) ao inserir benefícios de assinatura
+- Implementação adequada de `supabaseAdmin` para operações de escrita para contornar políticas RLS em `CreatorChannelService.ts`
+- Criação sequencial de tiers e benefícios para prevenir violações de restrição de chave estrangeira
+
+### Adicionado
+
+- Integração de autenticação Google One Tap para experiência de login aprimorada
+- Sistema de tendências de conteúdo aprimorado com algoritmos de detecção melhorados
+
+### Alterado
+
+- `CreatorChannelService.saveCreatorChannel()` agora usa `supabaseAdmin` para todas as operações de escrita
+- Tratamento de erros e logging aprimorados nas operações de canal de criador
+- Processamento sequencial de tiers de assinatura e benefícios para garantir integridade referencial
+
 ## [0.5.0] - 18/11/25
 
 ### Adicionado

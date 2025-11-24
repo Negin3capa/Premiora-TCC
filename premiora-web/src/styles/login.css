@@ -28,11 +28,10 @@
   margin-bottom: var(--space-3);
 }
 
-.brand-logo svg {
-  width: 48px;
+.brand-logo img {
   height: 48px;
-  color: var(--color-primary);
-  filter: drop-shadow(0 2px 4px rgba(255, 66, 77, 0.3));
+  width: auto;
+  object-fit: contain;
 }
 
 .brand-logo span {

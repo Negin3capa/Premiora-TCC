@@ -504,6 +504,10 @@ export class ProfileService {
         }
 
         console.log('✅ Creator criado com display_name:', newCreator);
+
+        // Sincronizar com a tabela users (campo name)
+        await supabaseAdmin.from('users').update({ name: displayName }).eq('id', userId);
+
         return newCreator;
       }
 
@@ -519,6 +523,9 @@ export class ProfileService {
         console.error('❌ Erro ao atualizar display_name:', updateError);
         throw updateError;
       }
+
+      // Sincronizar com a tabela users (campo name)
+      await supabaseAdmin.from('users').update({ name: displayName }).eq('id', userId);
 
       console.log('✅ Display_name atualizado:', updatedCreator);
       return updatedCreator;

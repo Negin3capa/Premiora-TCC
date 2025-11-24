@@ -18,7 +18,10 @@ import {
   Upload,
   BarChart3,
   Trash2,
-  Ban
+  Ban,
+  CreditCard,
+  Users,
+  LayoutDashboard
 } from 'lucide-react';
 import '../styles/SettingsPage.css';
 
@@ -129,6 +132,7 @@ const SettingsPage: React.FC = () => {
     { id: 'privacy', label: 'Privacidade', icon: <Lock size={20} /> },
     { id: 'accessibility', label: 'Acessibilidade', icon: <Accessibility size={20} /> },
     { id: 'data', label: 'Dados e Privacidade', icon: <Database size={20} /> },
+    { id: 'creator-tools', label: 'Ferramentas de Criador', icon: <LayoutDashboard size={20} /> },
     { id: 'monetization', label: 'Monetização', icon: <DollarSign size={20} /> },
   ];
 
@@ -659,9 +663,67 @@ const SettingsPage: React.FC = () => {
               </div>
             )}
 
+            {activeSection === 'creator-tools' && (
+              <div className="settings-section">
+                <h3>Ferramentas de Criador</h3>
+                
+                <div className="setting-group">
+                  <h4>Analytics</h4>
+                  <div className="setting-item">
+                    <button className="btn-secondary">
+                      <BarChart3 size={16} /> Ver Painel de Analytics
+                    </button>
+                    <p className="setting-description">
+                      Visualize estatísticas detalhadas sobre seu conteúdo e audiência
+                    </p>
+                  </div>
+                </div>
+
+                <div className="setting-group">
+                  <h4>Gestão de Comunidade</h4>
+                  <div className="setting-item">
+                    <button className="btn-secondary">
+                      <Users size={16} /> Gerenciar Membros
+                    </button>
+                    <p className="setting-description">
+                      Gerencie membros, moderadores e permissões da sua comunidade
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeSection === 'monetization' && (
               <div className="settings-section">
                 <h3>Monetização</h3>
+
+                <div className="setting-group">
+                  <h4>Status da Conta</h4>
+                  <div className="monetization-status-card">
+                    <div className="status-header">
+                      <span className="status-label">Nível de Criador</span>
+                      <span className="status-value">Iniciante</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: '30%' }}></div>
+                    </div>
+                    <p className="status-description">
+                      Complete mais 2 metas para desbloquear o nível Intermediário
+                    </p>
+                  </div>
+                </div>
+
+                <div className="setting-group">
+                  <h4>Configurações de Pagamento</h4>
+                  <div className="setting-item">
+                    <button className="btn-secondary">
+                      <CreditCard size={16} /> Configurar Payouts
+                    </button>
+                    <p className="setting-description">
+                      Conecte sua conta bancária ou Stripe para receber pagamentos
+                    </p>
+                  </div>
+                </div>
 
                 <div className="setting-group">
                   <h4>Receitas e Anúncios</h4>
@@ -672,24 +734,10 @@ const SettingsPage: React.FC = () => {
                         checked={settings.allowAds}
                         onChange={(e) => handleSettingChange('allowAds', e.target.checked)}
                       />
-                      <span>Permitir anúncios personalizados</span>
+                      <span>Permitir anúncios em meu conteúdo</span>
                     </label>
                     <p className="setting-description">
-                      Permite que anúncios sejam exibidos com base nos seus interesses
-                    </p>
-                  </div>
-
-                  <div className="setting-item">
-                    <label className="setting-label">
-                      <input
-                        type="checkbox"
-                        checked={settings.creatorMode}
-                        onChange={(e) => handleSettingChange('creatorMode', e.target.checked)}
-                      />
-                      <span>Modo criador</span>
-                    </label>
-                    <p className="setting-description">
-                      Ative ferramentas especiais para criadores de conteúdo
+                      Ganhe receita exibindo anúncios em seus vídeos e posts
                     </p>
                   </div>
 
@@ -700,21 +748,11 @@ const SettingsPage: React.FC = () => {
                         checked={settings.premiumFeatures}
                         onChange={(e) => handleSettingChange('premiumFeatures', e.target.checked)}
                       />
-                      <span>Recursos premium</span>
+                      <span>Habilitar Assinaturas de Fãs</span>
                     </label>
                     <p className="setting-description">
-                      Acesso a recursos exclusivos com assinatura premium
+                      Permita que fãs assinem seu conteúdo exclusivo
                     </p>
-                  </div>
-                </div>
-
-                <div className="setting-group">
-                  <h4>Assinatura</h4>
-                  <div className="subscription-info">
-                    <p>Plano atual: <strong>Gratuito</strong></p>
-                    <button className="btn-primary">
-                      Fazer Upgrade para Premium
-                    </button>
                   </div>
                 </div>
               </div>

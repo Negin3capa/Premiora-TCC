@@ -2,7 +2,7 @@
  * Serviço de transformação de dados de conteúdo
  * Responsável por converter dados do banco para formato da aplicação
  */
-import type { ContentItem } from '../../types/content';
+import type { ContentItem } from "../../types/content";
 
 /**
  * Classe de serviço para transformação de dados de conteúdo
@@ -15,7 +15,8 @@ export class ContentTransformer {
    */
   static transformToContentItem(data: any): ContentItem {
     // Verificar se é vídeo baseado na estrutura dos dados
-    const isVideo = data.content_type === 'video' || data.contentType === 'video' || data.type === 'video' || data.videoUrl;
+    const isVideo = data.content_type === "video" ||
+      data.contentType === "video" || data.type === "video" || data.videoUrl;
 
     if (isVideo) {
       return this.transformVideoToContentItem(data);
@@ -34,28 +35,48 @@ export class ContentTransformer {
 
     // Dados do usuário podem vir de diferentes estruturas dependendo da query
     const userData = postData.users || postData.creator || {};
-    const authorName = userData.name || userData.display_name || postData.username || 'Usuário';
-    const authorAvatar = userData.avatar_url || userData.profile_image_url || '';
+    const authorName = userData.name || userData.display_name ||
+      postData.username || "Usuário";
+    const authorAvatar = userData.avatar_url || userData.profile_image_url ||
+      "";
+
+    // Extract flair
+    let flair;
+    if (postData.post_flairs && postData.post_flairs.length > 0) {
+      const flairData = postData.post_flairs[0].community_flairs;
+      if (flairData) {
+        flair = {
+          text: flairData.flair_text,
+          color: flairData.flair_color,
+          backgroundColor: flairData.flair_background_color,
+        };
+      }
+    }
 
     return {
       id: postData.id,
-      type: 'post',
-      title: postData.title || '',
+      type: "post",
+      title: postData.title || "",
       author: authorName,
       authorUsername: postData.username, // Foreign key direta para users.username
       authorAvatar: authorAvatar,
       thumbnail: postData.media_urls?.[0] || undefined,
+      mediaUrls: postData.media_urls || [],
       content: postData.content,
       views: postData.views_count || 0,
       likes: likesCount,
-      timestamp: this.formatTimestamp(postData.created_at || postData.published_at),
-      accessLevel: postData.is_premium ? 'premium' : 'public',
+      timestamp: this.formatTimestamp(
+        postData.created_at || postData.published_at,
+      ),
+      accessLevel: postData.is_premium ? "premium" : "public",
       isLocked: postData.is_premium,
       communityId: postData.community?.id,
       communityName: postData.community?.name,
       communityDisplayName: postData.community?.name,
       communityAvatar: postData.community?.avatar_url,
-      creatorId: postData.creator_id
+      creatorId: postData.creator_id,
+      isPinned: postData.is_pinned,
+      flair: flair,
     };
   }
 
@@ -66,31 +87,37 @@ export class ContentTransformer {
    */
   static transformVideoToContentItem(videoData: any): ContentItem {
     // Verificar se os dados já estão pré-processados (do VideoService) ou raw do banco
-    const isPreprocessed = videoData.type === 'video' && videoData.thumbnail;
+    const isPreprocessed = videoData.type === "video" && videoData.thumbnail;
 
     if (isPreprocessed) {
       // Dados já pré-processados do VideoService.transformVideoForFeed()
       return {
         id: videoData.id,
-        type: 'video' as const,
-        title: videoData.title || '',
-        author: videoData.author || videoData.creators?.display_name || 'Usuário',
+        type: "video" as const,
+        title: videoData.title || "",
+        author: videoData.author || videoData.creators?.display_name ||
+          "Usuário",
         authorUsername: videoData.authorUsername || videoData.username,
-        authorAvatar: videoData.authorAvatar || videoData.creators?.profile_image_url || '',
+        authorAvatar: videoData.authorAvatar ||
+          videoData.creators?.profile_image_url || "",
         thumbnail: videoData.thumbnail,
         videoUrl: videoData.videoUrl,
         content: videoData.content,
         views: videoData.views || videoData.views_count || 0,
         likes: videoData.likes || videoData.likes_count || 0,
-        timestamp: videoData.timestamp ? this.formatTimestamp(videoData.timestamp) : videoData.timestamp || '',
+        timestamp: videoData.timestamp
+          ? this.formatTimestamp(videoData.timestamp)
+          : videoData.timestamp || "",
         duration: videoData.duration,
         resolution: videoData.resolution,
         fileSize: videoData.fileSize,
         communityId: videoData.communityId || videoData.community_id,
         communityName: videoData.communityName || videoData.community?.name,
-        communityDisplayName: videoData.communityDisplayName || videoData.communityName || videoData.community?.display_name,
-        communityAvatar: videoData.communityAvatar || videoData.community?.avatar_url,
-        creatorId: videoData.creatorId || videoData.creator_id
+        communityDisplayName: videoData.communityDisplayName ||
+          videoData.communityName || videoData.community?.display_name,
+        communityAvatar: videoData.communityAvatar ||
+          videoData.community?.avatar_url,
+        creatorId: videoData.creatorId || videoData.creator_id,
       };
     } else {
       // Dados raw do banco - extrair informações do media_urls
@@ -100,11 +127,11 @@ export class ContentTransformer {
 
       return {
         id: videoData.id,
-        type: 'video' as const,
-        title: videoData.title || '',
-        author: videoData.creator?.display_name || 'Usuário',
+        type: "video" as const,
+        title: videoData.title || "",
+        author: videoData.creator?.display_name || "Usuário",
         authorUsername: videoData.username,
-        authorAvatar: videoData.creator?.profile_image_url || '',
+        authorAvatar: videoData.creator?.profile_image_url || "",
         thumbnail: thumbnailInfo.url || videoInfo.url, // Fallback para thumbnail
         videoUrl: videoInfo.url,
         content: videoData.content,
@@ -112,13 +139,16 @@ export class ContentTransformer {
         likes: videoData.likes_count || 0,
         timestamp: this.formatTimestamp(videoData.published_at),
         duration: videoInfo.metadata?.duration,
-        resolution: videoInfo.metadata ? `${videoInfo.metadata.width}x${videoInfo.metadata.height}` : undefined,
+        resolution: videoInfo.metadata
+          ? `${videoInfo.metadata.width}x${videoInfo.metadata.height}`
+          : undefined,
         fileSize: videoInfo.metadata?.fileSize,
         communityId: videoData.community_id,
         communityName: videoData.community?.name,
-        communityDisplayName: videoData.community?.display_name || videoData.community?.name,
+        communityDisplayName: videoData.community?.display_name ||
+          videoData.community?.name,
         communityAvatar: videoData.community?.avatar_url,
-        creatorId: videoData.creator_id
+        creatorId: videoData.creator_id,
       };
     }
   }
@@ -131,10 +161,12 @@ export class ContentTransformer {
   static formatTimestamp(timestamp: string): string {
     const now = new Date();
     const postDate = new Date(timestamp);
-    const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
+    const diffInHours = Math.floor(
+      (now.getTime() - postDate.getTime()) / (1000 * 60 * 60),
+    );
 
     if (diffInHours < 1) {
-      return 'Agora há pouco';
+      return "Agora há pouco";
     } else if (diffInHours < 24) {
       return `${diffInHours}h atrás`;
     } else {
@@ -149,7 +181,10 @@ export class ContentTransformer {
    * @param startIndex - Índice inicial
    * @returns Array com sugestões inseridas
    */
-  static insertUserSuggestions(posts: ContentItem[], startIndex: number): ContentItem[] {
+  static insertUserSuggestions(
+    posts: ContentItem[],
+    startIndex: number,
+  ): ContentItem[] {
     const result: ContentItem[] = [];
     const suggestionInterval = 5;
 
@@ -158,18 +193,18 @@ export class ContentTransformer {
 
       if ((startIndex + i + 1) % suggestionInterval === 0) {
         const lastItem = result[result.length - 1];
-        if (lastItem && lastItem.type !== 'profile') {
+        if (lastItem && lastItem.type !== "profile") {
           // Usar timestamp + índice para garantir IDs únicos
           const uniqueId = `suggestion-${Date.now()}-${startIndex + i}`;
           result.push({
             id: uniqueId,
-            type: 'profile',
-            title: 'Sugestões para você',
-            author: '',
-            authorAvatar: '',
+            type: "profile",
+            title: "Sugestões para você",
+            author: "",
+            authorAvatar: "",
             views: 0,
             likes: 0,
-            timestamp: ''
+            timestamp: "",
           });
         }
       }

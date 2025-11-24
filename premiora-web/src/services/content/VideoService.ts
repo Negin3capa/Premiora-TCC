@@ -3,6 +3,7 @@
  * Responsável por operações CRUD de vídeos
  */
 import { supabase } from '../../utils/supabaseClient';
+import { supabaseAdmin } from '../../utils/supabaseAdminClient';
 import { FileUploadService } from './FileUploadService';
 import type { VideoFormData } from '../../types/content';
 
@@ -41,41 +42,71 @@ export class VideoService {
    */
   static async createVideo(videoData: VideoFormData, creatorId: string): Promise<VideoCreationResult> {
     try {
-      // 1. Fazer upload do vídeo
-      const videoUploadResult = await FileUploadService.uploadFile(
-        videoData.video!,
-        'videos',
-        creatorId
-      );
-
-      // 2. Preparar thumbnail
+      let videoUrl = '';
+      let videoPath = '';
+      let metadata: VideoMetadata = { fileSize: 0, mimeType: 'video/unknown' };
       let thumbnailUploadResult = null;
+
+      // 1. Processar Vídeo (Upload ou YouTube)
+      if (videoData.youtubeUrl) {
+        // Caso YouTube
+        videoUrl = videoData.youtubeUrl;
+        videoPath = 'external/youtube';
+        metadata = { 
+          fileSize: 0, 
+          mimeType: 'video/youtube',
+          // Tentar inferir algo ou deixar vazio
+        };
+
+        // Se não tiver thumbnail, tentar usar a do YouTube
+        if (!videoData.thumbnail) {
+           const videoId = this.getYouTubeId(videoData.youtubeUrl);
+           if (videoId) {
+             // Usar thumbnail de alta qualidade do YouTube como URL direta
+             // Nota: isso não faz upload, apenas salva a URL
+             thumbnailUploadResult = {
+               url: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+               path: `external/youtube/${videoId}/thumbnail`
+             };
+           }
+        }
+
+      } else if (videoData.video) {
+        // Caso Upload de Arquivo
+        const videoUploadResult = await FileUploadService.uploadFile(
+          videoData.video,
+          'videos',
+          creatorId
+        );
+        videoUrl = videoUploadResult.url;
+        videoPath = videoUploadResult.path;
+
+        // Extrair metadados
+        metadata = await this.extractVideoMetadata(videoData.video);
+        
+        // Gerar thumbnail automática se não fornecida
+        if (!videoData.thumbnail) {
+           try {
+            const generatedThumbnail = await this.generateVideoThumbnail(videoData.video);
+            if (generatedThumbnail) {
+              videoData.thumbnail = generatedThumbnail; // Atribuir para upload abaixo
+            }
+          } catch (thumbnailError) {
+            console.warn('Não foi possível gerar thumbnail automática:', thumbnailError);
+          }
+        }
+      } else {
+        throw new Error('Nenhum vídeo ou link do YouTube fornecido');
+      }
+
+      // 2. Fazer upload da thumbnail se existir (e não for URL externa já tratada)
       if (videoData.thumbnail) {
-        // Usar thumbnail fornecida pelo usuário
         thumbnailUploadResult = await FileUploadService.uploadFile(
           videoData.thumbnail,
           'thumbnails',
           creatorId
         );
-      } else {
-        // Gerar thumbnail automaticamente do vídeo
-        try {
-          const generatedThumbnail = await this.generateVideoThumbnail(videoData.video!);
-          if (generatedThumbnail) {
-            thumbnailUploadResult = await FileUploadService.uploadFile(
-              generatedThumbnail,
-              'thumbnails',
-              creatorId
-            );
-          }
-        } catch (thumbnailError) {
-          console.warn('Não foi possível gerar thumbnail automática:', thumbnailError);
-          // Continua sem thumbnail se falhar
-        }
       }
-
-      // 3. Extrair metadados do vídeo
-      const metadata = await this.extractVideoMetadata(videoData.video!);
 
       // 4. Buscar dados do usuário (necessário para o username)
       const { data: userData, error: userError } = await supabase
@@ -89,14 +120,16 @@ export class VideoService {
       }
 
       // 6. Preparar dados para inserção no banco
+      const isPremium = videoData.visibility === 'subscribers' || videoData.visibility === 'tier';
+
       const videoRecord = {
         title: videoData.title,
         content: videoData.description,
         content_type: 'video' as const,
         media_urls: [{
           video: {
-            url: videoUploadResult.url,
-            path: videoUploadResult.path,
+            url: videoUrl,
+            path: videoPath,
             metadata: metadata
           },
           ...(thumbnailUploadResult && {
@@ -109,6 +142,8 @@ export class VideoService {
         community_id: videoData.communityId || null,
         creator_id: creatorId,
         username: userData.username, // Foreign key direta para users.username
+        is_premium: isPremium,
+        required_tier_id: videoData.requiredTierId || null,
         is_published: true,
         published_at: new Date().toISOString()
       };
@@ -128,7 +163,7 @@ export class VideoService {
       return {
         id: data.id,
         title: data.title,
-        videoUrl: videoUploadResult.url,
+        videoUrl: videoUrl,
         thumbnailUrl: thumbnailUploadResult?.url,
         metadata,
         createdAt: data.created_at
@@ -138,6 +173,16 @@ export class VideoService {
       console.error('Erro ao criar vídeo:', error);
       throw error;
     }
+  }
+
+  /**
+   * Extrai ID do vídeo do YouTube da URL
+   * @param url - URL do vídeo
+   */
+  static getYouTubeId(url: string): string | null {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   }
 
   /**
@@ -382,7 +427,8 @@ export class VideoService {
     userId?: string
   ): Promise<{ videos: any[]; nextCursor?: string; hasMore: boolean }> {
     try {
-      let query = supabase
+      // Usar supabaseAdmin para garantir que vídeos premium sejam retornados (bypass RLS)
+      let query = supabaseAdmin
         .from('posts')
         .select(`
           id,
@@ -398,6 +444,8 @@ export class VideoService {
           published_at,
           created_at,
           username,
+          is_premium,
+          required_tier_id,
           communities (
             id,
             name,
@@ -408,6 +456,11 @@ export class VideoService {
             id,
             display_name,
             profile_image_url
+          ),
+          required_tier:required_tier_id (
+            id,
+            name,
+            tier_order
           )
         `)
         .eq('content_type', 'video')
@@ -418,13 +471,10 @@ export class VideoService {
       // Aplicar cursor se fornecido
       if (cursor) {
         const { timestamp, id } = this.decodeCursor(cursor);
-        query = query.lt('published_at', timestamp).neq('id', id);
-      }
-
-      // Se usuário logado, pode adicionar filtros de comunidades seguidas
-      // Por enquanto, retorna todos os vídeos públicos
-      if (userId) {
-        // TODO: Implementar lógica de comunidades seguidas
+        // Ensure timestamp is valid before applying filter
+        if (timestamp && timestamp !== 'undefined') {
+          query = query.lt('published_at', timestamp).neq('id', id);
+        }
       }
 
       const { data, error } = await query;
@@ -433,8 +483,57 @@ export class VideoService {
         throw new Error(`Erro ao buscar vídeos com cursor: ${error.message}`);
       }
 
-      // Transformar dados para o formato do feed
-      const realVideos = (data || []).map(video => this.transformVideoForFeed(video));
+      // Buscar assinaturas do usuário se estiver logado
+      let userSubscribedTiers: any[] = [];
+      if (userId) {
+        const { data: userSubs } = await supabase
+          .from('user_subscriptions')
+          .select('plan_id')
+          .eq('user_id', userId)
+          .eq('status', 'active');
+        
+        const planIds = userSubs?.map(s => s.plan_id) || [];
+        
+        if (planIds.length > 0) {
+          const { data: tiers } = await supabaseAdmin
+            .from('subscription_tiers')
+            .select('id, tier_order, creator_channel_id')
+            .in('id', planIds);
+          
+          userSubscribedTiers = tiers || [];
+        }
+      }
+
+      // Transformar dados para o formato do feed e aplicar lock
+      const realVideos = (data || []).map(video => {
+        let videoData = this.transformVideoForFeed(video);
+        
+        if (video.is_premium) {
+          let hasAccess = false;
+          
+          const requiredTier = Array.isArray(video.required_tier) ? video.required_tier[0] : video.required_tier;
+
+          if (userId && video.creator_id === userId) {
+            hasAccess = true;
+          } else if (userId && userSubscribedTiers.length > 0) {
+            const requiredOrder = requiredTier?.tier_order || 0;
+            hasAccess = userSubscribedTiers.some(t => 
+              t.creator_channel_id === video.creator_id && t.tier_order >= requiredOrder
+            );
+          }
+
+          if (!hasAccess) {
+            videoData = {
+              ...videoData,
+              content: null,
+              videoUrl: null,
+              isLocked: true,
+              requiredTier: requiredTier?.name
+            };
+          }
+        }
+        return videoData;
+      });
 
       const videos = data || [];
       let nextCursor: string | undefined;
@@ -442,7 +541,11 @@ export class VideoService {
 
       if (hasMore && videos.length > 0) {
         const lastVideo = videos[videos.length - 1];
-        nextCursor = this.encodeCursor(lastVideo.published_at, lastVideo.id);
+        // Fallback to created_at if published_at is missing
+        const timestamp = lastVideo.published_at || lastVideo.created_at;
+        if (timestamp) {
+          nextCursor = this.encodeCursor(timestamp, lastVideo.id);
+        }
       }
 
       return {

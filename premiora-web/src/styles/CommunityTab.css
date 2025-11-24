@@ -18,7 +18,7 @@
 .no-community {
   text-align: center;
   padding: 3rem 1rem;
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 .loading-community p,
@@ -33,7 +33,7 @@
 }
 
 .no-community h3 {
-  color: #DADADA;
+  color: var(--color-text-secondary);
   margin: 0 0 1rem 0;
   font-size: 18px;
   font-weight: 600;
@@ -52,8 +52,8 @@
   align-items: center;
   gap: 1rem;
   padding: 1.5rem;
-  background-color: #0D0D0D;
-  border: 1px solid #1A1A1A;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 12px;
   margin-bottom: 1.5rem;
 }
@@ -80,22 +80,22 @@
 .community-name {
   font-size: 20px;
   font-weight: 600;
-  color: #DADADA;
+  color: var(--color-text-primary);
   margin: 0 0 0.25rem 0;
 }
 
 .community-tag {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
 .visit-community-button {
   padding: 8px 16px;
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-light);
   border-radius: 8px;
   background: none;
-  color: #999;
+  color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -107,8 +107,8 @@
 }
 
 .visit-community-button:hover {
-  border-color: #FF6B75;
-  color: #FF6B75;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 /* ==================== Community Description ==================== */
@@ -118,7 +118,7 @@
 }
 
 .community-description p {
-  color: #DADADA;
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
@@ -136,22 +136,22 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #999;
+  color: var(--color-text-secondary);
   font-size: 14px;
 }
 
 .stat-icon {
-  color: #666;
+  color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
 
 .stat-value {
   font-weight: 600;
-  color: #DADADA;
+  color: var(--color-text-primary);
 }
 
 .stat-label {
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 /* ==================== Community Actions ==================== */
@@ -174,12 +174,12 @@
 }
 
 .action-button.primary {
-  background-color: #FF6B75;
+  background-color: var(--color-primary);
   color: white;
 }
 
 .action-button.primary:hover {
-  background-color: #e55a63;
+  background-color: var(--color-primary-hover);
   transform: translateY(-1px);
 }
 
@@ -187,20 +187,20 @@
 
 .community-preview {
   padding: 1.5rem;
-  background-color: #0D0D0D;
-  border: 1px solid #1A1A1A;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
   border-radius: 12px;
 }
 
 .community-preview h4 {
-  color: #DADADA;
+  color: var(--color-text-primary);
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 1rem 0;
 }
 
 .community-preview p {
-  color: #999;
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.6;
   margin: 0;

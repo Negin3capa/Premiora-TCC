@@ -4,8 +4,9 @@
  */
 import React, { useState, useRef } from 'react';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { Compass, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Compass, ChevronRight, ChevronLeft, Search } from 'lucide-react';
 import { useExplore } from '../hooks/useExplore';
+import TrendingSection from '../components/dashboard/TrendingSection';
 import '../styles/ExplorePage.css';
 
 /**
@@ -19,10 +20,6 @@ const ExplorePage: React.FC = () => {
 
   // Refs para controle de scroll
   const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const recentScrollRef = useRef<HTMLDivElement>(null);
-  const recommendedScrollRef = useRef<HTMLDivElement>(null);
-  const trendingScrollRef = useRef<HTMLDivElement>(null);
-  const topCreatorsScrollRef = useRef<HTMLDivElement>(null);
 
   // Categorias do topo
   const categories = [
@@ -100,238 +97,101 @@ const ExplorePage: React.FC = () => {
 
   return (
     <div className="explore-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <div className="dashboard-sidebar">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
       <div className="explore-main-content">
         <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="explore-page-container">
-          {/* Category Filter Bar */}
-          <section className="category-filter-section">
-            <div className="category-scroll-container">
-              <button 
-                className="scroll-arrow scroll-arrow-left"
-                onClick={() => handleScroll(categoryScrollRef, 'left')}
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <div className="category-scroll" ref={categoryScrollRef}>
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    className={`category-pill ${selectedCategory === category ? 'active' : ''}`}
-                    onClick={() => setSelectedCategory(category)}
-                  >
-                    {category}
-                  </button>
-                ))}
+        <div className="explore-layout">
+          <div className="explore-content-container">
+            {/* Search Bar */}
+            <div className="explore-search-container">
+              <div className="explore-search-input-wrapper">
+                <Search size={20} className="search-icon" />
+                <input 
+                  type="text" 
+                  placeholder="Search creators, posts, or communities" 
+                  className="explore-search-input" 
+                />
               </div>
-              <button 
-                className="scroll-arrow scroll-arrow-right"
-                onClick={() => handleScroll(categoryScrollRef, 'right')}
-              >
-                <ChevronRight size={20} />
-              </button>
             </div>
-          </section>
 
-          {/* Recent Access Section */}
-          <section className="carousel-section">
-            <div className="section-header">
-              <h2 className="section-title">Acessado recentemente</h2>
-              <div className="carousel-controls">
+            {/* Category Filter Bar */}
+            <section className="category-filter-section">
+              <div className="category-scroll-container">
                 <button 
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(recentScrollRef, 'left')}
+                  className="scroll-arrow scroll-arrow-left"
+                  onClick={() => handleScroll(categoryScrollRef, 'left')}
                 >
                   <ChevronLeft size={20} />
                 </button>
+                <div className="category-scroll" ref={categoryScrollRef}>
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      className={`category-pill ${selectedCategory === category ? 'active' : ''}`}
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
                 <button 
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(recentScrollRef, 'right')}
+                  className="scroll-arrow scroll-arrow-right"
+                  onClick={() => handleScroll(categoryScrollRef, 'right')}
                 >
                   <ChevronRight size={20} />
                 </button>
               </div>
-            </div>
-            <div className="carousel-container">
-              <div className="carousel-scroll" ref={recentScrollRef}>
-                {data.recentCommunities.map((community) => (
-                  <div key={community.id} className="recent-access-card">
-                    <div className="card-image">
-                      <img
-                        src={community.avatarUrl || 'https://via.placeholder.com/80x80?text=Community'}
-                        alt={community.displayName}
-                      />
-                    </div>
-                    <div className="card-content">
-                      <h3 className="card-title">{community.displayName}</h3>
-                      <p className="card-subtitle">creating content</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Recommended Creators Section */}
-          <section className="carousel-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                <span className="section-subtitle">Com base em suas assinaturas</span>
-                Criadores recomendados para você
-              </h2>
-              <div className="carousel-controls">
-                <button 
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(recommendedScrollRef, 'left')}
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button 
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(recommendedScrollRef, 'right')}
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="carousel-container">
-              <div className="carousel-scroll" ref={recommendedScrollRef}>
+            {/* Recommended Creators Grid (Patreon Style) */}
+            <section className="creators-section">
+              <h2 className="section-title">Recommended Creators</h2>
+              <div className="creators-grid">
                 {data.recommendedCreators.map((creator) => (
-                  <div key={creator.id} className="recommended-creator-card">
-                    <div className="creator-image">
+                  <div key={creator.id} className="creator-card">
+                    <div className="creator-cover" style={{ backgroundImage: `url(${creator.avatarUrl})` }}></div>
+                    <div className="creator-info">
                       <img
                         src={creator.avatarUrl}
                         alt={creator.displayName}
+                        className="creator-avatar"
                       />
-                    </div>
-                    <div className="creator-content">
                       <h3 className="creator-name">{creator.displayName}</h3>
-                      <p className="creator-description">{creator.featuredContent.title}</p>
+                      <p className="creator-category">Creating content</p>
+                      <div className="creator-stats">
+                        <span>12k followers</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Trending This Week Section */}
-          <section className="carousel-section">
-            <div className="section-header">
-              <h2 className="section-title">Em alta esta semana</h2>
-              <div className="carousel-controls">
-                <button 
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(trendingScrollRef, 'left')}
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button 
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(trendingScrollRef, 'right')}
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="carousel-container">
-              <div className="trending-scroll" ref={trendingScrollRef}>
-                {data.trendingContent.map((item) => (
-                  <div key={item.id} className="trending-item">
-                    <div className="trending-avatar">
-                      <img
-                        src={item.authorAvatar || 'https://via.placeholder.com/48x48?text=User'}
-                        alt={item.author}
-                      />
-                    </div>
-                    <div className="trending-content">
-                      <h4 className="trending-name">{item.author}</h4>
-                      <p className="trending-description">{item.content}</p>
-                    </div>
-                  </div>
+            {/* Explore Topics Section */}
+            <section className="topics-section">
+              <h2 className="section-title">Explore Topics</h2>
+              <div className="colorful-topics-grid">
+                {colorfulTopics.map((topic) => (
+                  <button
+                    key={topic.id}
+                    className="colorful-topic-button"
+                    style={{ backgroundColor: topic.color }}
+                  >
+                    <span className="topic-icon">{topic.icon}</span>
+                    <span className="topic-name">{topic.name}</span>
+                  </button>
                 ))}
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
 
-          {/* Explore Topics Section */}
-          <section className="topics-section">
-            <h2 className="section-title">Explorar tópicos</h2>
-            <div className="colorful-topics-grid">
-              {colorfulTopics.map((topic) => (
-                <button
-                  key={topic.id}
-                  className="colorful-topic-button"
-                  style={{ backgroundColor: topic.color }}
-                >
-                  <span className="topic-icon">{topic.icon}</span>
-                  <span className="topic-name">{topic.name}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
-          {/* Newcomers Section */}
-          <section className="newcomers-section">
-            <h2 className="section-title">Recém chegados ao Patreon</h2>
-            {data.newcomers.length > 0 && (
-              <div className="newcomer-featured-card">
-                <div className="newcomer-image">
-                  <img
-                    src={data.newcomers[0].avatarUrl}
-                    alt={data.newcomers[0].displayName}
-                  />
-                </div>
-                <div className="newcomer-content">
-                  <h3 className="newcomer-name">{data.newcomers[0].displayName}</h3>
-                  <p className="newcomer-description">Music lessons, harmony tutorial...</p>
-                </div>
-              </div>
-            )}
-          </section>
-
-          {/* Recommended Communities Section */}
-          <section className="carousel-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                Comunidades recomendadas para você
-              </h2>
-              <div className="carousel-controls">
-                <button
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(topCreatorsScrollRef, 'left')}
-                >
-                  <ChevronLeft size={20} />
-                </button>
-                <button
-                  className="carousel-arrow"
-                  onClick={() => handleScroll(topCreatorsScrollRef, 'right')}
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </div>
-            <div className="carousel-container">
-              <div className="carousel-scroll" ref={topCreatorsScrollRef}>
-                {data.recommendedCommunities.map((community) => (
-                  <div key={`rec-${community.id}`} className="recommended-community-card">
-                    <div className="community-image">
-                      <img
-                        src={community.avatarUrl || 'https://via.placeholder.com/80x80?text=Community'}
-                        alt={community.displayName}
-                      />
-                    </div>
-                    <div className="community-content">
-                      <h3 className="community-name">{community.displayName}</h3>
-                      <p className="community-description">
-                        {community.memberCount ? `${community.memberCount} membros` : 'Comunidade ativa'}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
+          {/* Right Sidebar (Trending) */}
+          <div className="explore-right-sidebar">
+            <TrendingSection />
+          </div>
         </div>
       </div>
       <MobileBottomBar />

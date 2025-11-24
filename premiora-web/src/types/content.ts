@@ -5,12 +5,12 @@
 /**
  * Tipos de conteúdo suportados na plataforma
  */
-export type ContentType = 'profile' | 'video' | 'post';
+export type ContentType = "profile" | "video" | "post";
 
 /**
  * Níveis de acesso para conteúdo (similar ao Patreon)
  */
-export type AccessLevel = 'public' | 'supporters' | 'premium';
+export type AccessLevel = "public" | "supporters" | "premium";
 
 /**
  * Item de conteúdo exibido no feed
@@ -23,6 +23,7 @@ export interface ContentItem {
   authorUsername?: string; // Username real da tabela users
   authorAvatar: string;
   thumbnail?: string;
+  mediaUrls?: string[];
   content?: string;
   views?: number;
   likes?: number;
@@ -33,6 +34,7 @@ export interface ContentItem {
   isLocked?: boolean;
   previewContent?: string; // Conteúdo preview para posts bloqueados
   requiredTier?: string; // Nome do tier necessário
+  requiredTierId?: string; // ID do tier necessário
   fullContent?: string; // Conteúdo completo (só para usuários autorizados)
   // Propriedades de comunidade
   communityId?: string;
@@ -43,6 +45,11 @@ export interface ContentItem {
   communityLikes?: number;
   communityComments?: number;
   isPinned?: boolean;
+  flair?: {
+    text: string;
+    color: string;
+    backgroundColor: string;
+  };
   // Propriedades específicas para vídeos
   videoUrl?: string;
   duration?: number;
@@ -58,7 +65,10 @@ export interface PostFormData {
   title: string;
   content: string;
   communityId?: string;
-  image?: File | null;
+  flairId?: string;
+  images?: File[]; // Array de imagens/GIFs
+  visibility?: 'public' | 'subscribers' | 'tier'; // Nível de visibilidade
+  requiredTierId?: string; // ID do tier específico se visibility == 'tier'
 }
 
 /**
@@ -69,7 +79,10 @@ export interface VideoFormData {
   description: string;
   communityId?: string;
   video?: File | null;
+  youtubeUrl?: string;
   thumbnail?: File | null;
+  visibility?: 'public' | 'subscribers' | 'tier';
+  requiredTierId?: string;
 }
 
 /**
@@ -121,8 +134,8 @@ export interface CommentFilters {
   parentCommentId?: string | null; // null para comentários raiz, string para respostas
   limit?: number;
   offset?: number;
-  sortBy?: 'created_at' | 'updated_at';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "created_at" | "updated_at";
+  sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -133,3 +146,13 @@ export interface CommentStats {
   topLevelComments: number; // Comentários raiz (não respostas)
   lastCommentAt?: string;
 }
+
+/**
+ * Opções de ordenação para feeds
+ */
+export type SortOption = "hot" | "new" | "top";
+
+/**
+ * Filtros de tempo para ordenação "Top"
+ */
+export type TimeRange = "all" | "year" | "month" | "week" | "day";

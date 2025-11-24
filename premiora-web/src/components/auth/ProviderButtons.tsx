@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithProvider } from '../../lib/supabaseAuth';
 import { useGoogleOneTap } from '../../hooks/useGoogleOneTap';
+import { supabase } from '../../utils/supabaseClient';
 import type { OAuthProvider } from '../../lib/supabaseAuth';
 
 /**
@@ -95,6 +96,88 @@ const ProviderButtons: React.FC<ProviderButtonsProps> = ({
     try {
       setLoadingProvider(provider);
 
+      // Para Google, tentar usar popup para melhor UX
+      if (provider === 'google') {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            skipBrowserRedirect: true,
+            redirectTo: window.location.origin, // Redirecionar para a origem (vai carregar a app e processar o hash)
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          // Abrir popup
+          const width = 500;
+          const height = 600;
+          const left = window.screenX + (window.outerWidth - width) / 2;
+          const top = window.screenY + (window.outerHeight - height) / 2;
+          
+          const popup = window.open(
+            data.url,
+            'google-auth',
+            `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+          );
+
+          if (popup) {
+            // Monitorar popup para fechar quando voltar para a origem
+            const timer = setInterval(() => {
+              try {
+                if (popup.closed) {
+                  clearInterval(timer);
+                  setLoadingProvider(null);
+                  return;
+                }
+
+                // Tentar acessar location (só funciona se estiver na mesma origem)
+                const currentUrl = popup.location.href;
+                if (currentUrl.includes(window.location.origin)) {
+                  // Estamos de volta! O AuthContext na popup vai processar o login
+                  
+                  // Verificar se há hash na URL (indica que o Supabase retornou tokens)
+                  if (currentUrl.includes('#access_token') || currentUrl.includes('code=')) {
+                    console.log('✅ Popup recebeu tokens, processando...');
+                    
+                    // Parar o timer principal para iniciar polling de sessão dedicado
+                    clearInterval(timer);
+
+                    // Polling agressivo para detectar a sessão o mais rápido possível
+                    const sessionCheckTimer = setInterval(async () => {
+                      try {
+                        // Tentar forçar atualização da sessão na janela principal
+                        const { data } = await supabase.auth.getSession();
+                        if (data.session) {
+                          console.log('✅ Sessão detectada na janela principal, fechando popup imediatamente');
+                          popup.close();
+                          clearInterval(sessionCheckTimer);
+                          onSuccess?.();
+                        }
+                      } catch (e) {
+                        // Ignorar erros temporários
+                      }
+                    }, 100); // Verificar a cada 100ms
+
+                    // Timeout de segurança para parar o polling se demorar muito (5s)
+                    setTimeout(() => clearInterval(sessionCheckTimer), 5000);
+                  }
+                }
+              } catch (e) {
+                // Cross-origin, ignorar
+              }
+            }, 500);
+            
+            return; // Retornar para manter loading state até o popup fechar ou detectar login
+          }
+        }
+      }
+
+      // Fallback para redirect padrão (ou para outros providers)
       const result = await signInWithProvider(provider);
 
       if (result.error) {

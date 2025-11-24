@@ -68,9 +68,9 @@
 /* ==================== Community Header Banner ==================== */
 
 .community-header-banner {
-  background: linear-gradient(135deg, var(--color-primary) 0%, #FF6B75 100%);
+  background: linear-gradient(135deg, #0D0D0D 0%, #1a1a1a 100%);
   padding: var(--space-6) var(--space-6) var(--space-4);
-  color: var(--color-text-white);
+  color: #FFFFFF;
   position: relative;
 }
 
@@ -114,6 +114,7 @@
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   margin: 0 0 var(--space-2) 0;
+  color: #FFFFFF;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -238,6 +239,37 @@
   background-color: var(--color-bg-hover);
 }
 
+.highlights-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.highlights-content {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary);
+}
+
+.pinned-post-wrapper {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.pinned-post-wrapper:last-child {
+  border-bottom: none;
+}
+
+.pinned-post-wrapper .content-card {
+  border: none;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.pinned-post-wrapper .content-card:hover {
+  background-color: var(--color-bg-secondary);
+}
+
 .highlighted-post {
   display: flex;
   gap: var(--space-3);
@@ -346,6 +378,23 @@
   background-color: var(--color-primary-light);
   color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
+}
+
+.time-range-select {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+  margin-left: var(--space-2);
+}
+
+.time-range-select:hover, .time-range-select:focus {
+  border-color: var(--color-primary);
 }
 
 /* ==================== Posts Feed ==================== */

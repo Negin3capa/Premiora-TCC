@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useUI';
 import { ProviderButtons, GoogleOneTap } from '../components/auth';
 import '../styles/login.css';
 
@@ -11,6 +12,7 @@ import '../styles/login.css';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { loading, user } = useAuth();
+  const { isDark } = useTheme();
   const [error, setError] = useState('');
 
   // Redirecionar se já estiver logado
@@ -36,9 +38,10 @@ const Login: React.FC = () => {
       {/* Premium Branding Header */}
       <div className="login-brand">
         <div className="brand-logo">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
+          <img 
+            src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
+            alt="Premiora" 
+          />
           <span>Premiora</span>
         </div>
       </div>

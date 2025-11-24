@@ -8,6 +8,12 @@ on:
       - reopened
       - ready_for_review
 
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
@@ -18,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Enable auto-merge for Dependabot PRs
         if: github.actor == 'dependabot[bot]'

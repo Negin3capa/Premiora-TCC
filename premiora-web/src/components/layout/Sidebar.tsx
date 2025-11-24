@@ -5,9 +5,10 @@
 import React, { useCallback, useRef, useEffect } from 'react';
 import '../../styles/Sidebar.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Compass, Bell, MessageCircle, Users, Building2, Settings, PenTool, User, CreditCard } from 'lucide-react';
+import { Home, Bell, MessageCircle, Building2, Settings, PenTool, User, CreditCard } from 'lucide-react';
 import { useModal } from '../../hooks/useModal';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useUI';
 import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
 import { ProfileService } from '../../services/auth/ProfileService';
 import { FeedService } from '../../services/content/FeedService';
@@ -248,6 +249,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { userProfile } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const prefetchTimeoutRef = useRef<number | null>(null);
@@ -325,10 +327,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
 
   const navigationItems = [
     { icon: <Home size={20} />, label: 'Home', route: '/dashboard', active: location.pathname === '/dashboard' },
-    { icon: <Compass size={20} />, label: 'Explore', route: '/explore', active: location.pathname === '/explore' },
     { icon: <Bell size={20} />, label: 'Notifications', route: '/notifications', active: location.pathname === '/notifications' },
     { icon: <MessageCircle size={20} />, label: 'Messages', route: '/messages', active: location.pathname === '/messages' },
-    { icon: <Users size={20} />, label: 'Following', route: '/dashboard', active: false }, // TODO: Add following page
     { icon: <Building2 size={20} />, label: 'Communities', route: '/communities', active: location.pathname === '/communities' },
     {
       icon: <User size={20} />,
@@ -426,7 +426,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
         <div className="sidebar-content">
           {/* Logo/Brand */}
           <div className="sidebar-header">
-            <h1 className="sidebar-logo">Premiora</h1>
+            <img 
+              src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
+              alt="Premiora" 
+              className="sidebar-logo" 
+            />
+            <span className="sidebar-brand-name">Premiora</span>
           </div>
 
           {/* Navigation Icons */}

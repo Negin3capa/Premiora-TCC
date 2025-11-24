@@ -2,12 +2,15 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ProfileBanner, FeaturedPost, RecentPosts, PostsTab, CommunityTab, ShopTab } from '../components/profile';
 import { Sidebar, Header, ProfileSidebar } from '../components/layout';
+import SubscriptionModal from '../components/profile/SubscriptionModal';
 import { useAuth } from '../hooks/useAuth';
 import { useProfileTabs } from '../hooks/useProfileTabs';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
+import { CreatorChannelService } from '../services/content/CreatorChannelService';
 import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
 import type { CreatorProfile, Post, PostMedia } from '../types/profile';
+import type { SubscriptionTier } from '../types/creator';
 import '../styles/globals.css';
 
 // Cache global para prefetch - acessível via window
@@ -45,9 +48,11 @@ const ProfilePage: React.FC = () => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Verificar se é o próprio perfil do usuário
-  const isOwnProfile = userProfile?.username === username;
+  
+  // Creator Channel State
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
+  const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTier[]>([]);
+  const [connectedCommunityId, setConnectedCommunityId] = useState<string | undefined>(undefined);
 
   const handleShare = useCallback(() => {
     // TODO: Implementar compartilhamento do perfil
@@ -88,6 +93,11 @@ const ProfilePage: React.FC = () => {
         setFeaturedPost(cachedData.featuredPost);
         setProfileLoading(false);
         setPostsLoading(false);
+        
+        // Ainda precisamos buscar os dados do canal, pois não estão no cache
+        if (cachedData.profile.user?.id) {
+          fetchChannelData(cachedData.profile.user.id);
+        }
         return;
       }
 
@@ -103,6 +113,11 @@ const ProfilePage: React.FC = () => {
 
       setCreatorProfile(profileData);
       setProfileLoading(false); // Perfil carregado, mostrar layout
+      
+      // Buscar dados do canal (tiers e comunidade)
+      if (profileData.user?.id) {
+        fetchChannelData(profileData.user.id);
+      }
 
       // Buscar posts do creator em paralelo com o processamento
       const postsPromise = FeedService.getCreatorPosts(profileData.user.id, 1, 20, userProfile?.id);
@@ -161,6 +176,22 @@ const ProfilePage: React.FC = () => {
       setPostsLoading(false);
     }
   }, [username, userProfile?.id]);
+
+  // Função separada para buscar dados do canal
+  const fetchChannelData = async (userId: string) => {
+    try {
+      const channelConfig = await CreatorChannelService.getCreatorChannel(userId);
+      if (channelConfig) {
+        setSubscriptionTiers(channelConfig.subscriptionTiers);
+        setConnectedCommunityId(channelConfig.connectedCommunityId);
+      } else {
+        setSubscriptionTiers([]);
+        setConnectedCommunityId(undefined);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados do canal:', err);
+    }
+  };
 
   // Buscar dados do perfil quando username muda ou quando volta de edição
   useEffect(() => {
@@ -225,13 +256,19 @@ const ProfilePage: React.FC = () => {
     return (views * 1) + (likes * 2) + (comments * 3);
   };
 
+  const handleSelectTier = (tierId: string) => {
+    console.log('Selected tier:', tierId);
+    // Aqui implementaremos o fluxo de checkout futuramente
+    setIsSubscriptionModalOpen(false);
+  };
+
   // Se ainda está carregando o perfil, mostrar skeleton
   if (profileLoading) {
   return (
     <div style={{
-      backgroundColor: '#0D0D0D',
+      backgroundColor: 'var(--color-bg-primary)',
       minHeight: '100vh',
-      color: '#DADADA',
+      color: 'var(--color-text-secondary)',
       overflowX: 'hidden'
     }}>
       {/* Show default sidebar during loading to prevent flash */}
@@ -253,13 +290,13 @@ const ProfilePage: React.FC = () => {
           marginRight: '-50vw',
           marginTop: '64px',
           height: '300px',
-          backgroundColor: '#1a1a1a',
+          backgroundColor: 'var(--color-bg-tertiary)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}>
           <div style={{
-            color: '#666',
+            color: 'var(--color-text-tertiary)',
             fontSize: '1.2rem'
           }}>
             Carregando perfil...
@@ -268,7 +305,7 @@ const ProfilePage: React.FC = () => {
 
         {/* Main content container */}
         <div style={{
-          marginLeft: '80px', /* Consistent with default sidebar width */
+          marginLeft: '60px', /* Consistent with ProfileSidebar width */
           marginTop: '0',
           padding: '2rem 1rem',
           overflow: 'hidden',
@@ -280,14 +317,14 @@ const ProfilePage: React.FC = () => {
           }}>
             {/* Skeleton para posts */}
             <div style={{
-              backgroundColor: '#1a1a1a',
+              backgroundColor: 'var(--color-bg-tertiary)',
               borderRadius: '8px',
               height: '200px',
               marginBottom: '2rem',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#666'
+              color: 'var(--color-text-tertiary)'
             }}>
               Carregando posts...
             </div>
@@ -300,9 +337,9 @@ const ProfilePage: React.FC = () => {
   if (error || !creatorProfile) {
     return (
       <div style={{
-        backgroundColor: '#0D0D0D',
+        backgroundColor: 'var(--color-bg-primary)',
         minHeight: '100vh',
-        color: '#DADADA',
+        color: 'var(--color-text-secondary)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -329,20 +366,18 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div style={{
-      backgroundColor: '#0D0D0D',
+      backgroundColor: 'var(--color-bg-primary)',
       minHeight: '100vh',
-      color: '#DADADA',
+      color: 'var(--color-text-secondary)',
       overflowX: 'hidden'
     }}>
-      {/* Conditional Sidebar - Full sidebar for own profile, minimal for others */}
+      {/* Conditional Sidebar - ProfileSidebar for all profile pages */}
       {/* On mobile, hamburger menu opens the full sidebar */}
       {isSidebarOpen ? (
         <Sidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />
-      ) : isOwnProfile ? (
-        <Sidebar />
       ) : (
         <ProfileSidebar
           username={username!}
@@ -354,7 +389,7 @@ const ProfilePage: React.FC = () => {
       {/* Global Header */}
       <Header
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        isProfileMode={!isOwnProfile}
+        isProfileMode={true}
         showProfileTabs={true}
         activeProfileTab={activeTab}
         onProfileTabChange={handleTabChange}
@@ -371,13 +406,17 @@ const ProfilePage: React.FC = () => {
           marginRight: '-50vw',
           marginTop: '64px', /* Account for header height */
         }}>
-          <ProfileBanner profile={creatorProfile} userId={creatorProfile.user?.id} />
+          <ProfileBanner 
+            profile={creatorProfile} 
+            userId={creatorProfile.user?.id}
+            onBecomeMember={() => setIsSubscriptionModalOpen(true)}
+          />
         </div>
       )}
 
       {/* Main content container - adjusted for fixed sidebar and header */}
       <div style={{
-        marginLeft: isSidebarOpen ? '0' : (window.innerWidth <= 768 ? '0' : (isOwnProfile ? '80px' : '60px')), /* Account for sidebar width, hide on mobile */
+        marginLeft: isSidebarOpen ? '0' : (window.innerWidth <= 768 ? '0' : '60px'), /* Account for ProfileSidebar width (60px), hide on mobile */
         marginTop: ['posts', 'community', 'shop'].includes(activeTab) ? '64px' : '0', /* Add top margin when banner is hidden */
         padding: window.innerWidth <= 768 ? '1rem 0.5rem' : '2rem 1rem', /* Reduce padding on mobile */
         paddingBottom: window.innerWidth <= 480 ? '80px' : undefined, /* Add padding for mobile bottom bar */
@@ -420,7 +459,10 @@ const ProfilePage: React.FC = () => {
           )}
 
           {activeTab === 'community' && creatorProfile && (
-            <CommunityTab creatorProfile={creatorProfile} />
+            <CommunityTab 
+              creatorProfile={creatorProfile} 
+              connectedCommunityId={connectedCommunityId}
+            />
           )}
 
           {activeTab === 'shop' && (
@@ -428,6 +470,15 @@ const ProfilePage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={isSubscriptionModalOpen}
+        onClose={() => setIsSubscriptionModalOpen(false)}
+        tiers={subscriptionTiers}
+        creatorName={creatorProfile.user?.name || creatorProfile.username || 'Criador'}
+        onSelectTier={handleSelectTier}
+      />
     </div>
   );
 };

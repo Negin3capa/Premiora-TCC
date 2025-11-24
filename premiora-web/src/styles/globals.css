@@ -5,25 +5,26 @@
 
 /* Variáveis de Design System */
 :root {
-  /* Cores Principais */
+  scroll-behavior: smooth;
+  /* Cores Principais - Default Dark */
   --color-primary: #FF424D;
   --color-primary-hover: #E63946;
   --color-primary-light: #FFE8E9;
   
-  /* Cores de Fundo */
+  /* Cores de Fundo - Default Dark */
   --color-bg-primary: #0D0D0D;
   --color-bg-secondary: #121212;
   --color-bg-tertiary: #1A1A1A;
   --color-bg-hover: #1A1A1A;
   --color-bg-dark: #000000;
 
-  /* Cores de Texto */
+  /* Cores de Texto - Default Dark */
   --color-text-primary: #FFFFFF;
   --color-text-secondary: #DADADA;
   --color-text-tertiary: #666666;
   --color-text-white: #FFFFFF;
 
-  /* Cores de Borda */
+  /* Cores de Borda - Default Dark */
   --color-border-light: #1A1A1A;
   --color-border-medium: #343536;
   --color-border-dark: #2F3336;
@@ -97,6 +98,31 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
+}
+
+/* Tema Claro */
+[data-theme='light'] {
+  /* Cores Principais - Pastel Pink */
+  --color-primary: #ff606b; /* Pastel Red/Pink */
+  --color-primary-hover: #FF9E99;
+  --color-primary-light: #FFF0F0;
+  
+  /* Cores de Fundo - Light */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F9FA;
+  --color-bg-tertiary: #E9ECEF;
+  --color-bg-hover: #DEE2E6;
+  --color-bg-dark: #CED4DA;
+
+  /* Cores de Texto - Light */
+  --color-text-primary: #212529;
+  --color-text-secondary: #495057;
+  --color-text-tertiary: #868E96;
+  
+  /* Cores de Borda - Light */
+  --color-border-light: #E9ECEF;
+  --color-border-medium: #DEE2E6;
+  --color-border-dark: #CED4DA;
 }
 
 /* Reset e Estilos Base */

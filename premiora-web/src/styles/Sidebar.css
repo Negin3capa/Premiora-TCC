@@ -11,8 +11,8 @@
   top: 0;
   height: 100vh;
   width: 220px;
-  background-color: #0D0D0D;
-  border-right: 1px solid #1A1A1A;
+  background-color: var(--color-bg-primary);
+  border-right: 1px solid var(--color-border-light);
   z-index: 2000; /* Garante que a sidebar esteja sempre no topo */
   display: flex;
   flex-direction: column;
@@ -33,16 +33,24 @@
 .sidebar-header {
   width: 100%;
   padding: 0px 16px 20px 16px;
-  text-align: center;
-  border-bottom: 1px solid #1A1A1A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-border-light);
   margin-bottom: 20px;
 }
 
 .sidebar-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.sidebar-brand-name {
   font-size: 20px;
   font-weight: 700;
-  color: #FFFFFF;
-  margin: 0;
+  color: var(--color-text-primary);
   letter-spacing: -0.5px;
 }
 
@@ -83,20 +91,20 @@
   justify-content: flex-start;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #666;
+  color: var(--color-text-tertiary);
   position: relative;
   padding: 0 12px;
   gap: 12px;
 }
 
 .sidebar-nav-button:hover {
-  background-color: #1A1A1A;
-  color: #DADADA;
+  background-color: var(--color-bg-hover);
+  color: var(--color-text-secondary);
 }
 
 .sidebar-nav-button.active {
-  background-color: #FF424D;
-  color: #FFFFFF;
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
 }
 
 .sidebar-nav-button.active::after {
@@ -107,7 +115,7 @@
   transform: translateY(-50%);
   width: 4px;
   height: 24px;
-  background-color: #FF424D;
+  background-color: var(--color-primary);
   border-radius: 2px;
 }
 

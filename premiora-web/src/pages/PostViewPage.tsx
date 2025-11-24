@@ -3,18 +3,20 @@
  * Implementa routing tipo Twitter/Reddit: /u/:username/status/post_id
  */
 import React, { useState, useEffect, Suspense } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X } from 'lucide-react';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { ArrowLeft, Heart, MessageCircle, Share, Bookmark, Flag, MoreHorizontal, X, Lock } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { usePostLike, usePostViews } from '../hooks/usePostLike';
 import { PostService } from '../services/content/PostService';
-import { Sidebar } from '../components/layout';
-import SidebarFeed from '../components/content/SidebarFeed';
-import CommunityPostSidebar from '../components/content/CommunityPostSidebar';
+import { VideoService } from '../services/content/VideoService';
+import { Sidebar, MobileBottomBar } from '../components/layout';
+import RightSidebar from '../components/dashboard/RightSidebar';
 import { CommentList } from '../components/content/CommentList';
 import type { ContentItem, ContentType } from '../types/content';
 import { LikeParticles } from '../components/ContentCard/CardActions';
+import '../styles/HomePage.css';
 import '../styles/PostViewPage.css';
+import '../styles/Comments.css';
 
 // Lazy loading dos componentes para otimização
 const Header = React.lazy(() => import('../components/layout/Header'));
@@ -95,9 +97,10 @@ const usePost = (postId: string, username: string) => {
               fileSize: mediaData.video?.metadata?.fileSize
             };
           } else {
-            // Para posts, usar primeira URL como thumbnail
+            // Para posts
             mediaUrls = {
-              thumbnail: postData.media_urls[0]
+              thumbnail: postData.media_urls[0],
+              mediaUrls: postData.media_urls || []
             };
           }
         }
@@ -142,6 +145,48 @@ const usePost = (postId: string, username: string) => {
 };
 
 /**
+ * Componente para exibir conteúdo bloqueado (Premium)
+ */
+const LockedPostContent: React.FC<{ requiredTier?: string }> = ({ requiredTier }) => (
+  <div className="locked-content" style={{ 
+    padding: '60px 20px', 
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    textAlign: 'center',
+    backgroundColor: 'var(--color-bg-secondary)',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px dashed var(--color-border-medium)',
+    margin: '20px 0'
+  }}>
+    <Lock size={64} className="lock-icon-large" style={{ marginBottom: '20px', color: 'var(--color-text-secondary)' }} />
+    <h2 style={{ marginBottom: '10px', fontSize: '1.5rem' }}>Conteúdo Exclusivo</h2>
+    <p style={{ marginBottom: '24px', color: 'var(--color-text-secondary)', maxWidth: '500px' }}>
+      Este post é exclusivo para apoiadores do nível <strong>{requiredTier || 'Premium'}</strong>. 
+      Assine para ter acesso a este e outros conteúdos exclusivos.
+    </p>
+    <button 
+      className="unlock-button"
+      style={{
+        backgroundColor: 'var(--color-primary)',
+        color: 'white',
+        border: 'none',
+        padding: '12px 32px',
+        borderRadius: '9999px',
+        fontWeight: 600,
+        fontSize: '1rem',
+        cursor: 'pointer',
+        transition: 'transform 0.2s'
+      }}
+      onClick={() => console.log('Navigate to subscribe')}
+    >
+      Assinar para Desbloquear
+    </button>
+  </div>
+);
+
+/**
  * Componente VideoPlayer
  * Player de vídeo customizado com controles
  */
@@ -151,6 +196,22 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
+  const youtubeId = VideoService.getYouTubeId(src);
+
+  if (youtubeId) {
+    return (
+      <div className="post-video-container" style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
+        <iframe
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+          src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0`}
+          title="YouTube video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="post-video-container">
       <video
@@ -171,13 +232,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster }) => {
 const PostViewPage: React.FC = () => {
   const { username, postId } = useParams<{ username: string; postId: string; communityName?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { post, loading, error } = usePost(postId!, username!);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalMenuOpen, setIsModalMenuOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
+  const [showModalParticles, setShowModalParticles] = useState(false);
 
   // Hooks para likes e visualizações
   const { liked, likeCount, isLoading: likeLoading, toggleLike } = usePostLike({
@@ -201,6 +266,16 @@ const PostViewPage: React.FC = () => {
     }
   }, [post, postId, incrementView, loading]);
 
+  // Verificar se deve abrir o modal de imagem automaticamente
+  useEffect(() => {
+    if (location.state && (location.state as any).openImage && post?.thumbnail) {
+      setIsImageModalOpen(true);
+      setSelectedImageIndex(0);
+      // Limpar o state para não reabrir ao navegar
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, post?.thumbnail]);
+
   /**
    * Handler para voltar à página anterior
    */
@@ -215,12 +290,16 @@ const PostViewPage: React.FC = () => {
   /**
    * Handler personalizado para like que inclui efeito de partículas
    */
-  const handleLike = () => {
+  const handleLike = (isModal = false) => {
     const wasLiked = liked;
 
     // Disparar efeito de particulas apenas quando está dando like (não removendo)
     if (!wasLiked && !likeLoading) {
-      setShowParticles(true);
+      if (isModal) {
+        setShowModalParticles(true);
+      } else {
+        setShowParticles(true);
+      }
     }
 
     // Chamar handler original
@@ -351,17 +430,21 @@ const PostViewPage: React.FC = () => {
   }
 
   return (
-    <div className="post-view-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="post-view-main-content">
+    <div className="dashboard-page post-view-page">
+      <div className="dashboard-sidebar">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
+      <div className="dashboard-main-content">
         <Suspense fallback={<ComponentLoader />}>
           <Header
+            className="dashboard-header"
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           />
         </Suspense>
-        <div className="post-view-page">
-          <div className="post-view-layout">
-            {/* Conteúdo principal do post */}
+        
+        <div className="dashboard-layout">
+          {/* Conteúdo principal do post */}
+          <div className="dashboard-feed-container">
             <div className="post-view-main">
               <div className="post-view-page-container">
                 {/* Header com navegação */}
@@ -503,8 +586,12 @@ const PostViewPage: React.FC = () => {
 
                     {/* Título e conteúdo */}
                     <div className="post-view-body">
-                      {/* Para vídeos: mostrar player primeiro, depois título e descrição */}
-                      {post.type === 'video' && post.videoUrl ? (
+                      {post.isLocked ? (
+                        <>
+                          <h1 className="post-title">{post.title}</h1>
+                          <LockedPostContent requiredTier={post.requiredTier} />
+                        </>
+                      ) : post.type === 'video' && post.videoUrl ? (
                         <>
                           <VideoPlayer
                             src={post.videoUrl}
@@ -536,15 +623,36 @@ const PostViewPage: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Mídia do post - imagem */}
-                          {post.thumbnail ? (
+                          {/* Mídia do post - imagens */}
+                          {(post.mediaUrls && post.mediaUrls.length > 0) ? (
+                            <div className="post-images-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                              {post.mediaUrls.map((url, index) => (
+                                <div key={index} className="post-image-container">
+                                  <img
+                                    src={url}
+                                    alt={`${post.title} - ${index + 1}`}
+                                    className="post-image clickable-image"
+                                    loading="lazy"
+                                    onClick={() => {
+                                      setSelectedImageIndex(index);
+                                      setIsImageModalOpen(true);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ) : post.thumbnail ? (
                             <div className="post-image-container">
                               <img
                                 src={post.thumbnail}
                                 alt={post.title}
                                 className="post-image clickable-image"
                                 loading="lazy"
-                                onClick={() => setIsImageModalOpen(true)}
+                                onClick={() => {
+                                  setSelectedImageIndex(0);
+                                  setIsImageModalOpen(true);
+                                }}
                                 style={{ cursor: 'pointer' }}
                               />
                             </div>
@@ -575,7 +683,7 @@ const PostViewPage: React.FC = () => {
                         <div className="like-btn-container-post-view">
                           <LikeParticles show={showParticles} />
                           <button
-                            onClick={handleLike}
+                            onClick={() => handleLike(false)}
                             className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
                             disabled={likeLoading}
                             aria-label={liked ? 'Descurtir' : 'Curtir'}
@@ -627,37 +735,234 @@ const PostViewPage: React.FC = () => {
                 </main>
               </div>
             </div>
+          </div>
 
-            {/* Sidebar condicional baseada no tipo de post */}
-            {post.communityId ? (
-              <CommunityPostSidebar communityName={post.communityName || ''} />
-            ) : (
-              <SidebarFeed />
-            )}
+          <div className="dashboard-right-sidebar-container">
+            <RightSidebar communityName={post.communityName} />
           </div>
         </div>
       </div>
 
+      <MobileBottomBar />
 
-      {/* Modal de imagem ampliada */}
-      {isImageModalOpen && post.thumbnail && (
-        <div
-          className="image-modal-overlay"
-          onClick={() => setIsImageModalOpen(false)}
-        >
-          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="image-modal-close"
+      {/* Modal de imagem ampliada - Layout Focado (Twitter-like) */}
+      {isImageModalOpen && (post.mediaUrls?.length || post.thumbnail) && (
+        <div className="image-modal-overlay">
+          <div className="image-modal-container">
+            {/* Painel Esquerdo: Mídia */}
+            <div 
+              className="image-modal-media"
               onClick={() => setIsImageModalOpen(false)}
-              aria-label="Fechar imagem ampliada"
+              style={{ position: 'relative' }}
             >
-              <X size={16} />
-            </button>
-            <img
-              src={post.thumbnail}
-              alt={post.title}
-              className="image-modal-image"
-            />
+              <button
+                className="image-modal-close"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsImageModalOpen(false);
+                }}
+                aria-label="Fechar visualização"
+              >
+                <X size={24} />
+              </button>
+              
+              {/* Navigation Arrows */}
+              {post.mediaUrls && post.mediaUrls.length > 1 && (
+                <>
+                  <button
+                    className="image-nav-prev"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : post.mediaUrls!.length - 1));
+                    }}
+                    style={{
+                      position: 'absolute',
+                      left: '20px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="image-nav-next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev < post.mediaUrls!.length - 1 ? prev + 1 : 0));
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '20px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10
+                    }}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              <img
+                src={post.mediaUrls && post.mediaUrls.length > 0 ? post.mediaUrls[selectedImageIndex] : post.thumbnail}
+                alt={`${post.title} - ${selectedImageIndex + 1}`}
+                className="image-modal-image"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+
+            {/* Painel Direito: Sidebar de Conteúdo */}
+            <div className="image-modal-sidebar">
+              <div className="image-modal-sidebar-content">
+                {/* Header do Post na Sidebar */}
+                <header className="post-header">
+                  <div className="author-info">
+                    <img
+                      src={post.authorAvatar || '/default-avatar.png'}
+                      alt={post.author}
+                      className="author-avatar"
+                    />
+                    <div className="author-details">
+                      <div className="author-meta">
+                        <Link to={`/u/${username}`} className="author-name">
+                          {post.author}
+                        </Link>
+                        {post.communityId && (
+                          <Link to={`/r/${post.communityName}`} className="community-flair">
+                            {post.communityAvatar && (
+                              <img 
+                                src={post.communityAvatar} 
+                                alt="" 
+                                className="community-avatar-small"
+                              />
+                            )}
+                            <span className="community-prefix">r/</span>
+                            <span className="community-name-small">{post.communityDisplayName || post.communityName}</span>
+                          </Link>
+                        )}
+                      </div>
+                      <span className="post-timestamp">{post.timestamp}</span>
+                    </div>
+                  </div>
+
+                  {/* Menu na Sidebar */}
+                  <div className="post-menu">
+                    <div className="post-menu-container">
+                      <button
+                        className="post-view-menu-button"
+                        onClick={() => setIsModalMenuOpen(!isModalMenuOpen)}
+                        aria-label="Mais opções"
+                      >
+                        <MoreHorizontal size={20} />
+                      </button>
+
+                      {isModalMenuOpen && (
+                        <>
+                          <div className="post-menu-dropdown">
+                            <button className="post-menu-item" onClick={() => { handleShare(); setIsModalMenuOpen(false); }}>
+                              <Share size={16} />
+                              <span>Compartilhar</span>
+                            </button>
+                            <button className="post-menu-item" onClick={() => { handleBookmark(); setIsModalMenuOpen(false); }}>
+                              <Bookmark size={16} />
+                              <span>{isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}</span>
+                            </button>
+                            {isAuthor && (
+                              <button className="post-menu-item delete-item" onClick={() => { handleDelete(); setIsModalMenuOpen(false); }}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                                <span>Excluir</span>
+                              </button>
+                            )}
+                            <button className="post-menu-item report-item" onClick={() => { handleReport(); setIsModalMenuOpen(false); }}>
+                              <Flag size={16} />
+                              <span>Denunciar</span>
+                            </button>
+                          </div>
+                          <div className="post-menu-overlay" onClick={() => setIsModalMenuOpen(false)} />
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </header>
+
+                {/* Conteúdo do Post na Sidebar */}
+                <div className="post-view-body">
+                  <h1 className="post-title">{post.title}</h1>
+                  {post.content && (
+                    <div className="post-text">
+                      {post.content.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Ações na Sidebar */}
+                <div className="post-actions">
+                  <div className="action-buttons">
+                    <div className="like-btn-container-post-view">
+                      <LikeParticles show={showModalParticles} />
+                      <button
+                        onClick={() => handleLike(true)}
+                        className={`post-view-action-button like-button ${liked ? 'liked' : ''} ${likeLoading ? 'loading' : ''}`}
+                        disabled={likeLoading}
+                      >
+                        <Heart size={18} fill={liked ? 'currentColor' : 'none'} />
+                        <span className="action-count">{likeCount}</span>
+                      </button>
+                    </div>
+
+                    <button className="post-view-action-button comment-button">
+                      <MessageCircle size={18} />
+                      <span className="action-count">0</span>
+                    </button>
+
+                    <button onClick={handleShare} className="post-view-action-button share-button">
+                      <Share size={18} />
+                    </button>
+
+                    <button 
+                      onClick={handleBookmark} 
+                      className={`post-view-action-button bookmark-button ${isBookmarked ? 'bookmarked' : ''}`}
+                    >
+                      <Bookmark size={18} fill={isBookmarked ? 'currentColor' : 'none'} />
+                    </button>
+                  </div>
+                  
+                  <div className="post-stats">
+                    <span className="views-count">{viewCount?.toLocaleString('pt-BR')} visualizações</span>
+                  </div>
+                </div>
+
+                {/* Comentários na Sidebar */}
+                <div className="comments-section">
+                  <CommentList postId={postId!} className="modal-comments" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

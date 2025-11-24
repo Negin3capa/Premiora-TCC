@@ -1,0 +1,229 @@
+/* Right Sidebar Styles */
+.right-sidebar {
+  width: 350px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100vh;
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  /* Hide scrollbar for cleaner look */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.right-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+.right-sidebar-section {
+  background-color: var(--color-bg-primary);
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.right-sidebar-title {
+  font-size: 20px;
+  font-weight: 800;
+  padding: 0 16px 12px;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+/* Trending Section */
+.trending-item {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.trending-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.trending-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trending-category {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.trending-topic {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.trending-posts {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.trending-more {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trending-more:hover {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+/* Who to Follow Section */
+.suggested-user-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggested-user-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.suggested-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.suggested-user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.suggested-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.suggested-user-username {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.follow-btn {
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  border: none;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.follow-btn:hover {
+  opacity: 0.9;
+}
+
+/* Show More Button */
+.show-more-btn {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  padding: 16px;
+  text-align: left;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 0 0 16px 16px;
+  width: 100%;
+}
+
+.show-more-btn:hover {
+  background-color: var(--color-bg-hover);
+}
+
+/* Search Bar */
+.right-sidebar-search {
+  position: sticky;
+  top: 0;
+  background-color: var(--color-bg-secondary);
+  padding-bottom: 12px;
+  z-index: 2;
+  margin-bottom: 4px;
+}
+
+.search-input-wrapper {
+  background-color: var(--color-bg-tertiary);
+  border-radius: 9999px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid transparent;
+}
+
+.search-input-wrapper:focus-within {
+  background-color: var(--color-bg-primary);
+  border-color: var(--color-primary);
+}
+
+.search-input {
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: var(--color-text-primary);
+  width: 100%;
+}
+
+.search-icon {
+  color: var(--color-text-secondary);
+}
+
+/* Footer Links */
+.right-sidebar-footer {
+  padding: 0 16px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.footer-links a, .footer-links span {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}

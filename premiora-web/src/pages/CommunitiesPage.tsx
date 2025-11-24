@@ -2,12 +2,14 @@
  * Página de comunidades - Design limpo e profissional
  * Lista comunidades de forma organizada e minimalista
  */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Community } from '../types/community';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { Search, Users, TrendingUp, Clock } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { getCommunities, searchCommunities } from '../utils/communityUtils';
+import TrendingSection from '../components/dashboard/TrendingSection';
+import CommunityRightSidebar from '../components/layout/CommunityRightSidebar';
 import '../styles/CommunitiesPage.css';
 
 /**
@@ -17,10 +19,16 @@ import '../styles/CommunitiesPage.css';
 const CommunitiesPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'popular' | 'trending' | 'new'>('popular');
+  const [activeCategory, setActiveCategory] = useState('All');
   const [communities, setCommunities] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const categories = [
+    'All', 'Internet Culture', 'Games', 'Q&As & Stories', 'Technology', 
+    'Movies & TV', 'Places & Travel', 'Pop Culture', 'Business & Finance', 
+    'Sports', 'Education & Career'
+  ];
 
   // Mock data generator for communities
   const generateMockCommunities = (): Community[] => {
@@ -218,29 +226,6 @@ const CommunitiesPage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Sort communities
-  const sortedCommunities = useMemo(() => {
-    // Add mock trending/popularity scores for sorting
-    const communitiesWithScores = communities.map(community => ({
-      ...community,
-      trendingScore: Math.random() * 100, // Mock trending score
-      popularityScore: community.memberCount + Math.random() * 1000, // Based on member count + random
-    }));
-
-    switch (sortBy) {
-      case 'trending':
-        return communitiesWithScores.sort((a, b) => b.trendingScore - a.trendingScore);
-      case 'popular':
-        return communitiesWithScores.sort((a, b) => b.popularityScore - a.popularityScore);
-      case 'new':
-        return communitiesWithScores.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
-      default:
-        return communitiesWithScores;
-    }
-  }, [communities, sortBy]);
-
   const handleCommunityClick = (community: Community) => {
     navigate(`/r/${community.name}`);
   };
@@ -259,107 +244,112 @@ const CommunitiesPage: React.FC = () => {
 
   return (
     <div className="communities-page">
-      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <div className="dashboard-sidebar">
+        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      </div>
       <div className="communities-main-content">
         <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <div className="communities-page-container">
-          {/* Header Section */}
-          <div className="communities-header">
-            <h1 className="page-title">Comunidades</h1>
-            <p className="page-subtitle">
-              Descubra comunidades incríveis e conecte-se com pessoas que compartilham seus interesses
-            </p>
-          </div>
+        <div className="communities-layout">
+          <div className="communities-content-container">
+            {/* Header Section */}
+            <div className="communities-header">
+              <h1 className="page-title">Explore Communities</h1>
+            </div>
 
-          {/* Search and Filter Bar */}
-          <div className="controls-section">
-            <div className="communities-search-bar">
-              <div className="communities-search-input-container">
-                <Search size={20} className="communities-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Buscar comunidades..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="communities-search-input"
-                />
-                {searchQuery && (
+            {/* Category Pills */}
+            <div className="category-pills-container">
+              <div className="category-pills">
+                {categories.map((category) => (
                   <button
-                    className="communities-clear-search"
-                    onClick={() => setSearchQuery('')}
-                    title="Limpar busca"
+                    key={category}
+                    className={`category-pill ${activeCategory === category ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(category)}
                   >
-                    ×
+                    {category}
                   </button>
-                )}
+                ))}
+                <button className="category-pill-more">
+                  <ChevronRight size={16} />
+                </button>
               </div>
             </div>
 
-            <div className="filter-buttons">
-              <button
-                className={`filter-button ${sortBy === 'popular' ? 'active' : ''}`}
-                onClick={() => setSortBy('popular')}
-              >
-                <Users size={16} />
-                Popular
-              </button>
-              <button
-                className={`filter-button ${sortBy === 'trending' ? 'active' : ''}`}
-                onClick={() => setSortBy('trending')}
-              >
-                <TrendingUp size={16} />
-                Tendência
-              </button>
-              <button
-                className={`filter-button ${sortBy === 'new' ? 'active' : ''}`}
-                onClick={() => setSortBy('new')}
-              >
-                <Clock size={16} />
-                Recente
-              </button>
-            </div>
-          </div>
+            {/* Recommended Section */}
+            <div className="communities-section">
+              <h2 className="section-title">Recommended for you</h2>
+              <div className="communities-grid">
+                {communities.slice(0, 6).map((community: Community) => (
+                  <div key={community.id} className="community-card" onClick={() => handleCommunityClick(community)}>
+                    <div className="community-card-header">
+                      <img
+                        src={community.avatarUrl}
+                        alt={community.displayName}
+                        className="community-avatar"
+                      />
+                      <div className="community-info-header">
+                        <div className="community-names">
+                          <h3 className="community-display-name">{community.displayName}</h3>
+                          <span className="community-handle">r/{community.name}</span>
+                        </div>
+                        <button className="btn-join">Join</button>
+                      </div>
+                    </div>
+                    
+                    <div className="community-stats">
+                      {community.memberCount.toLocaleString()} weekly visitors
+                    </div>
 
-          {/* Communities Grid */}
-          <div className="communities-grid">
-            {sortedCommunities.map((community: Community) => (
-              <div key={community.id} className="community-card" onClick={() => handleCommunityClick(community)}>
-                <div className="community-header">
-                  <img
-                    src={community.avatarUrl}
-                    alt={community.displayName}
-                    className="community-avatar"
-                  />
-                  <div className="community-basic-info">
-                    <h3 className="community-name">{community.displayName}</h3>
-                    <span className="community-tag">r/{community.name}</span>
+                    <p className="community-description">{community.description}</p>
                   </div>
-                </div>
-
-                <p className="community-description">{community.description}</p>
-
-                <div className="community-footer">
-                  <span className="member-count">
-                    <Users size={14} />
-                    {community.memberCount.toLocaleString()} membros
-                  </span>
-                </div>
+                ))}
               </div>
-            ))}
+              <button className="show-more-button">Show more</button>
+            </div>
+
+            {/* Trending Section - Horizontal List or another Grid */}
+            <div className="communities-section">
+              <h2 className="section-title">Trending in Technology</h2>
+              <div className="communities-grid">
+                {communities.filter(c => c.name.includes('tech') || c.name.includes('design') || c.name.includes('gaming')).slice(0, 3).map((community: Community) => (
+                  <div key={`trend-${community.id}`} className="community-card" onClick={() => handleCommunityClick(community)}>
+                    <div className="community-card-header">
+                      <img
+                        src={community.avatarUrl}
+                        alt={community.displayName}
+                        className="community-avatar"
+                      />
+                      <div className="community-info-header">
+                        <div className="community-names">
+                          <h3 className="community-display-name">{community.displayName}</h3>
+                          <span className="community-handle">r/{community.name}</span>
+                        </div>
+                        <button className="btn-join">Join</button>
+                      </div>
+                    </div>
+                    
+                    <div className="community-stats">
+                      {community.memberCount.toLocaleString()} members
+                    </div>
+
+                    <p className="community-description">{community.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {sortedCommunities.length === 0 && (
-            <div className="no-results">
-              <p>Nenhuma comunidade encontrada para "{searchQuery}"</p>
-              <button
-                className="clear-search-button"
-                onClick={() => setSearchQuery('')}
-              >
-                Limpar busca
-              </button>
-            </div>
-          )}
+          {/* Right Sidebar */}
+          <div className="communities-right-sidebar">
+            <CommunityRightSidebar
+              topCommunities={communities}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+            >
+              {/* Reuse Trending Section from Dashboard as child */}
+              <TrendingSection />
+            </CommunityRightSidebar>
+          </div>
         </div>
       </div>
       <MobileBottomBar />
