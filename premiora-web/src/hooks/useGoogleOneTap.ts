@@ -164,6 +164,26 @@ export const useGoogleOneTap = () => {
         return;
       }
 
+      // Verificar se estamos em um ambiente de preview (Vercel) para evitar erro 403
+      // Google One Tap requer que a origem esteja explicitamente permitida no Console
+      // URLs de preview dinâmicas geralmente não estão
+      // Relaxando a verificação para qualquer domínio vercel.app que não seja localhost
+      const isVercelPreview = window.location.hostname.includes('.vercel.app');
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      console.log('🔍 Verificação de ambiente One Tap:', {
+        hostname: window.location.hostname,
+        isVercelPreview,
+        isLocalhost
+      });
+
+      if (isVercelPreview && !isLocalhost) {
+        console.warn('⚠️ Ambiente Vercel detectado. Google One Tap desativado para evitar erro 403 (Client ID not found).');
+        console.log('ℹ️ O Google One Tap requer que o domínio exato esteja autorizado no Google Cloud Console.');
+        console.log('ℹ️ URLs de preview dinâmicas falharão. Para testar, use localhost ou o domínio de produção autorizado.');
+        return;
+      }
+
       // Configuração padrão do One Tap com FedCM habilitado
       const defaultConfig: OneTapConfig = {
         client_id: clientId,
@@ -173,8 +193,7 @@ export const useGoogleOneTap = () => {
         context: 'signin',
         ux_mode: 'popup',
         // FedCM migration: Opt-in to FedCM to prepare for when it becomes mandatory
-        // Temporariamente desativado para garantir compatibilidade
-        use_fedcm_for_prompt: false
+        use_fedcm_for_prompt: true
       };
 
       // Mesclar com configuração passada

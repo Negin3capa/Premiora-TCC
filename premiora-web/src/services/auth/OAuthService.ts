@@ -1,3 +1,4 @@
+
 /**
  * Serviço de autenticação OAuth
  * Responsável por operações de login com provedores OAuth
@@ -44,6 +45,17 @@ export class OAuthService {
           blocked: false,
           canLinkAccount: true,
           accountType: 'new'
+        };
+      }
+
+      // CHECK IF ADMIN CLIENT IS AVAILABLE (Production Fix)
+      if (!(supabaseAdmin as any)) {
+        console.warn('⚠️ Supabase Admin indisponível (Produção). Pulando verificação de proteção de identidade.');
+        return {
+          blocked: false,
+          canLinkAccount: true,
+          accountType: 'new', // Assume safe fallback
+          existingAccount: null
         };
       }
 
@@ -188,6 +200,11 @@ export class OAuthService {
     try {
       console.log('⚠️ checkConflictingProviders DEPRECATED - use checkIdentityProtection');
 
+      if (!(supabaseAdmin as any)) {
+        console.warn('⚠️ Supabase Admin indisponível. Pulando checkConflictingProviders.');
+        return { hasGoogle: false, hasFacebook: false, shouldBlockFacebook: false };
+      }
+
       // Buscar na tabela auth.identities para verificar provedores OAuth
       const { data: identities, error } = await supabaseAdmin
         .from('auth.identities')
@@ -227,7 +244,8 @@ export class OAuthService {
    */
   static async signInWithGoogle(): Promise<void> {
     // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = RedirectService.getRedirectUrl('/home');
+    // Usar /dashboard diretamente para evitar redirecionamentos extras que podem perder o hash de autenticação
+    const redirectTo = RedirectService.getRedirectUrl('/dashboard');
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -254,7 +272,8 @@ export class OAuthService {
    */
   static async signInWithFacebook(): Promise<void> {
     // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = RedirectService.getRedirectUrl('/home');
+    // Usar /dashboard diretamente para evitar redirecionamentos extras que podem perder o hash de autenticação
+    const redirectTo = RedirectService.getRedirectUrl('/dashboard');
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
