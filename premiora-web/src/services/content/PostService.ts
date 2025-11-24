@@ -23,22 +23,21 @@ export class PostService {
   ): Promise<any> {
     let mediaUrls: string[] = [];
 
-    // Upload da imagem se existir
-    if (postData.image) {
+    // Upload de imagens se existirem
+    if (postData.images && postData.images.length > 0) {
       try {
-        const uploadResult = await FileUploadService.uploadFile(
-          postData.image,
-          "posts",
-          userId,
+        const uploadPromises = postData.images.map(file => 
+          FileUploadService.uploadFile(file, "posts", userId)
         );
-        mediaUrls = [uploadResult.url];
+        
+        const uploadResults = await Promise.all(uploadPromises);
+        mediaUrls = uploadResults.map(result => result.url);
       } catch (error) {
         console.warn(
-          "Erro no upload da imagem (continuando sem imagem):",
+          "Erro no upload de imagens (continuando sem imagens):",
           error,
         );
-        // Não falhar a criação do post se o upload da imagem falhar
-        // O post será criado como texto apenas
+        // Não falhar a criação do post se o upload falhar
       }
     }
 
@@ -101,17 +100,20 @@ export class PostService {
 
     // Agora inserir o post
 
+    const isPremium = postData.visibility === 'subscribers' || postData.visibility === 'tier';
+    
     const { data, error } = await supabase
       .from("posts")
       .insert({
         title: postData.title,
         content: postData.content,
-        content_type: postData.image ? "image" : "text",
+        content_type: mediaUrls.length > 0 ? "image" : "text",
         media_urls: mediaUrls,
         community_id: postData.communityId || null,
         creator_id: creatorId,
         username: userData.username, // Foreign key direta para users.username
-        is_premium: false, // Por padrão, posts são públicos
+        is_premium: isPremium,
+        required_tier_id: postData.requiredTierId || null,
         is_published: true,
       })
       .select("id")
@@ -173,7 +175,8 @@ export class PostService {
    * @returns Promise com dados do post
    */
   static async getPostById(postId: string, userId?: string): Promise<any> {
-    let query = supabase
+    // Busca o post sem filtros de premium inicialmente para verificar acesso
+    let { data: post, error } = await supabase
       .from("posts")
       .select(`
         *,
@@ -191,26 +194,109 @@ export class PostService {
         post_likes (
           id,
           user_id
+        ),
+        required_tier:required_tier_id (
+          id,
+          name,
+          tier_order
         )
       `)
       .eq("id", postId)
-      .eq("is_published", true);
+      .eq("is_published", true)
+      .single();
 
-    // Aplicar filtros de acesso baseado no usuário
+    // Se falhar (provavelmente por RLS em post premium), tenta com admin para mostrar bloqueado
+    if (error || !post) {
+      const { data: adminPost, error: adminError } = await supabaseAdmin
+        .from("posts")
+        .select(`
+          *,
+          creator:creator_id (
+            id,
+            display_name,
+            profile_image_url
+          ),
+          community:community_id (
+            id,
+            name,
+            display_name,
+            avatar_url
+          ),
+          post_likes (
+            id,
+            user_id
+          ),
+          required_tier:required_tier_id (
+            id,
+            name,
+            tier_order
+          )
+        `)
+        .eq("id", postId)
+        .eq("is_published", true)
+        .single();
+
+      if (adminError) {
+        throw new Error(`Erro ao buscar post: ${error?.message || adminError.message}`);
+      }
+      post = adminPost;
+    }
+
+    // Se o post não é premium, retorna direto
+    if (!post.is_premium) {
+      return post;
+    }
+
+    // Se é premium e usuário é o criador, retorna direto
+    if (userId && post.creator_id === userId) {
+      return post;
+    }
+
+    // Verificação de acesso para usuários inscritos
+    let hasAccess = false;
+
     if (userId) {
-      query = query.or(`is_premium.eq.false,creator_id.eq.${userId}`);
-    } else {
-      // Usuário não logado vê apenas conteúdo público
-      query = query.eq("is_premium", false);
+      // 1. Obter ordem do tier necessário
+      const requiredTierOrder = post.required_tier?.tier_order || 0;
+
+      // 2. Buscar assinaturas ativas do usuário
+      const { data: userSubs } = await supabase
+        .from('user_subscriptions')
+        .select('plan_id')
+        .eq('user_id', userId)
+        .eq('status', 'active');
+
+      const planIds = userSubs?.map(s => s.plan_id) || [];
+
+      if (planIds.length > 0) {
+        // 3. Verificar se alguma assinatura corresponde ao criador e tem nível suficiente
+        // Usamos supabaseAdmin aqui para garantir acesso à tabela subscription_tiers se necessário,
+        // mas supabase client deve funcionar se as políticas permitirem leitura pública de tiers
+        const { data: tiers } = await supabase
+          .from('subscription_tiers')
+          .select('id, tier_order, creator_channel_id')
+          .in('id', planIds)
+          .eq('creator_channel_id', post.creator_id);
+
+        if (tiers && tiers.length > 0) {
+          // Verifica se algum tier tem ordem maior ou igual ao necessário
+          hasAccess = tiers.some(t => t.tier_order >= requiredTierOrder);
+        }
+      }
     }
 
-    const { data, error } = await query.single();
-
-    if (error) {
-      throw new Error(`Erro ao buscar post: ${error.message}`);
+    // Se não tem acesso, sanitizar o conteúdo
+    if (!hasAccess) {
+      return {
+        ...post,
+        content: null, // Remove conteúdo
+        media_urls: [], // Remove mídia
+        isLocked: true, // Flag para UI
+        requiredTier: post.required_tier?.name // Nome do tier para UI
+      };
     }
 
-    return data;
+    return post;
   }
 
   /**
@@ -242,17 +328,17 @@ export class PostService {
 
     let mediaUrls = existingPost.media_urls || [];
 
-    // Upload de nova imagem se fornecida
-    if (updateData.image) {
+    // Upload de novas imagens se fornecidas
+    if (updateData.images && updateData.images.length > 0) {
       try {
-        const uploadResult = await FileUploadService.uploadFile(
-          updateData.image,
-          "posts",
-          userId,
+        const uploadPromises = updateData.images.map(file => 
+          FileUploadService.uploadFile(file, "posts", userId)
         );
-        mediaUrls = [uploadResult.url];
+        
+        const uploadResults = await Promise.all(uploadPromises);
+        mediaUrls = uploadResults.map(result => result.url);
       } catch (error) {
-        console.warn("Erro no upload da nova imagem:", error);
+        console.warn("Erro no upload das novas imagens:", error);
       }
     }
 
@@ -275,9 +361,11 @@ export class PostService {
       .update({
         title: updateData.title,
         content: updateData.content,
-        content_type: updateData.image ? "image" : existingPost.content_type,
+        content_type: (updateData.images && updateData.images.length > 0) ? "image" : existingPost.content_type,
         media_urls: mediaUrls,
         community_id: updateData.communityId || existingPost.community_id,
+        is_premium: updateData.visibility ? (updateData.visibility === 'subscribers' || updateData.visibility === 'tier') : undefined,
+        required_tier_id: updateData.requiredTierId !== undefined ? updateData.requiredTierId : undefined
       })
       .eq("id", postId)
       .select(`

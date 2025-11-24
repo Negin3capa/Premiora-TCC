@@ -30,7 +30,9 @@ export class FileUploadService {
     userId: string
   ): Promise<UploadResult> {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userId}/${Date.now()}.${fileExt}`;
+    // Use timestamp + random string to avoid collisions with parallel uploads
+    const randomStr = Math.random().toString(36).substring(2, 15);
+    const fileName = `${userId}/${Date.now()}_${randomStr}.${fileExt}`;
     const filePath = `${bucket}/${fileName}`;
 
     const { error } = await supabase.storage

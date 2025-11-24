@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { User, Users, ArrowLeft } from 'lucide-react';
 import { SearchService } from '../services/content/SearchService';
+import { TrendingService, type TrendingTopic } from '../services/content/TrendingService';
+import { UserSuggestionsService } from '../services/content/UserSuggestionsService';
+import { useAuth } from '../hooks/useAuth';
 import type { Community } from '../types/community';
 import { Sidebar, MobileBottomBar } from '../components/layout';
 import RightSidebar from '../components/dashboard/RightSidebar';
@@ -13,7 +16,9 @@ import '../styles/SearchResultsPage.css';
 const SearchResultsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+  const searchType = searchParams.get('type'); // 'trending' | 'suggestions' | null
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'all' | 'people' | 'communities' | 'posts'>('all');
   const [loading, setLoading] = useState(false);
@@ -23,19 +28,40 @@ const SearchResultsPage: React.FC = () => {
     communities: Community[];
     content: any[];
   }>({ users: [], communities: [], content: [] });
+  const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query) return;
+      if (!query && !searchType) return;
       
       setLoading(true);
       try {
-        const data = await SearchService.globalSearch(query, {
-          usersLimit: 20,
-          communitiesLimit: 20,
-          contentLimit: 20
-        });
-        setResults(data);
+        if (searchType === 'trending') {
+          const data = await TrendingService.getTrendingTopics({ limit: 50 });
+          setTrendingTopics(data.topics);
+        } else if (searchType === 'suggestions') {
+          if (user?.id) {
+            const suggestions = await UserSuggestionsService.getUserSuggestions(user.id, 50);
+            // Adapt suggestions to users format
+            const usersList = suggestions.map(s => ({
+              id: s.id,
+              name: s.username, // UserSuggestion uses username as name usually? Or we need to check type
+              username: s.handle.replace('@', ''),
+              avatar_url: s.avatar,
+              // Add other fields if necessary
+            }));
+            setResults(prev => ({ ...prev, users: usersList }));
+            setActiveTab('people'); // Default to people tab for suggestions
+          }
+        } else {
+          // Standard search
+          const data = await SearchService.globalSearch(query, {
+            usersLimit: 20,
+            communitiesLimit: 20,
+            contentLimit: 20
+          });
+          setResults(data);
+        }
       } catch (error) {
         console.error('Search error:', error);
       } finally {
@@ -44,7 +70,7 @@ const SearchResultsPage: React.FC = () => {
     };
 
     fetchResults();
-  }, [query]);
+  }, [query, searchType, user?.id]);
 
   const handleBack = () => {
     navigate(-1);
@@ -52,9 +78,9 @@ const SearchResultsPage: React.FC = () => {
 
   const renderUsers = () => (
     <div className="results-section">
-      <h3>People</h3>
+      <h3>{searchType === 'suggestions' ? 'Suggested People' : 'People'}</h3>
       {results.users.length === 0 ? (
-        <p className="no-results">No people found.</p>
+        <p className="no-results">No {searchType === 'suggestions' ? 'suggestions' : 'people'} found.</p>
       ) : (
         <div className="results-grid">
           {results.users.map(user => (
@@ -69,6 +95,42 @@ const SearchResultsPage: React.FC = () => {
               <div className="result-info">
                 <span className="result-title">{user.name || user.username}</span>
                 <span className="result-subtitle">@{user.username}</span>
+              </div>
+              {searchType === 'suggestions' && (
+                <button className="follow-btn-small" style={{marginLeft: 'auto'}}>View</button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const renderTrending = () => (
+    <div className="results-section">
+      <h3>Trending Topics</h3>
+      {trendingTopics.length === 0 ? (
+        <p className="no-results">No trending topics found.</p>
+      ) : (
+        <div className="results-grid">
+          {trendingTopics.map(topic => (
+            <div 
+              key={topic.id} 
+              className="result-card trending-card" 
+              onClick={() => navigate(`/search?q=${encodeURIComponent(topic.title || topic.key)}`)}
+            >
+              <div className="result-info">
+                <span className="result-subtitle" style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                  {topic.category} · Trending
+                </span>
+                <span className="result-title" style={{ marginTop: '2px', marginBottom: '2px' }}>
+                  {topic.title || topic.key}
+                </span>
+                <span className="result-subtitle" style={{ fontSize: '13px' }}>
+                  {topic.totalMentions >= 1000 
+                    ? `${(topic.totalMentions / 1000).toFixed(1)}K` 
+                    : topic.totalMentions} posts
+                </span>
               </div>
             </div>
           ))}
@@ -139,54 +201,68 @@ const SearchResultsPage: React.FC = () => {
                 <button onClick={handleBack} className="back-button-simple">
                   <ArrowLeft size={20} />
                 </button>
-                <h2>Search results for "{query}"</h2>
+                <h2>
+                  {searchType === 'trending' ? 'Trending Topics' : 
+                   searchType === 'suggestions' ? 'Suggested for You' : 
+                   `Search results for "${query}"`}
+                </h2>
               </div>
 
-              <div className="search-tabs">
-                <button 
-                  className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('all')}
-                >
-                  Top
-                </button>
-                <button 
-                  className={`tab-btn ${activeTab === 'people' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('people')}
-                >
-                  People
-                </button>
-                <button 
-                  className={`tab-btn ${activeTab === 'communities' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('communities')}
-                >
-                  Communities
-                </button>
-                <button 
-                  className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('posts')}
-                >
-                  Posts
-                </button>
-              </div>
+              {!searchType && (
+                <div className="search-tabs">
+                  <button 
+                    className={`tab-btn ${activeTab === 'all' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('all')}
+                  >
+                    Top
+                  </button>
+                  <button 
+                    className={`tab-btn ${activeTab === 'people' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('people')}
+                  >
+                    People
+                  </button>
+                  <button 
+                    className={`tab-btn ${activeTab === 'communities' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('communities')}
+                  >
+                    Communities
+                  </button>
+                  <button 
+                    className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('posts')}
+                  >
+                    Posts
+                  </button>
+                </div>
+              )}
 
               <div className="search-content">
                 {loading ? (
                   <div className="loading-state">
                     <div className="loading-spinner"></div>
-                    Searching...
+                    {searchType ? 'Loading...' : 'Searching...'}
                   </div>
                 ) : (
                   <>
-                    {activeTab === 'all' && (
+                    {searchType === 'trending' ? (
+                      renderTrending()
+                    ) : searchType === 'suggestions' ? (
+                      renderUsers()
+                    ) : (
                       <>
-                        {renderUsers()}
-                        {renderCommunities()}
-                        {renderPosts()}
+                        {activeTab === 'all' && (
+                          <>
+                            {renderUsers()}
+                            {renderCommunities()}
+                            {renderPosts()}
+                          </>
+                        )}
+                        {activeTab === 'people' && renderUsers()}
+                        {activeTab === 'communities' && renderCommunities()}
+                        {activeTab === 'posts' && renderPosts()}
                       </>
                     )}
-                    {activeTab === 'people' && renderUsers()}
-                    {activeTab === 'communities' && renderCommunities()}
-                    {activeTab === 'posts' && renderPosts()}
                   </>
                 )}
               </div>

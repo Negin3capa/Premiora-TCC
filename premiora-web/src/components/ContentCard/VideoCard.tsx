@@ -2,9 +2,10 @@
  * Componente VideoCard
  * Card específico para exibir vídeos
  */
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Play } from 'lucide-react';
 import type { ContentItem } from '../../types/content';
+import { VideoService } from '../../services/content/VideoService';
 
 interface VideoCardProps {
   item: ContentItem;
@@ -18,14 +19,31 @@ interface VideoCardProps {
 const VideoCard: React.FC<VideoCardProps> = ({ item }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const youtubeId = useMemo(() => {
+    return item.videoUrl ? VideoService.getYouTubeId(item.videoUrl) : null;
+  }, [item.videoUrl]);
+
   const handlePlay = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsPlaying(true);
   };
 
-  return (
-    <div className="video-content">
-      {isPlaying && item.videoUrl ? (
+  const renderPlayer = () => {
+    if (youtubeId) {
+      return (
+        <div className="video-player-wrapper" onClick={(e) => e.stopPropagation()} style={{ position: 'relative', paddingTop: '56.25%', background: '#000' }}>
+          <iframe
+            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '8px' }}
+            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1`}
+            title={item.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      );
+    }
+    
+    return (
         <div className="video-player-wrapper" onClick={(e) => e.stopPropagation()}>
           <video
             src={item.videoUrl}
@@ -36,6 +54,29 @@ const VideoCard: React.FC<VideoCardProps> = ({ item }) => {
             style={{ width: '100%', borderRadius: '8px' }}
           />
         </div>
+    );
+  };
+
+  /**
+   * Formata a duração em segundos para o formato MM:SS ou HH:MM:SS
+   */
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return '0:00';
+    
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="video-content">
+      {isPlaying && item.videoUrl ? (
+        renderPlayer()
       ) : (
         <div className="video-thumbnail" onClick={handlePlay}>
           <img
@@ -46,9 +87,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ item }) => {
           <div className="play-overlay">
             <span className="play-icon"><Play size={24} /></span>
           </div>
-          <div className="video-duration">
-            {((item.views || 0) % 20) + 1}:{((item.views || 0) % 60).toString().padStart(2, '0')}
-          </div>
+          {item.duration !== undefined && (
+            <div className="video-duration">
+              {formatDuration(item.duration)}
+            </div>
+          )}
         </div>
       )}
       <div className="video-info">
