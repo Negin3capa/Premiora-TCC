@@ -1,5 +1,8 @@
--- Migration 006: Create Creator Channel Tables and Initial RLS Policies
--- This sets up the basic structure for creator channels, subscription tiers, and benefits
+-- Migration 006: Combined Creator Channels and Subscriptions Setup
+-- This script creates the necessary tables for both creator channels and Stripe subscriptions.
+
+-- PART 1: Creator Channel Tables and Initial RLS Policies
+-- Sets up the basic structure for creator channels, subscription tiers, and benefits
 
 -- Create creator_channels table
 CREATE TABLE IF NOT EXISTS creator_channels (
@@ -76,14 +79,11 @@ CREATE POLICY "Creators can manage their own tiers"
         )
     );
 
--- RLS Policies for subscription_benefits (these may cause circular dependency issues)
+-- RLS Policies for subscription_benefits
 CREATE POLICY "Anyone can view benefits"
     ON subscription_benefits FOR SELECT
     USING (true);
 
--- Note: The following policies for benefits can cause RLS circular dependencies
--- when trying to verify ownership through subscription_tiers
--- The workaround is to use supabaseAdmin (service role key) for write operations
 CREATE POLICY "Creators can manage benefits for their tiers"
     ON subscription_benefits FOR ALL
     USING (
@@ -92,3 +92,60 @@ CREATE POLICY "Creators can manage benefits for their tiers"
             WHERE creator_channel_id = auth.uid()
         )
     );
+
+-- PART 2: Create Stripe Subscriptions Table
+-- Tabela para rastrear assinaturas Stripe dos usuários
+
+-- Create subscriptions table
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  stripe_customer_id TEXT NOT NULL,
+  stripe_subscription_id TEXT NOT NULL UNIQUE,
+  stripe_price_id TEXT NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('active', 'canceled', 'past_due', 'incomplete', 'trialing')),
+  current_period_start TIMESTAMP WITH TIME ZONE NOT NULL,
+  current_period_end TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  UNIQUE(user_id, stripe_subscription_id)
+);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_customer_id ON subscriptions(stripe_customer_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_created_at ON subscriptions(created_at DESC);
+
+-- Enable RLS (Row Level Security)
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+CREATE POLICY "Users can view their own subscriptions" ON subscriptions
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role can insert subscriptions" ON subscriptions
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Service role can update subscriptions" ON subscriptions
+  FOR UPDATE USING (true);
+
+-- Function to update updated_at automatically
+CREATE OR REPLACE FUNCTION update_subscriptions_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for updated_at
+CREATE TRIGGER update_subscriptions_updated_at_trigger
+  BEFORE UPDATE ON subscriptions
+  FOR EACH ROW
+  EXECUTE FUNCTION update_subscriptions_updated_at();
+
+-- Comments for documentation
+COMMENT ON TABLE subscriptions IS 'Tabela para rastrear assinaturas Stripe dos usuários';

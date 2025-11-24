@@ -106,6 +106,44 @@ vercel env add VITE_HCAPTCHA_SITE_KEY preview
 
 **Por que não no vercel.json?** Por segurança - secrets nunca devem ser committed no repositório.
 
+## 🚀 Configuração Pós-Deploy em Produção
+
+Após o primeiro deploy bem-sucedido para o ambiente de produção, algumas configurações manuais são necessárias para garantir que a autenticação e os pagamentos funcionem corretamente.
+
+### 1. Configurar Domínios no Supabase
+
+Para evitar erros de autenticação (401/403), você precisa autorizar a URL de produção no seu projeto Supabase.
+
+1.  Acesse o **Supabase Dashboard**.
+2.  Navegue até **Project Settings** > **Authentication** > **URL Configuration**.
+3.  No campo **Site URL**, adicione a URL de produção fornecida pela Vercel (ex: `https://seu-projeto.vercel.app`).
+4.  Em **Redirect URLs**, adicione a URL de produção à lista de URLs permitidas.
+5.  Salve as alterações.
+
+### 2. Configurar Chaves Secretas do Stripe no Supabase
+
+As chaves secretas do Stripe são usadas pelas Edge Functions para processar pagamentos de forma segura.
+
+1.  Acesse o **Supabase Dashboard**.
+2.  Navegue até **Project Settings** > **Edge Functions**.
+3.  Na seção **Secrets**, adicione as seguintes chaves:
+    *   `STRIPE_SECRET_KEY`: Sua chave secreta do Stripe de produção (ex: `sk_live_...`).
+    *   `STRIPE_WEBHOOK_SECRET`: O segredo do webhook do Stripe, que garante que as requisições vêm do Stripe.
+4.  Clique em **Save** para cada segredo.
+
+### 3. Configurar Domínios no Google Cloud Console (para Google OAuth)
+
+Se você utiliza o login com Google, a URL de produção também precisa ser autorizada no Google Cloud.
+
+1.  Acesse o **Google Cloud Console**.
+2.  Navegue até **APIs & Services** > **Credentials**.
+3.  Selecione suas credenciais de **OAuth 2.0 Client ID**.
+4.  Em **Authorized JavaScript origins**, adicione a URL de produção.
+5.  Em **Authorized redirect URIs**, adicione a URL de produção.
+6.  Salve as alterações.
+
+Após concluir essas etapas, a aplicação estará totalmente configurada para o ambiente de produção.
+
 ## 📦 Processo de Deploy
 
 ### Deploy Automático

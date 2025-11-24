@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.tsx';
 import { ModalProvider } from './contexts/ModalContext.tsx';
+import ModalManager from './components/modals/ModalManager.tsx';
 import { NotificationProvider } from './contexts/NotificationContext.tsx';
 import { UIProvider } from './contexts/UIContext.tsx';
 import App from './App.tsx';
@@ -16,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('app')!).render(
       React.createElement(UIProvider, null,
         React.createElement(NotificationProvider, null,
           React.createElement(ModalProvider, null,
+            React.createElement(ModalManager, null), // Adiciona o ModalManager
             React.createElement(AuthProvider, null,
               React.createElement(App, null)
             )
