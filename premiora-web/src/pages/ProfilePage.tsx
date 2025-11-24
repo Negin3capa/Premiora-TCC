@@ -10,6 +10,7 @@ import { useProfileTabs } from '../hooks/useProfileTabs';
 import { ProfileService } from '../services/auth/ProfileService';
 import { FeedService } from '../services/content/FeedService';
 import { CreatorChannelService } from '../services/content/CreatorChannelService';
+import { paymentService } from '../services/payment/PaymentService';
 import { extractThumbnailUrl, isVideoMedia } from '../utils/mediaUtils';
 import type { CreatorProfile, Post, PostMedia } from '../types/profile';
 import type { SubscriptionTier } from '../types/creator';
@@ -55,6 +56,7 @@ const ProfilePage: React.FC = () => {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [subscriptionTiers, setSubscriptionTiers] = useState<SubscriptionTier[]>([]);
   const [connectedCommunityId, setConnectedCommunityId] = useState<string | undefined>(undefined);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   // Creator Tab State
   const [creatorSection, setCreatorSection] = useState('dashboard');
@@ -81,6 +83,22 @@ const ProfilePage: React.FC = () => {
       return;
     }
   }, [username, userProfile, navigate]);
+
+  // Função separada para buscar dados do canal
+  const fetchChannelData = async (userId: string) => {
+    try {
+      const channelConfig = await CreatorChannelService.getCreatorChannel(userId);
+      if (channelConfig) {
+        setSubscriptionTiers(channelConfig.subscriptionTiers);
+        setConnectedCommunityId(channelConfig.connectedCommunityId);
+      } else {
+        setSubscriptionTiers([]);
+        setConnectedCommunityId(undefined);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados do canal:', err);
+    }
+  };
 
   // Buscar dados do perfil - memoizado para evitar recriações desnecessárias
   const fetchProfileData = useCallback(async () => {
@@ -185,22 +203,6 @@ const ProfilePage: React.FC = () => {
     }
   }, [username, userProfile?.id]);
 
-  // Função separada para buscar dados do canal
-  const fetchChannelData = async (userId: string) => {
-    try {
-      const channelConfig = await CreatorChannelService.getCreatorChannel(userId);
-      if (channelConfig) {
-        setSubscriptionTiers(channelConfig.subscriptionTiers);
-        setConnectedCommunityId(channelConfig.connectedCommunityId);
-      } else {
-        setSubscriptionTiers([]);
-        setConnectedCommunityId(undefined);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar dados do canal:', err);
-    }
-  };
-
   // Buscar dados do perfil quando username muda ou quando volta de edição
   useEffect(() => {
     fetchProfileData();
@@ -264,29 +266,35 @@ const ProfilePage: React.FC = () => {
     return (views * 1) + (likes * 2) + (comments * 3);
   };
 
-  const handleSelectTier = (tierId: string) => {
-    console.log('Selected tier:', tierId);
-    // Aqui implementaremos o fluxo de checkout futuramente
-    setIsSubscriptionModalOpen(false);
+  const handleSelectTier = async (tierId: string) => {
+    try {
+      setCheckoutLoading(true);
+      const url = await paymentService.createCheckoutSession(tierId);
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      alert('Erro ao iniciar checkout. Tente novamente.');
+      setCheckoutLoading(false);
+    }
   };
 
   // Se ainda está carregando o perfil, mostrar skeleton
   if (profileLoading) {
-  return (
-    <div style={{
-      backgroundColor: 'var(--color-bg-primary)',
-      minHeight: '100vh',
-      color: 'var(--color-text-secondary)',
-      overflowX: 'hidden'
-    }}>
-      {/* Show default sidebar during loading to prevent flash */}
-      <Sidebar />
+    return (
+      <div style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        minHeight: '100vh',
+        color: 'var(--color-text-secondary)',
+        overflowX: 'hidden'
+      }}>
+        {/* Show default sidebar during loading to prevent flash */}
+        <Sidebar />
 
-      {/* Global Header - default mode during loading */}
-      <Header
-        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        isProfileMode={false}
-      />
+        {/* Global Header - default mode during loading */}
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          isProfileMode={false}
+        />
 
         {/* Profile Banner Skeleton */}
         <div style={{
@@ -506,10 +514,11 @@ const ProfilePage: React.FC = () => {
       {/* Subscription Modal */}
       <SubscriptionModal
         isOpen={isSubscriptionModalOpen}
-        onClose={() => setIsSubscriptionModalOpen(false)}
+        onClose={() => !checkoutLoading && setIsSubscriptionModalOpen(false)}
         tiers={subscriptionTiers}
         creatorName={creatorProfile.user?.name || creatorProfile.username || 'Criador'}
         onSelectTier={handleSelectTier}
+        isLoading={checkoutLoading}
       />
     </div>
   );

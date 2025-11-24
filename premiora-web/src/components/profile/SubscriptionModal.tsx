@@ -9,6 +9,7 @@ interface SubscriptionModalProps {
   tiers: SubscriptionTier[];
   creatorName: string;
   onSelectTier: (tierId: string) => void;
+  isLoading?: boolean;
 }
 
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
@@ -16,7 +17,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   onClose,
   tiers,
   creatorName,
-  onSelectTier
+  onSelectTier,
+  isLoading = false
 }) => {
   if (!isOpen) return null;
 
@@ -77,10 +79,15 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
                 <button
                   className="select-tier-btn"
-                  style={{ backgroundColor: tier.color }}
                   onClick={() => onSelectTier(tier.id)}
+                  disabled={isLoading}
+                  style={{ 
+                    backgroundColor: tier.color, 
+                    opacity: isLoading ? 0.7 : 1, 
+                    cursor: isLoading ? 'not-allowed' : 'pointer' 
+                  }}
                 >
-                  Escolher {tier.name}
+                  {isLoading ? 'Processando...' : `Escolher ${tier.name}`}
                 </button>
               </div>
             </div>

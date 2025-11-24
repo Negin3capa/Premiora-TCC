@@ -56,6 +56,7 @@ export class CreatorChannelService {
                 userId: channel.id,
                 subscriptionTiers: tiers,
                 connectedCommunityId: channel.connected_community_id,
+                stripeConnectId: channel.stripe_connect_id,
                 isSetupCompleted: channel.is_setup_completed,
             };
         } catch (err) {
