@@ -166,12 +166,21 @@ export const useGoogleOneTap = () => {
 
       // Verificar se estamos em um ambiente de preview (Vercel) para evitar erro 403
       // Google One Tap requer que a origem esteja explicitamente permitida no Console
-      // URLs de preview dinâmicas (ex: *-git-*.vercel.app) geralmente não estão
-      const isPreviewEnvironment = window.location.hostname.includes('-git-') && window.location.hostname.includes('.vercel.app');
+      // URLs de preview dinâmicas geralmente não estão
+      // Relaxando a verificação para qualquer domínio vercel.app que não seja localhost
+      const isVercelPreview = window.location.hostname.includes('.vercel.app');
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       
-      if (isPreviewEnvironment) {
-        console.warn('⚠️ Ambiente de preview detectado. Google One Tap desativado para evitar erro 403 (Client ID not found).');
-        console.log('ℹ️ Para testar Google One Tap, use localhost ou o domínio de produção.');
+      console.log('🔍 Verificação de ambiente One Tap:', {
+        hostname: window.location.hostname,
+        isVercelPreview,
+        isLocalhost
+      });
+
+      if (isVercelPreview && !isLocalhost) {
+        console.warn('⚠️ Ambiente Vercel detectado. Google One Tap desativado para evitar erro 403 (Client ID not found).');
+        console.log('ℹ️ O Google One Tap requer que o domínio exato esteja autorizado no Google Cloud Console.');
+        console.log('ℹ️ URLs de preview dinâmicas falharão. Para testar, use localhost ou o domínio de produção autorizado.');
         return;
       }
 
