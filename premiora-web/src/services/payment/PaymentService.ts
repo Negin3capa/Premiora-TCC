@@ -1,8 +1,7 @@
 import { supabase } from '../../utils/supabaseClient';
 import type {
     CreateCheckoutSessionRequest,
-    CreateCheckoutSessionResponse,
-    PaymentError
+    CreateCheckoutSessionResponse
 } from '../../types/payment';
 
 /**

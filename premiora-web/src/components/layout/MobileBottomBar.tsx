@@ -5,7 +5,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Bell, MessageCircle, Users, Search } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
 
 /**
  * Hook personalizado para detectar scroll e controlar visibilidade da bottom bar
