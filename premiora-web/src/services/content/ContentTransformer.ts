@@ -61,6 +61,7 @@ export class ContentTransformer {
       authorUsername: postData.username, // Foreign key direta para users.username
       authorAvatar: authorAvatar,
       thumbnail: postData.media_urls?.[0] || undefined,
+      mediaUrls: postData.media_urls || [],
       content: postData.content,
       views: postData.views_count || 0,
       likes: likesCount,

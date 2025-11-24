@@ -60,6 +60,7 @@ const usePostPrefetch = () => {
           authorAvatar: postData.creator?.profile_image_url || '',
           content: postData.content,
           thumbnail: postData.media_urls?.[0],
+          mediaUrls: postData.media_urls || [],
           views: postData.views || 0,
           likes: postData.post_likes?.length || 0,
           timestamp: new Date(postData.created_at).toLocaleDateString('pt-BR'),
@@ -203,7 +204,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
   /**
    * Handler para clique na imagem - navega com estado para abrir modal
    */
-  const handleImageClick = (e: React.MouseEvent) => {
+  const handleImageClick = (e: React.MouseEvent, index?: number) => {
     e.stopPropagation();
     if (item.id) {
       incrementView(item.id);
@@ -212,7 +213,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
         ? `/r/${item.communityName}/u/${username}/status/${item.id}`
         : `/u/${username}/status/${item.id}`;
         
-      navigate(path, { state: { openImage: true } });
+      navigate(path, { state: { openImage: true, imageIndex: index || 0 } });
     }
   };
 
@@ -337,7 +338,11 @@ const ContentCard: React.FC<ContentCardProps> = ({ item }) => {
                   </span>
                 )}
                 {item.communityId && (
-                  <Link to={`/r/${item.communityName}`} className="community-flair">
+                  <Link 
+                    to={`/r/${item.communityName}`} 
+                    className="community-flair"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {item.communityAvatar && (
                       <img
                         src={item.communityAvatar}

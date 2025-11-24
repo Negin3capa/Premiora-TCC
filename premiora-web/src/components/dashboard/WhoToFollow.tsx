@@ -111,7 +111,12 @@ const WhoToFollow: React.FC = () => {
           </div>
         ))}
       </div>
-      <button className="show-more-btn">Show more</button>
+      <button 
+        className="show-more-btn"
+        onClick={() => navigate('/search?type=suggestions')}
+      >
+        Show more
+      </button>
     </div>
   );
 };

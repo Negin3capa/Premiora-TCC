@@ -96,9 +96,10 @@ const usePost = (postId: string, username: string) => {
               fileSize: mediaData.video?.metadata?.fileSize
             };
           } else {
-            // Para posts, usar primeira URL como thumbnail
+            // Para posts
             mediaUrls = {
-              thumbnail: postData.media_urls[0]
+              thumbnail: postData.media_urls[0],
+              mediaUrls: postData.media_urls || []
             };
           }
         }
@@ -178,6 +179,7 @@ const PostViewPage: React.FC = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isModalMenuOpen, setIsModalMenuOpen] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
@@ -209,6 +211,7 @@ const PostViewPage: React.FC = () => {
   useEffect(() => {
     if (location.state && (location.state as any).openImage && post?.thumbnail) {
       setIsImageModalOpen(true);
+      setSelectedImageIndex(0);
       // Limpar o state para não reabrir ao navegar
       window.history.replaceState({}, document.title);
     }
@@ -557,15 +560,36 @@ const PostViewPage: React.FC = () => {
                             </div>
                           )}
 
-                          {/* Mídia do post - imagem */}
-                          {post.thumbnail ? (
+                          {/* Mídia do post - imagens */}
+                          {(post.mediaUrls && post.mediaUrls.length > 0) ? (
+                            <div className="post-images-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                              {post.mediaUrls.map((url, index) => (
+                                <div key={index} className="post-image-container">
+                                  <img
+                                    src={url}
+                                    alt={`${post.title} - ${index + 1}`}
+                                    className="post-image clickable-image"
+                                    loading="lazy"
+                                    onClick={() => {
+                                      setSelectedImageIndex(index);
+                                      setIsImageModalOpen(true);
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ) : post.thumbnail ? (
                             <div className="post-image-container">
                               <img
                                 src={post.thumbnail}
                                 alt={post.title}
                                 className="post-image clickable-image"
                                 loading="lazy"
-                                onClick={() => setIsImageModalOpen(true)}
+                                onClick={() => {
+                                  setSelectedImageIndex(0);
+                                  setIsImageModalOpen(true);
+                                }}
                                 style={{ cursor: 'pointer' }}
                               />
                             </div>
@@ -659,13 +683,14 @@ const PostViewPage: React.FC = () => {
       <MobileBottomBar />
 
       {/* Modal de imagem ampliada - Layout Focado (Twitter-like) */}
-      {isImageModalOpen && post.thumbnail && (
+      {isImageModalOpen && (post.mediaUrls?.length || post.thumbnail) && (
         <div className="image-modal-overlay">
           <div className="image-modal-container">
             {/* Painel Esquerdo: Mídia */}
             <div 
               className="image-modal-media"
               onClick={() => setIsImageModalOpen(false)}
+              style={{ position: 'relative' }}
             >
               <button
                 className="image-modal-close"
@@ -678,9 +703,67 @@ const PostViewPage: React.FC = () => {
                 <X size={24} />
               </button>
               
+              {/* Navigation Arrows */}
+              {post.mediaUrls && post.mediaUrls.length > 1 && (
+                <>
+                  <button
+                    className="image-nav-prev"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : post.mediaUrls!.length - 1));
+                    }}
+                    style={{
+                      position: 'absolute',
+                      left: '20px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <button
+                    className="image-nav-next"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex((prev) => (prev < post.mediaUrls!.length - 1 ? prev + 1 : 0));
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '20px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'rgba(0,0,0,0.5)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: '40px',
+                      height: '40px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 10
+                    }}
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
               <img
-                src={post.thumbnail}
-                alt={post.title}
+                src={post.mediaUrls && post.mediaUrls.length > 0 ? post.mediaUrls[selectedImageIndex] : post.thumbnail}
+                alt={`${post.title} - ${selectedImageIndex + 1}`}
                 className="image-modal-image"
                 onClick={(e) => e.stopPropagation()}
               />

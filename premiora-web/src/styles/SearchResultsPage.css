@@ -126,47 +126,53 @@
   margin: 0 var(--space-4);
 }
 
-/* Grid for Users and Communities */
+/* List for Users and Communities (Twitter-like) */
 .results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-4);
-  padding: 0 var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* No gap, using border-bottom */
 }
 
 .result-card {
-  background-color: var(--color-bg-primary);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border-light);
+  border-radius: 0;
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition: background-color var(--transition-fast);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  flex-direction: row;
+  align-items: center; /* Center vertically */
+  text-align: left;
+  width: 100%;
 }
 
 .result-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--color-primary-light);
+  transform: none;
+  box-shadow: none;
+  border-color: var(--color-border-light);
+  background-color: var(--color-bg-hover);
 }
 
 .result-icon {
-  margin-bottom: var(--space-3);
+  margin-bottom: 0;
+  margin-right: var(--space-3);
   color: var(--color-text-secondary);
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .result-avatar {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   border-radius: var(--radius-full);
   object-fit: cover;
 }
 
 .result-info {
-  width: 100%;
+  flex: 1; /* Take remaining space */
+  min-width: 0; /* Enable text truncation */
+  margin-right: var(--space-3);
 }
 
 .result-title {
@@ -174,7 +180,7 @@
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  margin-bottom: var(--space-1);
+  margin-bottom: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -184,17 +190,64 @@
   display: block;
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .result-description {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.4;
+  line-height: 1.3;
+}
+
+/* Special styling for trending items */
+.trending-card {
+  align-items: flex-start;
+  padding: var(--space-3) var(--space-4);
+}
+
+.trending-card .result-icon {
+  display: none; /* Hide icon for trends if desired, or keep it small */
+}
+
+.trending-card .result-info {
+  margin: 0;
+}
+
+.trending-card .result-title {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 2px;
+}
+
+.trending-card .result-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+/* Button styling within card */
+.follow-btn-small {
+  background-color: var(--color-text-primary);
+  color: var(--color-bg-primary);
+  border: none;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.follow-btn-small:hover {
+  opacity: 0.9;
 }
 
 /* List for Posts (using ContentCard, so just container styles) */

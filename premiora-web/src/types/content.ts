@@ -23,6 +23,7 @@ export interface ContentItem {
   authorUsername?: string; // Username real da tabela users
   authorAvatar: string;
   thumbnail?: string;
+  mediaUrls?: string[];
   content?: string;
   views?: number;
   likes?: number;
