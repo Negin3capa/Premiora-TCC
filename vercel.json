@@ -1,7 +1,7 @@
 {
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "outputDirectory": "premiora-web/dist",
   "devCommand": "npm run dev",
   "framework": "vite",
   "regions": ["gru1"],

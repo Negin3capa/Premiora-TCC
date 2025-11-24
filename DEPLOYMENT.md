@@ -2,9 +2,7 @@
 
 Este documento descreve como configurar e gerenciar os ambientes de deploy da aplicação Premiora Web.
 
-## ⚠️ Status do Deploy
-
-**Vercel deployment temporariamente desabilitado** - O projeto não está pronto para deploy ainda. Para reativar:
+## Status do Deploy: Pronto
 
 1. Renomeie `premiora-web/vercel.json.disabled` para `premiora-web/vercel.json`
 2. Descomente o job `deploy-preview` no arquivo `.github/workflows/ci.yml`
@@ -88,6 +86,18 @@ your_supabase_anon_key_here
 # Obter em https://dashboard.hcaptcha.com/
 ```
 
+#### `VITE_STRIPE_PUBLISHABLE_KEY`
+
+```
+pk_test_... (Frontend)
+```
+
+#### `VITE_STRIPE_PREMIUM_PRICE_ID`
+
+```
+price_... (Frontend)
+```
+
 ### 3. Environment Variables no Vercel
 
 ⚠️ **Importante**: As variáveis de ambiente NÃO devem ser hardcoded no `vercel.json`. Configure-as no painel do Vercel:
@@ -97,11 +107,15 @@ your_supabase_anon_key_here
 vercel env add VITE_SUPABASE_URL production
 vercel env add VITE_SUPABASE_ANON_KEY production
 vercel env add VITE_HCAPTCHA_SITE_KEY production
+vercel env add VITE_STRIPE_PUBLISHABLE_KEY production
+vercel env add VITE_STRIPE_PREMIUM_PRICE_ID production
 
 # Para Preview/Staging
 vercel env add VITE_SUPABASE_URL preview
 vercel env add VITE_SUPABASE_ANON_KEY preview
 vercel env add VITE_HCAPTCHA_SITE_KEY preview
+vercel env add VITE_STRIPE_PUBLISHABLE_KEY preview
+vercel env add VITE_STRIPE_PREMIUM_PRICE_ID preview
 ```
 
 **Por que não no vercel.json?** Por segurança - secrets nunca devem ser committed no repositório.
