@@ -244,7 +244,8 @@ export class OAuthService {
    */
   static async signInWithGoogle(): Promise<void> {
     // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = RedirectService.getRedirectUrl('/home');
+    // Usar /dashboard diretamente para evitar redirecionamentos extras que podem perder o hash de autenticação
+    const redirectTo = RedirectService.getRedirectUrl('/dashboard');
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -271,7 +272,8 @@ export class OAuthService {
    */
   static async signInWithFacebook(): Promise<void> {
     // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = RedirectService.getRedirectUrl('/home');
+    // Usar /dashboard diretamente para evitar redirecionamentos extras que podem perder o hash de autenticação
+    const redirectTo = RedirectService.getRedirectUrl('/dashboard');
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
