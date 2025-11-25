@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import {
-  LayoutDashboard, Library, Users, BarChart2, DollarSign,
+  LayoutDashboard, Library, Users, DollarSign,
   Megaphone, MessageSquare, Bell, Settings, ArrowLeft, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useTheme } from '../../hooks/useUI';
@@ -30,7 +30,7 @@ const CreatorSidebar: React.FC<CreatorSidebarProps> = ({
     { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Painel' },
     { id: 'library', icon: <Library size={20} />, label: 'Biblioteca' },
     { id: 'audience', icon: <Users size={20} />, label: 'Público' },
-    { id: 'analytics', icon: <BarChart2 size={20} />, label: 'Informações' },
+    { id: 'subscribers', icon: <Users size={20} />, label: 'Assinantes' },
     { id: 'payments', icon: <DollarSign size={20} />, label: 'Pagamentos' },
     { id: 'promotions', icon: <Megaphone size={20} />, label: 'Promoções', badge: 'NOVIDADE' },
     { id: 'chats', icon: <MessageSquare size={20} />, label: 'Chats' },
@@ -40,7 +40,7 @@ const CreatorSidebar: React.FC<CreatorSidebarProps> = ({
 
   return (
     <aside className={`profile-sidebar ${!isCollapsed ? 'expanded' : ''}`}>
-      <button 
+      <button
         className="sidebar-toggle-button"
         onClick={onToggleCollapse}
         aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
@@ -51,10 +51,10 @@ const CreatorSidebar: React.FC<CreatorSidebarProps> = ({
       <div className="profile-sidebar-content">
         {/* Logo/Brand */}
         <div className="profile-sidebar-header">
-          <img 
-            src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"} 
-            alt="Premiora" 
-            className="profile-sidebar-logo" 
+          <img
+            src={isDark ? "/assets/premiora-logo.png" : "/assets/premiora-logo-light.png"}
+            alt="Premiora"
+            className="profile-sidebar-logo"
           />
         </div>
 
@@ -74,11 +74,11 @@ const CreatorSidebar: React.FC<CreatorSidebarProps> = ({
                     <>
                       <span className="profile-sidebar-nav-label">{item.label}</span>
                       {item.badge && (
-                        <span style={{ 
-                          fontSize: '0.6rem', 
-                          backgroundColor: 'var(--color-accent)', 
-                          color: 'white', 
-                          padding: '2px 4px', 
+                        <span style={{
+                          fontSize: '0.6rem',
+                          backgroundColor: 'var(--color-accent)',
+                          color: 'white',
+                          padding: '2px 4px',
                           borderRadius: '4px',
                           marginLeft: 'auto'
                         }}>
