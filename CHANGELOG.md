@@ -5,6 +5,14 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 24/11/25
+
+### Corrigido
+
+- **Erro de Timestamp no Scroll Infinito**
+  - Corrigido erro `invalid input syntax for type timestamp` ao carregar mais vídeos.
+  - Garantido que valores `undefined` não sejam passados para RPCs do Supabase.
+
 ## [0.14.0] - 24/11/25
 
 ### Adicionado
