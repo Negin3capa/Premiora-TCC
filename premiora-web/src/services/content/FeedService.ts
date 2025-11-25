@@ -60,19 +60,20 @@ export class FeedService {
       let prevCursor: string | undefined;
 
       if (allContent.length > 0) {
-        // Next cursor é baseado no último item
         const lastItem = allContent[allContent.length - 1];
-        nextCursor = this.encodeCursor(
-          lastItem.published_at || lastItem.timestamp,
-          lastItem.id,
-        );
+        const sortValue = lastItem.published_at || lastItem.timestamp;
+
+        if (sortValue && sortValue !== "undefined") {
+          nextCursor = this.encodeCursor(sortValue, lastItem.id);
+        }
 
         // Prev cursor seria baseado no primeiro item (para paginação reversa)
         const firstItem = allContent[0];
-        prevCursor = this.encodeCursor(
-          firstItem.published_at || firstItem.timestamp,
-          firstItem.id,
-        );
+        const prevSortValue = firstItem.published_at || firstItem.timestamp;
+
+        if (prevSortValue && prevSortValue !== "undefined") {
+          prevCursor = this.encodeCursor(prevSortValue, firstItem.id);
+        }
       }
 
       // Verificar se há mais conteúdo baseado nos resultados individuais
@@ -143,10 +144,13 @@ export class FeedService {
 
       if (cursor) {
         const { sortValue, id } = this.decodeCursor(cursor);
-        // Cursor pagination: (published_at < sortValue) OR (published_at = sortValue AND id < id)
-        query = query.or(
-          `published_at.lt.${sortValue},and(published_at.eq.${sortValue},id.lt.${id})`,
-        );
+
+        if (sortValue && sortValue !== "undefined") {
+          // Cursor pagination: (published_at < sortValue) OR (published_at = sortValue AND id < id)
+          query = query.or(
+            `published_at.lt.${sortValue},and(published_at.eq.${sortValue},id.lt.${id})`,
+          );
+        }
       }
 
       const { data, error } = await query;
@@ -272,7 +276,8 @@ export class FeedService {
         return { sortValue: parsed.timestamp, id: parsed.id };
       }
 
-      return { sortValue: parsed.v, id: parsed.id };
+      const sortValue = parsed.v === "undefined" ? undefined : parsed.v;
+      return { sortValue: sortValue, id: parsed.id };
     } catch (error) {
       console.error("Erro ao decodificar cursor:", error);
       throw new Error("Cursor inválido");

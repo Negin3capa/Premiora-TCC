@@ -510,7 +510,9 @@ export class VideoService {
 
             if (cursor) {
                 const decoded = this.decodeCursor(cursor);
-                query = query.lt("published_at", decoded.timestamp);
+                if (decoded.timestamp && decoded.timestamp !== "undefined") {
+                    query = query.lt("published_at", decoded.timestamp);
+                }
             }
 
             const { data, error } = await query;
@@ -613,7 +615,14 @@ export class VideoService {
     ): { timestamp: string; id: string } {
         try {
             const decoded = atob(cursor); // Base64 decoding
-            return JSON.parse(decoded);
+            const parsed = JSON.parse(decoded);
+
+            // Compatibilidade com cursores do FeedService que usam 'v'
+            if (parsed.v !== undefined) {
+                return { timestamp: parsed.v, id: parsed.id };
+            }
+
+            return parsed;
         } catch (error) {
             console.error("Erro ao decodificar cursor:", error);
             throw new Error("Cursor inválido");
