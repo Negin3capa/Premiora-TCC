@@ -2,6 +2,7 @@ import React from 'react';
 import CreatorOverview from '../creator/CreatorOverview';
 import CreatorPayments from '../creator/CreatorPayments';
 import CreatorSettings from '../creator/CreatorSettings';
+import CreatorSubscribers from '../creator/CreatorSubscribers';
 
 interface CreatorTabProps {
   activeSection: string;
@@ -13,6 +14,8 @@ const CreatorTab: React.FC<CreatorTabProps> = ({ activeSection }) => {
       case 'dashboard':
       case 'analytics': // Reusing Overview for Analytics for now as they are similar in the screenshots
         return <CreatorOverview />;
+      case 'subscribers':
+        return <CreatorSubscribers />;
       case 'payments':
         return <CreatorPayments />;
       case 'settings':
