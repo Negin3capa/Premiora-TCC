@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useUI';
 import '../../styles/Header.css';
 import { Sun, LogOut, UserPlus, Menu, Moon, Bell } from 'lucide-react';
+import GoogleTranslate from '../common/GoogleTranslate';
 
 /**
  * Hook personalizado para detectar scroll e controlar visibilidade do header
@@ -385,6 +386,8 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Right side - Actions */}
         <div className="header-right">
+          <GoogleTranslate />
+          
           {/* Custom Actions (e.g. Mark as read) */}
           {customActions && (
             <div className="flex items-center gap-2 mr-2">

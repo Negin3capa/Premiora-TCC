@@ -398,8 +398,8 @@
 }
 
 .hero-cta-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-white);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
   text-decoration: none;
   font-weight: 600;
   font-size: var(--font-size-lg);
@@ -407,13 +407,13 @@
   border-radius: var(--radius-full);
   transition: all var(--transition-base);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--landing-border);
 }
 
 .hero-cta-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-bg-hover);
   transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.3);
+  border-color: var(--color-text-secondary);
 }
 
 .hero-visual {
