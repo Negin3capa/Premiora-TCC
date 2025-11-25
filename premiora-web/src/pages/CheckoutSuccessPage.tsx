@@ -4,6 +4,7 @@ import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../hooks/useNotification';
 import { paymentService } from '../services/payment';
+import { supabase } from '../utils/supabaseClient';
 import '../styles/SubscriptionsPage.css';
 
 const CheckoutSuccessPage: React.FC = () => {
@@ -16,17 +17,61 @@ const CheckoutSuccessPage: React.FC = () => {
         const sessionId = searchParams.get('session_id');
 
         if (sessionId) {
-            // Processar sucesso do checkout
-            paymentService.handleCheckoutSuccess(sessionId);
+            const processCheckout = async () => {
+                // Processar sucesso do checkout
+                await paymentService.handleCheckoutSuccess(sessionId);
 
-            // Atualizar perfil do usuário
-            refreshUserProfile();
+                // Aguardar atualização do tier (webhook pode demorar alguns segundos)
+                let attempts = 0;
+                const maxAttempts = 10;
+                const checkInterval = 1000; // 1 segundo
 
-            // Mostrar notificação de sucesso
-            showSuccess(
-                'Pagamento confirmado!',
-                'Sua assinatura Premium foi ativada com sucesso'
-            );
+                const checkTierUpdate = async (): Promise<boolean> => {
+                    await refreshUserProfile(true); // Forçar refresh
+
+                    // Verificar se o tier foi atualizado
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        const { data: profile } = await supabase
+                            .from('users')
+                            .select('tier')
+                            .eq('id', user.id)
+                            .single();
+
+                        return profile?.tier === 'premium';
+                    }
+                    return false;
+                };
+
+                // Tentar verificar atualização do tier com retry
+                while (attempts < maxAttempts) {
+                    const isPremium = await checkTierUpdate();
+
+                    if (isPremium) {
+                        // Tier atualizado com sucesso
+                        showSuccess(
+                            'Pagamento confirmado!',
+                            'Sua assinatura Premium foi ativada com sucesso'
+                        );
+                        break;
+                    }
+
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        await new Promise(resolve => setTimeout(resolve, checkInterval));
+                    }
+                }
+
+                // Se não conseguiu atualizar após todas as tentativas, mostrar mensagem mesmo assim
+                if (attempts >= maxAttempts) {
+                    showSuccess(
+                        'Pagamento confirmado!',
+                        'Sua assinatura está sendo processada. Atualize a página em alguns instantes.'
+                    );
+                }
+            };
+
+            processCheckout();
         }
     }, [searchParams, refreshUserProfile, showSuccess]);
 
@@ -60,7 +105,7 @@ const CheckoutSuccessPage: React.FC = () => {
                                 Ir para Dashboard
                             </button>
                             <button
-                                onClick={() => navigate('/settings')}
+                                onClick={() => navigate('/settings?section=subscriptions')}
                                 className="pricing-btn"
                             >
                                 Gerenciar Assinatura

@@ -7,13 +7,16 @@
 
 .settings-main-content {
   flex: 1;
-  margin-left: 220px; /* Account for fixed sidebar width */
-  padding-top: 80px; /* Account for fixed header height */
+  margin-left: 220px;
+  /* Account for fixed sidebar width */
+  padding-top: 80px;
+  /* Account for fixed header height */
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--color-bg-primary);
-  width: calc(100vw - 220px); /* Ensure content doesn't overflow */
+  width: calc(100vw - 220px);
+  /* Ensure content doesn't overflow */
   max-width: calc(100vw - 220px);
 }
 
@@ -232,6 +235,16 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
+.btn-sm {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-xs);
+  min-width: auto;
+}
+
+.upgrade-btn {
+  margin-top: 36px;
+}
+
 /* Zona de perigo */
 .danger-zone {
   border: 2px solid var(--color-error);
@@ -345,11 +358,13 @@
 
   .settings-sidebar {
     width: 100%;
-    order: 1; /* Keep navigation at the TOP on mobile/tablet */
+    order: 1;
+    /* Keep navigation at the TOP on mobile/tablet */
   }
 
   .settings-content {
-    order: 2; /* Content comes after navigation */
+    order: 2;
+    /* Content comes after navigation */
   }
 
   .settings-sidebar h2 {
@@ -374,8 +389,10 @@
 
 @media (max-width: 768px) {
   .settings-main-content {
-    margin-left: 0; /* Remove sidebar margin on mobile */
-    padding-top: 70px; /* Account for mobile header height */
+    margin-left: 0;
+    /* Remove sidebar margin on mobile */
+    padding-top: 70px;
+    /* Account for mobile header height */
     width: 100%;
     max-width: 100%;
   }
@@ -483,4 +500,138 @@
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+/* Subscription Styles */
+.premium-bg {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.subscription-detail-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.subscription-detail-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscription-detail-title {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.subscription-detail-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.billing-history {
+  padding: var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.billing-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.subscription-amount {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.icon-secondary {
+  color: var(--color-text-secondary);
+}
+
+/* Modal de confirmação */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background-color: var(--color-bg-white);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.modal-content p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-3) 0;
+  line-height: 1.6;
+}
+
+.modal-warning {
+  color: var(--color-error);
+  font-weight: var(--font-weight-medium);
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-error);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  justify-content: flex-end;
+}
+
+.modal-buttons button {
+  min-width: 120px;
 }

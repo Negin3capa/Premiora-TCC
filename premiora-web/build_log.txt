@@ -1,0 +1,21 @@
+
+> premiora-web@0.0.0 build
+> tsc && vite build
+
+[36mvite v7.2.4 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 1978 modules transformed.
+Ô£ù Build failed in 3.25s
+error during build:
+[vite:css] [postcss] C:/Users/Edy/OneDrive/Documentos/Premiora-TCC/premiora-web/src/styles/SettingsPage.css:583:1: Unexpected }
+file: C:/Users/Edy/OneDrive/Documentos/Premiora-TCC/premiora-web/src/styles/SettingsPage.css:583:0
+    at Input.error (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\input.js:135:16)
+    at Parser.unexpectedClose (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\parser.js:587:22)
+    at Parser.end (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\parser.js:330:12)
+    at Parser.parse (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\parser.js:456:16)
+    at parse (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\parse.js:11:12)
+    at new LazyResult (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\lazy-result.js:165:16)
+    at Processor.process (C:\Users\Edy\OneDrive\Documentos\Premiora-TCC\premiora-web\node_modules\postcss\lib\processor.js:53:14)
+    at runPostCSS (file:///C:/Users/Edy/OneDrive/Documentos/Premiora-TCC/premiora-web/node_modules/vite/dist/node/chunks/config.js:30793:68)
+    at async compilePostCSS (file:///C:/Users/Edy/OneDrive/Documentos/Premiora-TCC/premiora-web/node_modules/vite/dist/node/chunks/config.js:30777:6)
+    at async compileCSS (file:///C:/Users/Edy/OneDrive/Documentos/Premiora-TCC/premiora-web/node_modules/vite/dist/node/chunks/config.js:30707:26)
