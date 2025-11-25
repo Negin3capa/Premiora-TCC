@@ -44,6 +44,7 @@ export class VideoService {
         videoData: VideoFormData,
         creatorId: string,
     ): Promise<VideoCreationResult> {
+        console.log("Iniciando criação de vídeo...");
         try {
             let videoUrl = "";
             let videoPath = "";
@@ -83,11 +84,14 @@ export class VideoService {
                     "videos",
                     creatorId,
                 );
+                console.log("Upload de vídeo concluído:", videoUploadResult);
                 videoUrl = videoUploadResult.url;
                 videoPath = videoUploadResult.path;
 
                 // Extrair metadados
+                console.log("Extraindo metadados...");
                 metadata = await this.extractVideoMetadata(videoData.video);
+                console.log("Metadados extraídos:", metadata);
 
                 // Gerar thumbnail automática se não fornecida
                 if (!videoData.thumbnail) {
@@ -214,7 +218,18 @@ export class VideoService {
             const video = document.createElement("video");
             video.preload = "metadata";
 
+            // Timeout de segurança para evitar travamento
+            const timeoutId = setTimeout(() => {
+                console.warn("Timeout ao extrair metadados do vídeo");
+                URL.revokeObjectURL(video.src);
+                resolve({
+                    fileSize: videoFile.size,
+                    mimeType: videoFile.type,
+                });
+            }, 5000); // 5 segundos
+
             video.onloadedmetadata = () => {
+                clearTimeout(timeoutId);
                 URL.revokeObjectURL(video.src);
                 resolve({
                     duration: video.duration,
@@ -226,6 +241,7 @@ export class VideoService {
             };
 
             video.onerror = () => {
+                clearTimeout(timeoutId);
                 URL.revokeObjectURL(video.src);
                 // Fallback com metadados básicos se não conseguir extrair
                 resolve({
@@ -234,7 +250,16 @@ export class VideoService {
                 });
             };
 
-            video.src = URL.createObjectURL(videoFile);
+            try {
+                video.src = URL.createObjectURL(videoFile);
+            } catch (e) {
+                clearTimeout(timeoutId);
+                console.error("Erro ao criar ObjectURL:", e);
+                resolve({
+                    fileSize: videoFile.size,
+                    mimeType: videoFile.type,
+                });
+            }
         });
     }
 

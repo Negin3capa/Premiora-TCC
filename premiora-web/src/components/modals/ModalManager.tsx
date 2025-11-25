@@ -3,6 +3,10 @@ import { useModal } from '../../hooks/useModal';
 import CreatePostModal from './CreatePostModal';
 import CreateCommunityModal from './CreateCommunityModal';
 import PostViewModal from './PostViewModal';
+import CreateVideoModal from './CreateVideoModal';
+import CreateContentModal, { type ContentType } from './CreateContentModal';
+import { useNavigate } from 'react-router-dom';
+import { getCurrentCommunityContext } from '../../utils/communityUtils';
 
 /**
  * Gerenciador de Modais
@@ -15,7 +19,34 @@ import PostViewModal from './PostViewModal';
  * @component
  */
 const ModalManager: React.FC = () => {
-  const { modals, closeModal, getModalData } = useModal();
+  const { modals, closeModal, getModalData, openModal } = useModal();
+  const navigate = useNavigate();
+
+  const handleContentTypeSelect = async (type: ContentType) => {
+    closeModal('createContent');
+    switch (type) {
+      case 'post':
+        // Verificar se estamos em uma página de comunidade e usuário é membro
+        const communityContext = await getCurrentCommunityContext();
+        if (communityContext.community && communityContext.isMember) {
+          openModal('createPost', { preselectedCommunity: communityContext.community });
+        } else {
+          openModal('createPost');
+        }
+        break;
+      case 'video':
+        const videoCommunityContext = await getCurrentCommunityContext();
+        if (videoCommunityContext.community && videoCommunityContext.isMember) {
+          openModal('createVideo', { preselectedCommunity: videoCommunityContext.community });
+        } else {
+          openModal('createVideo');
+        }
+        break;
+      case 'community':
+        navigate('/create-community');
+        break;
+    }
+  };
 
   if (modals.createPost.isOpen) {
     return <CreatePostModal isOpen={true} onClose={() => closeModal('createPost')} />;
@@ -28,6 +59,20 @@ const ModalManager: React.FC = () => {
   if (modals.postView.isOpen) {
     const postData = getModalData('postView');
     return <PostViewModal isOpen={true} onClose={() => closeModal('postView')} item={postData} />;
+  }
+
+  if (modals.createVideo.isOpen) {
+    return <CreateVideoModal isOpen={true} onClose={() => closeModal('createVideo')} />;
+  }
+
+  if (modals.createContent.isOpen) {
+    return (
+      <CreateContentModal 
+        isOpen={true} 
+        onClose={() => closeModal('createContent')} 
+        onSelectContentType={handleContentTypeSelect}
+      />
+    );
   }
 
   // Adicione outros modais aqui conforme necessário

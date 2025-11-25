@@ -2,7 +2,7 @@
  * Serviço de upload de arquivos
  * Responsável por fazer upload de arquivos para o Supabase Storage
  */
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from "../../utils/supabaseClient";
 
 /**
  * Resultado de upload de arquivo
@@ -27,19 +27,19 @@ export class FileUploadService {
   static async uploadFile(
     file: File,
     bucket: string,
-    userId: string
+    userId: string,
   ): Promise<UploadResult> {
-    const fileExt = file.name.split('.').pop();
+    const fileExt = file.name.split(".").pop();
     // Use timestamp + random string to avoid collisions with parallel uploads
     const randomStr = Math.random().toString(36).substring(2, 15);
     const fileName = `${userId}/${Date.now()}_${randomStr}.${fileExt}`;
-    const filePath = `${bucket}/${fileName}`;
+    const filePath = `${fileName}`;
 
     const { error } = await supabase.storage
       .from(bucket)
       .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
+        cacheControl: "3600",
+        upsert: false,
       });
 
     if (error) {
@@ -53,7 +53,7 @@ export class FileUploadService {
     return {
       url: publicUrl,
       path: filePath,
-      fileName
+      fileName,
     };
   }
 
@@ -65,8 +65,8 @@ export class FileUploadService {
    */
   static async uploadAvatar(
     file: File,
-    userId: string
+    userId: string,
   ): Promise<UploadResult> {
-    return this.uploadFile(file, 'avatars', userId);
+    return this.uploadFile(file, "avatars", userId);
   }
 }
