@@ -1,9 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageCircle, UserPlus, Reply, Bell } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, Bell, Reply } from 'lucide-react';
 import type { SocialNotification } from '../../types/socialNotification';
-import { formatDistanceToNow } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 interface NotificationItemProps {
   notification: SocialNotification;
@@ -11,99 +9,96 @@ interface NotificationItemProps {
 }
 
 export const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onMarkAsRead }) => {
-  const { type, actor, created_at, is_read, metadata } = notification;
+  const { type, actor, metadata, is_read } = notification;
 
   const getIcon = () => {
     switch (type) {
       case 'like':
-        return <Heart className="w-5 h-5 text-red-500 fill-current" />;
+        return <Heart className="w-8 h-8 text-[#f91880] fill-current" />;
       case 'comment':
-        return <MessageCircle className="w-5 h-5 text-blue-500 fill-current" />;
+        return <MessageCircle className="w-8 h-8 text-[#1d9bf0] fill-current" />;
       case 'reply':
-        return <Reply className="w-5 h-5 text-blue-400" />;
+        return <Reply className="w-8 h-8 text-[#1d9bf0] fill-current" />;
       case 'follow':
-        return <UserPlus className="w-5 h-5 text-green-500" />;
+        return <UserPlus className="w-8 h-8 text-[#1d9bf0] fill-current" />;
       case 'subscribe':
-        return <Bell className="w-5 h-5 text-yellow-500" />;
+        return <Bell className="w-8 h-8 text-[#794bc4] fill-current" />;
       default:
-        return <Bell className="w-5 h-5 text-gray-500" />;
-    }
-  };
-
-  const getMessage = () => {
-    const name = actor?.name || 'Alguém';
-    switch (type) {
-      case 'like':
-        return (
-          <span>
-            <strong>{name}</strong> curtiu sua publicação.
-          </span>
-        );
-      case 'comment':
-        return (
-          <span>
-            <strong>{name}</strong> comentou: "{metadata.content}"
-          </span>
-        );
-      case 'reply':
-        return (
-          <span>
-            <strong>{name}</strong> respondeu ao seu comentário: "{metadata.content}"
-          </span>
-        );
-      case 'follow':
-        return (
-          <span>
-            <strong>{name}</strong> começou a seguir você.
-          </span>
-        );
-      case 'subscribe':
-        return (
-          <span>
-            <strong>{name}</strong> se inscreveu no seu canal.
-          </span>
-        );
-      default:
-        return <span>Nova notificação de <strong>{name}</strong></span>;
+        return <Bell className="w-8 h-8 text-[#71767b]" />;
     }
   };
 
   const getLink = () => {
-    if (metadata.post_id) return `/post/${metadata.post_id}`;
-    if (type === 'follow' && actor?.username) return `/profile/${actor.username}`;
+    // Redirecionamento para Post (Like, Comment, Reply)
+    // Tenta obter o ID do post do metadata ou do entity_id (fallback)
+    const postId = metadata?.post_id || (['like', 'comment', 'reply'].includes(type) ? notification.entity_id : undefined);
+
+    if (postId) {
+      // Se tiver o username do autor no metadata, usa ele
+      if (metadata?.post_author_username) {
+        return `/u/${metadata.post_author_username}/status/${postId}`;
+      }
+      // Fallback: assume que o post é do usuário atual (para likes/comments no meu post)
+      return `/u/me/status/${postId}`; 
+    }
+    
+    // Redirecionamento para Perfil (Follow)
+    if (type === 'follow' && actor?.username) {
+      return `/u/${actor.username}`;
+    }
+
+    // Fallback para Perfil se houver actor
+    if (actor?.username) {
+      return `/u/${actor.username}`;
+    }
+
     return '#';
   };
 
+  const name = actor?.name || 'Usuário';
+  const avatarUrl = actor?.avatar_url || `https://ui-avatars.com/api/?name=${name}&background=random`;
+
   return (
-    <div 
-      className={`p-4 border-b border-white/5 hover:bg-white/5 transition-colors ${!is_read ? 'bg-blue-500/5' : ''}`}
+    <Link 
+      to={getLink()} 
+      className={`notification-item ${!is_read ? 'unread' : ''}`}
       onClick={() => !is_read && onMarkAsRead(notification.id)}
     >
-      <Link to={getLink()} className="flex items-start gap-4">
-        <div className="relative">
+      {/* Left Gutter: Icon */}
+      <div className="notification-left-gutter">
+        {getIcon()}
+      </div>
+
+      {/* Right Content */}
+      <div className="notification-content-wrapper">
+        {/* Actor Avatar */}
+        <div className="mb-1">
           <img 
-            src={actor?.avatar_url || `https://ui-avatars.com/api/?name=${actor?.name || 'User'}&background=random`} 
-            alt={actor?.name} 
-            className="w-10 h-10 rounded-full object-cover"
+            src={avatarUrl} 
+            alt={name} 
+            className="notification-avatar"
           />
-          <div className="absolute -bottom-1 -right-1 bg-[#0f0f0f] rounded-full p-1">
-            {getIcon()}
-          </div>
         </div>
-        
-        <div className="flex-1">
-          <p className="text-sm text-gray-200 mb-1">
-            {getMessage()}
-          </p>
-          <span className="text-xs text-gray-500">
-            {formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: ptBR })}
+
+        {/* Notification Text */}
+        <div className="notification-text">
+          <span className="actor-name">{name}</span>
+          <span className="action-desc">
+            {type === 'like' && 'curtiu sua publicação'}
+            {type === 'comment' && 'comentou na sua publicação'}
+            {type === 'reply' && 'respondeu ao seu comentário'}
+            {type === 'follow' && 'começou a seguir você'}
+            {type === 'subscribe' && 'se inscreveu no seu canal'}
           </span>
         </div>
 
-        {!is_read && (
-          <div className="w-2 h-2 rounded-full bg-blue-500 mt-2" />
+        {/* Content Preview (if applicable) */}
+        {metadata.content && (
+          <div className="notification-preview">
+            {metadata.content}
+          </div>
         )}
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 };

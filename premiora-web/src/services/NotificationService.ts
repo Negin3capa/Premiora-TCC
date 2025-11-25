@@ -119,4 +119,31 @@ export class NotificationService {
             actor: Array.isArray(data.actor) ? data.actor[0] : data.actor,
         };
     }
+    /**
+     * Inscreve-se para receber atualizações em tempo real de notificações
+     * @param callback Função a ser chamada quando uma nova notificação chegar
+     */
+    static subscribeToNotifications(
+        callback: (notification: SocialNotification) => void,
+    ) {
+        return supabase
+            .channel("notifications_realtime")
+            .on(
+                "postgres_changes",
+                {
+                    event: "INSERT",
+                    schema: "public",
+                    table: "notifications",
+                },
+                async (payload) => {
+                    const newNotification = await this.getNotificationById(
+                        payload.new.id,
+                    );
+                    if (newNotification) {
+                        callback(newNotification);
+                    }
+                },
+            )
+            .subscribe();
+    }
 }

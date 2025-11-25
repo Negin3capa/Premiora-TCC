@@ -51,7 +51,7 @@ const usePost = (postId: string, username: string) => {
   const [post, setPost] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -59,8 +59,14 @@ const usePost = (postId: string, username: string) => {
         setLoading(true);
         setError(null);
 
+        // Handle 'me' username alias
+        let targetUsername = username;
+        if (username === 'me' && userProfile?.username) {
+          targetUsername = userProfile.username;
+        }
+
         // Primeiro, verifica se o post está no cache de prefetching
-        const cacheKey = `${username}-${postId}`;
+        const cacheKey = `${targetUsername}-${postId}`;
         const cachedPost = postCache.get(cacheKey);
 
         if (cachedPost && cachedPost._prefetchedAt &&
@@ -73,11 +79,23 @@ const usePost = (postId: string, username: string) => {
           return;
         }
 
+        // Fetch post by ID directly first to get the real author
         const postData = await PostService.getPostById(postId, user?.id);
 
-        // Validar se o username corresponde ao autor do post (usando foreign key direta)
-        if (postData.username !== username) {
-          throw new Error('Post não encontrado ou username incorreto');
+        // If username was 'me', we accept whatever the post's username is (assuming the ID is valid)
+        // If username was specific, we validate it.
+        // Actually, to be more robust, if the ID matches but username is wrong, we should probably redirect or just accept it.
+        // Let's accept it if it matches the ID, but maybe warn or redirect URL.
+        // For now, let's relax the check if username is 'me', or if we want to be auto-correcting.
+        
+        if (username !== 'me' && postData.username !== username) {
+           // Mismatch! The URL has wrong username.
+           // We could throw error, OR we could just use the post data and maybe replace URL.
+           // Let's throw error to maintain strictness, UNLESS it's 'me'.
+           // But wait, if I use 'me' in NotificationItem, I want it to work.
+           // So if username is 'me', we skip this check.
+           // If username is NOT 'me' and mismatch, we throw.
+           throw new Error('Post não encontrado ou username incorreto');
         }
 
         // Determinar tipo de conteúdo baseado no content_type
@@ -136,7 +154,7 @@ const usePost = (postId: string, username: string) => {
       }
     };
 
-    if (postId && username) {
+    if (postId) {
       fetchPost();
     }
   }, [postId, username, user?.id]);
