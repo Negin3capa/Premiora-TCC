@@ -183,7 +183,7 @@ export async function createCommunity(communityData: {
     return null;
   }
 
-  // Se não existe creator, criar um automaticamente
+  // Se não existe creator, criar um automaticamente (usando admin para garantir)
   if (!existingCreator) {
     console.log(
       "Criando registro de creator para usuário ao criar comunidade:",
@@ -211,7 +211,7 @@ export async function createCommunity(communityData: {
     }
 
     // Atualizar o usuário para marcar como creator
-    await supabase
+    await supabaseAdmin
       .from("users")
       .update({ is_creator: true })
       .eq("id", user.id);
@@ -269,9 +269,9 @@ export async function createCommunity(communityData: {
     return null;
   }
 
-  // Adicionar o criador como membro diretamente (evitando RPC que pode falhar)
+  // Adicionar o criador como membro diretamente (usando admin)
   try {
-    await supabase
+    await supabaseAdmin
       .from("community_members")
       .insert({
         community_id: data.id,

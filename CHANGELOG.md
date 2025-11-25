@@ -5,6 +5,35 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.0] - 24/11/25
+
+### Corrigido
+
+- **Erro de Timestamp no Scroll Infinito**
+  - Corrigido erro `invalid input syntax for type timestamp` ao carregar mais vídeos.
+  - Garantido que valores `undefined` não sejam passados para RPCs do Supabase.
+
+## [0.14.0] - 24/11/25
+
+### Adicionado
+
+- **Painel do Criador (Creator Dashboard)**
+  - Implementada a página do painel do criador (`CreatorDashboardPage.tsx`) com configurações e estilos.
+  - Adicionados componentes para análise de dados do criador, serviços de pagamento e gerenciamento de assinaturas.
+  - Nova página de perfil do criador com navegação por abas (visão geral, pagamentos, configurações).
+
+- **Integração com Stripe para Pagamentos**
+  - Adicionada documentação de integração com o Stripe e variáveis de ambiente.
+  - Implementadas migrações de banco de dados para tabelas de assinaturas.
+  - Adicionado link de assinaturas na barra lateral e na navegação mobile.
+
+### Alterado
+
+- **Estilos e UI**
+  - Ajustado o estilo do painel do criador para uma melhor experiência de usuário.
+  - Simplificadas as importações em `MobileBottomBar` e `SettingsPage`.
+  - Limpeza de importações não utilizadas no `PaymentService`.
+
 ## [0.13.0] - 24/11/25
 
 ### Adicionado

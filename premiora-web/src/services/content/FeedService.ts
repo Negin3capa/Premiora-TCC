@@ -60,19 +60,20 @@ export class FeedService {
       let prevCursor: string | undefined;
 
       if (allContent.length > 0) {
-        // Next cursor é baseado no último item
         const lastItem = allContent[allContent.length - 1];
-        nextCursor = this.encodeCursor(
-          lastItem.published_at || lastItem.timestamp,
-          lastItem.id,
-        );
+        const sortValue = lastItem.published_at || lastItem.timestamp;
+
+        if (sortValue && sortValue !== "undefined") {
+          nextCursor = this.encodeCursor(sortValue, lastItem.id);
+        }
 
         // Prev cursor seria baseado no primeiro item (para paginação reversa)
         const firstItem = allContent[0];
-        prevCursor = this.encodeCursor(
-          firstItem.published_at || firstItem.timestamp,
-          firstItem.id,
-        );
+        const prevSortValue = firstItem.published_at || firstItem.timestamp;
+
+        if (prevSortValue && prevSortValue !== "undefined") {
+          prevCursor = this.encodeCursor(prevSortValue, firstItem.id);
+        }
       }
 
       // Verificar se há mais conteúdo baseado nos resultados individuais
@@ -109,8 +110,6 @@ export class FeedService {
     userId?: string,
   ): Promise<{ posts: any[]; nextCursor?: string; hasMore: boolean }> {
     try {
-      // Usar supabaseAdmin para garantir que posts premium sejam retornados (bypass RLS)
-      // O filtro de acesso será feito manualmente abaixo
       let query = supabaseAdmin
         .from("posts")
         .select(`
@@ -126,10 +125,6 @@ export class FeedService {
             display_name,
             avatar_url
           ),
-          post_likes (
-            id,
-            user_id
-          ),
           comments (
             id
           ),
@@ -139,25 +134,23 @@ export class FeedService {
               flair_color,
               flair_background_color
             )
-          ),
-          required_tier:required_tier_id (
-            id,
-            name,
-            tier_order
           )
         `)
         .eq("is_published", true)
         .neq("content_type", "video")
         .order("published_at", { ascending: false })
+        .order("id", { ascending: false }) // Secondary sort for stability
         .limit(limit);
 
-      // Aplicar cursor se fornecido
       if (cursor) {
         const { sortValue, id } = this.decodeCursor(cursor);
-        // Para o feed principal, assumimos ordenação por data (New)
-        query = query.or(
-          `published_at.lt.${sortValue},and(published_at.eq.${sortValue},id.lt.${id})`,
-        );
+
+        if (sortValue && sortValue !== "undefined") {
+          // Cursor pagination: (published_at < sortValue) OR (published_at = sortValue AND id < id)
+          query = query.or(
+            `published_at.lt.${sortValue},and(published_at.eq.${sortValue},id.lt.${id})`,
+          );
+        }
       }
 
       const { data, error } = await query;
@@ -168,56 +161,73 @@ export class FeedService {
 
       let posts = data || [];
 
-      // Buscar assinaturas do usuário se estiver logado
-      let userSubscribedTiers: any[] = [];
-      if (userId) {
-        const { data: userSubs } = await supabase
-          .from('user_subscriptions')
-          .select('plan_id')
-          .eq('user_id', userId)
-          .eq('status', 'active');
-        
-        const planIds = userSubs?.map(s => s.plan_id) || [];
-        
-        if (planIds.length > 0) {
-          const { data: tiers } = await supabaseAdmin
-            .from('subscription_tiers')
-            .select('id, tier_order, creator_channel_id')
-            .in('id', planIds);
-          
-          userSubscribedTiers = tiers || [];
+      // Fetch user likes for these posts if user is logged in
+      let likedPostIds = new Set<string>();
+      if (userId && posts.length > 0) {
+        const postIds = posts.map((p: any) => p.id);
+        const { data: likesData } = await supabaseAdmin
+          .from("post_likes")
+          .select("post_id")
+          .eq("user_id", userId)
+          .in("post_id", postIds);
+
+        if (likesData) {
+          likesData.forEach((l: any) => likedPostIds.add(l.post_id));
         }
       }
 
-      // Processar posts para verificar acesso e sanitizar se necessário
-      posts = posts.map(post => {
-        if (!post.is_premium) return post;
-        
-        // Se é o criador, tem acesso
-        if (userId && post.creator_id === userId) return post;
+      // Mapear campos para o formato esperado pelo frontend
+      posts = posts.map((post: any) => ({
+        ...post,
+        post_flairs: post.post_flairs?.map((pf: any) => pf.community_flairs) ||
+          [],
+        post_likes: likedPostIds.has(post.id) ? [{ user_id: userId }] : [],
+        user_has_liked: likedPostIds.has(post.id),
+      }));
 
-        let hasAccess = false;
-        
-        if (userId && userSubscribedTiers.length > 0) {
-          const requiredOrder = post.required_tier?.tier_order || 0;
-          // Verificar se tem tier suficiente para este criador
-          hasAccess = userSubscribedTiers.some(t => 
-            t.creator_channel_id === post.creator_id && t.tier_order >= requiredOrder
-          );
-        }
+      // Calculate access rights if userId is present
+      if (userId) {
+        // Fetch user subscriptions
+        const { data: userSubs } = await supabase
+          .from("user_subscriptions")
+          .select("plan_id")
+          .eq("user_id", userId)
+          .eq("status", "active");
 
-        if (!hasAccess) {
+        const userPlanIds = userSubs?.map((s) => s.plan_id) || [];
+
+        posts = posts.map((post: any) => {
+          let hasAccess = !post.is_premium; // Public posts are accessible
+
+          // Creator always has access
+          if (post.creator_id === userId) {
+            hasAccess = true;
+          } else if (post.is_premium) {
+            // Check if user has required plan
+            if (userPlanIds.length > 0) {
+              if (post.required_tier) {
+                if (userPlanIds.includes(post.required_tier)) {
+                  hasAccess = true;
+                }
+              } else {
+                // If no specific tier required, any active subscription grants access
+                hasAccess = true;
+              }
+            }
+          }
+
           return {
             ...post,
-            content: null,
-            media_urls: [],
-            isLocked: true,
-            requiredTier: post.required_tier?.name
+            hasAccess,
           };
-        }
-
-        return post;
-      });
+        });
+      } else {
+        // If not logged in, only public posts are accessible
+        posts = posts.map((post: any) => ({
+          ...post,
+          hasAccess: !post.is_premium,
+        }));
+      }
 
       let nextCursor: string | undefined;
       const hasMore = posts.length === limit;
@@ -266,7 +276,8 @@ export class FeedService {
         return { sortValue: parsed.timestamp, id: parsed.id };
       }
 
-      return { sortValue: parsed.v, id: parsed.id };
+      const sortValue = parsed.v === "undefined" ? undefined : parsed.v;
+      return { sortValue: sortValue, id: parsed.id };
     } catch (error) {
       console.error("Erro ao decodificar cursor:", error);
       throw new Error("Cursor inválido");
@@ -440,7 +451,7 @@ export class FeedService {
       const communityId = communityData.id;
 
       // Buscar posts da comunidade usando cursor
-      let dataQuery = supabase
+      let dataQuery = supabaseAdmin
         .from("posts")
         .select(`
           *,
@@ -613,7 +624,7 @@ export class FeedService {
       // Agora buscar posts da comunidade usando o community_id
       const from = (page - 1) * limit;
 
-      let dataQuery = supabase
+      let dataQuery = supabaseAdmin
         .from("posts")
         .select(`
           *,
@@ -685,37 +696,9 @@ export class FeedService {
     userId?: string,
   ): Promise<FeedResult> {
     try {
-      // Primeiro, obter o total de registros para evitar erros de range
-      // Usar supabaseAdmin para incluir posts premium na contagem
-      let countQuery = supabaseAdmin
-        .from("posts")
-        .select("*", { count: "exact", head: true })
-        .eq("is_published", true)
-        .eq("creator_id", creatorId);
-
-      const { count, error: countError } = await countQuery;
-
-      if (countError) {
-        throw new Error(
-          `Erro ao contar posts do criador: ${countError.message}`,
-        );
-      }
-
-      const totalPosts = count || 0;
       const from = (page - 1) * limit;
 
-      // Se não há mais posts para carregar, retornar vazio
-      if (from >= totalPosts) {
-        return {
-          posts: [],
-          hasMore: false,
-        };
-      }
-
-      // Ajustar o limite se estamos na última página
-      const actualLimit = Math.min(limit, totalPosts - from);
-
-      let dataQuery = supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from("posts")
         .select(`
           *,
@@ -730,86 +713,101 @@ export class FeedService {
             display_name,
             avatar_url
           ),
-          post_likes (
-            id,
-            user_id
-          ),
           comments (
             id
           ),
-          required_tier:required_tier_id (
-            id,
-            name,
-            tier_order
+          post_flairs (
+            community_flairs (
+              flair_text,
+              flair_color,
+              flair_background_color
+            )
           )
         `)
         .eq("is_published", true)
         .eq("creator_id", creatorId)
+        .neq("content_type", "video")
         .order("published_at", { ascending: false })
-        .range(from, from + actualLimit - 1);
+        .range(from, from + limit - 1);
 
-      const { data, error: dataError } = await dataQuery;
-
-      if (dataError) {
+      if (error) {
         throw new Error(
-          `Erro ao buscar posts do criador: ${dataError.message}`,
+          `Erro ao buscar posts do criador: ${error.message}`,
         );
       }
 
       let posts = data || [];
 
-      // Buscar assinaturas do usuário se estiver logado
-      let userSubscribedTiers: any[] = [];
-      if (userId) {
-        const { data: userSubs } = await supabase
-          .from('user_subscriptions')
-          .select('plan_id')
-          .eq('user_id', userId)
-          .eq('status', 'active');
-        
-        const planIds = userSubs?.map(s => s.plan_id) || [];
-        
-        if (planIds.length > 0) {
-          const { data: tiers } = await supabaseAdmin
-            .from('subscription_tiers')
-            .select('id, tier_order, creator_channel_id')
-            .in('id', planIds);
-          
-          userSubscribedTiers = tiers || [];
+      // Fetch user likes for these posts if user is logged in
+      let likedPostIds = new Set<string>();
+      if (userId && posts.length > 0) {
+        const postIds = posts.map((p: any) => p.id);
+        const { data: likesData } = await supabaseAdmin
+          .from("post_likes")
+          .select("post_id")
+          .eq("user_id", userId)
+          .in("post_id", postIds);
+
+        if (likesData) {
+          likesData.forEach((l: any) => likedPostIds.add(l.post_id));
         }
       }
 
-      // Processar posts para verificar acesso e sanitizar se necessário
-      posts = posts.map(post => {
-        if (!post.is_premium) return post;
-        
-        // Se é o criador, tem acesso
-        if (userId && post.creator_id === userId) return post;
+      // Mapear campos para o formato esperado pelo frontend
+      posts = posts.map((post: any) => ({
+        ...post,
+        post_flairs: post.post_flairs?.map((pf: any) => pf.community_flairs) ||
+          [],
+        post_likes: likedPostIds.has(post.id) ? [{ user_id: userId }] : [],
+        user_has_liked: likedPostIds.has(post.id),
+      }));
 
-        let hasAccess = false;
-        
-        if (userId && userSubscribedTiers.length > 0) {
-          const requiredOrder = post.required_tier?.tier_order || 0;
-          // Verificar se tem tier suficiente para este criador
-          hasAccess = userSubscribedTiers.some(t => 
-            t.creator_channel_id === post.creator_id && t.tier_order >= requiredOrder
-          );
-        }
+      // Calculate access rights if userId is present
+      if (userId) {
+        // Fetch user subscriptions
+        const { data: userSubs } = await supabase
+          .from("user_subscriptions")
+          .select("plan_id")
+          .eq("user_id", userId)
+          .eq("status", "active");
 
-        if (!hasAccess) {
+        const userPlanIds = userSubs?.map((s) => s.plan_id) || [];
+
+        posts = posts.map((post: any) => {
+          let hasAccess = !post.is_premium; // Public posts are accessible
+
+          // Creator always has access
+          if (post.creator_id === userId) {
+            hasAccess = true;
+          } else if (post.is_premium) {
+            // Check if user has required plan
+            if (userPlanIds.length > 0) {
+              if (post.required_tier) {
+                if (userPlanIds.includes(post.required_tier)) {
+                  hasAccess = true;
+                }
+              } else {
+                // If no specific tier required, any active subscription grants access
+                hasAccess = true;
+              }
+            }
+          }
+
           return {
             ...post,
-            content: null,
-            media_urls: [],
-            isLocked: true,
-            requiredTier: post.required_tier?.name
+            hasAccess,
           };
-        }
+        });
+      } else {
+        // If not logged in, only public posts are accessible
+        posts = posts.map((post: any) => ({
+          ...post,
+          hasAccess: !post.is_premium,
+        }));
+      }
 
-        return post;
-      });
-
-      const hasMore = (from + actualLimit) < totalPosts;
+      // Verificar se há mais posts
+      const hasMore = posts.length === limit;
 
       return {
         posts,

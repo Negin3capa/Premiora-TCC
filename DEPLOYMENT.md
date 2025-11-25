@@ -2,9 +2,7 @@
 
 Este documento descreve como configurar e gerenciar os ambientes de deploy da aplicação Premiora Web.
 
-## ⚠️ Status do Deploy
-
-**Vercel deployment temporariamente desabilitado** - O projeto não está pronto para deploy ainda. Para reativar:
+## Status do Deploy: Pronto
 
 1. Renomeie `premiora-web/vercel.json.disabled` para `premiora-web/vercel.json`
 2. Descomente o job `deploy-preview` no arquivo `.github/workflows/ci.yml`
@@ -88,6 +86,18 @@ your_supabase_anon_key_here
 # Obter em https://dashboard.hcaptcha.com/
 ```
 
+#### `VITE_STRIPE_PUBLISHABLE_KEY`
+
+```
+pk_test_... (Frontend)
+```
+
+#### `VITE_STRIPE_PREMIUM_PRICE_ID`
+
+```
+price_... (Frontend)
+```
+
 ### 3. Environment Variables no Vercel
 
 ⚠️ **Importante**: As variáveis de ambiente NÃO devem ser hardcoded no `vercel.json`. Configure-as no painel do Vercel:
@@ -97,14 +107,56 @@ your_supabase_anon_key_here
 vercel env add VITE_SUPABASE_URL production
 vercel env add VITE_SUPABASE_ANON_KEY production
 vercel env add VITE_HCAPTCHA_SITE_KEY production
+vercel env add VITE_STRIPE_PUBLISHABLE_KEY production
+vercel env add VITE_STRIPE_PREMIUM_PRICE_ID production
 
 # Para Preview/Staging
 vercel env add VITE_SUPABASE_URL preview
 vercel env add VITE_SUPABASE_ANON_KEY preview
 vercel env add VITE_HCAPTCHA_SITE_KEY preview
+vercel env add VITE_STRIPE_PUBLISHABLE_KEY preview
+vercel env add VITE_STRIPE_PREMIUM_PRICE_ID preview
 ```
 
 **Por que não no vercel.json?** Por segurança - secrets nunca devem ser committed no repositório.
+
+## 🚀 Configuração Pós-Deploy em Produção
+
+Após o primeiro deploy bem-sucedido para o ambiente de produção, algumas configurações manuais são necessárias para garantir que a autenticação e os pagamentos funcionem corretamente.
+
+### 1. Configurar Domínios no Supabase
+
+Para evitar erros de autenticação (401/403), você precisa autorizar a URL de produção no seu projeto Supabase.
+
+1.  Acesse o **Supabase Dashboard**.
+2.  Navegue até **Project Settings** > **Authentication** > **URL Configuration**.
+3.  No campo **Site URL**, adicione a URL de produção fornecida pela Vercel (ex: `https://seu-projeto.vercel.app`).
+4.  Em **Redirect URLs**, adicione a URL de produção à lista de URLs permitidas.
+5.  Salve as alterações.
+
+### 2. Configurar Chaves Secretas do Stripe no Supabase
+
+As chaves secretas do Stripe são usadas pelas Edge Functions para processar pagamentos de forma segura.
+
+1.  Acesse o **Supabase Dashboard**.
+2.  Navegue até **Project Settings** > **Edge Functions**.
+3.  Na seção **Secrets**, adicione as seguintes chaves:
+    - `STRIPE_SECRET_KEY`: Sua chave secreta do Stripe de produção (ex: `sk_live_...`).
+    - `STRIPE_WEBHOOK_SECRET`: O segredo do webhook do Stripe, que garante que as requisições vêm do Stripe.
+4.  Clique em **Save** para cada segredo.
+
+### 3. Configurar Domínios no Google Cloud Console (para Google OAuth)
+
+Se você utiliza o login com Google, a URL de produção também precisa ser autorizada no Google Cloud.
+
+1.  Acesse o **Google Cloud Console**.
+2.  Navegue até **APIs & Services** > **Credentials**.
+3.  Selecione suas credenciais de **OAuth 2.0 Client ID**.
+4.  Em **Authorized JavaScript origins**, adicione a URL de produção.
+5.  Em **Authorized redirect URIs**, adicione a URL de produção.
+6.  Salve as alterações.
+
+Após concluir essas etapas, a aplicação estará totalmente configurada para o ambiente de produção.
 
 ## 📦 Processo de Deploy
 

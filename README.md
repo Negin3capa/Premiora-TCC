@@ -18,6 +18,7 @@ Para informações detalhadas sobre a arquitetura técnica, padrões de design e
 - **Build Tool**: Vite ^7.2.2 com code splitting otimizado
 - **Roteamento**: React Router DOM ^7.9.4
 - **Backend**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
+- **Pagamentos**: Stripe para processamento de assinaturas
 - **Estilização**: CSS personalizado com variáveis CSS e suporte a temas
 - **Ícones**: Lucide React ^0.553.0
 - **Captcha**: HCaptcha React ^1.14.0
@@ -60,6 +61,20 @@ type AccessLevel = "public" | "supporters" | "premium";
 - **Comunidades Privadas**: Participação em grupos restritos
 - **Conteúdo Premium**: Posts, vídeos e recursos especiais
 - **Interação Direta**: Comunicação privilegiada com o criador
+
+### Painel do Criador (Creator Dashboard)
+
+O Premiora oferece um painel completo para que os criadores de conteúdo possam gerenciar seus canais, analisar o desempenho e monetizar suas criações de forma eficaz.
+
+#### Funcionalidades do Painel do Criador
+
+- **Visão Geral**: Acompanhe as principais métricas de engajamento, como visualizações, curtidas e novos seguidores.
+- **Gerenciamento de Assinaturas**: Configure e gerencie os níveis de assinatura (tiers), defina preços e benefícios exclusivos para os assinantes.
+- **Análise de Dados**: Acesse relatórios detalhados sobre o desempenho do seu conteúdo e o crescimento da sua comunidade.
+- **Pagamentos**: Integre sua conta Stripe para receber pagamentos de forma segura e acompanhe seus ganhos.
+- **Configurações do Canal**: Personalize as informações do seu canal, conecte suas comunidades e gerencie as configurações de monetização.
+
+Para um guia detalhado sobre como configurar a integração com o Stripe, consulte o [Guia de Configuração do Stripe](./premiora-web/README_STRIPE.md).
 
 ### Estrutura de Arquivos
 

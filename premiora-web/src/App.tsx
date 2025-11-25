@@ -49,6 +49,7 @@ const SubscriptionsPage = React.lazy(() => import('./pages/SubscriptionsPage'));
 const CheckoutSuccessPage = React.lazy(() => import('./pages/CheckoutSuccessPage'));
 const CheckoutCancelPage = React.lazy(() => import('./pages/CheckoutCancelPage'));
 const CreatorChannelSetupPage = React.lazy(() => import('./pages/CreatorChannelSetupPage'));
+const CreatorDashboardPage = React.lazy(() => import('./pages/CreatorDashboardPage'));
 
 /**
  * Componente de loading para páginas em lazy loading
@@ -355,6 +356,18 @@ const App: React.FC = () => {
             <ProtectedRoute>
               <ProtectedLayout>
                 <CreatorChannelSetupPage />
+              </ProtectedLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Rota do Dashboard do Criador */}
+        <Route
+          path="/creator/:section"
+          element={
+            <ProtectedRoute>
+              <ProtectedLayout>
+                <CreatorDashboardPage />
               </ProtectedLayout>
             </ProtectedRoute>
           }

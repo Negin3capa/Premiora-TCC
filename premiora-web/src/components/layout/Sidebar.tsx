@@ -9,12 +9,9 @@ import { Home, Bell, MessageCircle, Building2, Settings, PenTool, User, CreditCa
 import { useModal } from '../../hooks/useModal';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useUI';
-import { CreateContentModal, CreatePostModal, CreateVideoModal, CreateCommunityModal } from '../modals';
 import { ProfileService } from '../../services/auth/ProfileService';
 import { FeedService } from '../../services/content/FeedService';
 import { ContentService } from '../../services/contentService';
-import { getCurrentCommunityContext } from '../../utils/communityUtils';
-import type { ContentType } from '../modals/CreateContentModal';
 import type { CreatorProfile, Post, PostMedia } from '../../types/profile';
 import { extractThumbnailUrl, isVideoMedia } from '../../utils/mediaUtils';
 
@@ -247,7 +244,7 @@ interface SidebarProps {
  * Exibe menu de navegação, criadores em alta e perfil do usuário
  */
 const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
-  const { openModal, closeModal, isModalOpen } = useModal();
+  const { openModal } = useModal();
   const { userProfile } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -264,66 +261,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     }
   }, [prefetchCache]);
 
-  /**
-   * Handler para seleção de tipo de conteúdo no modal principal
-   */
-  const handleContentTypeSelect = async (type: ContentType) => {
-    closeModal('createContent'); // Fecha o modal principal
-    switch (type) {
-      case 'post':
-        // Verificar se estamos em uma página de comunidade e usuário é membro
-        const communityContext = await getCurrentCommunityContext();
-        if (communityContext.community && communityContext.isMember) {
-          // Abrir modal de post com comunidade pré-selecionada
-          openModal('createPost', { preselectedCommunity: communityContext.community });
-        } else {
-          // Abrir modal normalmente
-          openModal('createPost');
-        }
-        break;
-      case 'video':
-        // Verificar se estamos em uma página de comunidade e usuário é membro
-        const videoCommunityContext = await getCurrentCommunityContext();
-        if (videoCommunityContext.community && videoCommunityContext.isMember) {
-          // Abrir modal de vídeo com comunidade pré-selecionada
-          openModal('createVideo', { preselectedCommunity: videoCommunityContext.community });
-        } else {
-          // Abrir modal normalmente
-          openModal('createVideo');
-        }
-        break;
-      case 'community':
-        // Navegar para página de criação de comunidade
-        navigate('/create-community');
-        break;
-      default:
-        console.warn(`Tipo de conteúdo não suportado: ${type}`);
-    }
-  };
 
-  /**
-   * Handler para publicação de post (callback do CreatePostModal)
-   */
-  const handlePostPublish = (postData: any) => {
-    console.log('Post publicado:', postData);
-    // TODO: Integrar com API quando implementado
-  };
-
-  /**
-   * Handler para publicação de vídeo (callback do CreateVideoModal)
-   */
-  const handleVideoPublish = (videoData: any) => {
-    console.log('Vídeo publicado:', videoData);
-    // TODO: Integrar com API quando implementado
-  };
-
-  /**
-   * Handler para criação de comunidade (callback do CreateCommunityModal)
-   */
-  const handleCommunityCreate = (communityData: any) => {
-    console.log('Comunidade criada:', communityData);
-    // TODO: Integrar com API quando implementado
-  };
 
   const navigationItems = [
     { icon: <Home size={20} />, label: 'Home', route: '/dashboard', active: location.pathname === '/dashboard' },
@@ -469,33 +407,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
           </div>
         </div>
 
-      {/* Modal de criação de conteúdo */}
-      <CreateContentModal
-        isOpen={isModalOpen('createContent')}
-        onClose={() => closeModal('createContent')}
-        onSelectContentType={handleContentTypeSelect}
-      />
 
-      {/* Modal de criação de post */}
-      <CreatePostModal
-        isOpen={isModalOpen('createPost')}
-        onClose={() => closeModal('createPost')}
-        onPublish={handlePostPublish}
-      />
-
-      {/* Modal de criação de vídeo */}
-      <CreateVideoModal
-        isOpen={isModalOpen('createVideo')}
-        onClose={() => closeModal('createVideo')}
-        onPublish={handleVideoPublish}
-      />
-
-      {/* Modal de criação de comunidade */}
-      <CreateCommunityModal
-        isOpen={isModalOpen('createCommunity')}
-        onClose={() => closeModal('createCommunity')}
-        onCreate={handleCommunityCreate}
-      />
 
 
     </aside>

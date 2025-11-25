@@ -65,6 +65,7 @@ supabase db push
 ```
 
 Ou execute manualmente no SQL Editor do Supabase Dashboard:
+
 1. `supabase-migrations/006_add_subscriptions_table.sql`
 2. `supabase-migrations/007_ensure_tier_column.sql`
 
@@ -79,6 +80,7 @@ supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 ```
 
 Ou via Dashboard:
+
 - `STRIPE_SECRET_KEY`: sua Secret Key do Stripe
 - `STRIPE_WEBHOOK_SECRET`: seu Webhook Signing Secret
 
@@ -142,6 +144,7 @@ supabase functions list
 ### Produção
 
 1. No Dashboard do Stripe, configure o endpoint do webhook:
+
    ```
    https://seu-projeto.supabase.co/functions/v1/stripe-webhook
    ```
@@ -176,6 +179,7 @@ stripe listen --forward-to http://localhost:54321/functions/v1/stripe-webhook
 ### Teste Manual Completo
 
 1. **Iniciar aplicação**:
+
    ```bash
    npm run dev
    ```
@@ -222,14 +226,16 @@ supabase functions logs stripe-webhook
 
 ### Erro: "Webhook signature verification failed"
 
-**Solução**: 
+**Solução**:
+
 1. Verifique se `STRIPE_WEBHOOK_SECRET` está configurado corretamente
 2. Certifique-se de que o endpoint do webhook no Stripe está correto
 3. Verifique os logs da Edge Function
 
 ### Erro: "Usuário não autenticado"
 
-**Solução**: 
+**Solução**:
+
 1. Verifique se o usuário está logado
 2. Verifique se o token JWT está sendo enviado corretamente
 3. Verifique os logs do navegador
@@ -237,6 +243,7 @@ supabase functions logs stripe-webhook
 ### Tier não atualizado após pagamento
 
 **Solução**:
+
 1. Verifique os logs do webhook no Dashboard do Stripe
 2. Verifique se o webhook está retornando status 200
 3. Verifique se a migration `007_ensure_tier_column.sql` foi executada
@@ -245,6 +252,7 @@ supabase functions logs stripe-webhook
 ### Edge Function não encontrada
 
 **Solução**:
+
 ```bash
 # Re-deploy da função
 supabase functions deploy create-checkout-session
@@ -271,6 +279,7 @@ Para usar em produção:
 ## Suporte
 
 Para problemas ou dúvidas:
+
 1. Verifique os logs das Edge Functions
 2. Verifique o Dashboard do Stripe > Developers > Events
 3. Consulte a documentação oficial do Stripe e Supabase

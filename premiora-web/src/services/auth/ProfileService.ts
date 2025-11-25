@@ -3,7 +3,6 @@
  * Responsável por operações CRUD de perfil de usuário
  */
 import { supabase } from '../../utils/supabaseClient';
-import { supabaseAdmin } from '../../utils/supabaseAdminClient';
 import type { User } from '@supabase/supabase-js';
 
 /**
@@ -43,7 +42,7 @@ export class ProfileService {
         // Criar username temporário único baseado no ID do usuário
         const tempUsername = `temp_${user.id.replace(/-/g, '').substring(0, 20)}`;
 
-        const { data: insertData, error: insertError } = await supabaseAdmin
+        const { data: insertData, error: insertError } = await supabase
           .from('users')
           .insert({
             id: user.id,
@@ -108,7 +107,7 @@ export class ProfileService {
 
         // Só fazer update se há dados para atualizar
         if (Object.keys(updateData).length > 0) {
-          const { data: updateResult, error: updateError } = await supabaseAdmin
+          const { data: updateResult, error: updateError } = await supabase
             .from('users')
             .update(updateData)
             .eq('id', user.id)
@@ -141,7 +140,8 @@ export class ProfileService {
   static async fetchUserProfile(userId: string, forceFresh: boolean = false): Promise<any> {
     console.log('🔍 Buscando perfil do usuário:', userId, forceFresh ? '(forçando busca fresca)' : '');
     try {
-      let query = supabaseAdmin
+      // Usar cliente padrão em vez de admin para evitar erros em produção onde service role key não existe
+      let query = supabase
         .from('users')
         .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
         .eq('id', userId);
@@ -181,7 +181,8 @@ export class ProfileService {
       console.log('🔍 Buscando creator por username:', username);
 
       // Primeiro buscar o usuário pelo username
-      const { data: userData, error: userError } = await supabaseAdmin
+      // Usar supabase client padrão (requer RLS policy pública para leitura de perfis)
+      const { data: userData, error: userError } = await supabase
         .from('users')
         .select('id, name, username, email, avatar_url, tier, profile_setup_completed')
         .eq('username', username)
@@ -193,7 +194,7 @@ export class ProfileService {
       }
 
       // Primeiro buscar dados do creator para obter o ID correto
-      const { data: creatorData, error: creatorError } = await supabaseAdmin
+      const { data: creatorData, error: creatorError } = await supabase
         .from('creators')
         .select('*')
         .eq('id', userData.id)
@@ -204,7 +205,7 @@ export class ProfileService {
         console.error('❌ Erro ao buscar creator:', creatorError);
       } else if (creatorData) {
         // Buscar contagem de posts do creator (usando creator_id)
-        const { count, error: postsError } = await supabaseAdmin
+        const { count, error: postsError } = await supabase
           .from('posts')
           .select('*', { count: 'exact', head: true })
           .eq('creator_id', creatorData.id)
@@ -264,7 +265,7 @@ export class ProfileService {
     avatar_url: string | null;
     profile_setup_completed: boolean;
   }>): Promise<any> {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('users')
       .update(updateData)
       .eq('id', userId)
@@ -282,7 +283,7 @@ export class ProfileService {
 
       try {
         // Verificar se existe registro de creator
-        const { data: existingCreator, error: creatorCheckError } = await supabaseAdmin
+        const { data: existingCreator, error: creatorCheckError } = await supabase
           .from('creators')
           .select('id, profile_image_url')
           .eq('id', userId)
@@ -300,7 +301,7 @@ export class ProfileService {
           console.log('📝 Creator encontrado, atualizando profile_image_url');
 
           // Atualizar avatar na tabela creators
-          const { data: updatedCreator, error: updateCreatorError } = await supabaseAdmin
+          const { data: updatedCreator, error: updateCreatorError } = await supabase
             .from('creators')
             .update({ profile_image_url: updateData.avatar_url })
             .eq('id', userId)
@@ -338,7 +339,7 @@ export class ProfileService {
       console.log('🔄 Atualizando banner do perfil:', { userId, bannerImage });
 
       // Primeiro buscar dados atuais do creator
-      const { data: creatorData, error: creatorError } = await supabaseAdmin
+      const { data: creatorData, error: creatorError } = await supabase
         .from('creators')
         .select('*')
         .eq('id', userId)
@@ -352,7 +353,7 @@ export class ProfileService {
       // Se creator não existe, criar um novo
       if (!creatorData) {
         console.log('📝 Criando novo registro de creator para banner');
-        const { data: newCreator, error: createError } = await supabaseAdmin
+        const { data: newCreator, error: createError } = await supabase
           .from('creators')
           .insert({
             id: userId,
@@ -374,7 +375,7 @@ export class ProfileService {
       }
 
       // Atualizar banner existente
-      const { data: updatedCreator, error: updateError } = await supabaseAdmin
+      const { data: updatedCreator, error: updateError } = await supabase
         .from('creators')
         .update({ cover_image_url: bannerImage })
         .eq('id', userId)
@@ -405,7 +406,7 @@ export class ProfileService {
       console.log('🔄 Atualizando bio do perfil:', { userId, bio });
 
       // Primeiro buscar dados atuais do creator
-      const { data: creatorData, error: creatorError } = await supabaseAdmin
+      const { data: creatorData, error: creatorError } = await supabase
         .from('creators')
         .select('*')
         .eq('id', userId)
@@ -419,7 +420,7 @@ export class ProfileService {
       // Se creator não existe, criar um novo
       if (!creatorData) {
         console.log('📝 Criando novo registro de creator para bio');
-        const { data: newCreator, error: createError } = await supabaseAdmin
+        const { data: newCreator, error: createError } = await supabase
           .from('creators')
           .insert({
             id: userId,
@@ -441,7 +442,7 @@ export class ProfileService {
       }
 
       // Atualizar bio existente
-      const { data: updatedCreator, error: updateError } = await supabaseAdmin
+      const { data: updatedCreator, error: updateError } = await supabase
         .from('creators')
         .update({ bio: bio })
         .eq('id', userId)
@@ -472,7 +473,7 @@ export class ProfileService {
       console.log('🔄 Atualizando display_name do perfil:', { userId, displayName });
 
       // Primeiro buscar dados atuais do creator
-      const { data: creatorData, error: creatorError } = await supabaseAdmin
+      const { data: creatorData, error: creatorError } = await supabase
         .from('creators')
         .select('*')
         .eq('id', userId)
@@ -486,7 +487,7 @@ export class ProfileService {
       // Se creator não existe, criar um novo
       if (!creatorData) {
         console.log('📝 Criando novo registro de creator para display_name');
-        const { data: newCreator, error: createError } = await supabaseAdmin
+        const { data: newCreator, error: createError } = await supabase
           .from('creators')
           .insert({
             id: userId,
@@ -506,13 +507,13 @@ export class ProfileService {
         console.log('✅ Creator criado com display_name:', newCreator);
 
         // Sincronizar com a tabela users (campo name)
-        await supabaseAdmin.from('users').update({ name: displayName }).eq('id', userId);
+        await supabase.from('users').update({ name: displayName }).eq('id', userId);
 
         return newCreator;
       }
 
       // Atualizar display_name existente
-      const { data: updatedCreator, error: updateError } = await supabaseAdmin
+      const { data: updatedCreator, error: updateError } = await supabase
         .from('creators')
         .update({ display_name: displayName })
         .eq('id', userId)
@@ -525,7 +526,7 @@ export class ProfileService {
       }
 
       // Sincronizar com a tabela users (campo name)
-      await supabaseAdmin.from('users').update({ name: displayName }).eq('id', userId);
+      await supabase.from('users').update({ name: displayName }).eq('id', userId);
 
       console.log('✅ Display_name atualizado:', updatedCreator);
       return updatedCreator;

@@ -1,7 +1,7 @@
 .subscriptions-page {
   display: flex;
   height: 100vh;
-  background-color: #000;
+  background-color: var(--color-bg-dark);
 }
 
 .subscriptions-main-content {
@@ -21,7 +21,7 @@
 .pricing h2 {
   font-size: 2.5rem;
   margin-bottom: 40px;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .pricing-grid {
@@ -33,15 +33,15 @@
 }
 
 .pricing-card {
-  background-color: #1a1a1a;
+  background-color: var(--color-bg-tertiary);
   border-radius: 10px;
   padding: 40px;
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-medium);
   position: relative;
 }
 
 .pricing-card.pro {
-  border-color: #ff424d;
+  border-color: var(--color-primary);
 }
 
 .popular-badge {
@@ -49,8 +49,8 @@
   top: -15px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #ff424d;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-text-white);
   padding: 5px 15px;
   border-radius: 20px;
   font-size: 0.9rem;
@@ -60,13 +60,13 @@
 .pricing-card h3 {
   font-size: 1.5rem;
   margin-bottom: 20px;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .price {
   font-size: 3rem;
   font-weight: bold;
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 10px;
 }
 
@@ -77,11 +77,11 @@
 
 .price .period {
   font-size: 1rem;
-  color: #888;
+  color: var(--color-text-tertiary);
 }
 
 .pricing-card p {
-  color: #aaa;
+  color: var(--color-text-secondary);
   margin-bottom: 30px;
 }
 
@@ -92,14 +92,14 @@
 }
 
 .pricing-card ul li {
-  color: #ccc;
+  color: var(--color-text-secondary);
   margin-bottom: 15px;
 }
 
 .pricing-btn {
   display: inline-block;
-  background-color: #333;
-  color: #fff;
+  background-color: var(--color-border-medium);
+  color: var(--color-text-white);
   padding: 15px 40px;
   border-radius: 5px;
   text-decoration: none;
@@ -111,15 +111,15 @@
 }
 
 .pricing-btn:hover {
-  background-color: #444;
+  background-color: var(--color-border-dark);
 }
 
 .pricing-btn.primary {
-  background-color: #ff424d;
+  background-color: var(--color-primary);
 }
 
 .pricing-btn.primary:hover {
-  background-color: #e63b45;
+  background-color: var(--color-primary-hover);
 }
 
 /* Estilo para link desabilitado */
@@ -129,7 +129,7 @@
 }
 
 .pricing-btn.disabled:hover {
-  background-color: #ff424d;
+  background-color: var(--color-primary);
 }
 
 /* Estilo para botão em loading */
@@ -148,7 +148,7 @@
   margin-top: -8px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: #fff;
+  border-top-color: var(--color-text-white);
   animation: spinner 0.6s linear infinite;
 }
 
@@ -165,22 +165,22 @@
   margin: 60px auto;
   text-align: center;
   padding: 40px;
-  background-color: #1a1a1a;
+  background-color: var(--color-bg-tertiary);
   border-radius: 10px;
-  border: 1px solid #333;
+  border: 1px solid var(--color-border-medium);
 }
 
 .success-icon {
   width: 80px;
   height: 80px;
   margin: 0 auto 20px;
-  background-color: #4caf50;
+  background-color: var(--color-success);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
-  color: #fff;
+  color: var(--color-text-white);
   font-weight: bold;
 }
 
@@ -188,13 +188,13 @@
   width: 80px;
   height: 80px;
   margin: 0 auto 20px;
-  background-color: #f44336;
+  background-color: var(--color-error);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48px;
-  color: #fff;
+  color: var(--color-text-white);
   font-weight: bold;
 }
 
@@ -202,13 +202,13 @@
 .checkout-cancel h1 {
   font-size: 2rem;
   margin-bottom: 20px;
-  color: #fff;
+  color: var(--color-text-primary);
 }
 
 .success-message,
 .cancel-message {
   font-size: 1.1rem;
-  color: #aaa;
+  color: var(--color-text-secondary);
   margin-bottom: 30px;
 }
 
@@ -216,12 +216,12 @@
   text-align: left;
   margin: 30px 0;
   padding: 20px;
-  background-color: #0a0a0a;
+  background-color: var(--color-bg-primary);
   border-radius: 8px;
 }
 
 .success-details h3 {
-  color: #fff;
+  color: var(--color-text-primary);
   margin-bottom: 15px;
 }
 
@@ -231,7 +231,7 @@
 }
 
 .success-details ul li {
-  color: #4caf50;
+  color: var(--color-success);
   margin-bottom: 10px;
   font-size: 1rem;
 }
@@ -239,12 +239,12 @@
 .cancel-details {
   margin: 30px 0;
   padding: 20px;
-  background-color: #0a0a0a;
+  background-color: var(--color-bg-primary);
   border-radius: 8px;
 }
 
 .cancel-details p {
-  color: #aaa;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
 

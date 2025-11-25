@@ -20,5 +20,6 @@ export interface CreatorChannelConfig {
     userId: string;
     subscriptionTiers: SubscriptionTier[];
     connectedCommunityId?: string;
+    stripeConnectId?: string;
     isSetupCompleted: boolean;
 }

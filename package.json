@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "dev": "npm run dev --prefix premiora-web",
+    "build": "npm ci --prefix premiora-web && npm run build --prefix premiora-web"
+  },
   "devDependencies": {
     "markdownlint-cli": "^0.44.0",
     "prettier": "^3.6.2"

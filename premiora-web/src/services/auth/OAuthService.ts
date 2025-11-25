@@ -2,9 +2,9 @@
  * Serviço de autenticação OAuth
  * Responsável por operações de login com provedores OAuth
  */
-import { supabase } from '../../utils/supabaseClient';
-import { supabaseAdmin } from '../../utils/supabaseAdminClient';
-import { RedirectService } from './RedirectService';
+import { supabase } from "../../utils/supabaseClient";
+import { supabaseAdmin } from "../../utils/supabaseAdminClient";
+import { RedirectService } from "./RedirectService";
 
 /**
  * Classe de serviço para operações OAuth
@@ -22,160 +22,173 @@ export class OAuthService {
    * @param provider - Provider que está tentando fazer login
    * @returns Promise com informações sobre bloqueio e conta existente
    */
-  static async checkIdentityProtection(identityData: any, provider: 'google' | 'facebook'): Promise<{
+  static async checkIdentityProtection(
+    identityData: any,
+    provider: "google" | "facebook",
+  ): Promise<{
     blocked: boolean;
     blockedReason?: string;
     existingAccount?: any;
     canLinkAccount: boolean;
-    accountType: 'existing' | 'new' | 'linked';
+    accountType: "existing" | "new" | "linked";
   }> {
     try {
       const email = identityData.email;
       const providerId = identityData.sub || identityData.id;
 
-      console.log(`🔍 Verificando proteção de identidade Patreon-like para ${provider}:`, {
-        email,
-        providerId: providerId?.substring(0, 10) + '...' // Log seguro
-      });
+      console.log(
+        `🔍 Verificando proteção de identidade Patreon-like para ${provider}:`,
+        {
+          email,
+          providerId: providerId?.substring(0, 10) + "...", // Log seguro
+        },
+      );
 
       if (!email) {
-        console.log('❌ Email não fornecido pela identidade OAuth');
+        console.log("❌ Email não fornecido pela identidade OAuth");
         return {
           blocked: false,
           canLinkAccount: true,
-          accountType: 'new'
+          accountType: "new",
+          existingAccount: null,
         };
       }
 
       // 1. VERIFICAR SE JÁ EXISTE CONTA SUPABASE PARA ESTE EMAIL
-      const { data: existingUsers, error: userError } = await supabaseAdmin
-        .from('users')
-        .select('id, email, username, profile_setup_completed')
-        .eq('email', email)
-        .limit(1);
+      // Usar admin client para listar usuários (bypassing RLS)
+      const { data: users, error: listError } = await supabaseAdmin.auth.admin
+        .listUsers();
 
-      // Buscar metadados separadamente se usuário existir
-      let appMetadata = null;
-      if (!userError && existingUsers?.[0]) {
-        try {
-          const { data: metadataData } = await supabaseAdmin
-            .from('users')
-            .select('app_metadata')
-            .eq('id', existingUsers[0].id)
-            .single();
-
-          appMetadata = metadataData?.app_metadata;
-        } catch (metadataError) {
-          console.warn('⚠️ Não foi possível buscar app_metadata:', metadataError);
-          appMetadata = null;
-        }
-      }
-
-      if (userError && userError.code !== 'PGRST116') {
-        console.error('❌ Erro ao buscar usuários existentes:', userError);
-        return {
-          blocked: true,
-          blockedReason: 'Erro interno ao verificar conta existente',
-          canLinkAccount: false,
-          accountType: 'existing'
-        };
-      }
-
-      const existingUser = existingUsers?.[0];
-      console.log('🔍 Verificação de conta existente:', {
-        userExists: !!existingUser,
-        userId: existingUser?.id,
-        username: existingUser?.username,
-        setupCompleted: existingUser?.profile_setup_completed
-      });
-
-      // 2. SE USUÁRIO NÃO EXISTE, PERMITIR NOVO CADASTRO
-      if (!existingUser) {
-        console.log('✅ Usuário não existe - permitindo novo cadastro');
+      if (listError) {
+        console.error("❌ Erro ao listar usuários:", listError);
+        // Fallback seguro: permitir login se admin falhar
         return {
           blocked: false,
           canLinkAccount: true,
-          accountType: 'new',
-          existingAccount: null
+          accountType: "new",
+          existingAccount: null,
         };
       }
 
-      // 3. SE USUÁRIO EXISTE, VERIFICAR PROVIDER ORIGINAL ATRAVÉS DOS METADADOS
-      // Supabase Auth armazena informações sobre o provider em app_metadata
-      const userProvider = appMetadata?.provider;
-      console.log('📋 Provider original da conta existente:', {
-        userProvider: userProvider,
-        attemptingProvider: provider
+      // Encontrar usuário com este email
+      const existingUser = users.users.find((u) =>
+        u.email?.toLowerCase() === email.toLowerCase()
+      );
+      const exists = !!existingUser;
+
+      // Tentar determinar o provider original
+      let existingProvider = null;
+      if (
+        existingUser && existingUser.identities &&
+        existingUser.identities.length > 0
+      ) {
+        // Pegar o provider da primeira identidade (assumindo que é a original)
+        existingProvider = existingUser.identities[0].provider;
+      }
+
+      // 2. SE USUÁRIO NÃO EXISTE, PERMITIR NOVO CADASTRO
+      if (!exists) {
+        console.log("✅ Usuário não existe - permitindo novo cadastro");
+        return {
+          blocked: false,
+          canLinkAccount: true,
+          accountType: "new",
+          existingAccount: null,
+        };
+      }
+
+      const existingUserInfo = { id: existingUser.id, email }; // Minimal user info
+
+      console.log("🔍 Verificação de conta existente:", {
+        userExists: true,
+        userId: existingUser.id,
+        existingProvider,
+      });
+
+      // 3. SE USUÁRIO EXISTE, VERIFICAR PROVIDER ORIGINAL
+      console.log("📋 Provider original da conta existente:", {
+        userProvider: existingProvider,
+        attemptingProvider: provider,
       });
 
       // Verificar se este é o mesmo provider usado originalmente
-      if (userProvider === provider) {
-        console.log(`✅ ${provider} é o mesmo provider da conta existente - permitindo login`);
+      if (existingProvider === provider) {
+        console.log(
+          `✅ ${provider} é o mesmo provider da conta existente - permitindo login`,
+        );
         return {
           blocked: false,
           canLinkAccount: false, // Mesmo provider
-          accountType: 'linked',
-          existingAccount: existingUser
+          accountType: "linked",
+          existingAccount: existingUserInfo,
         };
       }
 
       // 4. VERIFICAR SE É UM PROVIDER DIFERENTE (BLOCK FOR PATREON PROTECTION)
       // Se a conta foi criada com Google, bloquear Facebook
-      if (userProvider === 'google' && provider === 'facebook') {
-        console.log('🚫 BLOQUEADO: Facebook tentou login mas conta criada com Google');
+      if (existingProvider === "google" && provider === "facebook") {
+        console.log(
+          "🚫 BLOQUEADO: Facebook tentou login mas conta criada com Google",
+        );
         return {
           blocked: true,
-          blockedReason: 'Esta conta já está associada ao Google. Use sua conta Google para fazer login.',
+          blockedReason:
+            "Esta conta já está associada ao Google. Use sua conta Google para fazer login.",
           canLinkAccount: false,
-          accountType: 'existing',
-          existingAccount: existingUser
+          accountType: "existing",
+          existingAccount: existingUserInfo,
         };
       }
 
       // Se a conta foi criada com Facebook, bloquear Google
-      if (userProvider === 'facebook' && provider === 'google') {
-        console.log('🚫 BLOQUEADO: Google tentou login mas conta criada com Facebook');
+      if (existingProvider === "facebook" && provider === "google") {
+        console.log(
+          "🚫 BLOQUEADO: Google tentou login mas conta criada com Facebook",
+        );
         return {
           blocked: true,
-          blockedReason: 'Esta conta já está associada ao Facebook. Use sua conta Facebook para fazer login.',
+          blockedReason:
+            "Esta conta já está associada ao Facebook. Use sua conta Facebook para fazer login.",
           canLinkAccount: false,
-          accountType: 'existing',
-          existingAccount: existingUser
+          accountType: "existing",
+          existingAccount: existingUserInfo,
         };
       }
 
       // 5. CASO ESPECIAL: Se não há provider original definido, permitir
-      // (Isso pode acontecer em contas antigas ou migrações)
-      if (!userProvider) {
-        console.log('⚠️ Conta sem provider definido - permitindo com cautela');
+      if (!existingProvider) {
+        console.log("⚠️ Conta sem provider definido - permitindo com cautela");
         return {
           blocked: false,
           canLinkAccount: true,
-          accountType: 'existing',
-          existingAccount: existingUser
+          accountType: "existing",
+          existingAccount: existingUserInfo,
         };
       }
 
-      // 6. DEFAULT: Se chegou aqui, é uma situação válida mas não esperada
-      console.log('⚠️ Situação não esperada - permitindo com cautela');
+      // 6. DEFAULT
+      console.log("⚠️ Situação não esperada - permitindo com cautela");
       return {
         blocked: false,
         canLinkAccount: true,
-        accountType: 'existing',
-        existingAccount: existingUser
+        accountType: "existing",
+        existingAccount: existingUserInfo,
       };
-
     } catch (err) {
-      console.error('💥 Erro geral na verificação de identidade:', err);
+      console.error("💥 Erro geral na verificação de identidade:", err);
       return {
         blocked: true,
-        blockedReason: 'Erro interno na verificação de identidade',
+        blockedReason: "Erro interno na verificação de identidade",
         canLinkAccount: false,
-        accountType: 'existing'
+        accountType: "existing",
       };
     }
   }
 
+  /**
+   * @deprecated Use checkIdentityProtection instead
+   * Mantém compatibilidade com código existente
+   */
   /**
    * @deprecated Use checkIdentityProtection instead
    * Mantém compatibilidade com código existente
@@ -186,37 +199,38 @@ export class OAuthService {
     shouldBlockFacebook: boolean;
   }> {
     try {
-      console.log('⚠️ checkConflictingProviders DEPRECATED - use checkIdentityProtection');
+      // Usar admin client para verificar usuários
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers();
 
-      // Buscar na tabela auth.identities para verificar provedores OAuth
-      const { data: identities, error } = await supabaseAdmin
-        .from('auth.identities')
-        .select('provider, identity_data')
-        .eq('identity_data->>email', email);
+      if (error) throw error;
 
-      if (error) {
-        console.error('❌ Erro ao buscar auth.identities:', error);
-        return { hasGoogle: false, hasFacebook: false, shouldBlockFacebook: false };
+      const user = data.users.find((u) => u.email === email);
+
+      if (!user || !user.identities) {
+        return {
+          hasGoogle: false,
+          hasFacebook: false,
+          shouldBlockFacebook: false,
+        };
       }
 
-      const hasGoogle = identities?.some((identity: any) =>
-        identity.provider === 'google'
-      ) || false;
-
-      const hasFacebook = identities?.some((identity: any) =>
-        identity.provider === 'facebook'
-      ) || false;
-
-      const shouldBlockFacebook = hasGoogle;
+      const hasGoogle = user.identities.some((id) => id.provider === "google");
+      const hasFacebook = user.identities.some((id) =>
+        id.provider === "facebook"
+      );
 
       return {
         hasGoogle,
         hasFacebook,
-        shouldBlockFacebook
+        shouldBlockFacebook: hasGoogle && !hasFacebook,
       };
     } catch (err) {
-      console.error('💥 Erro geral ao verificar provedores conflitantes:', err);
-      return { hasGoogle: false, hasFacebook: false, shouldBlockFacebook: false };
+      console.error("💥 Erro geral ao verificar provedores conflitantes:", err);
+      return {
+        hasGoogle: false,
+        hasFacebook: false,
+        shouldBlockFacebook: false,
+      };
     }
   }
 
@@ -227,22 +241,23 @@ export class OAuthService {
    */
   static async signInWithGoogle(): Promise<void> {
     // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = RedirectService.getRedirectUrl('/home');
+    // Usar /dashboard diretamente para evitar redirecionamentos extras que podem perder o hash de autenticação
+    const redirectTo = RedirectService.getRedirectUrl("/dashboard");
 
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo,
-        scopes: 'openid email profile',
+        scopes: "openid email profile",
         queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     });
 
     if (error) {
-      console.error('Erro ao fazer login com Google:', error.message);
+      console.error("Erro ao fazer login com Google:", error.message);
       throw error;
     }
   }
@@ -254,17 +269,18 @@ export class OAuthService {
    */
   static async signInWithFacebook(): Promise<void> {
     // Determinar URL de redirecionamento baseada no ambiente
-    const redirectTo = RedirectService.getRedirectUrl('/home');
+    // Usar /dashboard diretamente para evitar redirecionamentos extras que podem perder o hash de autenticação
+    const redirectTo = RedirectService.getRedirectUrl("/dashboard");
 
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'facebook',
+      provider: "facebook",
       options: {
         redirectTo,
       },
     });
 
     if (error) {
-      console.error('Erro ao fazer login com Facebook:', error.message);
+      console.error("Erro ao fazer login com Facebook:", error.message);
       throw error;
     }
   }

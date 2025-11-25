@@ -279,3 +279,82 @@
 .follow-button:not(.following) {
   animation: followPulse 0.3s ease-out;
 }
+
+/* Expanded Sidebar Styles */
+.profile-sidebar.expanded {
+  width: 240px;
+  align-items: flex-start;
+}
+
+.profile-sidebar.expanded .profile-sidebar-header {
+  justify-content: flex-start;
+  padding-left: var(--space-3);
+}
+
+.profile-sidebar.expanded .profile-sidebar-nav-list {
+  align-items: stretch;
+}
+
+.profile-sidebar.expanded .profile-sidebar-nav-item {
+  justify-content: flex-start;
+  padding: 0 var(--space-2);
+}
+
+.profile-sidebar.expanded .profile-sidebar-nav-button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 var(--space-3);
+  gap: var(--space-3);
+}
+
+.profile-sidebar.expanded .profile-sidebar-nav-label {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-sidebar.expanded .profile-sidebar-actions {
+  width: 100%;
+  align-items: stretch;
+  padding: 0 var(--space-2);
+}
+
+.profile-sidebar.expanded .profile-sidebar-button {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 var(--space-3);
+  gap: var(--space-3);
+}
+
+/* Hide tooltips when expanded */
+.profile-sidebar.expanded .profile-sidebar-button::after,
+.profile-sidebar.expanded .profile-sidebar-nav-button::after {
+  display: none;
+}
+
+/* Toggle Button */
+.sidebar-toggle-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-light);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  right: -12px;
+  top: 32px;
+  z-index: 101;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-toggle-button:hover {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}

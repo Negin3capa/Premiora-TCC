@@ -1,8 +1,8 @@
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from "../../utils/supabaseClient";
 import type {
     CreateCheckoutSessionRequest,
-    CreateCheckoutSessionResponse
-} from '../../types/payment';
+    CreateCheckoutSessionResponse,
+} from "../../types/payment";
 
 /**
  * Serviço para gerenciar operações de pagamento com Stripe
@@ -16,47 +16,56 @@ class PaymentService {
     async createCheckoutSession(priceId: string): Promise<string> {
         try {
             // Obter sessão do usuário autenticado
-            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            const { data: { session }, error: sessionError } = await supabase
+                .auth.getSession();
 
             if (sessionError || !session) {
-                throw new Error('Usuário não autenticado');
+                throw new Error("Usuário não autenticado");
             }
 
             // Construir URLs de sucesso e cancelamento
             const baseUrl = window.location.origin;
-            const successUrl = `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+            const successUrl =
+                `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
             const cancelUrl = `${baseUrl}/checkout/cancel`;
 
             // Preparar request
             const request: CreateCheckoutSessionRequest = {
                 priceId,
                 successUrl,
-                cancelUrl
+                cancelUrl,
             };
 
             // Chamar Edge Function para criar sessão
-            const { data, error } = await supabase.functions.invoke<CreateCheckoutSessionResponse>(
-                'create-checkout-session',
+            const { data, error } = await supabase.functions.invoke<
+                CreateCheckoutSessionResponse
+            >(
+                "create-checkout-session",
                 {
                     body: request,
                     headers: {
-                        Authorization: `Bearer ${session.access_token}`
-                    }
-                }
+                        Authorization: `Bearer ${session.access_token}`,
+                    },
+                },
             );
 
             if (error) {
-                console.error('Erro ao criar sessão de checkout:', error);
-                throw new Error(error.message || 'Erro ao criar sessão de checkout');
+                console.error("Erro ao criar sessão de checkout:", error);
+                throw new Error(
+                    error.message || "Erro ao criar sessão de checkout",
+                );
             }
 
             if (!data || !data.url) {
-                throw new Error('Resposta inválida do servidor');
+                throw new Error("Resposta inválida do servidor");
             }
 
             return data.url;
         } catch (error) {
-            console.error('Erro no PaymentService.createCheckoutSession:', error);
+            console.error(
+                "Erro no PaymentService.createCheckoutSession:",
+                error,
+            );
             throw error;
         }
     }
@@ -75,8 +84,19 @@ class PaymentService {
      */
     async handleCheckoutSuccess(sessionId: string): Promise<void> {
         try {
-            console.log('Checkout bem-sucedido, session ID:', sessionId);
+            // Aqui podemos adicionar lógica adicional se necessário
+            // Por exemplo, verificar o status da sessão ou atualizar cache local
+            console.log("Checkout bem-sucedido, session ID:", sessionId);
 
+            // Recarregar perfil do usuário para obter tier atualizado
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                // Forçar refresh do perfil
+                await supabase
+                    .from("users")
+                    .select("*")
+                    .eq("id", user.id)
+                    .single();
             // Obter usuário atual
             const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -101,7 +121,7 @@ class PaymentService {
 
             console.log('✅ Tier do usuário atualizado para premium com sucesso');
         } catch (error) {
-            console.error('Erro ao processar sucesso do checkout:', error);
+            console.error("Erro ao processar sucesso do checkout:", error);
             throw error;
         }
     }
@@ -110,7 +130,57 @@ class PaymentService {
      * Processa o cancelamento do checkout
      */
     handleCheckoutCancel(): void {
-        console.log('Checkout cancelado pelo usuário');
+        console.log("Checkout cancelado pelo usuário");
+    }
+
+    /**
+     * Cria uma conta Connect para o criador
+     * @returns URL de onboarding do Stripe Connect
+     */
+    async createConnectAccount(): Promise<string> {
+        try {
+            const { data: { session }, error: sessionError } = await supabase
+                .auth.getSession();
+
+            if (sessionError || !session) {
+                throw new Error("Usuário não autenticado");
+            }
+
+            const baseUrl = window.location.origin;
+            const returnUrl =
+                `${baseUrl}/profile?tab=creator&section=payments&status=return`;
+            const refreshUrl =
+                `${baseUrl}/profile?tab=creator&section=payments&status=refresh`;
+
+            const { data, error } = await supabase.functions.invoke<
+                { url: string }
+            >(
+                "create-connect-account",
+                {
+                    body: { returnUrl, refreshUrl },
+                    headers: {
+                        Authorization: `Bearer ${session.access_token}`,
+                    },
+                },
+            );
+
+            if (error) {
+                console.error("Erro ao criar conta Connect:", error);
+                throw new Error(error.message || "Erro ao criar conta Connect");
+            }
+
+            if (!data || !data.url) {
+                throw new Error("Resposta inválida do servidor");
+            }
+
+            return data.url;
+        } catch (error) {
+            console.error(
+                "Erro no PaymentService.createConnectAccount:",
+                error,
+            );
+            throw error;
+        }
     }
 
     /**
@@ -126,14 +196,14 @@ class PaymentService {
             }
 
             const { data: profile } = await supabase
-                .from('users')
-                .select('tier')
-                .eq('id', user.id)
+                .from("users")
+                .select("tier")
+                .eq("id", user.id)
                 .single();
 
-            return profile?.tier === 'premium';
+            return profile?.tier === "premium";
         } catch (error) {
-            console.error('Erro ao verificar status premium:', error);
+            console.error("Erro ao verificar status premium:", error);
             return false;
         }
     }

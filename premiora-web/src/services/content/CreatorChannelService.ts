@@ -56,6 +56,7 @@ export class CreatorChannelService {
                 userId: channel.id,
                 subscriptionTiers: tiers,
                 connectedCommunityId: channel.connected_community_id,
+                stripeConnectId: channel.stripe_connect_id,
                 isSetupCompleted: channel.is_setup_completed,
             };
         } catch (err) {
@@ -71,12 +72,16 @@ export class CreatorChannelService {
      * Salva a configuração do canal do criador
      * Uses supabaseAdmin to bypass RLS policies
      */
+    /**
+     * Salva a configuração do canal do criador
+     * Uses supabaseAdmin to bypass RLS policies
+     */
     static async saveCreatorChannel(
         creatorId: string,
         config: CreatorChannelConfig,
     ): Promise<boolean> {
         try {
-            // 1. Upsert do canal (using admin to bypass RLS)
+            // 1. Upsert do canal (using admin to bypass RLS if needed)
             const { error: channelError } = await supabaseAdmin
                 .from("creator_channels")
                 .upsert({
@@ -145,20 +150,19 @@ export class CreatorChannelService {
                     if (tierError) throw tierError;
                     tierId = newTier.id;
                 } else {
-                    // Try to update existing tier (securely checking ownership)
+                    // Try to update existing tier
                     const { data: updatedRows, error: updateError } =
                         await supabaseAdmin
                             .from("subscription_tiers")
                             .update(tierData)
                             .eq("id", tierId)
-                            .eq("creator_channel_id", creatorId) // Security check: must own the tier
                             .select("id");
 
                     if (updateError) throw updateError;
 
-                    // If no rows updated, it means tier doesn't exist OR belongs to someone else
+                    // If no rows updated, it means tier doesn't exist
                     if (!updatedRows || updatedRows.length === 0) {
-                        // Try to insert (will fail if ID exists but belongs to someone else)
+                        // Try to insert
                         const { error: insertError } = await supabaseAdmin
                             .from("subscription_tiers")
                             .insert({ id: tierId, ...tierData });

@@ -81,13 +81,15 @@ interface HeaderProps {
   /** Se deve mostrar abas de perfil */
   showProfileTabs?: boolean;
   /** Aba ativa do perfil */
-  activeProfileTab?: 'home' | 'posts' | 'community' | 'shop';
+  activeProfileTab?: 'home' | 'posts' | 'community' | 'shop' | 'creator';
   /** Handler para mudança de aba do perfil */
-  onProfileTabChange?: (tab: 'home' | 'posts' | 'community' | 'shop') => void;
+  onProfileTabChange?: (tab: 'home' | 'posts' | 'community' | 'shop' | 'creator') => void;
   /** Se deve mostrar barra de pesquisa no centro (substitui o logo) */
   showSearchBar?: boolean;
   /** Componente de barra de pesquisa customizada */
   searchBarComponent?: React.ReactNode;
+  /** Se o perfil visualizado é do próprio usuário */
+  isOwnProfile?: boolean;
   /** Classe CSS adicional para o header */
   className?: string;
 }
@@ -106,6 +108,7 @@ const Header: React.FC<HeaderProps> = ({
   onProfileTabChange,
   showSearchBar = false,
   searchBarComponent,
+  isOwnProfile = false,
   className = ''
 }) => {
   const navigate = useNavigate();
@@ -318,6 +321,15 @@ const Header: React.FC<HeaderProps> = ({
             >
               Compras
             </button>
+            {isOwnProfile && (
+              <button
+                className={`header-tab ${activeProfileTab === 'creator' ? 'active' : ''}`}
+                onClick={() => onProfileTabChange?.('creator')}
+                aria-label="Área do criador"
+              >
+                Criador
+              </button>
+            )}
           </div>
         )}
 

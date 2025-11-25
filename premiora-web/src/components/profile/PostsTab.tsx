@@ -92,7 +92,7 @@ const PostsTabEnhanced: React.FC<PostsTabEnhancedProps> = ({ creatorProfile, cur
             likes: post.post_likes?.length || 0,
             comments: post.comments?.length || 0,
             timestamp: post.published_at,
-            isLocked: post.is_premium,
+            isLocked: !post.hasAccess,
             creatorId: post.creator_id
           };
         });

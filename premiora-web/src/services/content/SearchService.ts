@@ -166,24 +166,39 @@ export class SearchService {
       return [];
     }
 
-    // Primeiro busca os posts
     const { data: postsData, error: postsError } = await supabase
       .from("posts")
       .select(`
-        id,
-        title,
-        content,
-        content_type,
-        creator_id,
-        community_id,
-        created_at,
-        likes_count,
-        views_count,
-        is_premium,
-        media_urls,
-        communities (
+        *,
+        creator:creator_id (
+          id,
+          display_name,
+          profile_image_url
+        ),
+        community:community_id (
+          id,
           name,
-          display_name
+          display_name,
+          avatar_url
+        ),
+        post_likes (
+          id,
+          user_id
+        ),
+        comments (
+          id
+        ),
+        post_flairs (
+          community_flairs (
+            flair_text,
+            flair_color,
+            flair_background_color
+          )
+        ),
+        required_tier:required_tier_id (
+          id,
+          name,
+          tier_order
         )
       `)
       .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
@@ -196,57 +211,52 @@ export class SearchService {
       return [];
     }
 
-    const contentItems: ContentItem[] = [];
-
-    // Se temos posts, busca os dados dos usuários separadamente
-    if (postsData && postsData.length > 0) {
-      const creatorIds = postsData.map((post) => post.creator_id);
-
-      // Busca dados dos usuários (usa cliente padrão)
-      const { data: usersData, error: usersError } = await supabase
-        .from("users")
-        .select("id, username, name, avatar_url")
-        .in("id", creatorIds);
-
-      if (usersError) {
-        console.error("Erro ao buscar usuários dos posts:", usersError);
-      }
-
-      // Cria um mapa de usuários para lookup rápido
-      const usersMap = new Map();
-      if (usersData) {
-        usersData.forEach((user) => usersMap.set(user.id, user));
-      }
-
-      // Transforma posts em ContentItem
-      postsData.forEach((post: any) => {
-        const user = usersMap.get(post.creator_id);
-        const communities = Array.isArray(post.communities)
-          ? post.communities[0]
-          : post.communities;
-
-        contentItems.push({
-          id: post.id,
-          type: post.content_type === "video" ? "video" : "post",
-          title: post.title,
-          author: user?.name || user?.username || "Usuário",
-          authorAvatar: user?.avatar_url || "",
-          content: post.content,
-          timestamp: post.created_at,
-          communityId: post.community_id,
-          communityName: communities?.display_name || communities?.name || "",
-          communityAvatar: "", // TODO: implementar avatar da comunidade
-          likes: post.likes_count || 0,
-          views: post.views_count || 0,
-          accessLevel: post.is_premium ? "premium" : "public",
-          isLocked: post.is_premium,
-          videoUrl: post.content_type === "video"
-            ? (post.media_urls?.[0] || "")
-            : undefined,
-          creatorId: post.creator_id,
-        });
-      });
+    if (!postsData) {
+      return [];
     }
+
+    // Transforma posts em ContentItem
+    const contentItems = postsData.map((post: any) => {
+      const media = post.media_urls?.[0] || {};
+      const flairData = post.post_flairs?.[0]?.community_flairs;
+
+      return {
+        id: post.id,
+        type: (post.content_type === "video" ? "video" : "post") as "video" | "post",
+        title: post.title,
+        content: post.content,
+        author: post.creator?.display_name || "Usuário",
+        authorUsername: post.username,
+        authorAvatar: post.creator?.profile_image_url || "",
+        timestamp: post.published_at || post.created_at,
+        
+        mediaUrls: post.media_urls || [],
+        thumbnail: media.thumbnail?.url || (post.content_type === "video" ? media.video?.url : media.url),
+        videoUrl: post.content_type === "video" ? media.video?.url : undefined,
+        
+        likes: post.post_likes?.length || 0,
+        views: post.views_count || 0,
+        comments: post.comments?.length || 0,
+        
+        communityId: post.community_id,
+        communityName: post.community?.name,
+        communityDisplayName: post.community?.display_name,
+        communityAvatar: post.community?.avatar_url,
+        
+        creatorId: post.creator_id,
+        
+        accessLevel: (post.is_premium ? "premium" : "public") as "public" | "premium",
+        isLocked: post.is_premium, // TODO: Adicionar lógica de verificação de assinatura
+        requiredTier: post.required_tier?.name,
+        
+        isPinned: post.is_pinned,
+        flair: flairData ? {
+          text: flairData.flair_text,
+          color: flairData.flair_color,
+          backgroundColor: flairData.flair_background_color,
+        } : undefined,
+      };
+    });
 
     return contentItems;
   }
