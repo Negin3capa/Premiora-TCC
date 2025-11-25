@@ -666,3 +666,18 @@
 }
 
 /* Recursion indentation is handled by CommentItem passing margins/props */
+
+/* Highlight Flash Animation */
+@keyframes highlightFlash {
+  0% {
+    background-color: rgba(29, 155, 240, 0.2); /* Twitter blue with opacity */
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.comment-highlight-flash .comment-main {
+  animation: highlightFlash 2s ease-out;
+  border-radius: var(--border-radius-md);
+}

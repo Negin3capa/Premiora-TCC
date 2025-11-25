@@ -66,11 +66,11 @@
   .dashboard-right-sidebar-container {
     display: none;
   }
-  
+
   .dashboard-layout {
     justify-content: center;
   }
-  
+
   .dashboard-feed-container {
     max-width: 600px;
     width: 100%;
@@ -175,7 +175,7 @@
 }
 
 .feed-tab.active .feed-tab-content::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -17px; /* Ajuste conforme padding do pai */
   left: 0;
@@ -265,7 +265,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .bottom-sentinel {
@@ -359,3 +361,97 @@
   }
 }
 
+/* ==================== Notifications ==================== */
+
+.notification-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+  transition: background-color var(--transition-fast);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background-color: var(--color-bg-hover);
+}
+
+.notification-item.unread {
+  background-color: rgba(var(--color-primary-rgb), 0.1);
+}
+
+.notification-left-gutter {
+  flex-shrink: 0;
+  width: 40px;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.notification-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  transition: opacity var(--transition-fast);
+}
+
+.notification-avatar:hover {
+  opacity: 0.9;
+}
+
+.notification-text {
+  font-size: 15px;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+.notification-text .actor-name {
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.notification-text .actor-name:hover {
+  text-decoration: underline;
+}
+
+.notification-text .action-desc {
+  color: var(--color-text-secondary);
+}
+
+.notification-preview {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.notification-action-btn:hover {
+  background-color: var(--color-bg-hover);
+  color: var(--color-primary);
+}
