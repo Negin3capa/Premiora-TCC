@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useNotification } from '../hooks/useNotification';
+import { supabase } from '../utils/supabaseClient';
 import { useUI } from '../hooks/useUI';
 import { Sidebar, Header, MobileBottomBar } from '../components/layout';
 import {
@@ -18,7 +21,10 @@ import {
   Ban,
   CreditCard,
   Users,
-  LayoutDashboard
+  LayoutDashboard,
+  Star,
+  Calendar,
+  Receipt
 } from 'lucide-react';
 import '../styles/SettingsPage.css';
 
@@ -29,7 +35,7 @@ import '../styles/SettingsPage.css';
  * @component
  */
 const SettingsPage: React.FC = () => {
-  const { signOut } = useAuth();
+  const { signOut, userProfile, refreshUserProfile } = useAuth();
   const {
     theme,
     language,
@@ -41,9 +47,20 @@ const SettingsPage: React.FC = () => {
     updateAccessibility,
     resetPreferences
   } = useUI();
+  const [searchParams] = useSearchParams();
+  const { showSuccess, showError } = useNotification();
   const [activeSection, setActiveSection] = useState('appearance');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCancelSubscriptionConfirm, setShowCancelSubscriptionConfirm] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Check for section parameter in URL and set active section
+  useEffect(() => {
+    const sectionParam = searchParams.get('section');
+    if (sectionParam) {
+      setActiveSection(sectionParam);
+    }
+  }, [searchParams]);
 
   // Estados para configurações com valores padrão
   const defaultSettings = {
@@ -122,6 +139,45 @@ const SettingsPage: React.FC = () => {
     }
   };
 
+  /**
+   * Handler para cancelamento de assinatura premium
+   */
+  const handleCancelSubscription = async () => {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        showError('Erro', 'Não foi possível identificar o usuário');
+        return;
+      }
+
+      // Atualizar tier do usuário para free
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          tier: 'free',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Erro ao cancelar assinatura:', updateError);
+        showError('Erro', 'Não foi possível cancelar a assinatura');
+        return;
+      }
+
+      // Atualizar perfil do usuário
+      await refreshUserProfile(true);
+
+      // Fechar modal e mostrar mensagem de sucesso
+      setShowCancelSubscriptionConfirm(false);
+      showSuccess('Assinatura cancelada', 'Sua assinatura Premium foi cancelada com sucesso');
+    } catch (error) {
+      console.error('Erro ao cancelar assinatura:', error);
+      showError('Erro', 'Ocorreu um erro ao cancelar a assinatura');
+    }
+  };
+
   const sections = [
     { id: 'appearance', label: 'Aparência', icon: <Palette size={20} /> },
     { id: 'account', label: 'Conta', icon: <User size={20} /> },
@@ -131,6 +187,7 @@ const SettingsPage: React.FC = () => {
     { id: 'data', label: 'Dados e Privacidade', icon: <Database size={20} /> },
     { id: 'creator-tools', label: 'Ferramentas de Criador', icon: <LayoutDashboard size={20} /> },
     { id: 'monetization', label: 'Monetização', icon: <DollarSign size={20} /> },
+    { id: 'subscriptions', label: 'Assinaturas', icon: <Star size={20} /> },
   ];
 
   return (
@@ -663,7 +720,7 @@ const SettingsPage: React.FC = () => {
             {activeSection === 'creator-tools' && (
               <div className="settings-section">
                 <h3>Ferramentas de Criador</h3>
-                
+
                 <div className="setting-group">
                   <h4>Analytics</h4>
                   <div className="setting-item">
@@ -754,9 +811,123 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {activeSection === 'subscriptions' && (
+              <div className="settings-section">
+                <h3>Gerenciamento de Assinaturas</h3>
+
+                <div className="setting-group">
+                  <h4>Plano Atual</h4>
+                  <div className={`monetization-status-card ${userProfile?.tier === 'premium' ? 'premium-bg' : ''}`}>
+                    <div className="status-header">
+                      <span className="status-label">Seu Plano</span>
+                      <span className="status-value">{userProfile?.tier === 'premium' ? 'Premium' : 'Gratuito'}</span>
+                    </div>
+                    <p className="status-description">
+                      {userProfile?.tier === 'premium'
+                        ? 'Você tem acesso a todos os recursos exclusivos.'
+                        : 'Faça upgrade para desbloquear recursos exclusivos.'}
+                    </p>
+                    {userProfile?.tier !== 'premium' && (
+                      <button className="btn-primary btn-sm upgrade-btn" onClick={() => window.location.href = '/subscriptions'}>
+                        Fazer Upgrade
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {userProfile?.tier === 'premium' && (
+                  <>
+                    <div className="setting-group">
+                      <h4>Detalhes da Assinatura</h4>
+                      <div className="setting-item">
+                        <div className="subscription-detail-row">
+                          <Calendar size={20} className="icon-secondary" />
+                          <div className="subscription-detail-content">
+                            <p className="subscription-detail-title">Próxima renovação</p>
+                            <p className="subscription-detail-subtitle">24 de Dezembro, 2025</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="setting-item">
+                        <div className="subscription-detail-row">
+                          <CreditCard size={20} className="icon-secondary" />
+                          <div className="subscription-detail-content">
+                            <p className="subscription-detail-title">Método de Pagamento</p>
+                            <p className="subscription-detail-subtitle">•••• •••• •••• 4242</p>
+                          </div>
+                        </div>
+                        <button className="btn-secondary text-sm">Alterar</button>
+                      </div>
+                    </div>
+
+                    <div className="setting-group">
+                      <h4>Histórico de Cobranças</h4>
+                      <div className="billing-history">
+                        {[1, 2, 3].map((_, i) => (
+                          <div key={i} className="setting-item billing-item">
+                            <div className="subscription-detail-row">
+                              <Receipt size={20} className="icon-secondary" />
+                              <div className="subscription-detail-content">
+                                <p className="subscription-detail-title">Pagamento Mensal</p>
+                                <p className="subscription-detail-subtitle">24 de {['Novembro', 'Outubro', 'Setembro'][i]}, 2025</p>
+                              </div>
+                            </div>
+                            <span className="subscription-amount">R$ 29,90</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="setting-group danger-zone">
+                      <h4>Cancelar Assinatura</h4>
+                      <div className="setting-item">
+                        <button
+                          className="btn-danger"
+                          onClick={() => setShowCancelSubscriptionConfirm(true)}
+                        >
+                          Cancelar Assinatura Premium
+                        </button>
+                        <p className="setting-description">
+                          Ao cancelar, você perderá acesso aos recursos premium no final do ciclo de cobrança atual.
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Modal de confirmação de cancelamento de assinatura */}
+      {showCancelSubscriptionConfirm && (
+        <div className="modal-overlay" onClick={() => setShowCancelSubscriptionConfirm(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Cancelar Assinatura Premium</h3>
+            <p>Você tem certeza que deseja cancelar sua assinatura Premium?</p>
+            <p className="modal-warning">
+              Ao cancelar, você perderá acesso a todos os recursos exclusivos imediatamente.
+            </p>
+            <div className="modal-buttons">
+              <button
+                className="btn-secondary"
+                onClick={() => setShowCancelSubscriptionConfirm(false)}
+              >
+                Não
+              </button>
+              <button
+                className="btn-danger"
+                onClick={handleCancelSubscription}
+              >
+                Sim, Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MobileBottomBar />
     </div>
   );
