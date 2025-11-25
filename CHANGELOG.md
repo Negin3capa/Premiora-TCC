@@ -5,6 +5,18 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado no [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/spec/v2.0.0.html).
 
+## [0.15.1] - 25/11/25
+
+### Corrigido
+
+- **PostViewPage**
+  - Resolvido erros de build relacionados à estrutura JSX e aninhamento de componentes.
+  - Corrigida implementação de lazy loading para o componente Header.
+  - Melhorado tratamento de erro para posts não encontrados ou usernames incorretos.
+
+- **Conexão Supabase**
+  - Resolvido erro "Missing Supabase URL or Service Role Key" em produção.
+
 ## [0.15.0] - 24/11/25
 
 ### Corrigido
