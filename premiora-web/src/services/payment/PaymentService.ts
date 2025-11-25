@@ -84,42 +84,37 @@ class PaymentService {
      */
     async handleCheckoutSuccess(sessionId: string): Promise<void> {
         try {
-            // Aqui podemos adicionar lógica adicional se necessário
-            // Por exemplo, verificar o status da sessão ou atualizar cache local
             console.log("Checkout bem-sucedido, session ID:", sessionId);
 
-            // Recarregar perfil do usuário para obter tier atualizado
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                // Forçar refresh do perfil
-                await supabase
-                    .from("users")
-                    .select("*")
-                    .eq("id", user.id)
-                    .single();
             // Obter usuário atual
-            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            const { data: { user }, error: userError } = await supabase.auth
+                .getUser();
 
             if (userError || !user) {
-                console.error('Erro ao obter usuário:', userError);
+                console.error("Erro ao obter usuário:", userError);
                 return;
             }
 
             // Atualizar tier do usuário para premium
             const { error: updateError } = await supabase
-                .from('users')
+                .from("users")
                 .update({
-                    tier: 'premium',
-                    updated_at: new Date().toISOString()
+                    tier: "premium",
+                    updated_at: new Date().toISOString(),
                 })
-                .eq('id', user.id);
+                .eq("id", user.id);
 
             if (updateError) {
-                console.error('Erro ao atualizar tier do usuário:', updateError);
+                console.error(
+                    "Erro ao atualizar tier do usuário:",
+                    updateError,
+                );
                 throw updateError;
             }
 
-            console.log('✅ Tier do usuário atualizado para premium com sucesso');
+            console.log(
+                "✅ Tier do usuário atualizado para premium com sucesso",
+            );
         } catch (error) {
             console.error("Erro ao processar sucesso do checkout:", error);
             throw error;
