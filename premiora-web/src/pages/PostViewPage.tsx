@@ -53,6 +53,7 @@ const usePost = (postId: string, username: string) => {
   const [error, setError] = useState<string | null>(null);
   const { user, userProfile } = useAuth();
 
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -251,6 +252,8 @@ const PostViewPage: React.FC = () => {
   const { username, postId } = useParams<{ username: string; postId: string; communityName?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const highlightCommentId = searchParams.get('commentId');
   const { user } = useAuth();
   const { post, loading, error } = usePost(postId!, username!);
 
@@ -374,12 +377,7 @@ const PostViewPage: React.FC = () => {
     console.log('Excluir post:', postId);
   };
 
-  /**
-   * Handler para clique no menu
-   */
-  const handleMenuClick = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+
 
   /**
    * Handler para fechar menu quando clicar fora
@@ -503,103 +501,88 @@ const PostViewPage: React.FC = () => {
                           <Link to={`/u/${username}`} className="author-name">
                             {post.author}
                           </Link>
-                          <span className="post-timestamp">{post.timestamp}</span>
+                          <span className="post-date">
+                            {post.timestamp}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Menu de opções */}
-                      <div className="post-menu">
-                        <div className="post-menu-container">
-                          <button
-                            className="post-view-menu-button"
-                            onClick={handleMenuClick}
-                            aria-label="Mais opções"
-                            aria-expanded={isMenuOpen}
-                          >
-                            <MoreHorizontal size={20} />
-                          </button>
+                      <div className="post-actions-header">
+                        <button 
+                          className="post-menu-button"
+                          onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        >
+                          <MoreHorizontal size={20} />
+                        </button>
 
-                          {/* Dropdown Menu */}
-                          {isMenuOpen && (
-                            <div className="post-menu-dropdown">
-                              <button
-                                className="post-menu-item"
-                                onClick={() => {
-                                  handleShare();
-                                  handleMenuClose();
-                                }}
-                              >
-                                <Share size={16} />
-                                <span>Compartilhar</span>
-                              </button>
-
-                              <button
-                                className="post-menu-item"
-                                onClick={() => {
-                                  handleBookmark();
-                                  handleMenuClose();
-                                }}
-                              >
-                                <Bookmark size={16} />
-                                <span>{isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}</span>
-                              </button>
-
-                              {isAuthor && (
-                                <>
-                                  <button
-                                    className="post-menu-item"
-                                    onClick={() => {
-                                      handleEdit();
-                                      handleMenuClose();
-                                    }}
-                                  >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                    </svg>
-                                    <span>Editar</span>
-                                  </button>
-
-                                  <button
-                                    className="post-menu-item delete-item"
-                                    onClick={() => {
-                                      handleDelete();
-                                      handleMenuClose();
-                                    }}
-                                  >
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <path d="M3 6h18"/>
-                                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                      <line x1="10" y1="11" x2="10" y2="17"/>
-                                      <line x1="14" y1="11" x2="14" y2="17"/>
-                                    </svg>
-                                    <span>Excluir</span>
-                                  </button>
-                                </>
-                              )}
-
-                              <button
-                                className="post-menu-item report-item"
-                                onClick={() => {
-                                  handleReport();
-                                  handleMenuClose();
-                                }}
-                              >
-                                <Flag size={16} />
-                                <span>Denunciar</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Overlay para fechar menu ao clicar fora */}
                         {isMenuOpen && (
-                          <div
-                            className="post-menu-overlay"
-                            onClick={handleMenuClose}
-                          />
+                          <div className="post-menu-dropdown">
+                            <button 
+                              className="post-menu-item"
+                              onClick={() => {
+                                handleBookmark();
+                                handleMenuClose();
+                              }}
+                            >
+                              <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
+                              <span>{isBookmarked ? 'Remover dos favoritos' : 'Salvar nos favoritos'}</span>
+                            </button>
+
+                            {isAuthor && (
+                              <>
+                                <button
+                                  className="post-menu-item"
+                                  onClick={() => {
+                                    handleEdit();
+                                    handleMenuClose();
+                                  }}
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                  </svg>
+                                  <span>Editar</span>
+                                </button>
+
+                                <button
+                                  className="post-menu-item delete-item"
+                                  onClick={() => {
+                                    handleDelete();
+                                    handleMenuClose();
+                                  }}
+                                >
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M3 6h18"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                  </svg>
+                                  <span>Excluir</span>
+                                </button>
+                              </>
+                            )}
+
+                            <button
+                              className="post-menu-item report-item"
+                              onClick={() => {
+                                handleReport();
+                                handleMenuClose();
+                              }}
+                            >
+                              <Flag size={16} />
+                              <span>Denunciar</span>
+                            </button>
+                          </div>
                         )}
                       </div>
+
+                      {/* Overlay para fechar menu ao clicar fora */}
+                      {isMenuOpen && (
+                        <div
+                          className="post-menu-overlay"
+                          onClick={handleMenuClose}
+                        />
+                      )}
                     </header>
 
                     {/* Título e conteúdo */}
@@ -749,7 +732,7 @@ const PostViewPage: React.FC = () => {
                   </article>
 
                   {/* Seção de comentários */}
-                  <CommentList postId={postId!} />
+                  <CommentList postId={postId!} highlightCommentId={highlightCommentId || undefined} />
                 </main>
               </div>
             </div>
@@ -977,7 +960,7 @@ const PostViewPage: React.FC = () => {
 
                 {/* Comentários na Sidebar */}
                 <div className="comments-section">
-                  <CommentList postId={postId!} className="modal-comments" />
+                  <CommentList postId={postId!} className="modal-comments" highlightCommentId={highlightCommentId || undefined} />
                 </div>
               </div>
             </div>

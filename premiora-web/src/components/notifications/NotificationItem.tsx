@@ -34,12 +34,16 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({ notification
     const postId = metadata?.post_id || (['like', 'comment', 'reply'].includes(type) ? notification.entity_id : undefined);
 
     if (postId) {
+      // Determine commentId for highlighting
+      const commentId = metadata?.comment_id || (['comment', 'reply'].includes(type) ? notification.entity_id : undefined);
+      const queryParams = commentId ? `?commentId=${commentId}` : '';
+
       // Se tiver o username do autor no metadata, usa ele
       if (metadata?.post_author_username) {
-        return `/u/${metadata.post_author_username}/status/${postId}`;
+        return `/u/${metadata.post_author_username}/status/${postId}${queryParams}`;
       }
       // Fallback: assume que o post é do usuário atual (para likes/comments no meu post)
-      return `/u/me/status/${postId}`; 
+      return `/u/me/status/${postId}${queryParams}`; 
     }
     
     // Redirecionamento para Perfil (Follow)
