@@ -169,7 +169,7 @@ const ProfilePage: React.FC = () => {
               views: post.views || 0,
               likes: post.post_likes?.length || 0,
               comments: post.comments || 0,
-              locked: post.is_premium,
+              locked: !post.hasAccess,
               contentType: isVideo ? 'video' : (firstMedia ? 'image' : 'text')
             };
           });

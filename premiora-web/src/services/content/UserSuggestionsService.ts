@@ -442,7 +442,8 @@ export class UserSuggestionsService {
           .eq("is_published", true)
           .order("published_at", { ascending: false })
           .limit(1)
-          .single();
+          .limit(1)
+          .maybeSingle();
 
         const suggestion: UserSuggestion = {
           id: user.id,

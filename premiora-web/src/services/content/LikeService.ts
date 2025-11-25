@@ -2,7 +2,7 @@
  * Serviço de gerenciamento de likes em posts
  * Responsável por dar, tirar e verificar likes
  */
-import { supabase } from '../../utils/supabaseClient';
+import { supabase } from "../../utils/supabaseClient";
 
 /**
  * Classe de serviço para operações de likes
@@ -16,19 +16,20 @@ export class LikeService {
    */
   static async toggleLike(
     postId: string,
-    userId: string
+    userId: string,
   ): Promise<{ liked: boolean; likeCount: number }> {
     // Verificar se já existe um like deste usuário no post
     const { data: existingLike, error: checkError } = await supabase
-      .from('post_likes')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('user_id', userId)
-      .single();
+      .from("post_likes")
+      .select("id")
+      .eq("post_id", postId)
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      // PGRST116 = no rows returned (não é erro)
-      throw new Error(`Erro ao verificar like existente: ${checkError.message}`);
+    if (checkError) {
+      throw new Error(
+        `Erro ao verificar like existente: ${checkError.message}`,
+      );
     }
 
     let liked: boolean;
@@ -37,10 +38,10 @@ export class LikeService {
     if (existingLike) {
       // Remover like existente
       const { error: deleteError } = await supabase
-        .from('post_likes')
+        .from("post_likes")
         .delete()
-        .eq('post_id', postId)
-        .eq('user_id', userId);
+        .eq("post_id", postId)
+        .eq("user_id", userId);
 
       if (deleteError) {
         throw new Error(`Erro ao remover like: ${deleteError.message}`);
@@ -50,15 +51,15 @@ export class LikeService {
     } else {
       // Adicionar novo like
       const { error: insertError } = await supabase
-        .from('post_likes')
+        .from("post_likes")
         .insert({
           post_id: postId,
-          user_id: userId
+          user_id: userId,
         });
 
       if (insertError) {
         // Verificar se o erro é de constraint único (já existe like)
-        if (insertError.code === '23505') {
+        if (insertError.code === "23505") {
           // Talvez houve uma condição de corrida, tentar remover
           await this.toggleLike(postId, userId);
           return this.toggleLike(postId, userId);
@@ -71,9 +72,9 @@ export class LikeService {
 
     // Obter o contador atualizado de likes
     const { data: postData, error: countError } = await supabase
-      .from('posts')
-      .select('like_count')
-      .eq('id', postId)
+      .from("posts")
+      .select("like_count")
+      .eq("id", postId)
       .single();
 
     if (countError) {
@@ -93,13 +94,13 @@ export class LikeService {
    */
   static async hasUserLiked(postId: string, userId: string): Promise<boolean> {
     const { data, error } = await supabase
-      .from('post_likes')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('user_id', userId)
-      .single();
+      .from("post_likes")
+      .select("id")
+      .eq("post_id", postId)
+      .eq("user_id", userId)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       throw new Error(`Erro ao verificar like: ${error.message}`);
     }
 
@@ -114,26 +115,28 @@ export class LikeService {
    */
   static async getPostLikes(
     postId: string,
-    limit: number = 50
-  ): Promise<Array<{
-    id: string;
-    user_id: string;
-    created_at: string;
-    user: {
-      username: string;
-      avatar_url?: string;
-      name?: string;
-    };
-  }>> {
+    limit: number = 50,
+  ): Promise<
+    Array<{
+      id: string;
+      user_id: string;
+      created_at: string;
+      user: {
+        username: string;
+        avatar_url?: string;
+        name?: string;
+      };
+    }>
+  > {
     const { data, error } = await supabase
-      .from('post_likes')
+      .from("post_likes")
       .select(`
         id,
         user_id,
         created_at
       `)
-      .eq('post_id', postId)
-      .order('created_at', { ascending: false })
+      .eq("post_id", postId)
+      .order("created_at", { ascending: false })
       .limit(limit);
 
     if (error) {
@@ -145,33 +148,35 @@ export class LikeService {
     }
 
     // Buscar dados dos usuários separadamente
-    const userIds = data.map(like => like.user_id);
+    const userIds = data.map((like) => like.user_id);
     const { data: usersData, error: usersError } = await supabase
-      .from('users')
-      .select('id, username, avatar_url, name')
-      .in('id', userIds);
+      .from("users")
+      .select("id, username, avatar_url, name")
+      .in("id", userIds);
 
     if (usersError) {
-      throw new Error(`Erro ao buscar dados dos usuários: ${usersError.message}`);
+      throw new Error(
+        `Erro ao buscar dados dos usuários: ${usersError.message}`,
+      );
     }
 
     // Criar mapa de usuários para acesso rápido
     const userMap = new Map(
-      (usersData || []).map(user => [user.id, user])
+      (usersData || []).map((user) => [user.id, user]),
     );
 
     // Combinar dados
-    return data.map(like => {
+    return data.map((like) => {
       const user = userMap.get(like.user_id);
       return {
         id: like.id,
         user_id: like.user_id,
         created_at: like.created_at,
         user: {
-          username: user?.username || '',
+          username: user?.username || "",
           avatar_url: user?.avatar_url,
-          name: user?.name
-        }
+          name: user?.name,
+        },
       };
     });
   }
@@ -182,33 +187,39 @@ export class LikeService {
    * @returns Promise com novo contador de visualizações
    */
   static async incrementViewCount(postId: string): Promise<number> {
-    const { data, error } = await supabase.rpc('increment_post_view', {
-      post_id: postId
+    const { data, error } = await supabase.rpc("increment_post_view", {
+      post_id: postId,
     });
 
     if (error) {
       // Fallback: tentar atualização manual se a função não existe
-      console.warn('Função increment_post_view não encontrada, usando fallback manual');
+      console.warn(
+        "Função increment_post_view não encontrada, usando fallback manual",
+      );
 
       const { data: currentData, error: selectError } = await supabase
-        .from('posts')
-        .select('view_count')
-        .eq('id', postId)
+        .from("posts")
+        .select("view_count")
+        .eq("id", postId)
         .single();
 
       if (selectError) {
-        throw new Error(`Erro ao buscar contador atual: ${selectError.message}`);
+        throw new Error(
+          `Erro ao buscar contador atual: ${selectError.message}`,
+        );
       }
 
       const newViewCount = (currentData?.view_count || 0) + 1;
 
       const { error: updateError } = await supabase
-        .from('posts')
+        .from("posts")
         .update({ view_count: newViewCount })
-        .eq('id', postId);
+        .eq("id", postId);
 
       if (updateError) {
-        throw new Error(`Erro ao incrementar visualizações: ${updateError.message}`);
+        throw new Error(
+          `Erro ao incrementar visualizações: ${updateError.message}`,
+        );
       }
 
       return newViewCount;
