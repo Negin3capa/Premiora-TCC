@@ -10,6 +10,7 @@ import { useTheme } from '../../hooks/useUI';
  */
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isDark } = useTheme();
 
   useEffect(() => {
@@ -20,6 +21,15 @@ const Header: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [mobileMenuOpen]);
 
   return (
     <header className={`header ${scrolled ? 'scrolled' : ''}`}>
@@ -40,12 +50,35 @@ const Header: React.FC = () => {
             <a href="#pricing">Preços</a>
           </div>
           
-          <div className="auth-buttons">
+          <div className="auth-buttons desktop-only">
             <a href="/login" className="login-btn">Entrar</a>
             <a href="/login" className="cta-button-small">Começar</a>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="mobile-menu-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Menu"
+          >
+            <span className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}></span>
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
+        <div className="mobile-nav-links">
+          <a href="#features" onClick={() => setMobileMenuOpen(false)}>Funcionalidades</a>
+          <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>Como Funciona</a>
+          <a href="#creators" onClick={() => setMobileMenuOpen(false)}>Criadores</a>
+          <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Preços</a>
+        </div>
+        <div className="mobile-auth-buttons">
+          <a href="/login" className="login-btn-mobile">Entrar</a>
+          <a href="/login" className="cta-button-mobile">Começar</a>
+        </div>
+      </div>
     </header>
   );
 };
