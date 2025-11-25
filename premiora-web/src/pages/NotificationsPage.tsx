@@ -1,139 +1,151 @@
-/**
- * Página de notificações
- * Exibe todas as notificações do usuário
- */
-import React, { useState } from 'react';
-import { Sidebar, Header, MobileBottomBar } from '../components/layout';
-import { Heart, MessageCircle, User, Building2, Bell, MoreHorizontal } from 'lucide-react';
-import '../styles/NotificationsPage.css';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../utils/supabaseClient';
+import { NotificationService } from '../services/NotificationService';
+import { NotificationItem } from '../components/notifications/NotificationItem';
+import type { SocialNotification } from '../types/socialNotification';
+import { Bell, CheckCheck } from 'lucide-react';
+import { useInView } from 'react-intersection-observer';
+import { Header, Sidebar, MobileBottomBar } from '../components/layout';
 
-/**
- * Página de notificações do usuário
- * Mostra lista de notificações com filtros e ações
- */
-const NotificationsPage: React.FC = () => {
+export const NotificationsPage: React.FC = () => {
+  const [notifications, setNotifications] = useState<SocialNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { ref, inView } = useInView();
 
-  // Mock notifications data
-  const mockNotifications = [
-    {
-      id: '1',
-      type: 'like' as const,
-      title: 'João curtiu seu post',
-      message: '"Como criar aplicações React modernas"',
-      timestamp: '2h atrás',
-      read: false,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face&auto=format'
-    },
-    {
-      id: '2',
-      type: 'comment' as const,
-      title: 'Maria comentou em seu vídeo',
-      message: '"Excelente explicação sobre hooks!"',
-      timestamp: '4h atrás',
-      read: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b60d0de9?w=40&h=40&fit=crop&crop=face&auto=format'
-    },
-    {
-      id: '3',
-      type: 'follow' as const,
-      title: 'Carlos começou a te seguir',
-      message: '',
-      timestamp: '1d atrás',
-      read: true,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face&auto=format'
-    },
-    {
-      id: '4',
-      type: 'community' as const,
-      title: 'Nova comunidade: Tecnologia',
-      message: 'Você foi convidado para participar',
-      timestamp: '2d atrás',
-      read: true,
-      avatar: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=40&h=40&fit=crop&crop=center&auto=format'
+  const fetchNotifications = async (reset = false) => {
+    try {
+      const currentPage = reset ? 0 : page;
+      const data = await NotificationService.getNotifications(20, currentPage * 20);
+      
+      if (data.length < 20) {
+        setHasMore(false);
+      }
+
+      if (reset) {
+        setNotifications(data);
+        setPage(1);
+      } else {
+        setNotifications(prev => [...prev, ...data]);
+        setPage(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar notificações:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'like': return <Heart size={16} />;
-      case 'comment': return <MessageCircle size={16} />;
-      case 'follow': return <User size={16} />;
-      case 'community': return <Building2 size={16} />;
-      default: return <Bell size={16} />;
+  useEffect(() => {
+    fetchNotifications(true);
+
+    // Realtime subscription
+    const subscription = supabase
+      .channel('notifications_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+        },
+        async (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newNotification = await NotificationService.getNotificationById(payload.new.id);
+            if (newNotification) {
+              setNotifications(prev => [newNotification, ...prev]);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            setNotifications(prev => 
+              prev.map(n => n.id === payload.new.id ? { ...n, ...payload.new } : n)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      fetchNotifications();
+    }
+  }, [inView, hasMore]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await NotificationService.markAsRead(id);
+      setNotifications(prev => 
+        prev.map(n => n.id === id ? { ...n, is_read: true } : n)
+      );
+    } catch (error) {
+      console.error('Erro ao marcar como lida:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await NotificationService.markAllAsRead();
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    } catch (error) {
+      console.error('Erro ao marcar todas como lidas:', error);
     }
   };
 
   return (
-    <div className="notifications-page">
+    <div className="min-h-screen bg-[#0f0f0f] text-white">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-      <div className="notifications-main-content">
-        <Header
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
-
-        <div className="feed">
-          <div className="feed-content">
-            <div className="notifications-header">
-              <h1 className="page-title">Notificações</h1>
-              <p className="page-subtitle">
-                Fique por dentro das atividades da sua rede
-              </p>
-            </div>
-
-            <div className="notifications-page-container">
-              {mockNotifications.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon"><Bell size={48} /></div>
-                  <h3>Nenhuma notificação</h3>
-                  <p>Quando alguém interagir com seu conteúdo, você verá aqui.</p>
-                </div>
-              ) : (
-                <div className="notifications-list">
-                  {mockNotifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`notification-item ${!notification.read ? 'unread' : ''}`}
-                    >
-                      <div className="notification-avatar">
-                        <img
-                          src={notification.avatar}
-                          alt="Avatar"
-                          className="avatar-image"
-                        />
-                        <div className="notification-type-icon">
-                          {getNotificationIcon(notification.type)}
-                        </div>
-                      </div>
-
-                      <div className="notification-content">
-                        <div className="notification-text">
-                          <span className="notification-title">{notification.title}</span>
-                          {notification.message && (
-                            <span className="notification-message"> {notification.message}</span>
-                          )}
-                        </div>
-                        <div className="notification-meta">
-                          <span className="notification-time">{notification.timestamp}</span>
-                          {!notification.read && (
-                            <span className="unread-indicator"></span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="notification-actions">
-                        <button className="action-button" title="Mais opções">
-                          <MoreHorizontal size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+      
+      <div className="md:pl-64 flex flex-col min-h-screen pb-16 md:pb-0">
+        <Header onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+        
+        <main className="flex-1 max-w-2xl w-full mx-auto py-8 px-4">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Bell className="w-6 h-6" />
+              Notificações
+            </h1>
+            <button
+              onClick={handleMarkAllAsRead}
+              className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+            >
+              <CheckCheck className="w-4 h-4" />
+              Marcar todas como lidas
+            </button>
           </div>
-        </div>
+
+          <div className="bg-[#1a1a1a] rounded-xl border border-white/10 overflow-hidden min-h-[400px]">
+            {notifications.length === 0 && !loading ? (
+              <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+                <Bell className="w-12 h-12 mb-4 opacity-20" />
+                <p>Nenhuma notificação encontrada</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {notifications.map(notification => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onMarkAsRead={handleMarkAsRead}
+                  />
+                ))}
+                
+                {hasMore && (
+                  <div ref={ref} className="p-4 text-center text-gray-500">
+                    Carregando mais...
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </main>
       </div>
+      
       <MobileBottomBar />
     </div>
   );
