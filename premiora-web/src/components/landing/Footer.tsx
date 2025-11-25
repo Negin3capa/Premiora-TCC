@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
         <div className="footer-bottom">
           <p>© 2024 Premiora. Todos os direitos reservados.</p>
           <div style={{display: 'flex', gap: '1.5rem'}}>
-            <a href="#" style={{color: 'var(--landing-text-muted)'}}>Instagram</a>
+            <a href="https://www.instagram.com/premiora.br/" target="_blank" rel="noopener noreferrer" style={{color: 'var(--landing-text-muted)'}}>Instagram</a>
             <a href="#" style={{color: 'var(--landing-text-muted)'}}>Twitter</a>
             <a href="#" style={{color: 'var(--landing-text-muted)'}}>LinkedIn</a>
           </div>
