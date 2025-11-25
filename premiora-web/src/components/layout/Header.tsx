@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useUI';
 import '../../styles/Header.css';
 import { Sun, LogOut, UserPlus, Menu, Moon, Bell } from 'lucide-react';
+import GoogleTranslate from '../common/GoogleTranslate';
 
 /**
  * Hook personalizado para detectar scroll e controlar visibilidade do header
@@ -90,6 +91,14 @@ interface HeaderProps {
   searchBarComponent?: React.ReactNode;
   /** Se o perfil visualizado é do próprio usuário */
   isOwnProfile?: boolean;
+  /** Se deve mostrar abas de notificações */
+  showNotificationTabs?: boolean;
+  /** Aba ativa de notificações */
+  activeNotificationTab?: 'all' | 'verified' | 'mentions';
+  /** Handler para mudança de aba de notificações */
+  onNotificationTabChange?: (tab: 'all' | 'verified' | 'mentions') => void;
+  /** Ações customizadas para exibir no lado direito */
+  customActions?: React.ReactNode;
   /** Classe CSS adicional para o header */
   className?: string;
 }
@@ -106,9 +115,13 @@ const Header: React.FC<HeaderProps> = ({
   showProfileTabs = false,
   activeProfileTab = 'home',
   onProfileTabChange,
+  showNotificationTabs = false,
+  activeNotificationTab = 'all',
+  onNotificationTabChange,
   showSearchBar = false,
   searchBarComponent,
   isOwnProfile = false,
+  customActions,
   className = ''
 }) => {
   const navigate = useNavigate();
@@ -121,6 +134,17 @@ const Header: React.FC<HeaderProps> = ({
 
   // Define o ícone de notificações
   const NotificationIcon = Bell;
+  
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      // Import dinâmico para evitar dependência circular se houver
+      import('../../services/NotificationService').then(({ NotificationService }) => {
+        NotificationService.getUnreadCount().then(setUnreadCount);
+      });
+    }
+  }, [user]);
 
   // Nome de exibição (usado no header) - prioriza o name do banco
   const displayName = userProfile?.name ||
@@ -290,6 +314,33 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
+        {/* Notification Tabs */}
+        {showNotificationTabs && (
+          <div className="header-tabs">
+            <button
+              className={`header-tab ${activeNotificationTab === 'all' ? 'active' : ''}`}
+              onClick={() => onNotificationTabChange?.('all')}
+              aria-label="Todas as notificações"
+            >
+              Tudo
+            </button>
+            <button
+              className={`header-tab ${activeNotificationTab === 'verified' ? 'active' : ''}`}
+              onClick={() => onNotificationTabChange?.('verified')}
+              aria-label="Notificações verificadas"
+            >
+              Verificadas
+            </button>
+            <button
+              className={`header-tab ${activeNotificationTab === 'mentions' ? 'active' : ''}`}
+              onClick={() => onNotificationTabChange?.('mentions')}
+              aria-label="Menções"
+            >
+              Menções
+            </button>
+          </div>
+        )}
+
         {/* Profile Tabs - Only shown on Profile pages */}
         {showProfileTabs && (
           <div className="header-tabs header-tabs--profile">
@@ -335,13 +386,25 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Right side - Actions */}
         <div className="header-right">
+          <GoogleTranslate />
+          
+          {/* Custom Actions (e.g. Mark as read) */}
+          {customActions && (
+            <div className="flex items-center gap-2 mr-2">
+              {customActions}
+            </div>
+          )}
+
           <button
-            className="header-action-button"
+            onClick={() => handleAction('notifications')}
+            className="header-action-button relative"
             aria-label="Notificações"
             title="Notificações"
-            onClick={() => handleAction('notifications')}
           >
             <NotificationIcon size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0f0f0f]" />
+            )}
           </button>
 
           <button

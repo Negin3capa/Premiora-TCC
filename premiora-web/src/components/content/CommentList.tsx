@@ -14,6 +14,7 @@ interface CommentListProps {
   postId: string;
   /** Classe CSS adicional */
   className?: string;
+  highlightCommentId?: string;
 }
 
 /**
@@ -21,7 +22,8 @@ interface CommentListProps {
  */
 export const CommentList: React.FC<CommentListProps> = ({
   postId,
-  className = ''
+  className = '',
+  highlightCommentId
 }) => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -47,6 +49,30 @@ export const CommentList: React.FC<CommentListProps> = ({
     sortBy: 'created_at',
     sortOrder
   });
+
+  // Effect to scroll to highlighted comment
+  React.useEffect(() => {
+    if (highlightCommentId && !isLoading && comments.length > 0) {
+      const element = document.getElementById(`comment-${highlightCommentId}`);
+      if (element) {
+        // Scroll with offset for header
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+
+        // Add flash effect
+        element.classList.add('comment-highlight-flash');
+        setTimeout(() => {
+          element.classList.remove('comment-highlight-flash');
+        }, 2000);
+      }
+    }
+  }, [highlightCommentId, isLoading, comments]);
 
   /**
    * Handler para criação de novo comentário

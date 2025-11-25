@@ -264,6 +264,33 @@
 
 /* Responsividade */
 @media (max-width: 768px) {
+  .subscriptions-page {
+    flex-direction: column;
+  }
+
+  .subscriptions-container {
+    padding: 1rem;
+    padding-bottom: 80px; /* Espaço para a bottom bar */
+  }
+
+  .pricing {
+    padding: 30px 0;
+  }
+
+  .pricing h2 {
+    font-size: 2rem;
+    margin-bottom: 30px;
+  }
+
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 10px;
+  }
+
+  .pricing-card {
+    padding: 30px 20px;
+  }
 
   .checkout-success,
   .checkout-cancel {

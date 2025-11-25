@@ -93,7 +93,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   return (
-    <div className={`comment-item ${depth > 0 ? 'comment-reply' : 'comment-root'}`}>
+    <div id={`comment-${comment.id}`} className={`comment-item ${depth > 0 ? 'comment-reply' : 'comment-root'}`}>
       {/* Avatar e conteúdo principal */}
       <div className="comment-main">
         {/* Avatar */}
