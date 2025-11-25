@@ -1,7 +1,0 @@
-
-> premiora-web@0.0.0 build
-> tsc && vite build
-
-src/pages/NotificationsPage.tsx(2,37): error TS2307: Cannot find module '../../services/NotificationService' or its corresponding type declarations.
-src/pages/NotificationsPage.tsx(3,34): error TS2307: Cannot find module '../../components/notifications/NotificationItem' or its corresponding type declarations.
-src/pages/NotificationsPage.tsx(4,41): error TS2307: Cannot find module '../../types/socialNotification' or its corresponding type declarations.
