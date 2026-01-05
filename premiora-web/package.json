@@ -15,7 +15,7 @@
     "migrate:oauth-avatars": "node -e \"import('./src/utils/avatar-migration.ts').then(m => m.runAvatarMigration())\""
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
+    "@commitlint/cli": "^20.3.0",
     "@commitlint/config-conventional": "^20.3.0",
     "@vitejs/plugin-react": "^5.1.2",
     "cz-conventional-changelog": "^3.3.0",
