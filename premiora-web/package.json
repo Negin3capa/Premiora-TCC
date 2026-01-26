@@ -29,7 +29,7 @@
     "@stripe/react-stripe-js": "^5.4.1",
     "@stripe/stripe-js": "^8.6.4",
     "@supabase/supabase-js": "^2.90.1",
-    "@types/react": "^19.2.8",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@types/react-router-dom": "^5.3.3",
     "date-fns": "^4.1.0",
